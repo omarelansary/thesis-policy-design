@@ -1,0 +1,79 @@
+{
+  "model": "claude-sonnet-5-5",
+  "autoMemoryEnabled": false,
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-5-5",
+    "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python tools/origin_extract.py *)",
+      "Bash(python tools/verify_workspace.py*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git add *)"
+    ],
+    "ask": [
+      "Bash(git commit*)",
+      "PowerShell(git commit*)",
+      "WebSearch",
+      "WebFetch",
+      "Artifact",
+      "mcp__claude_ai_Claude_Docs"
+    ],
+    "deny": [
+      "Read(//c/Users/omr/Documents/research-cleanroom/**)",
+      "Edit(//c/Users/omr/Documents/research-cleanroom/**)",
+      "Read(//c/Users/omr/Documents/research-cleanroom-backups-20261011/**)",
+      "Read(//c/Users/omr/Documents/thesis-backups/**)",
+      "Read(//c/Users/omr/Documents/claude_forensic_rescue_2026-10-02/**)",
+      "Read(~/.claude/projects/**)",
+      "Read(~/.claude/history.jsonl)",
+      "Read(~/.claude/file-history/**)",
+      "Read(~/.claude/plans/**)",
+      "Read(~/.claude/backups/**)",
+      "Bash(git push*)",
+      "Bash(git remote*)",
+      "Bash(git clone*)",
+      "Bash(git pull*)",
+      "Bash(git fetch*)",
+      "Bash(git config*)",
+      "Bash(pip install*)",
+      "Bash(python -m pip install*)",
+      "Bash(npm install*)",
+      "Bash(winget*)",
+      "Bash(choco*)",
+      "PowerShell(git push*)",
+      "PowerShell(git remote*)",
+      "PowerShell(git clone*)",
+      "PowerShell(git pull*)",
+      "PowerShell(git fetch*)",
+      "PowerShell(git config*)",
+      "PowerShell(pip install*)",
+      "PowerShell(npm install*)",
+      "PowerShell(winget*)",
+      "Skill(import-memory)",
+      "Skill(anthropic-skills:import-memory)",
+      "mcp__claude_ai_Google_Drive",
+      "mcp__claude_ai_Gmail",
+      "mcp__claude_ai_Google_Calendar"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|Read|Grep|Glob|Write|Edit|NotebookEdit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/guard.py\"",
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}

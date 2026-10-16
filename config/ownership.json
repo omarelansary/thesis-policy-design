@@ -1,0 +1,21 @@
+{
+  "note": "Single-writer ownership enforced by tools/guard.py for named subagents. The lead session (no agent type) may write anywhere except immutable files. Paths are workspace-relative globs.",
+  "agents": {
+    "evidence-steward": [
+      "evidence/extracts/**",
+      "findings/**",
+      "ops/threads/*/evidence-steward.md"
+    ],
+    "design-proposer": [
+      "hypotheses/**",
+      "design/proposals/**",
+      "design/choices/**",
+      "ops/threads/*/design-proposer.md"
+    ],
+    "design-challenger": [
+      "challenges/**",
+      "reviews/**",
+      "ops/threads/*/design-challenger.md"
+    ]
+  }
+}

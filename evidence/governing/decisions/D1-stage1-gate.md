@@ -1,0 +1,39 @@
+# Decision record
+
+- Decision ID and date (UTC): D1, 2026-10-11
+- Decision owner: the user
+- Question to decide: approve the Stage 1 research brief and Stage 2 plan (`stage-reports/STAGE1_RESEARCH_BRIEF.md`, rev. 1), and settle the blocking decisions.
+  - Approvals:
+    - G-a1: requirements statement.
+    - G-a2: landscape questions L1–L8.
+    - G-a3: providers and query families F1–F12.
+    - G-a4: acceptance criteria.
+  - Blocking decisions:
+    - G-b: did the follow-up meeting happen?
+    - G-c: handling of the supervisor's requested policy draft.
+    - G-d: approval of each transcript-derived F13 search term.
+    - G-e: treat the supervisor's "facts" as hypotheses or as assumptions.
+    - G-f: running baselines in or after Stage 2.
+- Competing options: as listed per item in brief §4. Stop or revise is always available.
+- Evidence considered:
+  - S1;
+  - `stage-reports/STAGE1_MEETING_RECORD.md`;
+  - `audits/A1`, `A2`, `A3`.
+- Reasons for acceptance or rejection: the user approved Stage 1 provisionally on 2026-10-11, with binding decisions recorded in brief §0. Summary:
+  - Research target: reduce total model-visible input tokens for accessing large tool catalogues while maintaining end-to-end task performance, counting all discovery, selection and execution overhead. Its validity is itself under investigation.
+  - No favoured architecture.
+  - Autonomous public search without private material.
+  - The supervisor's assertions are treated as claims to test.
+  - Names are discovery leads.
+  - A later meeting is not assumed.
+  - No experiments and no policy design.
+  - Saturation cannot establish coverage.
+  - One targeted re-review (A4); its blocking defects B1 and B2 are fixed.
+- Unresolved objections and uncertainties:
+  - T1 (objective form);
+  - U1, U2, U4 (accuracy and token accounting);
+  - U10 (later meeting);
+  - the challenger has not re-reviewed brief rev. 1.
+- Required follow-up / owner / due condition: the user, before any Stage 2 search.
+- Decision status: **accepted by user (provisional), 2026-10-11**
+- Rationale for any change to an earlier decision: none.

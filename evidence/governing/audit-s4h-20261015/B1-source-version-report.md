@@ -1,0 +1,40 @@
+# B-1: source-version consistency (MCPVerse, MCP-Atlas, LiveMCPBench)
+
+- Date (UTC): 2026-10-15. Coordinator: Sonnet 5.5. Authority: `decisions/D11-evidence-to-claim-audit-authorization.md`; unit ticket COORD-S4H-AUDIT-20261015-01.
+- Retrieved (3 of 3 authorised fetches, `infrastructure/tools/fetch_source_text.py`, commit bdc41f0): `s4h-b1-mcpverse-v1-2508-16260` (arXiv v1, 9 pp.), `s4h-b1-mcpatlas-v1-2602-00933` (v1, 20 pp.), `s4h-b1-livemcpbench-v1-2508-01780` (v1, 15 pp.), all 2026-10-15T17:58Z, HTTP 200, no extraction warnings. Previously stored versions: MCPVerse v2 (`r3-mcpverse`), MCP-Atlas v3 (`r3-mcpatlas`), LiveMCPBench v2 (`r3-livemcpbench`), all retrieved 2026-10-11.
+- Scope rule applied: a difference is recorded only if it touches a scientific assertion actually used in the candidate or stage records. A version difference is not treated as a contradiction. Labels: F stored-text fact with line; I interpretation. Exact passages are in `B2-evidence-packet.md` E8.
+
+## Which assertions about these papers the governing records use (grep over stage-reports, candidate-questions, decisions)
+
+| Paper | Assertions used | Where |
+|---|---|---|
+| MCPVerse | 552 tools / 250 tasks; definition size "~44k; 140-147k, itself inconsistent"; Claude-4-Sonnet Oracle 62.3, Standard 62.4, Max-Scale 44.2; "most models degrade Oracle→Standard, a few agentic models gain; all evaluable models degrade further at Max-Scale"; "Table 4 conflict", "duplicated cells"; "Max-Scale −18 points for one model" | STAGE3_CLAIM_LEDGER C3-12, C3-17, K11; STAGE2_FINAL §1.5, §3; STAGE4B map §2, synthesis; STEP1 brief vehicle table; named as prior art in S4D C3 and C4 |
+| MCP-Atlas | 1,000 tasks, 36 servers, 220 tools; "6-37 exposed per task"; pass = claim coverage ≥ 0.75; no per-task token or monetary cost | STEP1 brief vehicle table; ledger C3-16, C3-17; STAGE4B O4 |
+| LiveMCPBench | 95 tasks, 70 servers, 527 tools; judge agreement 78.95-81.05%; "k=1 vs k=5" retrieval-depth comparison; Retrieve error class 50.00%; tokens 6.07M vs 6.70M; Pareto list-price view; "pipeline SD 5.4 points" (this last figure is from a third-party audit, not this paper) | STAGE2_FINAL §1.5; ledger C3-11 (PS-11 leg), C3-17, K8, K11; STAGE4B map; S4D C2 motivation (50.00%) |
+
+## Comparison
+
+| Item | v1 (fetched) | Stored version | Same? | Used assertion affected? |
+|---|---|---|---|---|
+| MCPVerse: tools / MCPs / tasks | 552 tools, 65 MCPs, 250 tasks (L49, L181, L192) | same (v2 L87, L221, L227) | yes | no |
+| MCPVerse: size of the full toolset | "exceeding 140k tokens" (abstract L19, L55) | "exceeding 147k tokens" (abstract L17, L88, L371) but "approximately 140k" at v2 L289 | **differs; v2 contains both** | Explains the "140-147k, itself inconsistent" note in ledger C3-17/K11: it is revision residue inside v2. No candidate uses the figure. |
+| MCPVerse: Claude-4-Sonnet Oracle / Standard / Max-Scale | 57.81 / 61.01 / 57.77 (v1 Table 3 FC rows L368-372; prose L89, L104) | 62.3 / 62.4 / 44.2 (v2 prose L387-391; the Table 2 extraction is interleaved) | **numerically different** | Direction used by the records (Standard ≥ Oracle for Claude; Max-Scale below Standard) holds in both. The magnitude of the Max-Scale drop is −3.2 points in v1 and −18.2 points in v2. The Stage 2 sentence "Max-Scale −18 points for one model" and ledger C3-12 are v2 statements; no candidate (C1-C6) depends on the magnitude. |
+| MCPVerse: Retrieve mode, Table 4 | no Retrieve mode; v1 Table 4 is dialogue length (L404-409) | v2 Table 4 = Oracle/Standard/Retrieve SR; Claude and Qwen3-235B-2507 rows carry identical 44.8/53.2 values (L533-535) | **different content** | The "Table 4 conflict / duplicated cells" in the records is a v2 observation (correctly attributed to the stored text). Not used by C1-C6. |
+| MCP-Atlas: scale | 1,000 tasks, 36 servers, 220 tools (L46-47, L66-67) | same | yes | no |
+| MCP-Atlas: tools exposed per task | "10-25 tools exposed per task, 3-7 required" (L192, L367) | "6-37 tools (mean 15.2)" (v3 L244) | **differs** | STEP1 brief vehicle table uses 6-37 (v3). The range is a vehicle-description detail; not used in C1-C6. |
+| MCP-Atlas: pass criterion | coverage ≥ 0.75; sensitivity 0.65/0.75/0.85 (L308-311) | coverage ≥ 0.75 (v3 L273) | yes | no |
+| MCP-Atlas: headline results / failure diagnosis | top pass 62.30%; tool-usage failures 56.7% on average (47.5-68.5%) (L410, L488, L505) | top pass up to 82.2%; 63.3% cognitive vs 36.7% tool-related failures (v3 L27-29, L165, L395) | **differs** | Ledger C3-16/17 use only the 0.75 criterion and the absence of per-task cost; both hold in v3. The integrity-investigation use of A1's "56.7% tool-usage failures" is a v1 figure (already withdrawn in its errata). |
+| LiveMCPBench: scale | 95 tasks, 70 servers, 527 tools (L21, L26, L99-103) | same (v2 L39-40, L223) | yes | no |
+| LiveMCPBench: success / agreement | 78.95% best; agreement 81% / 81.05% (abstract L29, L98); 78.95% for DeepSeek-V3 in one place (L305) | 78.95%; 81.05%; 78.95% (v2 L45, L129-130, L347) | yes (the 78.95 / 81.05 within-paper inconsistency exists in both) | no |
+| LiveMCPBench: Retrieve error 50.00% | Figure 6 error distribution with Retrieve 50.00% (L327, L394) | v2 L505 | yes | no (S4D C2 motivation holds in both) |
+| LiveMCPBench: retrieval depth k=1 vs 5 | **absent** (no '64.21', no McNemar, no depth ablation in the text) | 78.95% → 64.21% at k=1, McNemar p = 0.02; k=10 plateau; embedding swap 76.84% (v2 L386-402, L438) | **v2-only** | Stage 2 §1.5 and ledger PS-11's "retrieval-depth comparison" rest on v2, which is the version stored and cited. Not used in S4D-S4G. |
+| LiveMCPBench: token totals 6.07M vs 6.70M | v1 efficiency table has steps/tools but not these totals | v2 table 6.07M vs prose 6.70M (v2 L286, L401) | **v2-only** | Ledger K11's inconsistency is internal to v2. Not used in C1-C6. |
+
+## Findings (I)
+
+1. Every assertion in the governing records about these three papers matches the version it cites (the stored versions). None of the v1-versus-stored differences changes an assertion used in the C1-C6 assessments.
+2. Version-specific content that the records rely on: the LiveMCPBench retrieval-depth ablation (v2 only), MCPVerse's Retrieve mode and its Table 4 (v2 only), the magnitude of MCPVerse's Max-Scale drop (−18 vs −3 points), MCP-Atlas's exposed-tool range and failure split (v3 vs v1). These are safe only while the records name the version; most do (STAGE2_FINAL names MCP-Atlas v3; stored manifests carry the URL with version).
+3. The three fresh-worker "disagreements" in the integrity investigation (D1-D3) are explained by version, as D1 had found; this B-1 retrieval confirms it: A2's MCPVerse values equal v1's; A1's MCP-Atlas "10-25" is v1's wording; A1's missing LiveMCPBench ablation is absent from v1.
+4. Not done: no comparison of other papers' versions; no check of whether other stored texts are superseded by later versions (the inventory records the URL and version for the 45 stored texts whose URL carries one).
+
+Uncertain: pdftotext layout interleaves some table rows (MCPVerse Table 2/3); values were matched through prose and the Table 3 FC rows, not by reading a rendered table.
