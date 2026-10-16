@@ -20,7 +20,7 @@ Requirements are **inputs**. They are carried by reference to hash-verified extr
 
 ## F. Pending intake (not yet supplied to this workspace)
 1. The thesis research question as established with the supervisor: `requirements/THESIS_QUESTION.md` (empty until the user supplies it verbatim).
-2. The 2026-10-14 supervisor instructions and examples: `requirements/intake/` (rules in `intake/README.md`). They become new REQ ids with their own provenance; they must not be merged into sections A-E or presented as findings of the independent research.
+2. The 2026-10-14 supervisor instructions and examples: `requirements/intake/` (rules in `intake/README.md`; the admission mechanism for approved excerpts of an outside file was prepared under AUTH-002 and has not been used). The human supplies the approved excerpt and its line ranges separately and authorizes it in a new AUTH entry. They become new REQ ids with their own provenance; they must not be merged into sections A-E or presented as findings of the independent research.
 3. Any change to the research-target formulation (section A).
 
 ## Read this before using sections B-D

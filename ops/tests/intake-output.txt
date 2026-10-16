@@ -1,0 +1,30 @@
+PASS approved range 2-4 is extracted
+PASS extract records identity, location, full-file hash, body hash, mtime, supplier, authorization
+PASS extract body is verbatim and contains no excluded text
+PASS verify passes with the extract present
+PASS edited extract body detected
+PASS changed original file detected
+PASS restoring the original clears the failure
+PASS excluded line copied into the workspace detected
+PASS whole original copied into the workspace detected
+PASS range wholly outside refused, nothing written
+PASS range straddling the boundary refused, nothing written
+PASS range spanning excluded lines refused, nothing written
+PASS unregistered intake id refused
+PASS changed original refused by the tool
+PASS --describe-file prints hash and counts, no content
+PASS --describe-file refuses a forbidden location by name
+PASS tool refuses entry citing AUTH-002
+PASS verify flags entry citing AUTH-002
+PASS tool refuses entry citing AUTH-001
+PASS verify flags entry citing AUTH-001
+PASS tool refuses an authorization id absent from the register
+PASS valid intake-text record passes
+PASS edited intake-text record detected
+PASS alias r4-github opens its manifest id and says so
+PASS exact manifest id still works, no alias notice
+PASS alias with two candidates resolves to the one with stored text
+PASS family name refused with members listed
+PASS a mere prefix is not resolved silently; hints shown
+PASS every source-like name in the Stage 3 claim ledger resolves (id, alias or group)
+failures 0

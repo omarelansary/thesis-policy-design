@@ -7,6 +7,9 @@
   python tools/verify_workspace.py --repin    after a HUMAN-REVIEWED change to a configuration file, rewrite config/PINNED.json
                                               (a lead action; the change shows in git and must be reviewed)
 
+It also checks the source-alias table, the registered intake sources (config/intake_sources.json: original hash, line count,
+authorization, excluded-line leak scan), extract body hashes and recorded intake texts (AUTH-002).
+
 What a PASS means: the checks below hold. It does not mean the science is right, and it cannot detect instruction-level
 violations (for example an agent ignoring a rule that no hook or permission enforces). See ops/SAFEGUARDS.md.
 """
@@ -64,6 +67,7 @@ def need(cond, ok, bad):
 for f in ["CLAUDE.md", ".claude/settings.json", "ops/STATE.md", "ops/AUTHORIZATIONS.md", "ops/PROTOCOL.md", "ops/RECORDS.md",
           "ops/SAFEGUARDS.md", "ops/DESIGN-DECISIONS.md", "config/origin.json", "config/ownership.json", "config/extractable_origin.json", "config/limits.json", "config/PINNED.json",
           "evidence/README.md", "evidence/CAVEATS.md", "evidence/sources.json", "evidence/origin-index.tsv", "evidence/restricted.json",
+          "config/source_aliases.json", "config/intake_sources.json",
           "evidence/governing/INDEX.json", "requirements/REGISTER.md", "requirements/intake/README.md", "tools/guard.py",
           "tools/origin_extract.py", "tools/verify_workspace.py"]:
     need((WS / f).exists(), f"present: {f}", f"missing: {f}")
@@ -129,15 +133,63 @@ src = json.loads((WS / "evidence/sources.json").read_text(encoding="utf-8"))
 need(src["count"] == len(src["sources"]), f"sources.json count consistent ({src['count']})", "sources.json count mismatch")
 need(all(s["manifest_text_sha256"] in (None, s["text_sha256_recomputed"]) for s in src["sources"] if s.get("has_text")), "sources.json: manifest and recomputed text hashes agree", "sources.json hash disagreement")
 rj = json.loads((WS / "evidence/restricted.json").read_text(encoding="utf-8"))["withheld"]
-bad = set(v["sha256"] for v in rj.values() if v["sha256"])
+intake = json.loads((WS / "config/intake_sources.json").read_text(encoding="utf-8")).get("sources", []) if (WS / "config/intake_sources.json").exists() else []
+bad = set(v["sha256"] for v in rj.values() if v["sha256"]) | {e["sha256"] for e in intake}
 leak = []
 for p in WS.rglob("*"):
     if p.is_file() and ".git" not in p.parts and p.stat().st_size < 5_000_000:
         if sha(p) in bad:
             leak.append(str(p.relative_to(WS)))
-need(not leak, "no workspace file is a copy of a withheld origin file", f"WITHHELD FILE COPIED: {leak}")
+need(not leak, "no workspace file is a copy of a withheld origin file or of a whole intake source", f"WITHHELD OR WHOLE-INTAKE FILE COPIED: {leak}")
 big = [str(p.relative_to(WS)) for p in WS.rglob("*") if p.is_file() and ".git" not in p.parts and p.stat().st_size > 5_000_000]
 need(not big, "no file over 5 MB", f"large files: {big}")
+
+
+def lf_lines(raw):
+    """Same line rule as tools/origin_extract.py: LF only, CR before LF dropped."""
+    ls = raw.decode("utf-8").split("\n")
+    if ls and ls[-1] == "":
+        ls.pop()
+    return [l[:-1] if l.endswith("\r") else l for l in ls]
+
+
+# ---------- 4b. source aliases and intake sources ----------
+ids_in_manifest = {s["id"] for s in src["sources"]}
+al = json.loads((WS / "config/source_aliases.json").read_text(encoding="utf-8")) if (WS / "config/source_aliases.json").exists() else {"aliases": {}, "groups": {}}
+bad_al = [k for k, v in al["aliases"].items() if v["id"] not in ids_in_manifest or k in ids_in_manifest]
+bad_al += [k for k, v in al["groups"].items() if not set(v["members"]) <= ids_in_manifest or k in ids_in_manifest]
+need(not bad_al, f"source aliases resolve to manifest ids ({len(al['aliases'])} aliases, {len(al['groups'])} groups)", f"bad aliases (unknown target, or shadowing a manifest id): {bad_al}")
+_auth_ids = set(re.findall(r"\bAUTH-\d{3}\b", (WS / "ops/AUTHORIZATIONS.md").read_text(encoding="utf-8")))
+rep("PASS", f"{len(intake)} intake source(s) registered")
+for e in intake:
+    keys = ("id", "path", "sha256", "total_lines", "allowed_ranges", "authorization", "supplied_by", "supplied_utc", "form", "source_identity", "stated_nature")
+    miss = [k for k in keys if k not in e]
+    if miss or not all(isinstance(r, list) and len(r) == 2 and 1 <= r[0] <= r[1] for r in e.get("allowed_ranges", [])) or not e.get("allowed_ranges"):
+        rep("FAIL", f"intake {e.get('id')}: entry incomplete or ranges invalid (missing {miss})")
+        continue
+    need(e["authorization"] in _auth_ids and e["authorization"] not in ("AUTH-001", "AUTH-002"),
+         f"intake {e['id']}: cites human authorization {e['authorization']}", f"intake {e['id']}: authorization {e['authorization']} missing from the register or is AUTH-001/002 (mechanism only)")
+    ip = pathlib.Path(e["path"])
+    if not ip.is_file():
+        rep("WARN", f"intake {e['id']}: original file not available here; its extracts cannot be re-verified against it")
+        continue
+    raw = ip.read_bytes()
+    if not need(hashlib.sha256(raw).hexdigest() == e["sha256"], f"intake {e['id']}: original file unchanged (SHA-256)", f"intake {e['id']}: original file CHANGED since it was authorized"):
+        continue
+    ls = lf_lines(raw)
+    need(len(ls) == e["total_lines"], f"intake {e['id']}: line count matches ({len(ls)})", f"intake {e['id']}: line count {len(ls)} != recorded {e['total_lines']}")
+    inside = {i for r0, r1 in e["allowed_ranges"] for i in range(r0, r1 + 1)}
+    allowed_txt = {ls[i - 1].strip() for i in inside if i <= len(ls)}
+    excl = {l.strip() for i, l in enumerate(ls, 1) if i not in inside and len(l.strip()) >= 40} - allowed_txt
+    hits = []
+    if excl:
+        for p in WS.rglob("*"):
+            if p.is_file() and ".git" not in p.parts and "raw" not in p.parts and p.stat().st_size < 5_000_000:  # raw = git-ignored test stream logs
+                t = p.read_bytes().decode("utf-8", errors="ignore")
+                if any(x in t for x in excl):
+                    hits.append(str(p.relative_to(WS)))
+    need(not hits, f"intake {e['id']}: no excluded line (>=40 chars, exact) of the original appears in the workspace ({len(excl)} checked)",
+         f"intake {e['id']}: EXCLUDED original text appears in: {hits[:5]} (exact-line match, best effort)")
 
 # ---------- 5. origin cross-check (full mode) ----------
 origin = json.loads((WS / "config/origin.json").read_text(encoding="utf-8"))
@@ -176,7 +228,15 @@ for p in sorted((WS / "evidence/extracts").glob("EXT-*.md")):
         rep("FAIL", f"{p.name}: verbatim markers missing")
         continue
     kind, sp = d["source_kind"], d["source_path"]
-    path = WS / sp if kind == "governing-copy" else op / sp
+    if "body_sha256" in d:  # detects an edited extract even when its source is not reachable
+        need(hashlib.sha256(m.group(1).encode("utf-8")).hexdigest() == d["body_sha256"], f"{d['id']}: body hash matches the recorded body_sha256", f"{d['id']}: body differs from its recorded body_sha256 (extract edited)")
+    if kind == "intake-source":
+        ent = next((e for e in intake if e["id"] == d["source_id"]), None)
+        okr = bool(ent) and any(r0 <= d["line_start"] and d["line_end"] <= r1 for r0, r1 in ent["allowed_ranges"])
+        need(okr and d["source_sha256"] == ent["sha256"], f"{d['id']}: within the approved intake ranges and hash", f"{d['id']}: intake extract outside the approved ranges, unregistered source, or hash differs from the registered one")
+        path = pathlib.Path(sp)
+    else:
+        path = WS / sp if kind == "governing-copy" else op / sp
     if not path.exists():
         rep("WARN", f"{d['id']}: source not available here ({kind}); verbatim body not re-verified")
         continue
@@ -189,6 +249,15 @@ for p in sorted((WS / "evidence/extracts").glob("EXT-*.md")):
         _all.pop()
     lines = [l[:-1] if l.endswith("\r") else l for l in _all][d["line_start"] - 1:d["line_end"]]
     need("\n".join(lines) == m.group(1), f"{d['id']}: verbatim body matches source lines {d['line_start']}-{d['line_end']}", f"{d['id']}: verbatim body DIFFERS from source")
+
+# Direct-text intake records (text the human pasted or typed, no separate original file): requirements/intake/<date>-<source>.md
+for p in sorted((WS / "requirements/intake").glob("20*.md")):
+    d, body = fm(p)
+    m = re.search(r"<<<BEGIN-VERBATIM\n(.*)\nEND-VERBATIM>>>", body or "", re.S)
+    ok = bool(d) and d.get("type") == "intake-text" and bool(m) and all(k in d for k in ("supplied_by", "supplied_utc", "form", "stated_nature", "body_sha256"))
+    if not need(ok, f"requirements/intake/{p.name}: intake-text header ok", f"requirements/intake/{p.name}: not a valid intake-text record (type, supplied_by, supplied_utc, form, stated_nature, body_sha256, verbatim markers)"):
+        continue
+    need(hashlib.sha256(m.group(1).encode("utf-8")).hexdigest() == d["body_sha256"], f"requirements/intake/{p.name}: body matches its recorded SHA-256", f"requirements/intake/{p.name}: body CHANGED since it was recorded")
 
 TYPES = {"findings": ("finding", "FND"), "hypotheses": ("hypothesis", "HYP"), "design/proposals": ("design-proposal", "DPR"),
          "design/choices": ("design-choice", "DES"), "challenges": ("challenge", "CH"), "reviews": ("review", "RV")}
@@ -224,8 +293,8 @@ for p, d, typ, pre in recs:
     if typ == "hypothesis":
         need(bool(d.get("falsifier")), f"{p.name}: falsifier stated", f"{p.name}: hypothesis without falsifier")
     if d.get("status") == "approved":
-        need(d.get("approved_by") == "human" and d.get("authorization") in auth_ids and d.get("authorization") != "AUTH-001",
-             f"{p.name}: approval cites human and a design-level AUTH id", f"{p.name}: 'approved' without approved_by=human and a valid design-level AUTH id (AUTH-001 is the bootstrap authorization and covers no design approval)")
+        need(d.get("approved_by") == "human" and d.get("authorization") in auth_ids and d.get("authorization") not in ("AUTH-001", "AUTH-002"),
+             f"{p.name}: approval cites human and a design-level AUTH id", f"{p.name}: 'approved' without approved_by=human and a valid design-level AUTH id (AUTH-001 and AUTH-002 are workspace-setup authorizations and cover no design approval)")
 
 # ---------- 7. authorization register ----------
 rows = [l for l in auth_text.splitlines() if re.match(r"\|\s*AUTH-\d{3}\s*\|", l)]
@@ -235,7 +304,8 @@ for l in rows:
 
 # ---------- 7b. configuration pin ----------
 PIN_FILES = (["CLAUDE.md", ".claude/settings.json", ".gitignore", ".gitattributes", "tools/guard.py", "tools/origin_extract.py",
-              "tools/verify_workspace.py", "config/ownership.json", "config/limits.json", "config/extractable_origin.json"]
+              "tools/verify_workspace.py", "config/ownership.json", "config/limits.json", "config/extractable_origin.json",
+              "config/source_aliases.json", "config/intake_sources.json"]
              + sorted(str(q.relative_to(WS)).replace("\\", "/") for q in (WS / ".claude/agents").glob("*.md")))
 cur = {f: sha(WS / f) for f in PIN_FILES if (WS / f).exists()}
 if args.repin:

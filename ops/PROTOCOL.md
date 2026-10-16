@@ -12,6 +12,7 @@ Status of the mechanism is in `ops/DESIGN-DECISIONS.md` WD-004 and `ops/SAFEGUAR
 
 ## Mechanism (verified in this environment; see ops/tests/)
 - The lead spawns the three agents with the `Agent` tool (`subagent_type` = the definition name, `run_in_background: true`). In this configuration the tool has **no `name` parameter**, so peers are addressed by the **agent id** the spawn call returns (a + 16 hex characters). `tools/guard.py` accepts only agent ids and `main` as `SendMessage` recipients (messages to other sessions or invented names are blocked) and **counts every message against the thread cap**; see step 2 and step 5.
+- Agent ids in the VS Code runtime were confirmed (T-20261016-92) to be `a` + 16 hex characters, and the guard accepts them. In that runtime an agent's final report reaches the lead through a separate hand-back channel, not through `SendMessage`; it is not counted against the cap.
 - Agents message each other with `SendMessage` (`to` = agent id). A message is asynchronous: the receiver reads it at its next turn; an idle (finished) receiver is resumed with it. **An agent cannot wait or poll.** It sends, ends its turn, and is resumed by the reply.
 - Native "agent teams" (shared task list, named teammates, mailbox) are experimental and need `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Their interactive form was **not testable from this bootstrap** (WD-004, SAFEGUARDS). Do not enable them without the human.
 

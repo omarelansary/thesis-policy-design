@@ -41,6 +41,12 @@ case("lead write immutable via traversal", W("design/../evidence/governing/INDEX
 case("lead write .git/config (T6a)", W(".git/config"), 2)
 case("lead write settings.local.json (T6b)", W(".claude/settings.local.json"), 2)
 case("lead write settings.json (allowed, human-visible in git)", W(".claude/settings.json"), 0)
+(WS / "requirements" / "intake").mkdir(parents=True)
+(WS / "requirements" / "intake" / "2026-01-01-existing.md").write_text("x")
+case("lead creates a NEW intake text", W("requirements/intake/2026-01-02-new.md"), 0)
+case("lead overwrites an EXISTING intake text (Write)", W("requirements/intake/2026-01-01-existing.md"), 2)
+case("lead edits an EXISTING intake text (Edit)", {"tool_name": "Edit", "tool_input": {"file_path": w + r"\requirements\intake\2026-01-01-existing.md"}, "cwd": w}, 2)
+case("lead edits intake README (not a recorded text)", W("requirements/intake/README.md"), 0)
 # --- agent writes
 case("steward own area", W(w + r"\findings\FND-1.md", "evidence-steward"), 0)
 case("proposer into steward area", W(w + r"\findings\FND-1.md", "design-proposer"), 2)

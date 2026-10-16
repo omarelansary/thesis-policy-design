@@ -1,0 +1,59 @@
+PASS lead write inside (abs)  exit=0 expected=0
+PASS lead write inside (rel)  exit=0 expected=0
+PASS lead write outside (abs)  exit=2 expected=2
+PASS lead write ../ escape  exit=2 expected=2
+PASS lead write origin  exit=2 expected=2
+PASS lead write immutable sources.json  exit=2 expected=2
+PASS lead write immutable via traversal  exit=2 expected=2
+PASS lead write .git/config (T6a)  exit=2 expected=2
+PASS lead write settings.local.json (T6b)  exit=2 expected=2
+PASS lead write settings.json (allowed, human-visible in git)  exit=0 expected=0
+PASS lead creates a NEW intake text  exit=0 expected=0
+PASS lead overwrites an EXISTING intake text (Write)  exit=2 expected=2
+PASS lead edits an EXISTING intake text (Edit)  exit=2 expected=2
+PASS lead edits intake README (not a recorded text)  exit=0 expected=0
+PASS steward own area  exit=0 expected=0
+PASS proposer into steward area  exit=2 expected=2
+PASS steward traversal to tools  exit=2 expected=2
+PASS steward abs traversal to config  exit=2 expected=2
+PASS proposer write .claude/settings.json (T5)  exit=2 expected=2
+PASS proposer write ops/threads/ACTIVE.json  exit=2 expected=2
+PASS proposer write messages.log  exit=2 expected=2
+PASS proposer own thread file  exit=0 expected=0
+PASS proposer other agent's thread file  exit=2 expected=2
+PASS unknown agent type (Explore)  exit=2 expected=2
+PASS Read inside workspace  exit=0 expected=0
+PASS Read origin path  exit=2 expected=2
+PASS Read outside workspace  exit=2 expected=2
+PASS Read ../ relative  exit=2 expected=2
+PASS Glob wildcard dir + parent path (T1)  exit=2 expected=2
+PASS Glob absolute parent pattern  exit=2 expected=2
+PASS Glob inside workspace  exit=0 expected=0
+PASS Grep parent dir + glob key (T2)  exit=2 expected=2
+PASS Grep inside workspace  exit=0 expected=0
+PASS Grep glob with ..  exit=2 expected=2
+PASS Bash ls ../research-clean* (T3)  exit=2 expected=2
+PASS Bash cd ..  exit=2 expected=2
+PASS Bash parent dir ls (msys form)  exit=2 expected=2
+PASS Bash parent dir ls (windows form)  exit=2 expected=2
+PASS Bash origin + sanctioned-name comment (T4)  exit=2 expected=2
+PASS Bash sanctioned tool  exit=0 expected=0
+PASS Bash verify  exit=0 expected=0
+PASS Bash own absolute path  exit=0 expected=0
+PASS Bash 'git log' file with dots in name  exit=0 expected=0
+PASS PowerShell origin  exit=2 expected=2
+PASS Bash writes settings.local.json  exit=2 expected=2
+PASS PowerShell writes settings.local.json  exit=2 expected=2
+PASS msg with no active thread  exit=2 expected=2
+PASS msg to peer session name  exit=2 expected=2
+PASS msg to peer session ref  exit=2 expected=2
+PASS msg to arbitrary name  exit=2 expected=2
+PASS msg 1 of 3 (agent id)  exit=0 expected=0
+PASS msg 2 of 3 (main, from agent)  exit=0 expected=0
+PASS msg 3 of 3  exit=0 expected=0
+PASS msg 4 over cap  exit=2 expected=2
+PASS msg 5 over cap (to main also blocked)  exit=2 expected=2
+PASS ACTIVE cap above limits.json is clamped (log already 3, limit 12 -> allowed until 12)  exit=0 expected=0
+INFO messages.log lines: 4
+PASS hard cap from config/limits.json stops at 12 (log has 12)
+failures 0

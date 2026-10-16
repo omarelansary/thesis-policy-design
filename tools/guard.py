@@ -8,7 +8,8 @@ Enforces, as far as a hook can:
   2. Single-writer ownership: a named subagent may write only inside the globs listed for it in config/ownership.json.
   3. Immutable files: nobody may Write/Edit evidence/governing/**, evidence/sources.json, evidence/restricted.json,
      evidence/origin-index.tsv, config/origin.json, .git/**, .claude/settings.local.json via the file-edit tools.
-  4. Agents may not edit configuration, instructions, tools or the authorization register.
+  4. Agents may not edit configuration, instructions, tools or the authorization register. Recorded intake texts
+     (requirements/intake/20*) may be created but, once they exist, not changed through the edit tools (CREATE_ONLY).
   5. SendMessage: recipients are limited to subagent ids (a + 16 hex) and "main"; and every message of a thread is
      counted in ops/threads/<thread>/messages.log against the cap in config/limits.json. With no active thread
      (ops/threads/ACTIVE.json written by the lead from a TASK.md) messaging is refused.
@@ -36,6 +37,7 @@ DOTDOT = re.compile(r"(^|[\s\"'=(])\.\.(?=[\\/\s;&|)\"']|$)")
 SCRATCH = re.compile(r"[\\/]AppData[\\/]Local[\\/]Temp[\\/]claude[\\/]", re.I)
 ALWAYS_IMMUTABLE = ["evidence/governing/**", "evidence/sources.json", "evidence/restricted.json", "evidence/origin-index.tsv",
                     "config/origin.json", ".git/**", ".claude/settings.local.json"]
+CREATE_ONLY = ["requirements/intake/20*"]  # recorded intake texts: a new file may be created, an existing one may not be changed (edit tools only)
 AGENT_FORBIDDEN_WRITE = [".claude/**", "CLAUDE.md", "tools/**", "config/**", "ops/AUTHORIZATIONS.md", "ops/STATE.md",
                          "ops/threads/ACTIVE.json", "ops/threads/*/messages.log", ".gitignore", ".gitattributes"]
 
@@ -167,6 +169,8 @@ elif tool in ("Write", "Edit", "NotebookEdit", "MultiEdit"):
         block(f"writes outside the workspace are not allowed: {p}")
     if match(r, ALWAYS_IMMUTABLE):
         block(f"{r} is protected (immutable evidence, git internals or local settings override); changes need a human-authorized step.")
+    if match(r, CREATE_ONLY) and (WS / r).exists():
+        block(f"{r} is a recorded intake text and already exists: corrections are new files, never edits (requirements/intake/README.md). Bash can still change it; verify_workspace.py detects that, it does not prevent it.")
     if agent:
         own = json.loads((WS / "config" / "ownership.json").read_text(encoding="utf-8"))
         if match(r, AGENT_FORBIDDEN_WRITE):

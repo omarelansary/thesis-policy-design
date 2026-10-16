@@ -52,7 +52,7 @@ def withheld(d):
     (d / "evidence/restricted.json").write_text(json.dumps(r), encoding="utf-8")
 
 
-run("copy of a withheld file appears (synthetic)", withheld, r"WITHHELD FILE COPIED")
+run("copy of a withheld file appears (synthetic)", withheld, r"WITHHELD OR WHOLE-INTAKE FILE COPIED")
 run("agent model changed", lambda d: edit(d, ".claude/agents/design-proposer.md", lambda t: t.replace("model: claude-sonnet-5-5", "model: opus", 1)), r"design-proposer: model is opus")
 
 
