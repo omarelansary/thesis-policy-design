@@ -1,0 +1,129 @@
+PASS present: CLAUDE.md
+PASS present: .claude/settings.json
+PASS present: ops/STATE.md
+PASS present: ops/AUTHORIZATIONS.md
+PASS present: ops/PROTOCOL.md
+PASS present: ops/RECORDS.md
+PASS present: ops/SAFEGUARDS.md
+PASS present: ops/DESIGN-DECISIONS.md
+PASS present: config/origin.json
+PASS present: config/ownership.json
+PASS present: config/extractable_origin.json
+PASS present: config/limits.json
+PASS present: config/PINNED.json
+PASS present: evidence/README.md
+PASS present: evidence/CAVEATS.md
+PASS present: evidence/sources.json
+PASS present: evidence/origin-index.tsv
+PASS present: evidence/restricted.json
+PASS present: evidence/governing/INDEX.json
+PASS present: requirements/REGISTER.md
+PASS present: requirements/intake/README.md
+PASS present: tools/guard.py
+PASS present: tools/origin_extract.py
+PASS present: tools/verify_workspace.py
+PASS auto memory disabled
+PASS subagent model pinned to claude-sonnet-5-5 (forced)
+PASS deny rule present: research-cleanroom/**
+PASS deny rule present: thesis-backups
+PASS deny rule present: .claude/projects
+PASS deny rule present: git push
+PASS deny rule present: git clone
+PASS deny rule present: Skill(import-memory)
+PASS deny rule present: mcp__claude_ai_Google_Drive
+PASS deny rule present: RemoteTrigger
+PASS deny rule present: PushNotification
+PASS deny rule present: CronCreate
+PASS deny rule present: ScheduleWakeup
+PASS deny rule present: mcp__claude_ai_Gmail
+PASS deny rule present: mcp__claude_ai_Google_Calendar
+PASS deny rule present: Bash(*settings.local*)
+PASS deny rule present: Edit(.claude/settings.local.json)
+PASS allow list is exactly the reviewed set
+PASS hook matcher covers Bash
+PASS hook matcher covers PowerShell
+PASS hook matcher covers Read
+PASS hook matcher covers Grep
+PASS hook matcher covers Glob
+PASS hook matcher covers Write
+PASS hook matcher covers Edit
+PASS hook matcher covers NotebookEdit
+PASS hook matcher covers MultiEdit
+PASS hook matcher covers SendMessage
+PASS no .claude/settings.local.json override
+PASS guard hook configured (fail-closed)
+PASS agent design-challenger: name matches file
+PASS agent design-challenger: model claude-sonnet-5-5
+PASS agent design-challenger: has SendMessage
+PASS agent design-challenger: no spawn/web tools
+PASS agent design-challenger: ownership entry
+PASS agent design-proposer: name matches file
+PASS agent design-proposer: model claude-sonnet-5-5
+PASS agent design-proposer: has SendMessage
+PASS agent design-proposer: no spawn/web tools
+PASS agent design-proposer: ownership entry
+PASS agent evidence-steward: name matches file
+PASS agent evidence-steward: model claude-sonnet-5-5
+PASS agent evidence-steward: has SendMessage
+PASS agent evidence-steward: no spawn/web tools
+PASS agent evidence-steward: ownership entry
+PASS 3 agents == 3 ownership entries
+PASS governing copy intact: stage-reports/STAGE1_RESEARCH_BRIEF.md
+PASS governing copy intact: decisions/D1-stage1-gate.md
+PASS governing copy intact: decisions/D10-step3-selection-preparation-authorization.md
+PASS governing copy intact: decisions/D11-evidence-to-claim-audit-authorization.md
+PASS governing copy intact: decisions/D12-s4h-closure-near-neighbour-adjudication.md
+PASS governing copy intact: decisions/D13-audit-closure-and-return-to-selection.md
+PASS governing copy intact: decisions/D2-stage2-closure-contract.md
+PASS governing copy intact: decisions/D3-readiness-memorandum-20261012.md
+PASS governing copy intact: decisions/D3-stage3-authorization.md
+PASS governing copy intact: decisions/D4-stage4-authorization.md
+PASS governing copy intact: decisions/D4B-opportunity-space-authorization.md
+PASS governing copy intact: decisions/D4C-supervisor-alignment-integration.md
+PASS governing copy intact: decisions/D4D-evidence-gap-campaign-authorization.md
+PASS governing copy intact: decisions/D5-candidate-formation-authorization.md
+PASS governing copy intact: decisions/D6-candidate-quality-gate-authorization.md
+PASS governing copy intact: decisions/D7-candidate-formation-closure.md
+PASS governing copy intact: decisions/D8-decision-readiness-gate-authorization.md
+PASS governing copy intact: decisions/D9-step2-novelty-and-feasibility-authorization.md
+PASS governing copy intact: stage-reports/S4G-SELECTION-READY-BRIEF-20261015.md
+PASS governing copy intact: candidate-questions/S4I-GOVERNING-ERRATUM-20261016.md
+PASS governing copy intact: stage-reports/S4I-SELECTION-DECISION-SHEET-20261016.md
+PASS governing copy intact: candidate-questions/S4D-CANDIDATE-DOSSIER-20261014.md
+PASS governing copy intact: candidate-questions/S4D-DEPENDENCY-MATRIX-20261014.md
+PASS governing copy intact: candidate-questions/S4D-QUALITY-ADDENDUM-20261014.md
+PASS governing copy intact: candidate-questions/S4F-UNCERTAINTY-ADDENDUM-20261015.md
+PASS governing copy intact: stage-reports/S4E-DECISION-READINESS-REPORT-20261015.md
+PASS governing copy intact: stage-reports/S4F-PRIOR-ART-ASSESSMENT-20261015.md
+PASS governing copy intact: stage-reports/S4F-VEHICLE-FEASIBILITY-REPORT-20261015.md
+PASS governing copy intact: stage-reports/STAGE2_FINAL_LANDSCAPE_REPORT-20261012.md
+PASS governing copy intact: stage-reports/STAGE3_FINAL_REPORT-20261013.md
+PASS governing copy intact: stage-reports/STAGE3_CLAIM_LEDGER-20261013.md
+PASS governing copy intact: stage-reports/STAGE4_PRIOR_ART_COMPARISON-20261013.md
+PASS governing copy intact: stage-reports/STAGE4B_OPPORTUNITY_MAP-20261013.md
+PASS governing copy intact: stage-reports/STAGE4B_FINAL_SYNTHESIS_AND_SUPERVISOR_ALIGNMENT-20261013.md
+PASS governing copy intact: stage-reports/STAGE4C_DECISION_EVIDENCE_DOSSIER-20261013.md
+PASS governing copy intact: integrity-investigation-20261015/FINAL-REPORT-20261015.md
+PASS governing copy intact: audit-s4h-20261015/B2-REPORT.md
+PASS governing copy intact: audit-s4h-20261015/B1-source-version-report.md
+PASS governing copy intact: s4h-closure-20261016/S4H-CLOSURE-ADDENDUM.md
+PASS no unindexed files under evidence/governing
+PASS sources.json count consistent (239)
+PASS sources.json: manifest and recomputed text hashes agree
+PASS no workspace file is a copy of a withheld origin file
+PASS no file over 5 MB
+PASS all 233 stored-source texts match the origin hashes (6 sources have no stored text)
+PASS origin HEAD unchanged since snapshot
+PASS EXT-0001: verbatim body matches source lines 5-18
+PASS EXT-0002: verbatim body matches source lines 20-66
+PASS EXT-0003: verbatim body matches source lines 7-29
+PASS EXT-0004: verbatim body matches source lines 30-48
+PASS EXT-0005: verbatim body matches source lines 11-22
+PASS EXT-0006: verbatim body matches source lines 1-13
+PASS reviews/RV-0001.md: header ok (RV-0001)
+PASS AUTH-001: has date and verbatim human quote
+PASS configuration matches its pin (13 files)
+PASS no git remote configured
+WARN 1 uncommitted change(s)
+INFO branch=main head=64796f5 mode=full
+SUMMARY pass=126 warn=1 fail=0
