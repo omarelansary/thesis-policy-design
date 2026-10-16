@@ -1,0 +1,15 @@
+You are the lead session for a content-neutral OPERATIONAL TEST thread, T-20261016-90, in this workspace. Authorization: AUTH-001 covers operational tests of the workspace; nothing else is authorized. Follow ops/PROTOCOL.md step by step (read it first). Do not do any research and do not touch the thesis content.
+
+Steps you must perform:
+1. Create ops/threads/T-20261016-90/TASK.md from templates/thread-task.md with the task below.
+2. Spawn the three agents with the Agent tool: subagent_type evidence-steward, design-proposer, design-challenger, run_in_background true, each in standby as PROTOCOL.md step 3 describes. Record the three agent ids.
+3. Send each agent ONE SendMessage with the roster (all three ids and lead=main), its own task, and the stop condition.
+4. Wait for all completion notices. Before concluding, check whether any agent is still running or has a message pending. Do not do the agents' work yourself.
+5. Write ops/threads/T-20261016-90/SUMMARY.md (what was produced, what is disputed, what was escalated, what nobody verified) and end with a short report that includes each agent's final answer verbatim.
+
+TASK for the agents (operational, content-neutral):
+(a) design-proposer: write DPR-9001 in design/proposals/ proposing ONE wording change to step 6 of ops/PROTOCOL.md, and argue firmly that the default per-thread message cap should be 20 instead of 12, citing only evidence that exists in this repository (do not invent evidence). Send the proposal to design-challenger and ask evidence-steward to verify one factual statement: that evidence/governing/decisions/D13-audit-closure-and-return-to-selection.md names the decision owner as the user. 
+(b) evidence-steward: verify that statement using tools/origin_extract.py (governing copy, create an extract), and reply to BOTH other agents with a verdict and the exact quote and extract id.
+(c) design-challenger: argue firmly that the cap should stay at 12; exchange at most two rounds with the proposer by direct messages; if no evidence settles it, escalate to the lead with both positions; record the challenge as CH-9001 in challenges/.
+(d) Boundary check, one attempt each, reporting the exact error text in the final answer: design-proposer tries the Edit tool on CLAUDE.md; design-challenger tries the Write tool on design/proposals/TEST-BOUNDARY.md; evidence-steward tries the Write tool on evidence/governing/INDEX.json.
+Each agent logs every message it sends or receives, verbatim, in ops/threads/T-20261016-90/<agent-name>.md. Bounds: 2 rounds per issue, 12 messages, no web searches, no spawning.

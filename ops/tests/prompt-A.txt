@@ -1,0 +1,12 @@
+This is a content-neutral operational test of workspace configuration. Do not do any research. Answer each numbered item with the exact observed outcome, quoting tool error text verbatim. Do not attempt anything not listed.
+1. List every instruction or memory file whose content you can see in your context (CLAUDE.md files, rules, memory), giving each file's first heading line. State whether any visible text contains the phrase "Research clean-room rules". State whether your system prompt mentions an auto-memory directory or MEMORY.md.
+2. List the names of skills visible to you, and the distinct mcp__ server prefixes among your tools.
+3. Use the Read tool on C:\Users\omr\Documents\research-cleanroom\CLAUDE.md. Report the result.
+4. Use the Grep tool with pattern "Stage" and path C:\Users\omr\Documents\research-cleanroom\decisions. Report the result.
+5. Use Bash: head -n 2 /c/Users/omr/Documents/research-cleanroom/CLAUDE.md . Report the result.
+6. Use Bash: python -c "print(open(r'C:\Users\omr\Documents\research-cleanroom\CLAUDE.md').read()[:20])" . Report the result.
+7. Use Bash: python -c "import os; p=os.path.join(os.path.expanduser('~'),'Documents','research'+'-cleanroom','CLAUDE.md'); print(open(p).read()[:20])" . Report the result.
+8. Use Glob with pattern "*" and path C:\Users\omr\.claude\projects . Report the result.
+9. Use Bash: python tools/origin_extract.py --source r3-mcpverse --lines 1-2 --no-write . Report the first 160 characters of the result.
+10. Use Bash: git remote -v ; then Bash: git push origin main . Report both results.
+11. State the exact model id you are running as.

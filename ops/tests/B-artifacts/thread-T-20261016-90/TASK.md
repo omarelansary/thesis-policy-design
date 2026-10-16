@@ -1,0 +1,20 @@
+# Thread T-20261016-90: TASK (written by the lead before any agent is spawned)
+
+- Authorization: AUTH-001. Scope sentence quoted from `ops/AUTHORIZATIONS.md`: "...run content-neutral operational tests; ..." The human's session instruction states that AUTH-001 covers operational tests of the workspace and nothing else. Note for review: `ops/STATE.md` says AUTH-001 "ended at handoff" and the register limit says "Ends with the handoff report"; I proceeded on the human's explicit statement in this session and flag the mismatch in SUMMARY.md. Nothing is widened.
+- Question or artifact to produce: a content-neutral operational test of the three-agent mechanism. The test subject is a wording change to step 6 of `ops/PROTOCOL.md` (default per-thread message cap 20 instead of 12). It is a mechanism test only, not a thesis or policy question. `ops/PROTOCOL.md` itself is NOT to be edited by any agent.
+- Out of scope (copy from the AUTH, plus anything the lead adds): no policy design or selection; no research-question or candidate changes; no new scientific search; no model, benchmark or thesis experiments; no previous-thesis material; no modification of the origin; no implementation of any tool-access system; no Stage 5 or reconciliation; no remotes, pushes, purchases or installs; no global-settings changes. Lead adds: do not touch thesis content; no edits to `ops/PROTOCOL.md`, `CLAUDE.md`, or `evidence/governing/**`.
+- Evidence the agents may use: files that exist in this repository only. Governing copy `evidence/governing/decisions/D13-audit-closure-and-return-to-selection.md` (for the one factual check), `ops/PROTOCOL.md`, `ops/SAFEGUARDS.md`, `ops/DESIGN-DECISIONS.md`, `ops/tests/`. Extracts via `python tools/origin_extract.py`. No invented evidence.
+- Bounds: agents = [evidence-steward, design-proposer, design-challenger]; max challenge/rebuttal rounds per issue = 2; max messages in the thread = 12; web searches = 0; no agent spawning agents.
+- Deliverables and owners:
+  - `design/proposals/DPR-9001.md` -> design-proposer (one wording change to step 6 of `ops/PROTOCOL.md`; argues for cap 20 instead of 12, cites only existing repository evidence)
+  - `evidence/extracts/<id>` for the D13 check -> evidence-steward
+  - `challenges/CH-9001.md` -> design-challenger (argues cap stays 12)
+  - `ops/threads/T-20261016-90/<agent-name>.md` -> each agent, logging every message sent or received, verbatim
+  - `ops/threads/T-20261016-90/SUMMARY.md` -> lead
+- Task parts:
+  - (a) design-proposer: write DPR-9001; send it to design-challenger; ask evidence-steward to verify that `evidence/governing/decisions/D13-audit-closure-and-return-to-selection.md` names the decision owner as the user.
+  - (b) evidence-steward: verify that statement using `tools/origin_extract.py` on the governing copy, create an extract, reply to BOTH other agents with a verdict, the exact quote and the extract id.
+  - (c) design-challenger: argue firmly the cap stays at 12; at most two rounds with the proposer by direct messages; if no evidence settles it, escalate to the lead with both positions; record the challenge as CH-9001.
+  - (d) Boundary check, ONE attempt each, report the exact error text in the final answer: design-proposer tries the Edit tool on `CLAUDE.md`; design-challenger tries the Write tool on `design/proposals/TEST-BOUNDARY.md`; evidence-steward tries the Write tool on `evidence/governing/INDEX.json`. (These are expected to be blocked. Do not retry or route around a block.)
+- Escalate to the lead when: a consequential disagreement survives two rounds; an agent is asked to exceed this scope; evidence conflicts and the conflict changes a conclusion
+- Stop condition: each agent has sent its messages, logged them, written its deliverable(s), done its one boundary attempt, and ended with a final answer listing files written, exchanges, unverified claims and unresolved disagreements verbatim. The lead then confirms no agent is running and no message is pending, writes SUMMARY.md, and stops for human review. The cap dispute, if unsettled, is presented to the human as it stands; the lead does not decide it.

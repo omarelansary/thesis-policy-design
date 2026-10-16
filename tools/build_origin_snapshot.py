@@ -97,7 +97,7 @@ def category(path):
         "stage-reports": "stage-report", "candidate-questions": "candidate-record", "decisions": "decision-record",
         "audits": "audit-critic-worker-record", "searches": "search-log", "protocols": "protocol",
         "probes": "probe-output", "infrastructure": "tooling", "checkpoints": "operational-checkpoint",
-        "integrity-investigation-20261015": "audit-record", "audit-s4h-20261015": "audit-record",
+        ".claude": "origin-agent-config", "integrity-investigation-20261015": "audit-record", "audit-s4h-20261015": "audit-record",
         "s4h-closure-20261016": "audit-record", "inputs": "restricted-input", "evidence": "evidence",
     }.get(top, "root-file")
 
@@ -133,6 +133,9 @@ for d in sorted((ORIGIN / "evidence" / "source-text").iterdir()):
         "text_sha256_recomputed": sha256_file(tp) if tp.exists() else None,
         "text_bytes": tp.stat().st_size if tp.exists() else None,
         "origin_text_path": f"evidence/source-text/{d.name}/text.txt",
+        "has_text": tp.exists(),
+        "kind": ("fetch-tool test artefact (not research material)" if d.name.startswith("test-") else
+                 ("fetch failed: no text stored" if not tp.exists() else "stored text")),
     })
 
 # ---- write generated files ----

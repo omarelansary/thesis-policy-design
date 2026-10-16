@@ -112,7 +112,7 @@ extra = [p for p in (WS / "evidence/governing").rglob("*") if p.is_file() and p.
 need(not extra, "no unindexed files under evidence/governing", f"unindexed files under evidence/governing: {[str(e.relative_to(WS)) for e in extra][:5]}")
 src = json.loads((WS / "evidence/sources.json").read_text(encoding="utf-8"))
 need(src["count"] == len(src["sources"]), f"sources.json count consistent ({src['count']})", "sources.json count mismatch")
-need(all(s["manifest_text_sha256"] in (None, s["text_sha256_recomputed"]) for s in src["sources"]), "sources.json: manifest and recomputed text hashes agree", "sources.json hash disagreement")
+need(all(s["manifest_text_sha256"] in (None, s["text_sha256_recomputed"]) for s in src["sources"] if s.get("has_text")), "sources.json: manifest and recomputed text hashes agree", "sources.json hash disagreement")
 rj = json.loads((WS / "evidence/restricted.json").read_text(encoding="utf-8"))["withheld"]
 bad = set(v["sha256"] for v in rj.values() if v["sha256"])
 leak = []
@@ -130,11 +130,12 @@ op = pathlib.Path(origin["origin_path"])
 if not args.quick:
     if op.exists():
         mism = 0
-        for s in src["sources"]:
+        withtext = [s for s in src["sources"] if s.get("has_text")]
+        for s in withtext:
             t = op / s["origin_text_path"]
             if not t.exists() or sha(t) != s["text_sha256_recomputed"]:
                 mism += 1
-        need(mism == 0, f"all {src['count']} stored-source hashes match the origin", f"{mism} stored-source hashes differ from the origin")
+        need(mism == 0, f"all {len(withtext)} stored-source texts match the origin hashes ({src['count'] - len(withtext)} sources have no stored text)", f"{mism} stored-source hashes differ from the origin")
         try:
             head = subprocess.run(["git", "-C", str(op), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
             rep("PASS" if head == origin["origin_head"] else "WARN",

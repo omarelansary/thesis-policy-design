@@ -79,6 +79,8 @@ def main():
         meta = next((s for s in load_json("evidence/sources.json")["sources"] if s["id"] == a.source), None)
         if not meta:
             sys.exit(f"ERROR: unknown source id {a.source} (see --list-sources)")
+        if not meta.get("has_text"):
+            sys.exit(f"ERROR: source {a.source} has no stored text ({meta.get('kind')}).")
         path = root / meta["origin_text_path"]
         kind, sid, spath = "stored-source", a.source, meta["origin_text_path"]
         expect = meta["text_sha256_recomputed"]
