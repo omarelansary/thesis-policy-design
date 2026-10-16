@@ -1,6 +1,6 @@
 # Intake rules for new supervisor or user material
 
-Used for the 2026-10-14 supervisor instructions and for any later supervisor, user or advisor input. Mechanism revised under AUTH-002 (2026-10-16); nothing has been admitted through it yet.
+Used for the 2026-10-14 supervisor instructions and for any later supervisor, user or advisor input. Mechanism revised under AUTH-002 (2026-10-16). First use: AUTH-003 (2026-10-16), **route A**, nine user-approved excerpts of the 2026-10-14 meeting: `2026-10-16-supervisor-meeting-2026-10-14-excerpts.md`. Route B has still not been used on real material.
 
 ## Which route
 | Situation | Route |

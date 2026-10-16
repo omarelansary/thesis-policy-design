@@ -16,6 +16,8 @@ PASS present: evidence/CAVEATS.md
 PASS present: evidence/sources.json
 PASS present: evidence/origin-index.tsv
 PASS present: evidence/restricted.json
+PASS present: config/source_aliases.json
+PASS present: config/intake_sources.json
 PASS present: evidence/governing/INDEX.json
 PASS present: requirements/REGISTER.md
 PASS present: requirements/intake/README.md
@@ -110,8 +112,10 @@ PASS governing copy intact: s4h-closure-20261016/S4H-CLOSURE-ADDENDUM.md
 PASS no unindexed files under evidence/governing
 PASS sources.json count consistent (239)
 PASS sources.json: manifest and recomputed text hashes agree
-PASS no workspace file is a copy of a withheld origin file
+PASS no workspace file is a copy of a withheld origin file or of a whole intake source
 PASS no file over 5 MB
+PASS source aliases resolve to manifest ids (44 aliases, 2 groups)
+PASS 0 intake source(s) registered
 PASS all 233 stored-source texts match the origin hashes (6 sources have no stored text)
 PASS origin HEAD unchanged since snapshot
 PASS EXT-0001: verbatim body matches source lines 5-18
@@ -120,10 +124,14 @@ PASS EXT-0003: verbatim body matches source lines 7-29
 PASS EXT-0004: verbatim body matches source lines 30-48
 PASS EXT-0005: verbatim body matches source lines 11-22
 PASS EXT-0006: verbatim body matches source lines 1-13
+PASS requirements/intake/2026-10-16-supervisor-meeting-2026-10-14-excerpts.md: intake-text header ok
+PASS requirements/intake/2026-10-16-supervisor-meeting-2026-10-14-excerpts.md: body matches its recorded SHA-256
 PASS reviews/RV-0001.md: header ok (RV-0001)
 PASS AUTH-001: has date and verbatim human quote
-PASS configuration matches its pin (13 files)
+PASS AUTH-002: has date and verbatim human quote
+PASS AUTH-003: has date and verbatim human quote
+PASS configuration matches its pin (15 files)
 PASS no git remote configured
-WARN 1 uncommitted change(s)
-INFO branch=main head=64796f5 mode=full
-SUMMARY pass=126 warn=1 fail=0
+WARN 9 uncommitted change(s)
+INFO branch=main head=64ae6d9 mode=full
+SUMMARY pass=134 warn=1 fail=0
