@@ -4,7 +4,7 @@ type: design-choice
 status: proposed
 created_by: design-proposer
 created_utc: 2026-01-01T00:00:00Z
-basis: ["EXT-0000", "REQ-D1", "HYP-0000"]
+basis: ["EXT-0000", "HYP-0000"]  # evidence/hypothesis ids; add REQ-* ids only for requirements that actually apply
 alternatives: ["name each alternative considered"]
 falsifier: "[what would show this choice to be wrong or unnecessary]"
 ---

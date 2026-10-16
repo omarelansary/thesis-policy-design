@@ -5,10 +5,10 @@ status: open
 created_by: design-challenger
 created_utc: 2026-01-01T00:00:00Z
 target: "HYP-0000"
-severity: material
+severity: should-fix
 ---
-<!-- status values: open | answered | resolved | escalated | withdrawn
-     severity values: blocking | material | minor -->
+<!-- status values: open | conceded | rebutted | escalated | unverified | withdrawn
+     severity values: blocking | should-fix | note -->
 # Title: the objection in one sentence
 
 **Objection.**

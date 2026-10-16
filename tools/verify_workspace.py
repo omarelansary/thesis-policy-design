@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Verify the workspace state. Exit code 0 = no FAIL. Read-only (never writes, never touches the origin except to read hashes).
+"""Verify the workspace state. Exit code 0 = no FAIL. Read-only except --repin (never touches the origin except to read files for hashes).
 
   python tools/verify_workspace.py            full check (re-verifies extracts and manifests against the origin if it is present)
-  python tools/verify_workspace.py --quick    structure, settings, agents, hashes of local copies, record schemas; no origin access
+  python tools/verify_workspace.py --quick    same checks except the origin-wide hash comparison; it still reads the two origin
+                                              record ranges that back EXT-0003/EXT-0004 through the allow-list, if the origin exists
+  python tools/verify_workspace.py --repin    after a HUMAN-REVIEWED change to a configuration file, rewrite config/PINNED.json
+                                              (a lead action; the change shows in git and must be reviewed)
 
 What a PASS means: the checks below hold. It does not mean the science is right, and it cannot detect instruction-level
 violations (for example an agent ignoring a rule that no hook or permission enforces). See ops/SAFEGUARDS.md.
@@ -13,6 +16,7 @@ WS = pathlib.Path(__file__).resolve().parents[1]
 sys.stdout.reconfigure(encoding="utf-8")
 ap = argparse.ArgumentParser()
 ap.add_argument("--quick", action="store_true")
+ap.add_argument("--repin", action="store_true")
 args = ap.parse_args()
 res = {"PASS": 0, "WARN": 0, "FAIL": 0}
 
@@ -58,7 +62,7 @@ def need(cond, ok, bad):
 
 # ---------- 1. required files ----------
 for f in ["CLAUDE.md", ".claude/settings.json", "ops/STATE.md", "ops/AUTHORIZATIONS.md", "ops/PROTOCOL.md", "ops/RECORDS.md",
-          "ops/SAFEGUARDS.md", "ops/DESIGN-DECISIONS.md", "config/origin.json", "config/ownership.json", "config/extractable_origin.json",
+          "ops/SAFEGUARDS.md", "ops/DESIGN-DECISIONS.md", "config/origin.json", "config/ownership.json", "config/extractable_origin.json", "config/limits.json", "config/PINNED.json",
           "evidence/README.md", "evidence/CAVEATS.md", "evidence/sources.json", "evidence/origin-index.tsv", "evidence/restricted.json",
           "evidence/governing/INDEX.json", "requirements/REGISTER.md", "requirements/intake/README.md", "tools/guard.py",
           "tools/origin_extract.py", "tools/verify_workspace.py"]:
@@ -74,7 +78,18 @@ try:
     deny = " ".join(st.get("permissions", {}).get("deny", []))
     for needle in ["research-cleanroom/**", "thesis-backups", ".claude/projects", "git push", "git clone", "Skill(import-memory)", "mcp__claude_ai_Google_Drive"]:
         need(needle in deny, f"deny rule present: {needle}", f"deny rule missing: {needle}")
+    for needle in ["RemoteTrigger", "PushNotification", "CronCreate", "ScheduleWakeup", "mcp__claude_ai_Gmail", "mcp__claude_ai_Google_Calendar", "Bash(*settings.local*)", "Edit(.claude/settings.local.json)"]:
+        need(needle in deny, f"deny rule present: {needle}", f"deny rule missing: {needle}")
+    expected_allow = {"Bash(python tools/origin_extract.py *)", "Bash(python tools/verify_workspace.py*)", "Bash(git status*)",
+                      "Bash(git diff*)", "Bash(git log*)", "Bash(git show*)", "Bash(git add *)"}
+    got_allow = set(st.get("permissions", {}).get("allow", []))
+    need(got_allow == expected_allow, "allow list is exactly the reviewed set", f"allow list differs from the reviewed set: extra={sorted(got_allow - expected_allow)} missing={sorted(expected_allow - got_allow)}")
     hooks = json.dumps(st.get("hooks", {}))
+    for tname in ["Bash", "PowerShell", "Read", "Grep", "Glob", "Write", "Edit", "NotebookEdit", "MultiEdit", "SendMessage"]:
+        covered = {tok for m in re.findall(r'"matcher": "([^"]*)"', hooks) for tok in m.split("|")}
+        need(tname in covered, f"hook matcher covers {tname}", f"hook matcher does NOT cover {tname}")
+    need(not (WS / ".claude/settings.local.json").exists(), "no .claude/settings.local.json override",
+         ".claude/settings.local.json exists: it can override the reviewed settings and is git-ignored. Inspect it; remove it unless the human put it there")
     need("tools/guard.py" in hooks and '"onFailure": "block"' in hooks.replace('":"', '": "'), "guard hook configured (fail-closed)", "guard hook missing or not fail-closed")
 except Exception as e:
     rep("FAIL", f"settings unreadable: {e}")
@@ -169,7 +184,10 @@ for p in sorted((WS / "evidence/extracts").glob("EXT-*.md")):
     if hashlib.sha256(raw).hexdigest() != d["source_sha256"]:
         rep("FAIL", f"{d['id']}: source hash changed since extraction")
         continue
-    lines = raw.decode("utf-8").splitlines()[d["line_start"] - 1:d["line_end"]]
+    _all = raw.decode("utf-8").split("\n")
+    if _all and _all[-1] == "":
+        _all.pop()
+    lines = [l[:-1] if l.endswith("\r") else l for l in _all][d["line_start"] - 1:d["line_end"]]
     need("\n".join(lines) == m.group(1), f"{d['id']}: verbatim body matches source lines {d['line_start']}-{d['line_end']}", f"{d['id']}: verbatim body DIFFERS from source")
 
 TYPES = {"findings": ("finding", "FND"), "hypotheses": ("hypothesis", "HYP"), "design/proposals": ("design-proposal", "DPR"),
@@ -206,14 +224,27 @@ for p, d, typ, pre in recs:
     if typ == "hypothesis":
         need(bool(d.get("falsifier")), f"{p.name}: falsifier stated", f"{p.name}: hypothesis without falsifier")
     if d.get("status") == "approved":
-        need(d.get("approved_by") == "human" and d.get("authorization") in auth_ids,
-             f"{p.name}: approval cites human and an AUTH id", f"{p.name}: 'approved' without approved_by=human and a valid authorization id")
+        need(d.get("approved_by") == "human" and d.get("authorization") in auth_ids and d.get("authorization") != "AUTH-001",
+             f"{p.name}: approval cites human and a design-level AUTH id", f"{p.name}: 'approved' without approved_by=human and a valid design-level AUTH id (AUTH-001 is the bootstrap authorization and covers no design approval)")
 
 # ---------- 7. authorization register ----------
 rows = [l for l in auth_text.splitlines() if re.match(r"\|\s*AUTH-\d{3}\s*\|", l)]
 for l in rows:
     cells = [c.strip() for c in l.strip().strip("|").split("|")]
     need(len(cells) >= 6 and cells[3] and cells[5], f"{cells[0]}: has date and verbatim human quote", f"{cells[0]}: missing date or human quote")
+
+# ---------- 7b. configuration pin ----------
+PIN_FILES = (["CLAUDE.md", ".claude/settings.json", ".gitignore", ".gitattributes", "tools/guard.py", "tools/origin_extract.py",
+              "tools/verify_workspace.py", "config/ownership.json", "config/limits.json", "config/extractable_origin.json"]
+             + sorted(str(q.relative_to(WS)).replace("\\", "/") for q in (WS / ".claude/agents").glob("*.md")))
+cur = {f: sha(WS / f) for f in PIN_FILES if (WS / f).exists()}
+if args.repin:
+    (WS / "config/PINNED.json").write_text(json.dumps({"note": "SHA-256 of the files that define the safeguards. Written by `verify_workspace.py --repin` after a human-reviewed change; a mismatch is reported as FAIL.", "files": cur}, indent=1) + "\n", encoding="utf-8", newline="\n")
+    print(f"repinned {len(cur)} files")
+else:
+    pin = json.loads((WS / "config/PINNED.json").read_text(encoding="utf-8")).get("files", {}) if (WS / "config/PINNED.json").exists() else {}
+    diff = sorted(f for f in set(cur) | set(pin) if cur.get(f) != pin.get(f))
+    need(not diff, f"configuration matches its pin ({len(cur)} files)", f"configuration differs from config/PINNED.json: {diff}. If a human reviewed the change, run --repin; otherwise revert it")
 
 # ---------- 8. git ----------
 try:

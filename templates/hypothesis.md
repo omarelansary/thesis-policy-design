@@ -4,7 +4,7 @@ type: hypothesis
 status: proposed
 created_by: design-proposer
 created_utc: 2026-01-01T00:00:00Z
-basis: ["EXT-0000", "REQ-D1"]
+basis: ["EXT-0000"]  # evidence ids; add REQ-* ids only for requirements that actually apply to this record
 falsifier: "[an observation that would show this hypothesis false; required]"
 ---
 # Title

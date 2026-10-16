@@ -8,7 +8,7 @@ target: "DPR-0000"
 ---
 # Review of [target]
 
-**Numbered objections** (severity: blocking | material | minor; each with evidence and the check that would resolve it).
+**Numbered objections** (severity: blocking | should-fix | note; each with evidence or an exact reference, and the check that would resolve it; disposition: conceded | rebutted | escalated | unverified).
 
 **What was tried and could not be broken.**
 

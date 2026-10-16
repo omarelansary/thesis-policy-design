@@ -2,8 +2,8 @@
 
 Requirements are **inputs**. They are carried by reference to hash-verified extracts, not paraphrased, so that a design cannot quietly soften them. Authority of each block is stated. Where the record itself classifies a statement (Required / Recommended / Example), that classification is the earlier researcher's reading, not the supervisor's.
 
-## A. User decisions that governed the clean-room project (authority: the user, 2026-10-11)
-- **REQ-U1** Research target formulation (G-a1), independence, search authorization, supervisor assertions as claims (G-e), no new experiments in Stage 2 (G-f), no policy committed (G-c), previous experiments unavailable until Stage 5. Text: `evidence/extracts/EXT-0001.md`.
+## A. User decisions that governed Stage 2 of the clean-room project (authority: the user, 2026-10-11; HISTORICAL, scoped to that project)
+- **REQ-U1** (status: historical input, **not an active requirement of this workspace** until the user says so) Stage 2 decisions: research target formulation (G-a1), independence, search authorization, supervisor assertions as claims (G-e), no new experiments in Stage 2 (G-f), no policy committed in Stage 2 (G-c), previous experiments unavailable until Stage 5. EXT-0001 line 18 scopes them to Stage 2; "no policy committed" applied to that stage. Text: `evidence/extracts/EXT-0001.md`.
 - The user described the formulation as "a starting target, not a justified one" (inside EXT-0001). Whether this workspace keeps it is a decision for the user; see section F.
 
 ## B. Supervisor requirements as read from the 2026-10-02 meeting, in the approved brief (authority: supervisor; reading: researcher)
@@ -13,7 +13,7 @@ Requirements are **inputs**. They are carried by reference to hash-verified extr
 - **REQ-M1**: meeting record section 1, rows R1-R18, quotes and transcript line references. Text: `evidence/extracts/EXT-0003.md` (extracted from the origin through the allow-list; section 3 of that file is withheld).
 
 ## D. Derived requirement list used by the candidate assessments (authority: researcher synthesis, user-accepted as the working list)
-- **REQ-D1**: R1-R10 (tokens, maintained performance, overhead counting, global judgement, policy with a way to query omitted tools, baselines, findings cue, stepwise, graded exposure as a lens, use existing work). Text: `evidence/extracts/EXT-0005.md`. Numbering differs from REQ-M1; do not mix them.
+- **REQ-D1**: R1-R10 as recorded, each with its scope in the "Applies to" column of the source table: R1-R4, R6, R10 apply to "all"; R7 to "contribution type"; **R5, R8, R9 apply only to the "solution form of a policy contribution"** (they are not requirements on every design). Text and the full table: `evidence/extracts/EXT-0005.md`. Numbering differs from REQ-M1; do not mix them. REQ-D1 is the earlier researchers' synthesis; cite the underlying REQ-S/REQ-M extracts when a requirement matters.
 
 ## E. Supervisor assertions that are empirical claims (authority: none; to test, not to assume)
 - **REQ-A1**: assertions A1-A13 as recorded. Text: `evidence/extracts/EXT-0004.md`. These are prior-art or fact claims to be tested; they are not requirements and not findings.

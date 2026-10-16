@@ -9,7 +9,7 @@ Format: decision, options compared, why, what would change it. These record how 
 - Revisit if: reconciliation is authorized and a shared structure becomes useful.
 
 ## WD-002 Evidence tiers instead of "everything" or "a narrative"
-- Options: (a) copy the repo; (b) hand-written briefing; (c) tiers: byte-exact governing copies (selected by a rule, not by claim), a metadata-only manifest of all 239 stored sources, an index of every other file, a withheld set with hashes, and a sanctioned hash-verified extraction tool.
+- Options: (a) copy the repo; (b) hand-written briefing; (c) tiers: byte-exact governing copies (selected by a rule, not by claim), a metadata-only manifest of all 239 source manifests (232 with stored text), an index of every other file, a withheld set with hashes, and a sanctioned hash-verified extraction tool.
 - Why: (a) loses the boundary; (b) loses provenance and bakes in one author's reading. (c) lets an agent open a passage by id/line range and cite it, while caveats stay in `evidence/CAVEATS.md` as pointers, not summaries.
 - Limits: the governing-copy rule (`evidence/README.md`) is a judgement; the index shows what is *not* copied so a gap can be seen.
 
@@ -37,3 +37,15 @@ Own repo, no remote. `.gitattributes` `* -text` and local `core.autocrlf=false` 
 
 ## WD-009 Reconciliation path (not executed)
 A later, separately authorized step: the lead produces a reconciliation brief listing each DES/HYP/FND with its evidence ids; comparison with the origin is done through the sanctioned tools under a new AUTH with explicit scope, never by merging repositories. Nothing in this workspace is written back to the origin.
+
+## WD-010 Hook-enforced thread message cap (added after the independent review)
+- Problem (RV-0001 D22, observed): an instruction-only cap of 12 was overrun in the review thread (13 sends) because no agent can see the global count, and the lead's 3 tasking messages are part of it.
+- Options: (a) per-agent tallies; (b) lead polls and stops agents (agents cannot be interrupted, only messaged); (c) the PreToolUse hook counts every SendMessage per active thread and refuses beyond the cap.
+- Chosen: (c) in `tools/guard.py` with `ops/threads/ACTIVE.json` and `config/limits.json`. Verified deterministically (`guard_cases.py`) and live (R2: 6th send refused at 5/5). The value 12 and 2 rounds are conservative defaults of the bootstrap lead, not evidence-derived; only the human changes them.
+- Limit: it depends on the hook layer (see WD-011). A refused agent cannot escalate; the protocol says to finish with a final answer listing the unresolved disagreement.
+
+## WD-011 Treat the hook layer as defeatable; keep deny rules as the second layer; detect, do not assume
+C7 showed `disableAllHooks` in a local settings file turns the guard off. Response: deny rules for that file (hook-independent, C8), guard text/path blocks, `verify` fails on its presence, a hash pin of the safeguard-defining files (`config/PINNED.json`), and the rule that every session starts with `verify --quick`. An OS sandbox would be the real fix and is not available here.
+
+## WD-012 Review-driven corrections (RV-0001)
+Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanctioned-name exemption, `.git` and local-settings protection, `match()` dot bug), SendMessage allow-list, message-cap hook, config pin, `approved` records may not cite AUTH-001, deny rules for outbound/scheduling tools, CAVEATS rows 3/10/12/15 corrected, REQ-U1 and REQ-D1 scopes restored, template seeds neutralised, severity/status vocabulary unified, message kinds unified, round and message definitions, steward command form, source counts corrected, claim about C4 as a model audit removed. Not applied (kept as documented limits): OS sandbox, Bash write ownership, foreign agent-id resolution (untested), interactive/VS Code behavior (untested). Details: `ops/threads/T-20261016-91/SUMMARY.md`.

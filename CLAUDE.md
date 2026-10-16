@@ -1,6 +1,6 @@
 # thesis-policy-design: operating instructions
 
-This workspace is for conceptual, evidence-grounded design work on a tool-access policy for a master's thesis. It was bootstrapped on 2026-10-16 from a completed, audited clean-room research repository (the **origin**, `C:\Users\omr\Documents\research-cleanroom`). The origin stays authoritative for its own historical records and is **never modified or read directly from here**.
+This workspace is for conceptual, evidence-grounded design work that the human has described as work on a tool-access policy for a master's thesis. The thesis question itself has not yet been supplied (`requirements/THESIS_QUESTION.md`); the framing here is the human's description of the workspace purpose, not a finding. It was bootstrapped on 2026-10-16 from a completed, audited clean-room research repository (the **origin**, `C:\Users\omr\Documents\research-cleanroom`). The origin stays authoritative for its own historical records and is **never modified or read directly from here**.
 
 @ops/STATE.md
 
@@ -33,7 +33,7 @@ Cite EXT ids, not memory. Copied/extracted text is evidence of what a record say
 
 ## Working method
 - Start of session: read `ops/STATE.md`; run `python tools/verify_workspace.py --quick`; check `ops/AUTHORIZATIONS.md`.
-- Agents (`.claude/agents/`): `evidence-steward`, `design-proposer`, `design-challenger`, all Sonnet. Protocol, message format, escalation and budgets: `ops/PROTOCOL.md`. One writer per file (`config/ownership.json`, enforced by the guard for subagents). Disagreement is resolved by evidence; after two rounds it is escalated with both positions, never averaged away.
-- Bounded work: each task states its limits (agents, rounds, messages, searches) in the AUTH; do not repeat reviews or searches beyond them.
+- Agents (`.claude/agents/`): `evidence-steward`, `design-proposer`, `design-challenger`, all Sonnet. Protocol, message format, escalation and budgets: `ops/PROTOCOL.md`. A thread needs `ops/threads/ACTIVE.json` (PROTOCOL step 2); the guard counts every message against the cap in `config/limits.json` and refuses sends beyond it. One writer per file (`config/ownership.json`, enforced by the guard for subagents). Disagreement is resolved by evidence; after two rounds it is escalated with both positions, never averaged away.
+- Bounded work: each task states its limits (agents, rounds, messages, searches) in the AUTH; do not repeat reviews or searches beyond them. The message cap in `config/limits.json` and the configuration pin in `config/PINNED.json` (`verify_workspace.py` fails on a mismatch) may be changed only with the human's review.
 - Before ending a session: update `ops/STATE.md`, record decisions in `ops/DESIGN-DECISIONS.md`, run `python tools/verify_workspace.py`, then stop for human review. The lead owns `ops/`, `requirements/`, configuration and the register.
 - Supervisor material received later (e.g. the 2026-10-14 instructions) goes in `requirements/` with provenance as in `requirements/intake/README.md`; it is a requirement or an example, never an independently established scientific finding.

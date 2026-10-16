@@ -11,7 +11,8 @@ Usage
   python tools/origin_extract.py --governing <path under evidence/governing> --lines 5-18 [--note ...] [--no-write]
   python tools/origin_extract.py --origin-path <origin-relative path> --lines 7-48 [--note ...]      (allow-list only)
   python tools/origin_extract.py --list-sources [--grep TEXT]
-Line numbers are 1-based and inclusive, counted on the text split by line breaks.
+Line numbers are 1-based and inclusive; a line ends at LF only (CR before LF is dropped), the same count as sed/grep -n.
+(Python str.splitlines would also split at form feed and other characters; 7 stored sources contain such characters.)
 """
 import argparse, datetime, hashlib, json, os, pathlib, sys
 
@@ -30,7 +31,10 @@ def load_json(p):
 def read_lines(path, a, b):
     raw = pathlib.Path(path).read_bytes()
     text = raw.decode("utf-8")
-    lines = text.splitlines()
+    lines = text.split("\n")  # a line ends at LF only (as sed, grep -n and editors count); form feed etc. are NOT line breaks
+    if lines and lines[-1] == "":
+        lines.pop()
+    lines = [l[:-1] if l.endswith("\r") else l for l in lines]
     if a < 1 or b < a or b > len(lines):
         sys.exit(f"ERROR: line range {a}-{b} outside 1-{len(lines)}")
     return raw, lines[a - 1:b], len(lines)

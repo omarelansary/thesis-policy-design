@@ -9,7 +9,7 @@ Front matter is `key: value` lines between `---` markers (values may be JSON). `
 | hypothesis | HYP-NNNN | hypotheses/ | design-proposer | + basis[], falsifier | falsifier non-empty (V) |
 | design proposal | DPR-NNNN | design/proposals/ | design-proposer | + basis[] | draft for challenge; never a decision |
 | design choice | DES-NNNN | design/choices/ | design-proposer drafts, human approves | + basis[], alternatives[], falsifier | `approved` requires `approved_by: human` and `authorization: AUTH-nnn` that exists (V) |
-| challenge | CH-NNNN | challenges/ | design-challenger | + target, severity | status open / answered / resolved / escalated / withdrawn |
+| challenge | CH-NNNN | challenges/ | design-challenger | + target, severity | status open / conceded / rebutted / escalated / unverified / withdrawn |
 | review | RV-NNNN | reviews/ | design-challenger | + target | |
 | requirement | REQ-xx | requirements/REGISTER.md | lead | row in the register | text lives in an EXT; ids must resolve (V) |
 | summary | SUM-NNNN | any (own directory of the writer) | any | type: summary, derived_from[] | unverified until checked against EXT |

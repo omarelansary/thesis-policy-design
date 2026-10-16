@@ -2,6 +2,8 @@
 
 Snapshot of the origin repository `C:\Users\omr\Documents\research-cleanroom` at commit `67e5eeec4b61` (see `config/origin.json`). The origin remains authoritative. Nothing here was edited; nothing was written to the origin.
 
+**Line numbers.** Everywhere in this workspace a line ends at LF only (a CR before it is dropped), the count that `sed`, `grep -n` and editors give. Python `splitlines()` would also break at form feed and similar characters, which 7 of the stored source texts contain; do not use it to number lines.
+
 ## Four kinds of material (never mixed in one file)
 | Kind | Where | What it proves |
 |---|---|---|
@@ -13,7 +15,7 @@ Generated manifests (`sources.json`, `origin-index.tsv`, `restricted.json`, `gov
 
 ## Tiers (see CLAUDE.md)
 - **Governing copies (39 files).** Selection rule, stated before looking at any candidate's merits: (1) the approved brief rev. 2 (user decisions and supervisor requirements as read from the 2026-10-02 meeting); (2) all decision records D1-D13; (3) the documents that state the *latest* candidate state and its corrections (S4G brief, S4I erratum and decision sheet, S4D dossier/matrix/quality addendum, S4E/S4F reports and addenda); (4) the final evidence synthesis of each stage (Stage 2 final report, Stage 3 final report and claim ledger, Stage 4 prior-art comparison, Stage 4b map and synthesis, Stage 4c dossier); (5) the audit and correction provenance (integrity-investigation final report, S4H B-1/B-2 reports, S4H closure addendum). Not copied: search logs, per-worker extractions, critic and reviewer reports, per-source L2 tables, operational checkpoints. They are indexed (tier 3) and reachable only with human authorization. The rule is category-based; the copied set contains both documents that favour and documents that qualify each candidate.
-- **Stored source texts (239).** `sources.json` lists every one, with URL, version, retrieval time, extractor warnings and sha256. No relevance ranking. Read with `tools/origin_extract.py --source ID`. Some texts are garbled by PDF extraction (two-column tables interleave); quote with care. Six manifests carry no text hash; the recomputed hash is recorded.
+- **Source manifests (239).** `sources.json` lists every one, with URL, version, retrieval time, extractor warnings and hashes. No relevance ranking. Of the 239: **232 have stored text** (readable with `tools/origin_extract.py --source ID`), **5 are failed fetches** with no text, and **2 are the fetch tool's own test artefacts** (one has a text file); the fields `has_text` and `kind` say which. For entries with a text file, the manifest's own text hash equals the SHA-256 recomputed on the stored file (checked at snapshot). Some texts are garbled by PDF extraction (two-column tables interleave); quote with care.
 - **Origin index (`origin-index.tsv`).** Every tracked origin file outside the stored texts and checkpoints: path, category, size, git blob id, last commit date, and `access` (`copied`, `indexed-only`, `restricted`).
 
 ## Withheld and why (`restricted.json`)

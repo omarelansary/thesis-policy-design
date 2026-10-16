@@ -4,7 +4,7 @@ type: design-proposal
 status: proposed
 created_by: design-proposer
 created_utc: 2026-01-01T00:00:00Z
-basis: ["EXT-0000", "REQ-D1"]
+basis: ["EXT-0000"]  # evidence ids; add REQ-* ids only for requirements that actually apply to this record
 ---
 <!-- A proposal is a draft for challenge, not a decision. status values: proposed | challenged | withdrawn | promoted.
      Promotion to a design choice (DES) is a separate record and needs human approval. -->
