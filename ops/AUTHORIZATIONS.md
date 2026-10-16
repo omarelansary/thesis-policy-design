@@ -8,6 +8,7 @@ Only the human grants authorizations. The lead records them here, quoting the hu
 | AUTH-002 | human | Readiness corrections in `thesis-policy-design` only, exactly the five items in the verbatim text below: (1) content-neutral test of the real agent ID format and peer-to-peer messaging in the VS Code runtime, with the minimum supported guard correction, test and pin update if a valid ID is rejected; (2) correct the supervisor-material intake mechanism so selected source-faithful excerpts can be admitted without copying excluded earlier-thesis experimental material, preserving source identity, timestamps or locations, extract scope, SHA-256 evidence and change detection, without claiming absolute hook-enforced immutability; (3) if straightforward, fix source-ledger short-name resolution to actual manifest identifiers; (4) record this authorization; (5) run relevant regressions, verify, document remaining limitations, create a local checkpoint. | 2026-10-16 | Proportionate effort. No further broad agent review, no redesign of the safeguards, no attempt at sandbox-level isolation. Do not fetch, import or summarize the October 14 transcript; prepare only the intake mechanism. No modification of `research-cleanroom`, no policy design, no scientific experiments, no contribution selection, no Stage 5. Stop with the readiness results and the exact next step for controlled supervisor-evidence intake. Recorded after the read-only readiness assessment; it does not authorize that assessment retroactively. | see "AUTH-002 verbatim human text" below the table |
 | AUTH-003 | human | Controlled intake of nine user-approved excerpts (E1-E9) of the 2026-10-14 meeting "Automatic Tool Discovery" (speaker per supplier: A.F.M. Mohimenul Joaa; supplier-claimed source: a Google Drive transcript; form: automatic transcript; supplier: the human, in the AUTH-003 message), by the intake route for user-supplied text (route A): (1) record this authorization; (2) store the excerpts verbatim with timestamps, speaker attribution, source reference and integrity information; (3) extract requirements, methodological expectations, design suggestions, examples and unresolved interpretations into requirement records; (4) distinguish explicit instructions from illustrative examples; (5) compare with the 2026-10-02 governing requirements without overwriting them; (6) keep the earlier research evidence independent (no reinterpretation of C1-C6); (7) run relevant checks, make a local checkpoint and report. | 2026-10-16 | **Intake only.** No scientific design; no selection of a policy or contribution; no experiments; no Stage 5; no reconciliation with the old thesis. Do not fetch or access the complete 2026-10-14 transcript or the omitted material; no previous-thesis experimental records; no unauthorized sources. Recording requirements is not approval of any proposed solution. No broad research or infrastructure review. **Covers no design approval and no change to tools, safeguards or configuration.** **Spent when the intake report is delivered**; the next task (conceptual policy design with the Sonnet agents) needs its own authorization. STOP FOR HUMAN REVIEW. | "I authorize the controlled intake of the selected supervisor statements below." and "This is an intake task only. Do not begin scientific design." |
 | AUTH-004 | human | First scientific design task: an evidence-grounded **provisional conceptual tool-access policy proposal** (reducing unnecessary tool exposure to LLM agents while preserving task performance and accounting for the costs of deciding, discovering and using tools), prepared for the 2026-10-21 supervisor meeting, using the workspace's three Sonnet agents. Expected outputs A-F: (A) problem and objective specification; (B) evidence-to-decision analysis; (C) conceptual policy proposal with a graph or equivalent decision-flow; (D) critical challenge; (E) validation strategy with falsifiers; (F) supervisor-ready synthesis. Source integrity and consistency checks, significant uncertainties and unresolved disagreements recorded, a local checkpoint, then a report with the specific questions requiring human judgment. | 2026-10-16 | Conceptual design only: no implementation, no benchmark or experiment, no measured-improvement claims. No fresh broad landscape search, no web search. No change to historical records, governing evidence, supervisor transcripts or C1-C6 classifications; no previous-thesis material, no Stage 5, no reconciliation with the origin. No declaring any design validated or irrevocably selected; no frozen thesis contribution; no asserted novelty beyond hypothesis; no arbitrary numeric thresholds, stages or performance targets; no future information, reference trajectories, gold tools or benchmark annotations as runtime signals unless their legitimate availability is shown. Existing operational limits apply (`config/limits.json`: 12 messages per thread, 2 rounds per issue; Sonnet agents); report if they materially constrain the review. The user's "working interpretations" in the verbatim text are user-approved clarifications, not supervisor statements. **Spent when the report is delivered.** STOP FOR HUMAN REVIEW. | "I now authorize the first scientific design task in this workspace." and "Do not implement the system or conduct empirical experiments." and "Then STOP FOR HUMAN REVIEW." |
+| AUTH-005 | human | Bounded scientific adjudication and revision of the AUTH-004 package: develop one defensible, sufficiently specified **provisional conceptual policy candidate** (or demonstrate that none is presently defensible), applying the eight "Required scientific corrections" in the verbatim text; check a small justified set of pivotal source passages against the already authorized original evidence; use the Sonnet agents proportionately with real disagreement preserved; deliver the candidate with decision logic and graph, justification, comparison with the strongest simpler and materially different alternatives, a corrected falsifiable evaluation outline, a claim-to-source register, a candid unsupported-claims assessment and a supervisor-ready presentation outline; successor records only, the AUTH-004 package and provenance preserved; local checkpoint; stop for human scientific review. | 2026-10-16 | No implementation, benchmark execution, broad literature search, previous-thesis material, origin-repository modification, Stage 5 or final contribution selection. No novelty, optimality, accuracy-preservation or cost-reduction claims without experimental evidence. No rewriting of history: AUTH-004 records stay; revisions are new records or explicitly versioned successor documents. Existing operational limits apply (`config/limits.json`: 12 messages per thread, 2 rounds per issue; Sonnet agents; no web search): the human has not raised them. Nothing in this task approves a design (`approved` needs the human and a design-level AUTH). **Spent when the report is delivered.** STOP FOR HUMAN SCIENTIFIC REVIEW. | "This task is a bounded scientific revision, not a restart." and "Produce a local checkpoint and stop for human scientific review before any further work." |
 
 ## AUTH-002 verbatim human text (message of 2026-10-16, after the readiness assessment)
 > I conditionally accept the workspace bootstrap and readiness assessment.
@@ -257,6 +258,77 @@ The whole message is quoted below. The "Working interpretations" are the human's
 > Do not autonomously proceed to implementation, additional research stages or reconciliation.
 
 Lead's notes on AUTH-004 (interpretation, not human text): (1) The message says the overarching question "is established" but did not supply its wording; `requirements/THESIS_QUESTION.md` stays a placeholder and agents use the Objective sentence above as the working statement, quoted, never paraphrased into a narrower question. (2) The register-row scope column is the lead's enumeration of the message; the two quotes in the last column are the operative human words. (3) `tools/verify_workspace.py` still excludes only AUTH-001/002 from design approval; nothing in this task makes any record `approved`.
+
+## AUTH-005 verbatim human text (message of 2026-10-16, after the AUTH-004 checkpoint `2a22677`)
+> # AUTH-005 — Scientific Adjudication and Conceptual Policy Revision
+>
+> AUTH-004 is complete at checkpoint `2a22677`. I have reviewed the uploaded A–F package and evidence map.
+>
+> This task is a bounded scientific revision, not a restart.
+>
+> The previous package is accepted as an exploratory analysis, but it is not yet accepted as the conceptual policy for the October 21 supervisor meeting.
+>
+> ## Goal
+>
+> Develop one defensible, sufficiently specified **provisional conceptual policy candidate** from the existing evidence and alternatives, while preserving the unresolved scientific questions and stronger simpler comparators.
+>
+> Do not assume Form S, Form M, or the existing N0–N4 template is correct.
+>
+> Determine whether a coherent candidate can be justified and explain why it is worth testing. Do not select it on the basis of resemblance to the supervisor's example.
+>
+> ## Required scientific corrections
+>
+> 1. Distinguish a configurable policy family from an actual proposed policy with specified decision conditions, inputs, actors and transitions.
+>
+> 2. Re-examine whether N0 is a deployment configuration, a learned or explicit policy-selection rule, or merely an experimental arm selector. Do not claim adaptivity without an actual decision mechanism.
+>
+> 3. Specify the decision questions in the proposed policy. It is acceptable to leave numeric parameters for later validation, but not to leave fundamental decision logic undefined.
+>
+> 4. Reconsider add-only exposure as a hypothesis rather than an automatically justified architectural constraint. Analyze session horizon, cache assumptions, withdrawal and stable-interface alternatives.
+>
+> 5. Correct the validation logic, especially recovery economics across miss/no-miss populations, trade-offs between initiation mechanisms, and claims based on failure to observe cost inversions.
+>
+> 6. Separate the primary research objective and measurable outcomes from optional diagnostic definitions of "unnecessary exposure". Distinguish optimization criteria, reporting requirements and strata.
+>
+> 7. Preserve strict runtime-information constraints and test whether any proposed decision relies on information unavailable when it must act.
+>
+> 8. Check a small, justified set of pivotal source passages against the already authorized original evidence. Do not repeat the failed broad evidence-steward exercise. Label anything left second-hand.
+>
+> ## Critical collaboration
+>
+> Use the available Sonnet agents proportionately.
+>
+> The proposer must justify its own assumptions rather than automatically concede challenges. The challenger must defend its criticisms and recognize when they are overstated.
+>
+> Do not force consensus. Retain material disagreements and identify what would resolve them.
+>
+> Do not create a new architecture simply to demonstrate novelty.
+>
+> ## Deliverables
+>
+> Provide:
+>
+> - One complete provisional policy candidate, with explicit decision logic and a readable graph.
+> - A brief justification for why that candidate deserves investigation.
+> - A comparison with the strongest simpler and materially different alternatives.
+> - A corrected, falsifiable evaluation outline.
+> - A claim-to-source register for the decisive arguments.
+> - A candid assessment of what remains scientifically unsupported.
+> - A concise supervisor-ready presentation outline.
+>
+> Preserve the original AUTH-004 package and its provenance. Make revisions through clear new records or explicitly versioned successor documents; do not rewrite history.
+>
+> You may conclude that no single candidate is presently defensible. If so, demonstrate precisely why, which minimal decision is missing, and what evidence would resolve it. Do not fabricate a selection.
+>
+> ## Boundaries
+>
+> No implementation, benchmark execution, broad literature search, previous-thesis material, origin-repository modification, Stage 5, or final scientific contribution selection.
+>
+> Do not claim novelty, optimality, accuracy preservation, or cost reductions without experimental evidence.
+>
+> Produce a local checkpoint and stop for human scientific review before any further work.
+
+Lead's note on AUTH-005 (interpretation): the message does not change `config/limits.json`; the 12-message cap, 2 rounds per issue, Sonnet pin and no-web-search rules stay in force and the task is planned inside them.
 
 Note on the register rows: `tools/verify_workspace.py` excludes only AUTH-001 and AUTH-002 from citation as a design approval. The restriction on AUTH-003 (it covers no design approval) is therefore carried by its limits column and this note, not by the check. See the intake report for the recommendation.
 
