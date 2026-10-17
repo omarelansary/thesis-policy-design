@@ -19,3 +19,6 @@ Recorded AUTH-005; extracted EXT-0057..0065 (sanctioned tool, lead-chosen ranges
 
 ## What no one verified
 Toollery model/pricing/list construction and the cause of its low hit rate; billing of deferred or withheld definitions; whether the closest evaluation vehicle can run free sessions; all vendor cache statements beyond what the documents say; ER-R, MCP-Zero, ITR (beyond its ablation table), PlanBench-XL beyond the extracted passage; ledger rows C3-*/K*.
+
+## Verification at close (honest status)
+`python tools/verify_workspace.py` at the final commit `e81244b`: 609 pass, 0 warn, **1 FAIL**: an unreviewed local override file under `.claude/` (git-ignored) that can switch off hooks. It appeared during this task, probably from a permission approval, but that is not established. It was **not inspected or removed** because the guard blocks any shell access to it and says to ask the human. All records and the package are committed; the file is not part of any commit. The human must inspect it and remove it unless they created it, then re-run the check. The AUTH-005 report is delivered but the workspace is not fully clean until then.
