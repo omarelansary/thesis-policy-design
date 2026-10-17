@@ -19,7 +19,7 @@ Two layers, said plainly. **Run-time policy:** assemble a stable prefix (optiona
 
 ## Slide 5. How it answers your three requirements, and where it does not
 - *Context:* the request enters only if per-request narrowing is selected; the trajectory enters through the model's own search and an optional trigger.
-- *Staged narrowing:* core -> per-request -> in-run discovery, each **optional**; the number of stages is an output of a stated rule and may be zero.
+- *Staged narrowing:* core -> per-request -> in-run discovery, each **optional**; the number of stages is an output of a stated rule and may be zero. **Say explicitly: the record cannot name the single run-time configuration in advance; that is what the selection protocol is for.**
 - *Reintroduction:* the model's search re-adds a capability; it re-adds something an earlier stage *removed* only if per-request narrowing is present.
 - We did not invent stages, thresholds or benefits to resemble the example. If the rule returns search-only, the realised policy is vendor-style deferral and the staged content is empty for that regime.
 
