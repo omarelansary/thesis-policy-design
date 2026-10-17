@@ -9,6 +9,7 @@ Only the human grants authorizations. The lead records them here, quoting the hu
 | AUTH-003 | human | Controlled intake of nine user-approved excerpts (E1-E9) of the 2026-10-14 meeting "Automatic Tool Discovery" (speaker per supplier: A.F.M. Mohimenul Joaa; supplier-claimed source: a Google Drive transcript; form: automatic transcript; supplier: the human, in the AUTH-003 message), by the intake route for user-supplied text (route A): (1) record this authorization; (2) store the excerpts verbatim with timestamps, speaker attribution, source reference and integrity information; (3) extract requirements, methodological expectations, design suggestions, examples and unresolved interpretations into requirement records; (4) distinguish explicit instructions from illustrative examples; (5) compare with the 2026-10-02 governing requirements without overwriting them; (6) keep the earlier research evidence independent (no reinterpretation of C1-C6); (7) run relevant checks, make a local checkpoint and report. | 2026-10-16 | **Intake only.** No scientific design; no selection of a policy or contribution; no experiments; no Stage 5; no reconciliation with the old thesis. Do not fetch or access the complete 2026-10-14 transcript or the omitted material; no previous-thesis experimental records; no unauthorized sources. Recording requirements is not approval of any proposed solution. No broad research or infrastructure review. **Covers no design approval and no change to tools, safeguards or configuration.** **Spent when the intake report is delivered**; the next task (conceptual policy design with the Sonnet agents) needs its own authorization. STOP FOR HUMAN REVIEW. | "I authorize the controlled intake of the selected supervisor statements below." and "This is an intake task only. Do not begin scientific design." |
 | AUTH-004 | human | First scientific design task: an evidence-grounded **provisional conceptual tool-access policy proposal** (reducing unnecessary tool exposure to LLM agents while preserving task performance and accounting for the costs of deciding, discovering and using tools), prepared for the 2026-10-21 supervisor meeting, using the workspace's three Sonnet agents. Expected outputs A-F: (A) problem and objective specification; (B) evidence-to-decision analysis; (C) conceptual policy proposal with a graph or equivalent decision-flow; (D) critical challenge; (E) validation strategy with falsifiers; (F) supervisor-ready synthesis. Source integrity and consistency checks, significant uncertainties and unresolved disagreements recorded, a local checkpoint, then a report with the specific questions requiring human judgment. | 2026-10-16 | Conceptual design only: no implementation, no benchmark or experiment, no measured-improvement claims. No fresh broad landscape search, no web search. No change to historical records, governing evidence, supervisor transcripts or C1-C6 classifications; no previous-thesis material, no Stage 5, no reconciliation with the origin. No declaring any design validated or irrevocably selected; no frozen thesis contribution; no asserted novelty beyond hypothesis; no arbitrary numeric thresholds, stages or performance targets; no future information, reference trajectories, gold tools or benchmark annotations as runtime signals unless their legitimate availability is shown. Existing operational limits apply (`config/limits.json`: 12 messages per thread, 2 rounds per issue; Sonnet agents); report if they materially constrain the review. The user's "working interpretations" in the verbatim text are user-approved clarifications, not supervisor statements. **Spent when the report is delivered.** STOP FOR HUMAN REVIEW. | "I now authorize the first scientific design task in this workspace." and "Do not implement the system or conduct empirical experiments." and "Then STOP FOR HUMAN REVIEW." |
 | AUTH-005 | human | Bounded scientific adjudication and revision of the AUTH-004 package: develop one defensible, sufficiently specified **provisional conceptual policy candidate** (or demonstrate that none is presently defensible), applying the eight "Required scientific corrections" in the verbatim text; check a small justified set of pivotal source passages against the already authorized original evidence; use the Sonnet agents proportionately with real disagreement preserved; deliver the candidate with decision logic and graph, justification, comparison with the strongest simpler and materially different alternatives, a corrected falsifiable evaluation outline, a claim-to-source register, a candid unsupported-claims assessment and a supervisor-ready presentation outline; successor records only, the AUTH-004 package and provenance preserved; local checkpoint; stop for human scientific review. | 2026-10-16 | No implementation, benchmark execution, broad literature search, previous-thesis material, origin-repository modification, Stage 5 or final contribution selection. No novelty, optimality, accuracy-preservation or cost-reduction claims without experimental evidence. No rewriting of history: AUTH-004 records stay; revisions are new records or explicitly versioned successor documents. Existing operational limits apply (`config/limits.json`: 12 messages per thread, 2 rounds per issue; Sonnet agents; no web search): the human has not raised them. Nothing in this task approves a design (`approved` needs the human and a design-level AUTH). **Spent when the report is delivered.** STOP FOR HUMAN SCIENTIFIC REVIEW. | "This task is a bounded scientific revision, not a restart." and "Produce a local checkpoint and stop for human scientific review before any further work." |
+| AUTH-006 | human | Bounded scientific correction of the AUTH-005 v2 package and a supervisor-facing conceptual policy: (1) correct the dimensional inconsistency of the recovery and initiator break-even equations (success vs cost kept as separate estimands under a noninferiority-constrained objective unless an exchange rate is justified); (2) identify what a missed-tool probability bound requires and correct claims beyond the evidence; (3) examine A1's greedy core-selection rule; (4) examine applicability of C-A to the original large-catalogue problem; (5) treat Toollery's inferred cache multiplier as a fitted study-specific parameter; reassess whether C-A is the principal proposal or a comparator; examine C-B and alternatives against the supervisor's requirement; produce one concrete provisional supervisor-facing decision graph; working operational objective: minimise cumulative model-visible input tokens over complete trajectories while preserving end-to-end task success, including all decision/discovery overhead, with tool count, token categories, billed cost and cache behaviour recorded separately. Outputs only: a corrected errata record for AUTH-005, the decision graph and explanation, a short comparison against C-A, expose-all and vendor deferral, the strongest remaining objections and experiments, and a presentation outline for 2026-10-21. | 2026-10-17 | Bounded revision, not a new research phase. Preserve earlier packages (successor documents only). Existing sources and targeted agent criticism only when necessary; no broad literature search, implementation, experiments or Stage 5 reconciliation. Do not invent stages, thresholds, empirical benefits or novelty; do not automatically adopt C-B; do not claim the objective is an exact supervisor quotation, that the noninferiority margin is decided, or that the policy is validated or final. If the local-settings warning persists, stop and request human intervention (it did not: verifier clean at session start). Existing operational limits unchanged (12 messages per thread, 2 rounds, Sonnet agents, no web search). Nothing in this task approves a design. **Spent when the report is delivered.** STOP FOR HUMAN REVIEW. | "This task is a bounded revision, not a new research phase." and "Check internal consistency, record a local checkpoint, and stop for human review." |
 
 ## AUTH-002 verbatim human text (message of 2026-10-16, after the readiness assessment)
 > I conditionally accept the workspace bootstrap and readiness assessment.
@@ -329,6 +330,71 @@ Lead's notes on AUTH-004 (interpretation, not human text): (1) The message says 
 > Produce a local checkpoint and stop for human scientific review before any further work.
 
 Lead's note on AUTH-005 (interpretation): the message does not change `config/limits.json`; the 12-message cap, 2 rounds per issue, Sonnet pin and no-web-search rules stay in force and the task is planned inside them.
+
+## AUTH-006 verbatim human text (message of 2026-10-17, after the AUTH-005 checkpoint `67abc5f`)
+> # AUTH-006 — Scientific Corrections and Supervisor-Ready Policy
+>
+> AUTH-005 has been completed at checkpoint `67abc5f`. Its successor package has received external scientific review.
+>
+> This task is a bounded revision, not a new research phase.
+>
+> Before working, verify the workspace is operationally ready. If the local-settings warning persists, stop and request human intervention. Do not bypass the guard.
+>
+> ## Scientific corrections
+>
+> Review and correct these substantive issues in the v2 package:
+>
+> 1. The recovery and initiator break-even equations combine success probabilities with monetary/token costs. Correct their dimensional inconsistency. Under a noninferiority-constrained objective, keep success and cost as separate estimands unless an exchange rate is explicitly justified.
+>
+> 2. A1's missed-tool probability is not automatically an upper bound on task-success degradation. Identify the assumptions necessary for any bound, distinguish surrogate coverage from end-to-end success, and correct claims that exceed the evidence.
+>
+> 3. Examine A1's greedy core-selection rule. Determine whether it actually minimizes incremental cost, how changing the core affects discovery failure probabilities, and whether any optimality or safety property is established.
+>
+> 4. Examine whether C-A is applicable to the original large-catalogue problem when full-exposure reference runs cannot fit and the proposed need-frequency estimates become unavailable.
+>
+> 5. Treat Toollery's inferred cache multiplier as a provider- and study-specific fitted parameter, not a verified universal billing rate.
+>
+> Do not merely add disclaimers where a mathematical or logical correction is required.
+>
+> ## Supervisor alignment
+>
+> Reassess whether C-A should be the principal conceptual thesis proposal or a simpler comparator.
+>
+> The supervisor requested a justified decision-oriented policy that accounts for context, staged narrowing, and possible reintroduction of omitted capabilities.
+>
+> Examine C-B and the available alternatives against that requirement and the independent evidence.
+>
+> Produce one concrete **provisional supervisor-facing decision graph**, specifying its questions, information, actors, actions, transitions, and recovery assumptions.
+>
+> A stage may be skipped where there is no defensible reason for using it. Do not invent stages, thresholds, empirical benefits, or novelty merely to resemble the supervisor's example.
+>
+> Do not automatically adopt C-B. If the evidence does not justify selecting a specific mechanism, preserve the uncertainty and explain a testable conditional decision.
+>
+> Maintain the distinction between a conceptual hypothesis and an empirically supported policy.
+>
+> ## Objective
+>
+> Use as the working operational objective: minimize cumulative model-visible input tokens over complete trajectories while preserving end-to-end task success. Include all decision/discovery overhead.
+>
+> Record tool count, token categories, billed cost and cache behavior separately. Do not claim that the objective formulation is an exact supervisor quotation or that the noninferiority margin has been decided.
+>
+> ## Outputs
+>
+> Produce only:
+>
+> - A corrected scientific errata record for AUTH-005.
+> - A defensible supervisor-facing conceptual policy graph and explanation.
+> - A short comparison against C-A, expose-all and vendor deferral.
+> - The strongest remaining objections and the experiments needed to resolve them.
+> - A concise presentation outline suitable for October 21.
+>
+> Preserve earlier packages. Use existing sources and targeted agent criticism only when necessary. No broad literature search, implementation, experiments or Stage 5 reconciliation.
+>
+> Check internal consistency, record a local checkpoint, and stop for human review.
+>
+> Do not claim the policy is validated or final.
+
+Lead's note on AUTH-006 (interpretation): the message does not change `config/limits.json`. The "working operational objective" is the human's instruction for this task, not a supervisor quotation.
 
 Note on the register rows: `tools/verify_workspace.py` excludes only AUTH-001 and AUTH-002 from citation as a design approval. The restriction on AUTH-003 (it covers no design approval) is therefore carried by its limits column and this note, not by the check. See the intake report for the recommendation.
 
