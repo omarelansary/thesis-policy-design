@@ -15,7 +15,7 @@ flowchart TD
   subgraph DESIGN["Design time: once per catalogue, model and provider; operator, on dev data disjoint from evaluation"]
     D1{"D1 Fit?\nDoes the full catalogue plus working context fit the model window?"}
     D2{"D2 Core eligible?\nDo need statistics exist that are not the evaluation set?"}
-    D3["D3 Build arms\nsearch-only / one-level selection + search / two-level selection + search\n| search + system trigger / expose-all if D1 yes / static no-removal sweep\neach with the core of D2 if eligible"]
+    D3["D3 Build arms\nsearch-only / one-level selection + search / two-level selection + search\n/ search + system trigger / expose-all if D1 yes / static no-removal sweep\neach with the core of D2 if eligible"]
     D4{"D4 Choose by pre-registered rule\nfeasible = end-to-end success not below reference minus delta\nchoose lowest cumulative model-visible tokens among feasible\nties: fewer components; confirm on held-out"}
     OUT0["Outcome: expose-all\n(no restriction justified)"]
     OUT1["Outcome: configuration for run time"]
