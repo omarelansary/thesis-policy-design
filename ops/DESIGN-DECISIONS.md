@@ -86,3 +86,11 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Message budget: planned so that a mandatory escalation slot stayed free (9 of 12 used; escalation not needed). Bundling per proposal remained a deviation from PROTOCOL's one-issue-per-message rule (TASK.md), cap unchanged.
 - Mechanical lead edits to agent-owned files: the `target` front matter of reviews/RV-0003.md (twice, the challenger overwrote the first fix). Suggestion for a tool change (not authorized): make `verify_workspace.py` accept prose targets or have the challenger template use id lists.
 - Safe-checkpoint practice used on the user's request: commit after every file and keep `ops/threads/<thread>/RESUME.md` current. Worth keeping for long tasks.
+
+## WD-019 Process and scientific decisions of AUTH-006 (thread T-20261016-95)
+- Scope kept: lead-written package-v3 (01 errata, 02 graph G, 03 comparison, 04 objections/experiments, 05 outline); one challenger, two rounds, 2 of 12 messages; no proposer or steward (no new evidence needed); earlier packages untouched.
+- Decision: C-A demoted to a component and comparator because its core rule needs need statistics a large catalogue lacks; the same reasons apply to G's D2, so this is an applicability decision, not a ranking. C-B not adopted; its parts are conditional arms.
+- Decision: G is presented as two layers (run-time policy R1-R6 plus a deployment selection protocol D1-D4), not as one policy. Retained disagreement with the challenger: D-nodes stay in the figure.
+- Challenger caught a decisive omission in the lead's own correction (the extra model call per discovery); fixed in 01 and hand-checked. Challenger maintained one should-fix (D4 specification); lead completed it after round 2 (arm table, test-split failure, power and minimum stratum, substitute reference rule); the challenger has not re-checked those final edits.
+- No empirical benefit, threshold, margin or novelty is claimed. Open human decisions are listed in 04 section 5.
+- Mechanical: ACTIVE.json deleted at close; challenger records left as written.
