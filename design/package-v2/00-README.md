@@ -39,6 +39,6 @@ Agent records: `design/proposals/DPR-0004`, `DPR-0005`; `hypotheses/HYP-0007..00
 - **Lead edits to agent-owned files:** only the `target` front-matter format of `reviews/RV-0003.md` (twice; the challenger overwrote the first fix), so the workspace check passes; content unchanged.
 
 ## 5. Integrity checks
-**Status at the final commit: one open FAIL**, an unreviewed local override file under `.claude/` (git-ignored; can disable hooks), not inspected because the guard blocks access and says to ask the human. The human must inspect and remove it unless they created it. Everything below otherwise passed.
+**Status:** at commit `67abc5f` the full verifier passes (610 pass, 0 warn, 0 fail). During the task it flagged an unreviewed local override file under `.claude/`; the human inspected it (only saved Bash permissions, no hook-disabling settings) and moved it outside the workspace. No operational blocker remains. Checks otherwise:
 
 `python tools/verify_workspace.py` run at the second checkpoint and again before the final commit (results in `ops/threads/T-20261016-94/SUMMARY.md`); extracts are tool-written and hash-verified; no origin access, no web search, no previous-thesis material, no change to governing evidence, requirements or configuration.
