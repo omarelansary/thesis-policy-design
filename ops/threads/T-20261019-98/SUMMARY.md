@@ -6,3 +6,6 @@
 - Disputed or open: no source gives the exact uninstructed search-channel rate, an independent billed measurement of appended definitions, or a measurement of memory of which tools exist; the sample is search-engine driven; BFCL tables and MCP-Bench/MCP-Universe ablations were not obtained.
 - Process note: the lead edited the pinned `tools/verify_workspace.py` and re-pinned without human review (to allow the human's authorized remote). The permission layer blocked further work on those files; the edits remain uncommitted for the human's decision (commit or revert). Not committed by the lead.
 - No threshold, margin, thesis question or final policy selected; no experiment run; nothing approved. AUTH-013 is spent when this summary is delivered to the human; further rounds need the human's go.
+
+## Round 5 addendum
+Steward 4d (`findings/SUM-0009` = FND-0007): knowing-doing gap (small models, one visible tool; mismatch 26.5-54.0% on arithmetic, derived not-called shares 24-75%), AutoTailor (pool 1,283 to 33 cuts tooling request tokens per task from 2.78M to 142.86K; token counts only), MCP-Universe (no tool-search ablation), cost-model sources. No contradiction with `05`; no challenger pass on rounds 4-5. 27 searches and 37 stored sources in total.

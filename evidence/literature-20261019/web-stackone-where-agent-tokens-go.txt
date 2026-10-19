@@ -1,0 +1,320 @@
+ Where your agent's tokens actually go | StackOne          
+Skip to main content
+
+   Announcing Tool Gateway MCP: the universal MCP Read the announcement    
+
+ Connectors 
+
+Platform
+
+    Connect   
+
+ Pre-Built Connectors    
+560+ Connectors and 35,000+ Actions    
+
+ AI Connector Builder    
+Build/Extend your connector via code in minutes    
+
+ Managed Authentication    
+OAuth, API keys, and token refresh – all handled    
+
+ Tool Gateway MCP    
+One universal MCP for every AI assistant you run    
+
+ Agent Webhooks    
+Trigger agentic workflows from app events     
+
+Connect to everything your agents need, without writing the infrastructure to get there.   
+
+    Secure   
+
+ Prompt Injection Guard    
+Block prompt injections before they reach your agent    
+
+ PII Redaction    
+Remove personal data from tool calls and logs   
+
+ Governance    
+Govern how teams use AI agents         
+
+ Tool Policies   New   
+Field-level control over reads and writes    
+
+ Connector Access    
+Scope actions and share account access    
+
+ Identity    
+SSO and directory sync for team access    
+
+ Observability & Audit    
+Action logs, changes and sign-in activity    
+
+ Deployment    
+Regional cloud, dedicated or self-hosted       
+
+Enterprise-grade controls to ensure your agent always meets security & compliance standards.   
+
+    Optimize   
+
+ Tool Discovery    
+Find the right action, skip the schema bloat    
+
+ Deep Query    
+Filter and aggregate synced data for faster answers    
+
+ Falcon Execution Engine    
+Actions your agents get right the first time     
+
+Maximise agent efficiency – faster responses, increased accuracy, fewer tokens used.        
+
+Solutions
+
+ HRIS/HCM (6)  
+
+ Employee Onboarding     
+
+ Employee Offboarding      
+
+ Recruiting (7)  
+
+ Application Screening     
+
+ Interview Scheduling       
+
+ Customer Support (8)  
+
+ Ticket Triage     
+
+ Voice Call Summarization      
+
+ Sales & CRM (7)  
+
+ Deal Risk Scoring     
+
+ Lead Qualification       
+
+ Accounting & Finance (13)  
+
+ Invoice Processing     
+
+ Month-End Accruals      
+
+ Marketing (4)  
+
+ Campaign Reports     
+
+ Lead Nurture Sequences           
+      Explore More Use-Cases  
+
+Resources
+
+ Learn  
+
+ Blog   
+Insights on agentic infrastructure   
+
+ Case Studies   
+Customer stories & results   
+
+ Events   
+Talks, meetups, livestreams & launches   
+
+ Partners   
+Partner with StackOne    
+
+ Developers  
+
+ Documentation   
+Guides, SDKs & API reference   
+
+ Changelog   
+What’s new in agentic infrastructure   
+
+ Status   
+System uptime & incidents    
+
+ Company  
+
+ About   
+Our mission and team   
+
+ Careers   
+Build the future with us   
+
+ Press   
+News, mentions & media   
+
+ Security & Privacy   
+Compliance, certifications & trust        
+      Next up: Meet us at Workday Rising EMEA 2026  
+         Pricing   
+ Login 
+  Book Demo    Start Free        
+
+ Connectors  
+Platform
+
+    Connect  
+Connect to everything your agents need, without writing the infrastructure to get there.  
+
+ Pre-Built Connectors      
+
+ AI Connector Builder      
+
+ Managed Authentication      
+
+ Tool Gateway MCP      
+
+ Agent Webhooks        
+
+    Secure  
+Enterprise-grade controls to ensure your agent always meets security & compliance standards.  
+
+ Prompt Injection Guard      
+
+ PII Redaction      
+
+ Governance          
+
+ Tool Policies  New      
+
+ Connector Access      
+
+ Identity      
+
+ Observability & Audit      
+
+ Deployment         
+
+    Optimize  
+Maximise agent efficiency – faster responses, increased accuracy, fewer tokens used.  
+
+ Tool Discovery      
+
+ Deep Query      
+
+ Falcon Execution Engine           
+  Use-Cases  
+Resources
+
+ Learn  
+
+ Blog    
+ Case Studies    
+ Events    
+ Partners     
+
+ Developers  
+
+ Documentation    
+ Changelog    
+ Status     
+
+ Company  
+
+ About    
+ Careers    
+ Press    
+ Security & Privacy        
+  Pricing  
+  Book Demo    Start Free          
+
+  Guillaume Lebedel ·  September 25, 2026   · 6 min read   
+
+ Where your agent's tokens actually go    
+
+Table of Contents
+
+Token usage is the part of an agent’s bill your team can optimize directly. Tool definitions, accumulated history, returned documents and repeated attempts all affect what the model processes. The right intervention depends on which of those contributes most to your workload.
+
+Start by measuring actual calls and completed tasks. A lower rate can help while the agent becomes less efficient, and a smaller prompt can save tokens while making task completion worse. You need both cost and outcomes to judge a change.
+
+How do you calculate the bill correctly?
+
+For each model call, multiply the tokens in each disjoint billing category by that category’s rate and add the charges. Include uncached input, cache reads, applicable cache-write tiers and output. Sum all calls and attempts, then divide by completed tasks.
+
+model spend = sum of all model-call charges
+cost per completed task = model spend / completed tasks
+
+Normalize provider usage fields before calculating. If total input already includes cached tokens, separate those categories rather than charging cached input twice. A task with no successful completion still contributes its spend to the numerator. With zero completions, report the ratio as undefined and expose the spend and failures.
+
+Four counters help explain the bill, but they are diagnostics, not factors to multiply:
+
+CounterWhat to inspectAccounting caveat
+Model calls or turnsHow long the agent keeps reasoningCount each actual model call once
+Tool callsUnnecessary actions and repeated readsMultiple tools may share one model turn
+Context per model callSchemas, history and tool resultsSeparate cached and uncached input; track output too
+RetriesWork repeated after a failureRetry calls may already be included in the turn count
+
+Attach these records to a stable task ID. Otherwise a retry can appear as an unrelated cheap request while the original task’s cost disappears from the report.
+
+What do the September model releases tell us?
+
+They show why rates and usage need separate measurements. Anthropic’s Opus 5.5 announcement reports a 40% running-cost saving at default settings. Uncached input and output rates fell 20%; cache-read rates fell 60%. Those figures do not establish that half the saving came from the price sheet or that token usage fell by a quarter.
+
+A model change can also increase usage while lowering the bill. Artificial Analysis measured GPT-6 Sol using 31k output tokens per Intelligence Index task versus 29k for GPT-5.6 Sol. Luna used 51k versus 41k. The associated benchmark costs per task fell about 47% and 61%, respectively.
+
+Artificial Analysis uses task count as the denominator, with benchmark weighting. Cost per completed task, as defined above, divides all spend by successful outcomes.
+
+Those are benchmark observations, not a forecast for your agent. The cost-per-task comparison separates the published rates, token counts and effort settings. For optimization work, your next step is to break down your own traces.
+
+Why do unused tool definitions occupy context?
+
+A definition included in the request is part of the model’s input, whether or not the tool is called. Supplying every available schema makes that input grow as the catalogue expands. Caching can reduce its price, but it does not make the definitions disappear from the context window.
+
+StackOne’s search and execute tools provide a search operation and an execute operation. The definitions for those two operations remain small as the catalogue grows across 560+ connectors. Search results and returned data still enter the conversation, so total context and total spend are not fixed.
+
+The catalogue and task are held constant in this schematic. Search results and tool data still add context.
+
+Load all enabled schemasSearch and execute
+Initial tool definitionsGrow with the enabled catalogueTwo discovery/execution operations
+Context added during the taskTool results and historySearch results, tool results and history
+Additional discovery stepNoneSearch before execution
+Main failure to measureWrong or ambiguous tool selectionMissing or irrelevant search results
+Useful comparisonSmall, stable tool setsBroad catalogues with task-specific needs
+
+This is a design comparison, not a claimed percentage saving. Measure the extra search step and any additional model call against the definitions it removes. A handful of clear tools may be cheaper to expose directly. For the selection-quality evidence, see the agent tool count ceiling.
+
+How can you preserve the prompt cache?
+
+Keep stable instructions and tool definitions early in the prompt, with changing task data later. Measure cache hits and misses before assuming that repeated context receives a discount.
+
+OpenAI’s GPT-6 caching guidance requires stable tool definitions, schemas and ordering. Change which tools are callable with allowed_tools, or use tool_choice set to none, instead of deleting definitions. To change reasoning effort while preserving reusable context, append a configuration_update and leave request-level effort unchanged.
+
+These mechanisms do not make arbitrary schema changes cache-safe. They also solve a different problem from trimming the tool surface: restricting availability can preserve a cached catalogue without reducing the definitions supplied. Compare smaller prompts and better cache reuse using actual billed usage.
+
+Which optimization should you try first?
+
+Choose the largest measured source of avoidable spend, then change one thing at a time on a fixed task set.
+
+Reduce unnecessary context. Measure schema tokens and tool-response sizes. Try a curated tool set, retrieval or bounded response fields. Check that removing information does not increase failed searches, extra turns or incorrect answers.
+
+Test effort by task class. Run candidate settings against the same quality requirements. Record output tokens and latency as well as success. A setting that saves tokens on one class can be unsuitable for another.
+
+Bound repeated work. Track retries under the original task ID and set an explicit attempt budget. Distinguish transient tool failures from an agent repeating an approach that already failed. Inspect abandoned tasks as well as eventual successes.
+
+Keep the dashboard failure-inclusive. Lead with total model spend across all attempts divided by completed tasks. Show success rate, abstentions, human fallback count and human time alongside it. Median and p95 spend among successful tasks help explain the distribution, but exclude failures and must be labeled as such.
+
+If total spend rises while prices fall, check workload volume and complexity before assigning a cause. Then compare per-task usage and outcomes for the same task mix. The evaluation runbook shows how to keep cheap failed attempts from disappearing in that comparison.
+
+Model figures and caching guidance checked against the linked sources on 25 September 2026.   
+
+Frequently Asked Questions    What drives the cost of an agentic workload?    
+An agent's model bill is the sum of actual calls, with each billable token category charged at its own rate. Divide all attempt costs, including failures, by completed tasks. Turns, tool calls, context size and retries explain usage, but multiplying those counters together can double-count calls and omit output tokens.   How much of Opus 5.5's cost reduction comes from fewer tokens?    
+The headline figures do not isolate that contribution. Anthropic reports a 40% running-cost reduction at default settings, but its rate changes differ: uncached input and output fell 20%, and cache reads fell 60%. You need usage by category and the relevant effort setting to separate price changes from token changes.   Can a cheaper model make my agent more expensive?    
+Yes. Extra token usage, retries or failures can outweigh lower rates. Artificial Analysis measured Sol's benchmark cost per task falling from $1.99 to $1.06, about 47%, while Luna fell from $0.18 to $0.07, about 61%. Both improved on that benchmark; neither result guarantees a saving on your own tasks.   Do unused tool definitions still cost tokens?    
+Definitions supplied in a model request occupy input context even if the model never calls those tools. Eligible cached tokens may receive a lower rate. Smaller schemas, a curated tool set or search-based discovery can reduce that context, but include retrieval results and any additional model calls when measuring the saving.   Should reasoning effort be set per task class?    
+Compare effort settings against each task class's quality and latency requirements. Classification and complex code changes may need different configurations, but lower effort is useful only when the outputs still pass. Record the selected setting in production traces and rerun the evaluation when the model, prompt or task distribution changes.     
+
+Share 
+
+On this page
+
+Share 
+
+ Put your AI agents to work  
+ All the tools you need to build and scale AI agent integrations, with best-in-class connectivity, execution, and security.   
+  Start Free   
+Book Demo
+
+                 

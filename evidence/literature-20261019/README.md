@@ -13,3 +13,6 @@ Ten more searches (18 in total) and sixteen more stored fetches (28 files includ
 
 ## Round 4 (AUTH-013; the challenger's list of missing vocabularies)
 Five more searches (23 in total): BFCL/Hammer/ToolACE/xLAM relevance detection (returned documentation only, no per-model tables), MCP-Universe/MCP-Bench/MCPToolBench++ ablations (returned abstracts; no tool-search ablation surfaced), cost-aware tool use, workflow memory and skill libraries, tool abstention. Four more sources stored: `arxiv-2604.00073` (Terminal Agents Suffice for Enterprise Automation), `arxiv-2607.10059` (AgentAbstain), `arxiv-2511.02734` (CostBench), `arxiv-2602.11541` (INTENT). Not stored: MCPToolBench++ (2508.07575) and MCP-Bench (2508.20453) full papers, the Compute-aware ReAct study, the evalscope/Hugging Face BFCL documentation pages, vendor memory blogs.
+
+## Round 5 (AUTH-013)
+Four more searches (27 in total): BFCL paper (returned later papers using BFCL, not the paper), MCP-Universe, proactive tool request, cost breakdown with cache fields. Five more sources stored: `arxiv-2605.14038` (knowing-doing gap), `arxiv-2609.13548` (AutoTailor), `arxiv-2508.14704` (MCP-Universe), `web-artificialanalysis-coding-agents`, `web-stackone-where-agent-tokens-go`. Not stored: the BFCL paper itself, the Codex CLI blog on billed-run economics (secondary to a stored paper), vendor cost pages.
