@@ -1,0 +1,4 @@
+# Log: Reviewer 6b1 (design-challenger; T-20261019-104; written by the lead from the reviewer's final answer)
+- Wrote reviews/RV-0009.md (C-R01/V4RES, C-R01/RENDER). Same model family as the earlier challenger (C-E04); a text check, not a challenger round 2; no messages, no web. (Reviewer 6b, the first attempt covering all four items, hit its 40-turn limit without writing a file; its work was split into 6b1 and 6b2.)
+- R2-R5, R7-R9 and the E7 item APPLIED-VERIFIED; R1 APPLIED-PARTLY (budget-exhausted trigger re-fire). The 'all fixed' sentence in 03 section 5 is gone. Stale wording at 03 lines 19 and 40. Mermaid: no certain syntax defect found by reading; rendering stays unverified.
+- New defect: Figure 2 has no path to O for a Regime B run with no declared margin (S5B reaches S6 only if a margin or budget was declared); S5A to S6 unconditional. Lead second reader: Figure 2 lines 66-70 re-read; confirmed.

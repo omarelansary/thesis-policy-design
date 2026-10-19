@@ -1,0 +1,4 @@
+# Log: Reviewer 6b2 (design-challenger; T-20261019-104; written by the lead from the reviewer's final answer)
+- Wrote reviews/RV-0010.md (C-R03/C23, C-R03/ROUND45). Same model family as the earlier challenger (C-E04); no messages, no web; no code run.
+- RV-0002: the three residues and the F4 note are fixed in the current files; the FitText 4.2 gap persists in DPR-0001:158 and HYP-0006; not cleanly superseded (DPR-0001..0003 and HYP-0001..0006 still 'proposed'; content only in RV-0002 listed).
+- Rounds 4-5, 12 figures from 05 lines 61-78: 9 reproduce, 1 incomplete (AutoTailor in-sample), 1 unsafe (BFCL r = -0.45 with degenerate rows), 1 overstated ('first measured cost effect of persisted memory'). Lead second reader: MemToolAgent lines 793-798 re-read (token comparison for 50 NESTFUL queries); AutoTailor and BFCL items not re-checked by the lead.

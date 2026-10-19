@@ -1,0 +1,4 @@
+# Log: Reviewer 6a (design-challenger; T-20261019-104; written by the lead from the reviewer's final answer)
+- Wrote reviews/RV-0008.md (ledger N-17). Fresh reviewer, same model family as the earlier challenger (C-E04). No messages, no web, no CH edits.
+- 24 records with status 'open' re-read against the current v3/v4 text: 13 APPLIED-VERIFIED (front matter stale), 10 APPLIED-PARTLY, 1 SUPERSEDED (CH-0038), none wholly unapplied. Eight objections answered nowhere (CH-0040 f; 0041 iii-a, iv; 0062 item 5; 0066 item 6; 0068 item 3; 0070; 0072 item 3; 0074 items 2, 4).
+- Findings: v3 files say CH-0040 (a)-(f) fixed while v4 02 line 92 and 03 line 40 say (a)(b) open; unhedged 'real gap' in 05 lines 1 and 48; three different search counts. Lead second reader: 02:92, 03:40, 05:1, 05:40, 05:48 and the count lines re-read.
