@@ -85,7 +85,7 @@ try:
     for needle in ["RemoteTrigger", "PushNotification", "CronCreate", "ScheduleWakeup", "mcp__claude_ai_Gmail", "mcp__claude_ai_Google_Calendar", "Bash(*settings.local*)", "Edit(.claude/settings.local.json)"]:
         need(needle in deny, f"deny rule present: {needle}", f"deny rule missing: {needle}")
     expected_allow = {"Bash(python tools/origin_extract.py *)", "Bash(python tools/verify_workspace.py*)", "Bash(git status*)",
-                      "Bash(git diff*)", "Bash(git log*)", "Bash(git show*)", "Bash(git add *)", "WebSearch", "WebFetch"}  # WebSearch/WebFetch moved from ask to allow by the human (AUTH-014)
+                      "Bash(git diff*)", "Bash(git log*)", "Bash(git show*)", "Bash(git add *)", "Bash(python tools/litfetch.py *)", "WebSearch", "WebFetch"}  # WebSearch/WebFetch moved from ask to allow (AUTH-014); litfetch.py is the pinned fetch helper (AUTH-015)
     got_allow = set(st.get("permissions", {}).get("allow", []))
     need(got_allow == expected_allow, "allow list is exactly the reviewed set", f"allow list differs from the reviewed set: extra={sorted(got_allow - expected_allow)} missing={sorted(expected_allow - got_allow)}")
     hooks = json.dumps(st.get("hooks", {}))
@@ -303,7 +303,7 @@ for l in rows:
     need(len(cells) >= 6 and cells[3] and cells[5], f"{cells[0]}: has date and verbatim human quote", f"{cells[0]}: missing date or human quote")
 
 # ---------- 7b. configuration pin ----------
-PIN_FILES = (["CLAUDE.md", ".claude/settings.json", ".gitignore", ".gitattributes", "tools/guard.py", "tools/origin_extract.py",
+PIN_FILES = (["CLAUDE.md", ".claude/settings.json", ".gitignore", ".gitattributes", "tools/guard.py", "tools/origin_extract.py", "tools/litfetch.py",
               "tools/verify_workspace.py", "config/ownership.json", "config/limits.json", "config/extractable_origin.json",
               "config/source_aliases.json", "config/intake_sources.json"]
              + sorted(str(q.relative_to(WS)).replace("\\", "/") for q in (WS / ".claude/agents").glob("*.md")))
