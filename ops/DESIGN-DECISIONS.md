@@ -173,3 +173,9 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Source types: forum posts and issue mirrors are user reports, not vendor documentation; the StackOne figures are a vendor's own evaluation (its page says 540 and 543 test cases).
 - Mechanical: the manifest entries say `"auth": "AUTH-013"` because the pinned helper hard-codes it; this batch ran under AUTH-016.
 - Retained limits: all readers share a model family (C-E04); stewards did not read every range (coverage in each finding).
+
+## WD-029 Ledger batch 5: remaining stored-text reads (AUTH-016, thread T-20261019-103, 2026-10-19)
+- Process (lead): repo evidence only, no web; four stewards read stored origin texts and workspace literature copies for named rows; the lead read the Anthropic programmatic-tool-calling token section (EXT-0183) and the digest lines for C-R03/DIGESTS, re-checked key quotes and updated the workbook in place.
+- Result: 1 row closed on evidence and archived (C-R03/DIGESTS); 8 rows sharpened to PARTLY ANSWERED. No row was closed on the 292k figure: its counting procedure is undocumented in the stored texts and several dmcp files remain unread, so it stays labelled second-hand.
+- Mechanical: sources not in the origin manifest (When2Call, ToolBeHonest, ToolSandbox, Memora, Reasoning Trap, Tool-Overuse and others) are workspace copies in evidence/literature-20261019/; origin_extract.py cannot create EXT ids for them, so findings cite file:line.
+- Retained limits: all readers share a model family (C-E04); stewards did not read every range (coverage in each finding).
