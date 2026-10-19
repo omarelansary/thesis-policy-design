@@ -1,0 +1,379 @@
+Code Execution with MCP: A New Approach to AI Agent Efficiency
+
+Agentic AI
+
+AI AgentsModel Context ProtocolAI FoundationsGenAI ApplicationsAI ModelsAI HardwareAI in Industries
+
+Cybersecurity
+
+Data SecurityVulnerability ManagementIdentity & Access ManagementNetwork SecurityThreat Detection and Response (TDR)Security Tools
+
+Data
+
+Web ProxiesWeb Data ScrapingData CollectionData ScienceSynthetic Data
+
+Enterprise Software
+
+E-CommerceWorkload AutomationProcess ImprovementIT AutomationRMMManaged File TransferObservabilityServicesPremium
+
+Back
+
+AI AgentsAI Agent PerformanceVideo Search BenchmarkAI Agents in MarketingOpen Source AI AgentsAgentic WebAgentic CRMLocal AI AgentSee All
+
+Model Context ProtocolBrowser MCPMCP GatewayCode Execution with MCP
+
+AI FoundationsAI Hallucination DetectionAI GuardrailsArtificial General Intelligence Singularity TimingAI Governance ToolsNo Code AIAI UsecasesAI Job LossSee All
+
+GenAI ApplicationsGenerative AIEnterprise Generative AIAI AvatarGenerative AI ApplicationsChatbot ApplicationsGenerative AI in RetailAudio Sentiment AnalysisSee All
+
+AI ModelsLLMOps ToolsAIM Enterprise BenchmarkLLM PricingAgentic ITVisual ReasoningFinance LLMTabular ModelsSee All
+
+AI HardwareGPU Rental IndexAI Chip MakersCloud GPU ProvidersCloud GPU PricingFree Cloud GPUGPU BenchmarkServerless GPUSee All
+
+AI in IndustriesSales AIHealthcare AI Use CasesAI in FashionManufacturing AI SolutionsRecommendation SystemLegal AI SoftwareSEO AISee All
+
+Data SecuritySaaS Backup SolutionsGoogle Workspace BackupDevice Control SoftwareBackup Benchmark ResultsDLP SoftwareDLP ReviewUSB Blocking SoftwareSee All
+
+Vulnerability ManagementPatch Management SoftwareVulnerability Scanning ToolsVulnerability Tools 2026
+
+Identity & Access ManagementEndpoint Security SoftwareActive Directory Management ToolsUEM Software GuideTanium AlternativesMFA SolutionsZTNA SolutionsMFA PricingSee All
+
+Network SecurityNetwork Security Audit ToolsNetwork Security Policy Management SolutionsFirewall Audit SoftwareFirewall ComplianceFirewall Management ToolsMicrosegmentation ToolsOpen Source Firewall ManagementSee All
+
+Threat Detection and Response (TDR)XDR SolutionsSIEM ToolsOpen Source SIEMSOAR Use CasesOpen Source SOARSee All
+
+Security ToolsNetwork Segmentation ToolsEPM SoftwarePAM SolutionsPrivacy Enhancing TechnologiesPassword Manager CompareEPM SoftwareIAST ToolsSee All
+
+Web ProxiesResidential Proxy ProvidersProxy ProvidersSOCKS5 ProxiesAmazon ProxiesProxy PricingRotating ProxyGeonode ProxiesSee All
+
+Web Data ScrapingReal Estate ScraperJob ScraperSERP Scraper APIVideo ScraperAmazon ScraperGlassdoor ScraperGoogle Maps ScraperSee All
+
+Data CollectionManaged Data ServicesData as a Service CompaniesAppen AlternativesAmazon Mechanical Turk AlternativesData Collection MethodsData Collection ServicesData Collection AutomationSee All
+
+Data ScienceDatasets for MLMLOps ToolsReproducible AIFederated LearningData Quality AIGraph DatabasesSee All
+
+Synthetic DataSynthetic Document GeneratorSynthetic Data Use CasesSynthetic Users
+
+E-CommercePrice Monitoring ToolsEcommerce TechnologyCheckout Free Stores
+
+Workload AutomationSAP Job Scheduling SoftwareData Center Automation ToolsSAP Workload AutomationEnterprise Job Scheduler SoftwareCloud Workload AutomationControl-M AlternativesSAP Scheduler AlternativeSee All
+
+Process ImprovementSAP BTP AutomationSAP Process OrchestrationProcess KPIsProcess Mining Use Cases
+
+IT AutomationIT Automation SoftwareMSP AutomationDevOps Automation ToolsIT Process Automation Tool
+
+RMMRemote Control SoftwareRMM PricingRMM SoftwareNinjaOne ReviewMobile Device Management PricingMobile Device Management SoftwareOpen Source RMM SoftwareSee All
+
+Managed File TransferHIPAA Compliant File SharingGoAnywhere AlternativesManaged File Transfer SolutionsMOVEit AlternativesSFTP Server SoftwareAxway MFTGlobalscape AlternativesSee All
+
+ObservabilityNetwork Monitoring SoftwareNetwork Monitoring Tools In WindowsMongoDB MonitoringNetwork Monitoring Use CasesOpen Source Database Monitoring ToolsObservability SoftwareAI Network MonitoringSee All
+
+No results found.
+
+Agentic AIModel Context Protocol...Model Context Protocol
+Benchmark
+Cite This Benchmark
+Code Execution with MCP: A New Approach to AI Agent Efficiency
+
+Şevval Alper
+updated on Sep 9, 2026
+
+See our ethical norms
+Cite This Benchmark
+
+Anthropic introduced a method in which AI agents interact with Model Context Protocol (MCP) servers by writing executable code rather than making direct calls to tools. The agent treats tools as files on a computer, finds what it needs, and uses them directly with code, so intermediate data doesn’t have to pass through the model’s memory. We tested this approach to see if it reduces the token cost while maintaining the same success rate.
+Code execution with MCP vs regular MCP
+
+Metric
+Regular MCP
+MCP with Code Execution
+Difference
+
+Success Rate
+
+100%
+
+100%
+
+Same
+
+Avg Latency
+
+9.66s
+
+10.37s
+
++7%
+
+Avg Input Tokens
+
+15,417
+
+3,310
+
+-78.5%
+
+Avg Output Tokens
+
+87
+
+192
+
++120%
+
+Total Input Tokens
+
+770,852
+
+165,496
+
+-78.5%
+
+Total Output Tokens
+
+4,345
+
+9,585
+
++120%
+
+Total All Tokens
+
+775,197
+
+175,081
+
+-77.4%
+
+Download as CSV
+We compared two approaches for building AI agents that interact with external tools via the MCP:
+
+Regular MCP: Traditional approach where all tool definitions are loaded into the model’s context window
+
+Code execution MCP: Novel approach where the model writes code that calls tools, keeping intermediate data out of context
+
+Tools used
+This benchmark was conducted using Bright Data’s MCP Server with Pro Mode, as it had the highest accuracy in our browser MCP benchmark.
+Key findings
+Input token savings: Code execution uses 78.5% fewer input tokens (165K vs 771K):
+
+Regular loads ~15,400 tokens of tool definitions per call
+
+Code execution only needs ~3,300 tokens per call
+
+Higher output tokens: Code execution approach uses 2.2× more output tokens because the model writes code + explanations
+Net token savings: 77.4% total token reduction (175K vs 775K)
+Cost implication:
+
+Input tokens are typically cheaper than output tokens
+
+But 78% input savings far outweighs 2× output increase
+
+Estimated ~70% cost reduction with code execution
+
+Both achieved 100% success rate on these queries with GPT-4.1.
+The code execution approach is inspired by Anthropic’s post on using code execution with MCP to reduce context window usage while maintaining agent capability.1
+
+Methodology of code execution with MCP comparison
+Tasks
+We run each task 50 times for each approach:
+
+Go to https://aimultiple.com/open-source-embedding-models, tell me the perfect top-5 performers (i.e., the models with 100% top-5 accuracy)
+
+Go to https://aimultiple.com/open-source-embedding-models, tell me which model has the highest latency.
+
+Comparison setup
+For both approaches, we used Bright Data’s MCP Server with Pro Mode and GPT-4.1 as the LLM due to its large context window.
+Environment Setup: We cleared any cached data and ensured a fresh MCP server connection per run. Each query is executed as a separate subprocess.
+Architecture comparison
+Regular MCP architecture
+In the regular MCP approach, the agent follows a straightforward flow: the user query enters a LangGraph ReAct Agent, which has access to all 63 tool definitions in its context window. The agent selects and calls tools through the MCP Client Session, and tool results flow back through the context window to inform the agent’s next action.
+Code execution MCP architecture
+The code execution approach adds an intermediate layer: the user query goes to a Code Execution Agent with a compact context (only tool names, not full schemas). The agent writes Python code that calls tools. This code runs in a sandboxed Code Executor environment, which communicates with the MCP Client Session. Only the final results or summaries return to the agent’s context, not raw intermediate data. 
+The code execution implementation uses progressive disclosure. Only tool names and truncated descriptions (60 characters) are included in the system prompt. When the model needs to use a tool, it writes Python code that calls an async call_tool() function provided in the execution environment.
+Limitations of our approach
+
+Query diversity: Only 2 query types tested; results may vary for other task types.
+
+Single model: Only tested with GPT-4.1; other models may show different patterns
+
+Code quality: Code execution success depends on the model’s code generation ability, this may cause decreases in success rates in more complicated tasks.
+
+Get our team to automate one of your business processes with AI agents, free of charge.Automate a process
+Why traditional MCP wastes resources
+Problem 1: Tool definitions consume excessive context
+Each tool needs instructions in the model’s memory. A basic example:
+gdrive.getDocument
+Gets a file from Google Drive
+Needs: document ID
+Returns: the file content
+Example: An agent connected to 50 servers with 20 tools each means 1,000 tool definitions. At roughly 150 tokens per definition, that’s 150,000 tokens consumed before the agent reads your first request.
+Problem 2: Data gets processed multiple times
+Task: “Get my meeting notes from Google Drive and add them to Salesforce.”
+What happens:
+
+Agent gets the document (50,000 tokens)
+
+The model reads it
+
+Agent sends it to Salesforce (another 50,000 tokens)
+
+The model handles 100,000+ tokens to move data from one place to another.
+Traditional MCP implementations require the model to select tools from JSONSchema definitions loaded into the context window, which degrades accuracy as tool count increases.1 Research has confirmed that task success rates decline sharply as the number of available tools grows due to context flooding from schema definitions.2 Exposing MCP tools as callable functions and allowing the model to write Python code that invokes tools directly leverages the model’s existing code generation capability rather than forcing selection from predefined schemas.
+When to use code execution with MCP?
+Code execution with MCP addresses two fundamental inefficiencies in traditional MCP implementations:
+
+Tool definitions no longer crowd the context window
+
+Intermediate data stops flowing through the model unnecessarily
+
+The approach works best when:
+
+You have many MCP tools connected
+
+Your workflows involve multi-step data processing
+
+Large documents or datasets move between tools
+
+Context window limits affect your agents
+
+The infrastructure requirements mean this isn’t automatically better for all use cases. Small-scale deployments with few tools might not justify the operational complexity.
+For organizations already running agents with extensive MCP tool catalogs, the potential for 98%+ token reduction and corresponding cost savings makes this approach worth investigating.
+
+Don’t miss our benchmarks and data-driven insights. The button opens Google; selecting AIMultiple confirms that you wish to see AIMultiple more often in Google search results.Add as preferred source
+Alternative frameworks and protocols
+Teams that want a code execution layer separate from their agent framework can use standalone sandbox services such as CoreWeave Sandboxes, which offers Python and TypeScript SDKs and lets you restrict each sandbox’s outbound access by IP address, port, and HTTPS hostname.3 In April 2026, OpenAI updated its Agents SDK to add native sandbox execution capabilities, providing isolated workspaces with restricted file and code access.4
+
+Cite this benchmark
+Pick the format that matches where you're publishing. Pasting the link version into your CMS preserves the backlink.
+
+Link with attribution
+HTML, for blog posts, LinkedIn articles & newsletters. Recommended.
+
+PreviewHTML
+Copy HTMLCopy
+Şevval Alper (2026) - "Code Execution with MCP: A New Approach to AI Agent Efficiency". Published online at AIMultiple.com. Retrieved September 9, 2026, from: https://aimultiple.com/code-execution-with-mcp [Online Resource]
+
+APA 7th edition
+For academic papers and analyst reports following APA 7th style.
+
+PreviewHTML
+Copy HTMLCopy
+Alper, Ş. (2026, September 9). Code Execution with MCP: A New Approach to AI Agent Efficiency. AIMultiple. https://aimultiple.com/code-execution-with-mcp
+
+BibTeX
+For LaTeX documents and academic reference managers.
+
+PreviewHTML
+Copy HTMLCopy
+
+@misc{alper2026,
+  author = {Alper, Şevval},
+  title  = {{Code Execution with MCP: A New Approach to AI Agent Efficiency}},
+  year   = {2026},
+  month  = sep,
+  howpublished    = {\url{https://aimultiple.com/code-execution-with-mcp}},
+  note   = {AIMultiple. Retrieved September 9, 2026}
+}
+
+Download all data
+Results and timestamps of 7 data points. Download the summary data shown in this article's charts and tables as a ZIP file containing one CSV file.
+
+Last updated: December 18, 2025Download
+Want the granular data behind it? Join Premium
+
+Changelog2 updates
+20262025
+
+Jan 22
+Removed the section "Comparison: UTCP vs MCP vs Code Execution MCP".
+
+Reference Links
+1.
+
+Code execution with MCP: building more efficient AI agents \ Anthropic
+Anthropic
+2.
+
+Semantic Tool Discovery for Large Language Models: A Vector-Based Approach to MCP Tool Selection
+
+3.
+
+CoreWeave Sandboxes | CoreWeave Forge
+
+4.
+
+OpenAI updates its Agents SDK to help enterprises build safer, more capable agents | TechCrunch
+TechCrunch
+
+Şevval Alper
+AI Researcher
+Follow On
+Şevval is an AI researcher at AIMultiple. She has previous research experience in pseudorandom number generation using chaotic systems.
+Şevval focuses on AI coding tools, AI agents, and quantum technologies.View Full Profile
+
+Be the first to comment
+Your email address will not be published. All fields are required. Comments are left in their original language.
+Name
+
+Email Address
+
+Comment
+
+0/450
+
+Post Comment
+
+Next to Read
+
+AI Agents
+BenchmarkOct 9
+AIM-Code Bench: Agentic Coding Benchmark
+
+Şevval Alper
+
+AI Agents
+Open World EvaluationSep 11
+Low/No-Code AI Agent Builders: n8n,make, Zapier
+
+Cem Dilmegani with 
+Ezgi Arslan, PhD.
+
+AI Coding
+BenchmarkSep 11
+Best Design to Code Tools Compared: Detailed Analysis
+
+Cem Dilmegani
+
+Model Context Protocol
+BenchmarkOct 15
+MCP Gateway Benchmark: Latency & Security of 6 Gateways
+
+Berk Kalelioğlu
+
+Model Context Protocol
+BenchmarkAug 21
+MCP Benchmark: Top MCP Servers for Web Access
+
+Cem Dilmegani with 
+Şevval Alper
+
+AI Coding
+BenchmarkOct 16
+AI Coding Benchmark: Claude Code vs Cursor
+
+Sedat Dogan with 
+Şevval Alper
+
+In This Article
+
+Code execution with MCP vs regular MCP
+Methodology of code execution with MCP comparison
+Why traditional MCP wastes resources
+When to use code execution with MCP?
+Alternative frameworks and protocols
+Cite this benchmark
+Changelog
+
+We follow ethical norms & our process for objectivity. Subscribers of AIMultiple's benchmarking services in Model Context Protocol include Bright Data.
+

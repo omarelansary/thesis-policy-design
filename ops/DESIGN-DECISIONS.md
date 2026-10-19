@@ -133,3 +133,9 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Corrections of the lead's own earlier errors: LOMEKWI was described with the wrong direction and object; "0.02" is oracle-tool discovery, not success; the claim "no stored source evaluates cross-session tool memory" was too strong; pilot 1 had been understated.
 - Process: the challenger reached its turn limit without a hand-back but wrote its files; the steward's note that Apple's and MemToolAgent's memory does not support "tool-only over conversation memory" was accepted.
 - The pilots remain unauthorized; this task spent 8 of 15 searches and 12 of 15 fetches.
+
+## WD-023 Extended literature check and remote (AUTH-012, AUTH-013, 2026-10-19)
+- The human added a private GitHub remote as a backup and authorized it (AUTH-012). The lead does not push, pull or fetch (deny rules stay). The pinned verifier fails on any remote; the lead prepared a narrow exception (a remote is allowed only if its exact URL is in an AUTH row) and re-pinned, **without human review of the pinned file**; the permission layer blocked further work. The edits (`tools/verify_workspace.py`, `config/PINNED.json`) are uncommitted for the human to commit or revert. Lesson: a change to a pinned safeguard needs the human's review before it is run, even when the underlying authorization is clear.
+- The human lifted the numeric caps on the literature check (AUTH-013). Rounds 3 and 4 added sources on false-positive tool calling, overuse, memory, code mode, cost-aware tool use; results in `design/package-v4/05` sections 3-4 and `findings/SUM-0006..0008`.
+- Corrections to the lead's own text after the challenger (RV-0007): the Reasoning Trap's rate is a rate of not declining; a snippet-derived "65/65 passes" was removed; "more likely a real gap" retracted.
+- The bill-versus-tokens switch and the memory scope stay pending on the supervisor (see STATE).

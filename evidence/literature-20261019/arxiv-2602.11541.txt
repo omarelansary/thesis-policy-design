@@ -1,0 +1,2658 @@
+
+=== [page 1] ===
+Budget-Constrained Agentic Large Language Models:
+Intention-Based Planning for Costly Tool Use
+Hanbing Liu 1 Chunhao Tian 1 Nan An 1 Ziyuan Wang 1 Pinyan Lu 2 Changyuan Yu 3 Qi Qi 1
+Abstract
+We study budget-constrained tool-augmented
+agents, where a large language model must solve
+multi-step tasks by invoking external tools un-
+der a strict monetary budget. We formalize this
+setting as sequential decision making in context
+space with priced and stochastic tool executions,
+making direct planning intractable due to massive
+state–action spaces, high variance of outcomes
+and prohibitive exploration cost.
+To address these challenges, we propose INTENT,
+an inference-time planning framework that lever-
+ages an intention-aware hierarchical world model
+to anticipate future tool usage, risk-calibrated
+cost, and guide decisions online. Across cost-
+augmented StableToolBench, INTENT strictly
+enforces hard budget feasibility while substan-
+tially improving task success over baselines, and
+remains robust under dynamic market shifts such
+as tool price changes and varying budgets.
+1. Introduction
+Large language models are rapidly evolving into agentic
+systems that can autonomously decompose complex tasks,
+interact with external tools, and execute multi-step plans.
+Recent systems demonstrate strong capabilities in deep re-
+search (OpenAI, 2025; Team et al., 2025), software engi-
+neering (Yang et al., 2024a), and web automation (Google,
+2026), where reasoning and tool use are tightly interleaved.
+Tools constitute the primary interface through which agents
+interact with the external world and incur real-world im-
+pact. With the emergence of standardized protocols such as
+MCP (Anthropic, 2025) and large-scale tool marketplaces
+(RapidAPI, 2014; Market, 2025; MCP.so, 2025), agents now
+have access to thousands of heterogeneous APIs. While this
+dramatically expands the action space, it also introduces
+1Gaoling School of Artificial Intelligence, Renmin University
+of China 2Shanghai University of Finance and Economics 3Baidu
+Inc.. Correspondence to: Qi Qi <qi.qi@ruc.edu.cn>.
+Preprint. February 13, 2026.
+GPT 4.1 mini
+GPT 5 nano
+0
+25
+50
+75
+100
+Achievable Upper Bound
+Pass Rate (%)
+GPT 4.1 mini
+GPT 5 nano
+Feasible Rate (%)
+Raw
+Prompt
+INTENT
+Figure 1. Budget awareness of agentic language models on tool
+cost-augmented StableToolBench. Standalone agents frequently
+violate hard budget constraints, and prompt-based cost feedback
+remains insufficient to guarantee budget feasibility or approach
+the achievable performance upper bound. Our lightweight online
+planning framework INTENT helps bridge this gap.
+a critical but underexplored dimension: ECONOMIC COST.
+Unlike token generation, whose marginal cost continues to
+decline drastically (Appenzeller, 2024; Cottier et al., 2025),
+many tools expose scarce and monetized resources, such
+as real-time financial market feeds, high-resolution satellite
+imagery or irrevocable blockchain state changes.
+As agentic systems mature, the central question is no longer
+whether they can solve complex tasks, but whether we can
+delegate economically consequential decisions to them. A
+fundamental question arises: Can we trust agentic models
+to make cost-sensitive tool-use decisions on our behalf?
+To probe this question, we instantiate a budgeted tool-use
+setting on top of the widely used StableToolBench (Qin
+et al., 2023; Guo et al., 2024), where each task comes with
+a hard budget constraint and diverse per-call tool prices. As
+shown in Figure 1, our findings reveal a significant gap: even
+when explicitly provided with budget feedback after each
+tool call (PROMPT), strong models frequently exceed the
+budget due to repetitive retries and unproductive exploration.
+More advanced reasoning models exhibit better compliance,
+but only by becoming overly conservative, leaving a large
+performance gap to the achievable upper bound.
+Such budgeted tool-use scenarios are not rare in practice.
+For instance, a financial analyst may rely on agentic work-
+flow to monitor hundreds of stocks on a daily basis, and, to
+control operational expenditure, impose a strict per-ticker
+1
+arXiv:2602.11541v1  [cs.AI]  12 Feb 2026
+
+=== [page 2] ===
+Budget-Constrained Agentic Large Language Models
+spending limit when gathering evidence about fundamentals
+and public sentiment. For each ticker, the agent then faces a
+spectrum of priced tool set: near-free but noisy web search
+may require repeated retries, official filings databases are
+moderately priced yet brittle to query formulations, and pre-
+mium data APIs are accurate but can consume most of the
+budget in one shot. In such cases, myopic choices like over-
+spending early on expensive tools or looping on unreliable
+cheap calls can render the remaining subtasks infeasible
+even when each individual step appears reasonable. Beyond
+finance, similar cost-capped tool-use patterns arise in many
+real-world pipelines (e.g., legal due diligence and cloud
+incidence diagnosis), and become particularly pronounced
+when agents are deployed at scale and invoked repeatedly.
+This setting exposes a non-trivial challenge. Agents must
+make sequential tool-use decisions under high stochasticity,
+where actions may incur real economic cost, tool outcomes
+are uncertain, and neither free interaction nor retraining is
+available at inference time. Moreover, the tool market itself
+is dynamic: available tools and their prices may change with
+time, and new tools may appear without prior experience.
+Motivated by these observations and examples, in this work,
+we study a concrete instantiation of cost-sensitive tool use
+that captures these challenges while remaining amenable to
+principled analysis. Each task consists of a user query and a
+task-specific tool market, where finite available tools have
+heterogeneous per-call prices. The agent must decide which
+tools to invoke, in what order, and when to terminate, so as
+to solve the task under a hard budget constraint.
+At first glance, this problem appears amenable to several
+natural solution strategies. One may attempt to cast it as an
+online knapsack (Buchbinder & Naor, 2009; Agrawal et al.,
+2009) or linear programming variant, allocating the budget
+across tools based on their shadow prices. However, such
+formulations assume independent, additive utilities and fail
+to capture the strong sequential dependencies between tool
+calls, where the value of an action is primarily determined
+by the information it enables for subsequent decisions.
+Alternatively, one might consider endowing agents with bud-
+get awareness through reinforcement learning in the post-
+training stage (Schulman et al., 2017; Shao et al., 2024).
+However, this paradigm is fundamentally misaligned with
+our setting. During training, an agent can only bind tool
+knowledge attained from historical interaction to static tex-
+tual descriptions, while real-time factors that substantially
+affect effective value of a tool, such as shifts in service
+quality, coverage, or response reliability, are inherently un-
+observable and only revealed at inference time. Tracking
+such dynamics would therefore require frequent retraining,
+which is already prohibitively expensive for large agentic
+models, let alone the additional monetary cost incurred by
+on-policy data collection through real tool invocations.
+Besides, classical online planning methods such as Monte
+Carlo Tree Search (Silver & Veness, 2010; Lee et al., 2018)
+offer a principled way to reason about long-horizon deci-
+sions under uncertainty. However, they typically rely on free
+environment interaction and extensive branching, resulting
+in prohibitive latency for agentic settings with extremely
+large action spaces and expensive tool calls.
+Taken together, these limitations point to a narrow but cru-
+cial design space: a solution must operate purely at inference
+time, reason about future costs under stochastic tool out-
+comes, and remain lightweight enough to guide a strong
+pretrained agent without exhaustive search.
+Thus, in this work, we propose INTENT, a lightweight
+inference-time planning framework for budget-aware tool
+use. INTENT leverages a learned language world model to
+simulate tool outcomes and performs calibrated Monte Carlo
+lookahead to estimate future costs. Crucially, INTENT in-
+troduces an intention-based decomposition that separates
+whether a tool call satisfies the agent’s semantic intention
+from the concrete content of the tool output, enabling accu-
+rate cost estimation in highly stochastic environments.
+Our contributions are summarized as follows:
+• We formalize budget-constrained tool use as a sequen-
+tial decision problem in agentic language models.
+• We propose INTENT, an intention-based planning al-
+gorithm that enables budget-aware decision making
+without retraining or environment interaction.
+• We demonstrate substantial performance improve-
+ments on StableToolBench across diverse budgets
+and market settings, approaching the empirical upper
+bound with mild overhead.
+2. Model
+In this section, We formalize budget-constrained agentic
+tool use as a sequential decision making over a growing
+textual history. Each task instance specifies a user query, a
+hard budget constraint, and a snapshot of a dynamic tool
+marketplace with per-call costs. The agent follows a inter-
+leaved thinking loop that alternates between reasoning, tool
+calls, and stochastic observations returned by external tools,
+until it terminates with a final answer. This abstraction cap-
+tures two core challenges of real-world agentic systems: an
+unbounded action space induced by free-form arguments,
+and stochastic transitions arising from tool execution.
+2.1. Contextual State
+We represent the agent’s interaction with the environment as
+sequential decision making over a growing textual context.
+2
+
+=== [page 3] ===
+Budget-Constrained Agentic Large Language Models
+Context Space. Let V denote the discrete vocabulary of
+tokens, and let V∗denote the set of all finite token se-
+quences. We define the concatenation of two sequences
+x1, x2 ∈V∗as [x1, x2], and extend this notation naturally
+to multiple sequences [x1, x2, . . . , xn]. The agent’s state is
+represented implicitly by its entire interaction history, which
+grows monotonically through concatenation.
+Serialization Convention. Throughout this paper, abstract
+objects that the agent interacts with, such as a tool specifi-
+cation T and execution feedback o, are assumed to admit a
+canonical textual serialization. For simplicity, we identify
+each object with its serialized token sequence, and use the
+same symbol to denote both, whenever no ambiguity arises.
+This convention allows us to embed heterogeneous concepts
+uniformly into the same context space.
+Language Model. The agent is powered by a large lan-
+guage model parameterized by θ. We view the LLM as a
+probabilistic policy operating over the context space. Given
+a context sequence h ∈V∗, the probability of generating a
+continuation x ∈V∗is denoted by Pθ(x | h).
+This formulation enables us to treat reasoning traces, tool
+calls, and final answers uniformly as token sequences gener-
+ated by a single policy over the contextual state.
+2.2. Dynamic Tool Marketplace
+We next formalize the environment in which the agent oper-
+ates, stressing the dynamic availability and pricing of tools.
+Market Snapshot. We assume a universe of all potential
+tools T . Upon the arrival of each user query q, the agent
+is presented with a market snapshot, denoted by M. This
+snapshot specifies the subset of tools that are accessible at
+that moment (determined by retrieval mechanisms, user per-
+missions, or provider status), together with their current per-
+call costs. Formally, M = {(T (j), c(j))}m
+j=1, where each
+T (j) ∈T encodes the tool’s specification (e.g., description,
+input schema, and usage examples), and c(j) ∈R≥0 denotes
+the financial cost incurred by a single invocation of the tool.
+Task Instance. A task instance is defined as a tuple I =
+(q, B, M), sampled from a task distribution D. Here, q
+denotes the user’s natural language query, B ∈R>0 is a
+hard budget constraint, and M specifies the tool market
+faced by the agent for this particular request.
+2.3. Budget-Constrained Agent
+Given a task instance I = (q, B, M), we model the agent’s
+problem-solving process as a ReAct-style (Yao et al., 2022)
+sequential decision-making procedure over a growing tex-
+tual history. The interaction unfolds over discrete time steps
+t = 1, 2, . . . , during which the agent alternates between
+internal reasoning, external tool use, and observation.
+History Initialization. Rather than maintaining an abstract
+state representation, we treat the agent’s state as its full
+interaction history. The initial history h0 consists of the
+system prompt, the user query, the budget constraint, and
+the market snapshot: h0 = [System, q, B, M].
+Reasoning and Action. At each step t, the agent first
+generates a reasoning trace rt to plan or reflect, conditioned
+on the current history, rt ∼πθ(· | ht). Based on both the
+history and the reasoning trace, the agent then selects a
+structured action at ∼πθ(· | [ht, rt]). The action space A
+consists of two types of operations:
+(i) TOOL CALL.
+at = (CALL, Tt, ut), where Tt ∈
+{T (j)}m
+j=1 is a tool available in the current market M
+and ut denotes its arguments. (ii) TERMINATION. at =
+(ANSWER, y), where y is the final response to the user.
+State Transition. If the agent chooses to terminate, the
+episode ends. If the agent chooses to call a tool, the tran-
+sition is governed by an external environment E, which
+acts as a chance node.
+The tool execution produces a
+stochastic observation ot ∼E(· | Tt, ut), and incurs a
+cost COST(at) = c(j), where Tt = T (j). The history is
+then deterministically updated by appending the interaction
+block: ht+1 = [ht, rt, at, ot].
+2.4. Task Formulation
+A trajectory τ is defined as the sequence of interaction
+components generated until termination at step K, τ =
+[h0, r1, a1, o1, . . . , aK], where aK is a ANSWER action.
+Reward. The agent’s objective is to produce a high-quality
+answer while strictly satisfying the budget constraint. Let
+J(aK, q) ∈[0, 1] denote an external evaluation metric (e.g.,
+a human evaluator or a judge model) that assesses whether
+the user query q has been successfully resolved. We define
+the reward function as
+R(τ) = J(aK, q) · I
+ K
+X
+t=1
+COST(at) ≤B
+!
+,
+where I(·) is an indicator function enforcing a hard budget
+constraint. Trajectories that exceed the budget receive zero
+reward regardless of answer quality.
+Optimization Objective. Our goal is to find a policy πθ that
+maximizes the expected reward over the task distribution:
+max
+π
+EI∼D
+
+Eτ∼π,E
+
+R(τ)
+
+.
+Directly optimizing this objective in post-training stage is
+impractical. The action space induced by free-form tool
+arguments is extremely large, making exploration and credit
+assignment prohibitively expensive. More importantly, the
+agent operates in a non-stationary tool market: available
+3
+
+=== [page 4] ===
+Budget-Constrained Agentic Large Language Models
+tools and their per-call costs vary across task instances, and
+new tools may appear without prior training data. As a
+result, a policy optimized offline cannot reliably adapt to
+the market configuration faced at inference time.
+These challenges motivate an online and lightweight
+inference-time planning approach. Instead of modifying
+the agent’s parameters, we leverage a learned world model
+to approximate environment transitions and dynamically
+guide tool selection under budget constraints.
+3. Methodology
+We now introduce an inference-time planning framework for
+budget-constrained tool use. Our design goal is to minimally
+intervene on a strong pretrained agent, while dynamically
+enforcing hard budget constraints under a non-stationary
+tool market. To this end, we perform lightweight looka-
+head simulations using a learned world model to anticipate
+future tool usage and guide decision making online. This
+section focuses on the conceptual design of the method. Fig-
+ure 2 outlines and contrasts candidate frameworks, while
+implementation details, including training and algorithmic
+pseudocode, are provided in the Appendix A.
+3.1. Language World Model
+First, we train a world model Wϕ, parameterized by ϕ, to
+predict the outcome of tool executions. While LLMs may
+not perfectly simulate the factual accuracy of external tools
+(e.g., a specific stock price), they excel at predicting the
+format and structure of outputs, which is sufficient to elicit
+the agent’s latent planning logic. Given tool call Tt ∈M,
+and arguments ut, the model predicts the observation:
+˜ot ∼Wϕ(· | [Tt, ut]).
+Importantly, we do not employ the language world model
+(LWM) for exhaustive tree search. Classical planning algo-
+rithms such as Monte Carlo Tree Search (Hao et al., 2023;
+Zhou et al., 2023) rely on repeated branching and state reuse,
+which are infeasible in our setting due to the unbounded
+action space induced by free-form tool call arguments, and
+the high inference latency of agents. Instead, we restrict the
+usage of world model to single-trajectory lookahead simu-
+lation, which is sufficient for enforcing budget constraints
+while remaining computationally lightweight.
+3.2. Monte Carlo Oracle
+Our direct feasible application of the LWM is the Monte
+Carlo Oracle (MCO). The core philosophy is minimal
+intervention: we assume the agent’s policy πθ is inherently
+capable of solving the task, and the planning algorithm’s
+role is strictly limited to enforcing budget constraints.
+Mechanism. When the agent proposes an immediate action
+at under current context [ht, rt] and remaining budget Bt,
+MCO performs a single Lookahead Rollout. Starting from
+the current state ht, we alternate between the world model
+Wϕ and the agent policy πθ to generate a simulated future
+trajectory ˜τ = (at, ˜ot, ˜rt+1, ˜at+1, ˜ot+1, . . . , ˜aK), where
+˜aK is a terminal ANSWER action. We then evaluate the
+total projected cost C(˜τ) = P
+˜a∈˜τ COST(˜a).
+Decision and Feedback. We rely on the Capability Assump-
+tion: if the agent decides to terminate at step K, we assume
+the gathered information is sufficient. The decision logic is
+purely budget-based: (i) Accept. If C(˜τ) ≤Bt, the action
+at is allowed to be executed in the real environment; (ii)
+Reject. If C(˜τ) > Bt, the oracle intercepts at and prevents
+its execution. Crucially, to guide the agent’s re-planning, we
+construct a feedback observation ˆot = [at, ˜at+1, . . . , ˜aK]
+containing the sequence of simulated actions that led to the
+budget violation. This feedback exposes the future failure
+to the agent, prompting it to generate a new reasoning trace
+r′
+t and a more informed action a′
+t via πθ(· | [ht, rt, at, ˆot]).
+Limitation. MCO relies on a single sample estimate. Due
+to the stochastic nature of tools (e.g., a search engine might
+return irrelevant results, triggering a costly retry loop), the
+variance of COST(˜τ) is high. A single lucky simulation
+may underestimate the true expected cost, leading to budget
+overruns in deployment.
+3.3. Intention-Based Oracle
+To mitigate the high variance of single-sample estimation
+in MCO, we propose INTENT, which is motivated by the
+observation that an agent’s decision to alter its high-level
+plan is driven less by the specific tool call outcome and more
+by whether it satisfies the intention encoded in reasoning rt.
+Probabilistic Decomposition. We introduce a binary latent
+variable zt ∈{0, 1}, where zt = 1 indicates satisfaction.
+Although the true tool response E(ot | Tt, ut) is independent
+of the agent’s internal reasoning rt, we introduce rt into our
+world model to capture the semantic alignment between the
+action and the expected outcome. By applying the law of
+total probability, we factorize the generation process as:
+PW(ot | rt, at) =
+X
+zt∈{0,1}
+P(ot | at, zt)
+|
+{z
+}
+Generation
+· P(zt | rt, at)
+|
+{z
+}
+Intention
+.
+Note that in the generation term, we omit rt based on the
+assumption that once the success status zt is determined, the
+specific content of ot depends primarily on the tool seman-
+tics. This factorization leads to two specialized modules:
+1. Intention Predictor. Estimates the probability ρt that
+observation ot produced by the proposed tool call
+(Tt, ut) will align with the agent’s intention revealed
+in the reasoning, ˜ρt = Wρ(zt = 1 | rt, Tt, ut).
+4
+
+=== [page 5] ===
+Budget-Constrained Agentic Large Language Models
+ℐ 
+   𝑟!
+𝑎!
+ℰ
+𝜊!
+Current
+History
+𝜊!"#
+𝑟"
+#
+𝑟"
+ℰ
+𝑎!
+(%)
+𝑜!
+(#)
+𝑎!
+(#)
+𝑜!
+(%)
+𝑜!
+(')
+𝑜!
+(()
+𝑜!
+())
+𝑎!"#
+(#)
+𝑎!"#
+(&)
+𝑎!"#
+(')
+𝑎!"#
+(()
+…
+…
+…
+…
+Task
+Massive Search Space
+(a) Monte Carlo Tree Search
+ℐ 
+   𝑟!
+𝑎!
+Task
+ℰ
+𝜊!
+𝜊!"#
+𝑎"
+𝑟"
+𝑜$"
+Reject
+𝑟"
+#
+𝑎"
+#
+𝑎"
+𝑟"
+ℰ
+𝑜!
+𝑜%"
+𝑤$
+𝑎$!$# 
+𝑎%$ (Answer)
+∑Cost 𝑎' ≤𝐵!
+Single
+Stochastic
+Rollout
+O
+P
+Accept
+Proposed
+Predicted
+Action
+Sequence
+[𝑎'!]
+Current
+History
+(b) Monte Carlo Oracle (MCO)
+ℐ 
+   𝑟!
+𝑎!
+Task
+ℰ
+𝜊!
+𝜊!"#
+𝑎"
+𝑟"
+𝑜$"
+Reject
+𝑟"
+#
+𝑎"
+#
+𝑎"
+𝑟"
+Proposed
+ℰ
+𝑜!
+Accept
+𝑜%"
+𝑤$
+𝑎$!$# 
+𝑎%$ (Answer)
+𝑐̂% = Cost/𝜌$%
+𝛾∑𝑐̂% ≤𝐵!
+Stable
+Ideal
+Trajectory
+O
+P
+Risk
+Info
+𝑤%
+Current
+History
+[𝑎(!, 𝜌(!]
+(c) Intention-based Oracle (INTENT)
+Figure 2. Inference-time planning paradigms for budget-aware agentic tool use. (a) MCTS explores a large stochastic search tree with
+prohibitive cost. (b) MCO enforces budgets via a single stochastic rollout using a language world model. (c) INTENT extracts the agent’s
+latent plan through ideal trajectory simulation and applies intention-aware, risk-adjusted cost estimation for stable budget control.
+2. Conditional Generator. Generates ot conditioned on
+the satisfaction status, ˜ot ∼Wψ(· | [Tt, ut], zt).
+Ideal Trajectory Simulation. During inference, instead
+of conducting stochastic sampling which risks traversing
+costly failure loops, we perform a deterministic simulation
+of the ideal trajectory. Starting from the current step t, we
+construct a trajectory ˜τ ∗by explicitly forcing the condi-
+tional generator to satisfy the intention (zk = 1) at every
+subsequent step k ≥t, ˜ok ∼Wψ(· | [Tk, uk], zk = 1).
+This yields a clean trajectory where every tool call works as
+intended and proceeds towards the solution without devia-
+tion, eliciting the latent plan that the agent currently holds.
+Geometric Cost Calibration. With the latent plan ˜τ ∗ex-
+tracted, we proceed to estimate its expected budget consump-
+tion via a pessimistic estimation strategy. We observe that
+an agent adhering to a specific plan will persistently retry or
+refine arguments until the intention is met (zt = 1), as doc-
+umented by Xue et al. (2025) and Jin et al. (2026). By mod-
+eling the number of trials as a geometric distribution with
+a constant initial success probability ˜ρk (ignoring potential
+information gain during retries), we derive an upper bound
+for the expected cost of each step ˜ck = COST(ak)/˜ρk.
+Finally, to compare this probabilistic estimatation against
+the hard budget, we introduce a risk preference parameter
+γ. The Oracle accepts the proposed action at if it is imme-
+diately affordable (COST(at) ≤Bt) and the risk-adjusted
+total cost remains within limits, i.e, γ P
+˜ak∈˜τ ∗˜ck ≤Bt.
+Here, γ serves as a discount factor on our pessimistic esti-
+mate, allowing the system to balance between strict safety
+(γ ≥1) and aggressive goal-seeking (γ < 1).
+If rejected, the feedback mechanism follows the MCO pro-
+tocol but augments the returned trajectory with predicted
+success probabilities ˆot = [at, ˜ρt, . . . , ˜aK], which helps the
+agent identify high-risk bottlenecks for targeted re-planning.
+Simulation Reuse. To reduce overhead, we cache the future
+actions [˜at+1, ˜at+2, . . . , ˜aK] in ideal trajectory ˜τ ∗upon ac-
+ceptance. At the subsequent step, if the agent’s proposed ac-
+tion at+1 aligns with the cached anticipation (at+1 ≈˜at+1),
+we imply plan continuity. Since the remaining trajectory has
+already satisfied the risk-adjusted budget constraint, we by-
+pass the simulation and grant immediate approval. We also
+provides other additional mechanisms to boost empirical
+time efficiency, see discussion in Appendix A.2.
+4. Experiments
+In this section, we empirically evaluate INTENT in budget-
+constrained and dynamic tool-market settings. Our experi-
+ments are designed to answer three important questions: (i)
+Can agentic models reliably satisfy hard budget constraints
+while solving tasks? (ii) How effective is INTENT com-
+pared to alternative inference-time strategies? (iii) How
+robust is INTENT to market perturbations such as price
+changes, new tools, and varying budgets? All experimental
+implementation details are provided in the Appendix B.
+4.1. Experimental Setup
+Dataset. We conduct our experiments on StableToolBench
+(Guo et al., 2024; 2025), a stable large-scale benchmark for
+5
+
+=== [page 6] ===
+Budget-Constrained Agentic Large Language Models
+tool learning that evolves from the widely used ToolBench
+(Qin et al., 2023). ToolBench provides multi-step tool-use
+tasks where an agent is required to iteratively generate tool
+calls and incorporate tool observations to complete a given
+instruction, and covers over 16k real-world tools collected
+from RapidAPI, spanning 49 diverse categories. Stable-
+ToolBench further introduces a cache-based API fallback
+mechanism, ensuring stable and reproducible evaluation.
+Since ToolBench does not provide cost information for tools,
+we augment each instance with synthetic tool prices. For
+each query q, we fix a moderate budget B = 50, use the
+official retriever (Reimers & Gurevych, 2019; Qin et al.,
+2023) to recall 20 related tools, and then assign each tool
+T (j) ∈M a per-call cost c(j) independently sampled from
+a uniform distribution U(5, 50), forming the market snap-
+shot M for each instance I = (q, B, M). We evaluate all
+methods on the 765 test instances in StableToolBench.
+Baselines. We categorize our baselines into two groups
+based on whether the budget constraint is explicitly enforced
+during inference: Soft baselines and Enforce baselines.
+Soft baselines do not enforce the budget constraint, and
+instead rely on the model’s implicit understanding of bud-
+get through prompting. This category includes: (i) RAW,
+where no cost information is provided to the model; and
+(ii) PROMPT, where the model is explicitly informed of tool
+costs and current spending via natural language prompts.
+These baselines evaluate the model’s intrinsic ability to rea-
+son about budget without external control mechanisms.
+Enforce baselines explicitly prevent budget violations by in-
+troducing external intervention mechanisms when the agent
+attempts to exceed the budget. We consider three represen-
+tative methods: (i) DFSDT (Qin et al., 2023), a heuristic
+depth-first search strategy that prunes branches leading to
+budget overflow; (ii) BTP (Zheng et al., 2024a), which
+formulates tool selection as a multi-knapsack problem and
+allocates call quotas for each tool; and (iii) BATS (Liu et al.,
+2025), which employs a budget tracker to dynamically ad-
+just agent behaviors under different remaining budget levels.
+Evaluation Metrics. We evaluate all methods from three
+perspectives: PERFORMANCE, COST-AWARENESS, and
+EFFICIENCY, in order to comprehensively assess both task-
+solving ability and budget-sensitive behaviors.
+PERFORMANCE. These metrics evaluate the agent’s ability
+to successfully solve tasks under budget constraints. We
+report: (i) PASS RATE (PR), the percentage of tasks success-
+fully solved; (iii) BUDGET-OPTIMAL PASS RATE (OR),
+defined as the ratio between the number of tasks solved by
+the agent and the total number of tasks that are solvable
+under the same budget; and (ii) WIN RATE (WR), the pro-
+portion of tasks where the agent outperforms the reference
+solution. Following the original StableToolBench, these
+metics are evaluated in a LLM-as-a-Judge (Zheng et al.,
+2023) paradigm, where both the quality of the final answer
+and the tool call trace are taken into consideration.
+COST-AWARENESS. These metrics measure whether the
+agent exhibits awareness of budget and cost during decision
+making. We consider: (i) FEASIBLE RATE (FR), the pro-
+portion of tasks where the agent does not exceed the budget;
+(ii) AVERAGE COST (AC), the average total cost incurred
+per task; and (iii) AVERAGE PRICE (AP), the average per-
+call price of selected tools, which reflects whether the agent
+prefers cheaper alternatives when budget is tight.
+EFFICIENCY. These metrics assess the computational effi-
+ciency of different methods. We adopt: (i) E2E TIME, the
+end-to-end time for completing all tasks; (ii) LATENCY, the
+average completion time per task under multi-threaded exe-
+cution; and (iii) TOKEN CONSUMPTION, the total number
+of tokens consumed by agents and oracles during inference.
+We report the relative ratio compared to the RAW method.
+4.2. Main Results
+Table 1 summarizes the main results on cost-augmented
+StableToolBench under both non-reasoning (
+GPT 4.1
+mini) and reasoning (
+GPT 5 nano) backbones.
+Standalone agents fail to reliably respect budgets. Ta-
+ble 1 shows that instruction-based methods struggle under
+hard budget constraints. Although providing explicit cost
+feedback (PROMPT) improves pass rate over RAW, it still
+violates budgets in a substantial fraction of tasks (a notable
+32.8% for
+GPT 4.1 mini) and remains far from the budget-
+optimal frontier, confirming that implicit budget awareness
+alone cannot prevent repetitive and unproductive tool use.
+Enforcement introduces performance-efficiency trade-
+offs. All Enforce baselines achieve perfect feasibility as
+expected , yet differ markedly in effectiveness and effi-
+ciency. Heuristic pruning (DFSDT) and static allocation
+(BTP) are conservative, leading to limited budget-optimal
+pass rates. BATS can improve performance but incurs pro-
+hibitive inference-time overhead, particularly with reason-
+ing models. These also highlights the limitations of classical
+online planning in agentic settings.
+INTENT achieves the best overall trade-off. Across both
+non-reasoning and reasoning backbones, INTENT consis-
+tently attains the highest pass rate while strictly respecting
+budgets. Notably, these gains are achieved with only mod-
+erate inference-time overhead, validating intention-level
+inference-time planning as an effective and practical solu-
+tion for budget-aware tool use.
+We further provide results of fine-granularity ablation of ora-
+cle components and efficiency mechanisms, as well as sensi-
+tivity analysis of risk preference parameter γ, in Appendix D.
+6
+
+=== [page 7] ===
+Budget-Constrained Agentic Large Language Models
+Table 1. Main results on the cost-augmented StableToolBench (Guo et al., 2024). We compare our proposed methods (MCO and
+INTENT) against Soft (instruction-based) and Enforce (hard budget-blocking) baselines across both Non-Reasoning (
+GPT 4.1 mini) and
+Reasoning (
+GPT 5 nano) backbones. Comprehensive evaluation covers three dimensions: PERFORMANCE (Pass Rate, Budget-Optimal
+Pass Rate, Win Rate), COST-AWARENESS (Feasible Rate, Average Cost, Average Price), and EFFICIENCY (E2E Time, Average Latency
+and Total Token Consumption relative to the RAW baseline). INTENT consistently achieves the best performance with budget adherence.
+Since the benchmark partitions tasks into several predefined groups, we report the group-wise PASS RATE in Appendix C for completeness.
+Method
+PERFORMANCE
+COST-AWARENESS
+EFFICIENCY
+PR ↑
+OR ↑
+WR ↑
+FR ↑
+AC ↓
+AP ↓
+Time ↓
+Lat. ↓
+Tok. ↓
+Non-Reasoning Model
+Soft
+Raw (Yao et al., 2022)
+19.1
+23.3
+37.5
+34.5
+102.1
+28.2
+1.00×
+1.00×
+1.00×
+Prompt
+30.9
+37.7
+41.4
+67.2
+43.4
+24.2
+0.65×
+0.55×
+0.56×
+Enforce
+DFSDT (Qin et al., 2023)
+44.9
+54.7
+55.4
+100.0
+35.2
+20.2
+0.97×
+0.99×
+1.14×
+BTP (Zheng et al., 2024a)
+46.4
+56.8
+59.0
+100.0
+32.5
+19.4
+1.01×
+0.76×
+0.84×
+BATS (Liu et al., 2025)
+53.0
+64.6
+68.1
+100.0
+35.6
+20.8
+1.96×
+3.55×
+4.13×
+MCO (Ours)
+58.9
+71.8
+72.5
+100.0
+27.1
+18.7
+1.90×
+2.05×
+2.15×
+INTENT (Ours)
+63.8
+77.8
+73.3
+100.0
+24.9
+19.1
+1.23×
+1.76×
+1.70×
+Reasoning Model
+Soft
+Raw (Yao et al., 2022)
+18.1
+22.1
+44.7
+24.7
+145.8
+27.8
+1.00×
+1.00×
+1.00×
+Prompt
+48.5
+59.1
+62.0
+87.6
+38.1
+20.1
+0.64×
+0.60×
+0.76×
+Enforce
+DFSDT (Qin et al., 2023)
+57.2
+69.7
+71.9
+100.0
+35.6
+18.6
+1.10×
+0.91×
+1.08×
+BTP (Zheng et al., 2024a)
+57.7
+70.3
+73.2
+100.0
+36.2
+18.8
+1.22×
+1.67×
+0.87×
+BATS (Liu et al., 2025)
+52.8
+64.3
+71.7
+100.0
+32.6
+17.3
+7.67×
+10.1×
+5.76×
+MCO (Ours)
+71.4
+87.0
+82.3
+100.0
+31.9
+18.1
+1.87×
+2.23×
+2.28×
+INTENT (Ours)
+76.0
+92.6
+86.1
+100.0
+29.2
+17.9
+1.79×
+2.16×
+2.40×
+These results highlight the synergy among INTENT’s core
+components, while the risk preference parameter enables a
+effective and flexible performance–cost trade-off.
+Moreover, to elucidate why the prompt-based approach fails
+and how INTENT guides the agent toward a feasible solu-
+tion path, we provide a detailed case study in Appendix E.
+4.3. Robustness under Dynamic Market
+To further evaluate INTENT in realistic and non-stationary
+environments, we design experiments to study its robustness
+under three forms of market dynamics: the emergence of
+new tools, relative price changes, and varying budget levels.
+New tools. A key motivation for online planning is that
+real-world tool markets are continually evolving, with new
+tools appearing that are not covered by the agent’s prior
+knowledge. Relying solely on parametric knowledge can
+therefore introduce substantial bias. To simulate this pro-
+cess, we vary the number of interaction logs used to train the
+proposed oracle, representing different stages of market ex-
+posure. Results in Figure 3 show a log-linear scaling trend
+in the early stage as more data is accumulated. Notably,
+INTENT already achieves strong performance with only a
+few thousand logs, indicating that it can rapidly infer tool
+characteristics from limited interaction data.
+1/32
+1/16
+1/8
+1/4
+1/2
+1
+Data Percentatge
+50
+55
+60
+65
+70
+Pass Rate (%)
+(a) GPT 4.1 mini
+1/32
+1/16
+1/8
+1/4
+1/2
+1
+Data Percentatge
+65
+70
+75
+80
+Pass Rate (%)
+(b) GPT 5 nano
+Figure 3. Performance under varying amounts of oracle training
+data, simulating the introduction of new tools. Data points cor-
+respond to fractions of the full interaction log set (from 1/32 to
+1). INTENT shows a clear log-linear scaling trend and strong
+performance even in the low-data regime, across both backbones.
+Price adjustments. In dynamic markets, tools with similar
+functionality often undergo relative price changes, requir-
+ing agents to reason about cost-effectiveness and substitute
+tools when necessary. We simulate this setting by identify-
+ing reference tools annotated in ToolBench and selectively
+increasing or decreasing their prices, while keeping other
+retrieved tools unchanged. As shown in Figure 4, PROMPT
+is highly sensitive to these price perturbations, reflecting
+path dependence and insufficient exploration in standalone
+agents. In contrast, INTENT maintains consistently high
+pass rates with significantly smaller performance degrada-
+tion, demonstrating robust cost-aware decision making.
+7
+
+=== [page 8] ===
+Budget-Constrained Agentic Large Language Models
+-1/2
+-1/4
+0
++1/4
++1/2
+Price Change of Reference Tools
+20
+40
+60
+80
+Pass Rate (%)
+Prompt
+INTENT
+(a) GPT 4.1 mini
+-1/2
+-1/4
+0
++1/4
++1/2
+Price Change of Reference Tools
+20
+40
+60
+80
+Pass Rate (%)
+Prompt
+INTENT
+(b) GPT 5 nano
+Figure 4. Robustness to relative price changes of reference tools.
+We uniformly increase or decrease the prices of reference tools by
+fixed ratios (from a 50% discount to a 50% markup), while keeping
+other tools unchanged. INTENT is substantially less sensitive to
+price perturbations than Prompt across both backbones.
+1/4
+1/2
+1
+2
+4
+Budget Ratio
+20
+40
+60
+80
+Pass Rate (%)
+Prompt
+INTENT
+(a) GPT 4.1 mini
+1/4
+1/2
+1
+2
+4
+Budget Ratio
+20
+40
+60
+80
+Pass Rate (%)
+Prompt
+INTENT
+(b) GPT 5 nano
+Figure 5. Performance under varying budget levels. Budgets
+are scaled by fixed ratios relative to the default setting. INTENT
+scales effectively with increased budget and achieves competitive
+performance under tight budgets, across both backbones.
+Budget scaling. Finally, we vary the available budget to
+reflect different user preferences for the same task. It can
+be seen from Figure 5 that, although INTENT is designed
+for budget-constrained scenarios, it does scale when more
+resources are available. Moreover, its efficient budget uti-
+lization allows INTENT under tight budgets to achieve per-
+formance comparable to PROMPT under substantially larger
+budgets, highlighting its ability to adapt across a wide range
+of resource regimes.
+Overall, these results show that INTENT generalizes ro-
+bustly across multiple forms of market non-stationarity,
+while requiring only periodic updates to a lightweight oracle
+model, without modifying the parameters of the underlying
+gigantic agentic language model.
+5. Related Work
+Agentic AI. Agentic AI typically refers to fronteer LLMs
+equipped with explicit reasoning and tool-use capabilities
+to autonomously solve complex, multi-step tasks. Recent
+systems have demonstrated strong performance in deep re-
+search and information synthesis (Li et al., 2025a; Team
+et al., 2025), GUI control (Qin et al., 2025), and software
+engineering (Yang et al., 2024a; Tao et al., 2024), etc.
+On the infrastructure side, standardized protocols such as
+Model Context Protocol (MCP; Protocol, 2025) have en-
+abled scalable integration of heterogeneous tools, while
+specialized reinforcement learning frameworks provide en-
+vironments for developing and evaluating tool-augmented
+agents (Chai et al., 2025; Jiang et al., 2025; Fu et al., 2025).
+Most existing works focus on expanding the capability fron-
+tier of agents, e.g., learning to invoke a large variety of tools
+(Tang et al., 2023; Qin et al., 2023), generating long-horizon
+tool-use trajectories (Chen et al., 2025; Gao et al., 2025),
+or coordinating multiple agents for collaborative problem
+solving (Li et al., 2025b). These methods optimize task
+success without constraints, and typically allow repeated
+tool calls until sufficient information is obtained.
+In contrast, far less attention has been paid to the economic
+dimension of agentic behavior. While a growing body of
+work studies the efficiency of agentic systems, including
+token efficiency via reasoning compression or speculative
+decoding (Xia et al., 2025; Zhang et al., 2025; Chen et al.,
+2023; Hu et al., 2025), and tool efficiency through reducing
+or approximating tool calls (Xu et al., 2025; Nichols et al.,
+2025)—these approaches mainly optimize computational
+cost or latency. They do not model explicit tool prices, nor
+do they reason about hard budget feasibility.
+As a result, existing agents cannot capture realistic scenar-
+ios in which tools are monetized, retries incur irreversible
+monetary costs, and agents must trade off information gain
+against expenditure in a dynamic tool market. In this work,
+we explicitly formalize budget-constrained tool use as a se-
+quential decision problem with hard monetary constraints,
+and study how a general-purpose agent can operate ratio-
+nally under such conditions.
+Language World Models.
+Language world models
+(LWMs) are trained to simulate environment dynamics in
+context space, enabling agents to reason about future out-
+comes without interacting with the real environment. In
+training, LWMs have been used to replace expensive or un-
+stable external tools, significantly reducing data collection
+costs (Guo et al., 2025; Sun et al., 2025). Examples include
+simulated search engines (Fan et al., 2025; Zhang et al.,
+2026), synthesized compiler feedback (Pan et al., 2024;
+Cheng et al., 2026), and general tool environments (Ren
+et al., 2025; Fang et al., 2025; Xi et al., 2025).
+At inference time, LWMs are mainly applied to determin-
+istic environments such as text-based games (e.g., ALF-
+World, Shridhar et al., 2020; GridWorld, Sasso et al., 2025),
+where they support planning via classical algorithms such
+as MCTS (Dainese et al., 2024; Hao et al., 2023).
+Our setting is substantially more challenging: tools exhibit
+high stochasticity, and repeated failures often trigger costly
+retry loops. Instead of predicting exact future states, we
+introduce an intention-based world model that abstracts tool
+outcomes at the semantic level, focusing on whether a tool
+8
+
+=== [page 9] ===
+Budget-Constrained Agentic Large Language Models
+call satisfies the agent’s intention. This enables reliable cost
+estimation and budget-aware planning in highly uncertain
+environments.
+6. Conclusions
+In this work, we highlighted budget-aware tool use as a
+fundamental yet underexplored problem in agentic AI model
+design. As agents increasingly rely on external tools in
+open and dynamic markets to make real-world impact, their
+ability to reason under hard resource constraints becomes
+essential for reliable and deployable systems.
+To this end, we proposed INTENT, an intention-based
+inference-time planning framework that views budget con-
+trol as a problem of anticipating whether future tool inter-
+actions will satisfy the agent’s high-level intent, rather than
+predicting exact tool outcomes. This abstraction allows
+effective budget enforcement with minimal intervention,
+without retraining or heavy search.
+More importantly, our study suggests that budget aware-
+ness should be treated as a first-class objective in agentic
+AI, and that intention-level reasoning provides a natural
+interface between stochastic environments and resource-
+constrained decision making. We hope this work draws
+attention to budget-constrained agentic planning, and en-
+courages further exploration of lightweight, inference-time
+control mechanisms for real-world agentic systems.
+9
+
+=== [page 10] ===
+Budget-Constrained Agentic Large Language Models
+Impact Statement
+This paper presents work whose goal is to advance the
+budget-awareness of tool-using agents. There might be
+some potential societal consequences of our work, none
+which we feel must be specifically highlighted here.
+References
+Agrawal, S., Wang, Z., and Ye, Y. A dynamic near-optimal
+algorithm for online linear programming. Oper. Res., 62:
+876–890, 2009.
+Anthropic.
+Introducing
+the
+Model
+Context
+Pro-
+tocol.
+https://www.anthropic.com/news/
+model-context-protocol, accessed 2026-01-27,
+2025.
+Appenzeller, G.
+Welcome to llmflation – llm infer-
+ence cost is going down fast.
+https://a16z.
+com/llmflation-llm-inference-cost/
+?utm_source=chatgpt.com, 2024.
+Accessed:
+2026-01-28.
+Buchbinder, N. and Naor, J. The design of competitive
+online algorithms via a primal-dual approach. Found.
+Trends Theor. Comput. Sci., 3:93–263, 2009.
+Chai, J., Yin, G., Xu, Z., Yue, C., Jia, Y., Xia, S., Wang, X.,
+Jiang, J., Li, X., Dong, C., et al. Rlfactory: A plug-and-
+play reinforcement learning post-training framework for
+llm multi-turn tool-use. arXiv preprint arXiv:2509.06980,
+2025.
+Chen, C., Borgeaud, S., Irving, G., Lespiau, J.-B., Sifre,
+L., and Jumper, J. Accelerating large language model
+decoding with speculative sampling.
+arXiv preprint
+arXiv:2302.01318, 2023.
+Chen, K., Cusumano-Towner, M., Huval, B., Petrenko, A.,
+Hamburger, J., Koltun, V., and Krähenbühl, P. Reinforce-
+ment learning for long-horizon interactive llm agents.
+arXiv preprint arXiv:2502.01600, 2025.
+Cheng, D., Huang, S., Gu, Y., Song, H., Chen, G.,
+Dong, L., Zhao, W. X., Wen, J.-R., and Wei, F. Llm-
+in-sandbox elicits general agentic intelligence. arXiv
+preprint arXiv:2601.16206, 2026.
+Cottier, B., Snodin, B., Owen, D., and Adamczewski, T. Llm
+inference prices have fallen rapidly but unequally across
+tasks.
+https://epoch.ai/data-insights/
+llm-inference-price-trends, 2025. Accessed:
+2026-01-28.
+Dainese, N., Merler, M., Alakuijala, M., and Marttinen,
+P. Generating code world models with large language
+models guided by monte carlo tree search. Advances
+in Neural Information Processing Systems, 37:60429–
+60474, 2024.
+Dao, T. Flashattention-2: Faster attention with better par-
+allelism and work partitioning, 2023.
+URL https:
+//arxiv.org/abs/2307.08691.
+Fan, Y., Zhang, K., Zhou, H., Zuo, Y., Chen, Y., Fu, Y., Long,
+X., Zhu, X., Jiang, C., Zhang, Y., et al. Ssrl: Self-search
+reinforcement learning. arXiv preprint arXiv:2508.10874,
+2025.
+Fang, R., Cai, S., Li, B., Wu, J., Li, G., Yin, W., Wang, X.,
+Wang, X., Su, L., Zhang, Z., et al. Towards general agen-
+tic intelligence via environment scaling. arXiv preprint
+arXiv:2509.13311, 2025.
+Fu, W., Gao, J., Shen, X., Zhu, C., Mei, Z., He, C., Xu, S.,
+Wei, G., Mei, J., Wang, J., et al. Areal: A large-scale
+asynchronous reinforcement learning system for language
+reasoning. arXiv preprint arXiv:2505.24298, 2025.
+Gao, J., Fu, W., Xie, M., Xu, S., He, C., Mei, Z., Zhu, B.,
+and Wu, Y. Beyond ten turns: Unlocking long-horizon
+agentic search with large-scale asynchronous rl. arXiv
+preprint arXiv:2508.07976, 2025.
+Google. The new era of browsing: Putting gemini to work
+in chrome. https://chatgpt.com/features/
+codex, 2026. Accessed: 2026-01-28.
+Guo, C., Pleiss, G., Sun, Y., and Weinberger, K. Q.
+On calibration of modern neural networks.
+ArXiv,
+abs/1706.04599, 2017.
+Guo, Z., Cheng, S., Wang, H., Liang, S., Qin, Y., Li, P.,
+Liu, Z., Sun, M., and Liu, Y. Stabletoolbench: Towards
+stable large-scale benchmarking on tool learning of large
+language models. In Annual Meeting of the Association
+for Computational Linguistics, 2024.
+Guo, Z., Cheng, S., Niu, Y., Wang, H., Zhou, S., Huang,
+W., and Liu, Y. Stabletoolbench-mirrorapi: Modeling
+tool environments as mirrors of 7,000+ real-world apis.
+In Annual Meeting of the Association for Computational
+Linguistics, 2025.
+Hao, S., Gu, Y., Ma, H., Hong, J., Wang, Z., Wang, D., and
+Hu, Z. Reasoning with language model is planning with
+world model. In Proceedings of the 2023 Conference on
+Empirical Methods in Natural Language Processing, pp.
+8154–8173, 2023.
+Hu, Y., Wang, K., Zhang, X., Zhang, F., Li, C., Chen, H.,
+and Zhang, J. Sam decoding: Speculative decoding via
+suffix automaton. In Proceedings of the 63rd Annual
+Meeting of the Association for Computational Linguistics
+(Volume 1: Long Papers), pp. 12187–12204, 2025.
+10
+
+=== [page 11] ===
+Budget-Constrained Agentic Large Language Models
+Jiang, D., Lu, Y., Li, Z., Lyu, Z., Nie, P., Wang, H., Su, A.,
+Chen, H., Zou, K., Du, C., et al. Verltool: Towards holis-
+tic agentic reinforcement learning with tool use. arXiv
+preprint arXiv:2509.01055, 2025.
+Jin, W., Zhao, C., Huang, Z., Zhang, C., Lin, Q., Bansal, C.,
+Rajmohan, S., Zhang, S., Sun, Y., Pei, D., Wu, Y., Jia, T.,
+Li, Y., Wu, Z., and Ma, M. A benchmark for language
+models in real-world system building. 2026.
+Kwon, W., Li, Z., Zhuang, S., Sheng, Y., Zheng, L., Yu,
+C. H., Gonzalez, J. E., Zhang, H., and Stoica, I. Ef-
+ficient memory management for large language model
+serving with pagedattention, 2023. URL https://
+arxiv.org/abs/2309.06180.
+Langley, P. Crafting papers on machine learning. In Langley,
+P. (ed.), Proceedings of the 17th International Conference
+on Machine Learning (ICML 2000), pp. 1207–1216, Stan-
+ford, CA, 2000. Morgan Kaufmann.
+Lee, J., hyeong Kim, G., Poupart, P., and Kim, K.-E. Monte-
+carlo tree search for constrained pomdps. In Neural In-
+formation Processing Systems, 2018.
+Li, K., Zhang, Z., Yin, H., Zhang, L., Ou, L., Wu, J., Yin, W.,
+Li, B., Tao, Z., Wang, X., et al. Websailor: Navigating
+super-human reasoning for web agent. arXiv preprint
+arXiv:2507.02592, 2025a.
+Li, X., Jin, J., Dong, G., Qian, H., Wu, Y., Wen, J.-R.,
+Zhu, Y., and Dou, Z. Webthinker: Empowering large
+reasoning models with deep research capability. arXiv
+preprint arXiv:2504.21776, 2025b.
+Liu, T., Wang, Z., Miao, J., Hsu, I.-H., Yan, J., Chen, J.,
+Han, R., Xu, F., Chen, Y., Jiang, K., Daruki, S., Liang,
+Y., Wang, W. Y., Pfister, T., and Lee, C.-Y.
+Budget-
+aware tool-use enables effective agent scaling. ArXiv,
+abs/2511.17006, 2025.
+Loshchilov, I. and Hutter, F. Sgdr: Stochastic gradient
+descent with warm restarts. arXiv: Learning, 2016.
+Loshchilov, I. and Hutter, F. Decoupled weight decay reg-
+ularization. In International Conference on Learning
+Representations, 2017.
+Market, M.
+The mcp market homepage.
+https://
+mcpmarket.com/, 2025. Accessed: 2026-01-28.
+MCP.so.
+The mcp.co homepage.
+https://mcp.so,
+2025. Accessed: 2026-01-28.
+Micikevicius, P., Narang, S., Alben, J., Diamos, G. F., Elsen,
+E., García, D., Ginsburg, B., Houston, M., Kuchaiev, O.,
+Venkatesh, G., and Wu, H. Mixed precision training.
+ArXiv, abs/1710.03740, 2017.
+Nichols, D., Singhania, P., Jekel, C., Bhatele, A., and
+Menon, H.
+Optimizing agentic language model in-
+ference via speculative tool calls.
+arXiv preprint
+arXiv:2512.15834, 2025.
+OpenAI. Introducing deep research. https://openai.
+com/index/introducing-deep-research/,
+2025. Accessed: 2025-04-06.
+Pan, J., Wang, X., Neubig, G., Jaitly, N., Ji, H., Suhr, A.,
+and Zhang, Y. Training software engineering agents and
+verifiers with swe-gym. arXiv preprint arXiv:2412.21139,
+2024.
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V.,
+Thirion, B., Grisel, O., Blondel, M., Müller, A., Noth-
+man, J., Louppe, G., Prettenhofer, P., Weiss, R., Dubourg,
+V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher,
+M., Perrot, M., and Édouard Duchesnay. Scikit-learn:
+Machine learning in python, 2018. URL https://
+arxiv.org/abs/1201.0490.
+Protocol, M. C. Model Context Protocol servers. https:
+//github.com/modelcontextprotocol/
+servers, last visited: Apr 23, 2025.
+Qin, Y., Liang, S., Ye, Y., Zhu, K., Yan, L., Lu, Y.-T., Lin,
+Y., Cong, X., Tang, X., Qian, B., Zhao, S., Tian, R., Xie,
+R., Zhou, J., Gerstein, M. H., Li, D., Liu, Z., and Sun,
+M. Toolllm: Facilitating large language models to master
+16000+ real-world apis. ArXiv, abs/2307.16789, 2023.
+Qin, Y., Ye, Y., Fang, J., Wang, H., Liang, S., Tian, S.,
+Zhang, J., Li, J., Li, Y., Huang, S., et al. Ui-tars: Pioneer-
+ing automated gui interaction with native agents. arXiv
+preprint arXiv:2501.12326, 2025.
+Ramírez, S. Fastapi. https://fastapi.tiangolo.
+com, 2026. Accessed: 2026-01-28.
+RapidAPI.
+The rapidapi homepage.
+https://
+rapidapi.com/hub, 2014. Accessed: 2026-01-28.
+Reimers, N. and Gurevych, I.
+Sentence-bert:
+Sen-
+tence embeddings using siamese bert-networks. ArXiv,
+abs/1908.10084, 2019.
+Ren, Z., Zhang, X., Qian, Z., Gao, Y., Shi, Y., Zheng, S.,
+and He, J. Gtm: Simulating the world of tools for ai
+agents. arXiv preprint arXiv:2512.04535, 2025.
+Sasso, R., Conserva, M., Jeurissen, D., and Rauber, P. Foun-
+dation models as world models: A foundational study in
+text-based gridworlds. arXiv preprint arXiv:2509.15915,
+2025.
+Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and
+Klimov, O. Proximal policy optimization algorithms.
+ArXiv, abs/1707.06347, 2017.
+11
+
+=== [page 12] ===
+Budget-Constrained Agentic Large Language Models
+Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J.-M., Zhang, M.,
+Li, Y. K., Wu, Y., and Guo, D. Deepseekmath: Pushing
+the limits of mathematical reasoning in open language
+models. ArXiv, abs/2402.03300, 2024.
+Shridhar, M., Yuan, X., Côté, M.-A., Bisk, Y., Trischler,
+A., and Hausknecht, M. Alfworld: Aligning text and
+embodied environments for interactive learning. arXiv
+preprint arXiv:2010.03768, 2020.
+Silver, D. and Veness, J. Monte-carlo planning in large
+pomdps.
+In Neural Information Processing Systems,
+2010.
+Sun, H., Qiao, Z., Guo, J., Fan, X., Hou, Y., Jiang, Y., Xie,
+P., Zhang, Y., Huang, F., and Zhou, J. Zerosearch: In-
+centivize the search capability of llms without searching.
+arXiv preprint arXiv:2505.04588, 2025.
+Tang, Q., Deng, Z., Lin, H., Han, X., Liang, Q., Cao, B.,
+and Sun, L. Toolalpaca: Generalized tool learning for lan-
+guage models with 3000 simulated cases. arXiv preprint
+arXiv:2306.05301, 2023.
+Tao, W., Zhou, Y., Wang, Y., Zhang, W., Zhang, H., and
+Cheng, Y. Magis: Llm-based multi-agent framework for
+github issue resolution. Advances in Neural Information
+Processing Systems, 37:51963–51993, 2024.
+Team, T. D., Li, B., Zhang, B., Zhang, D., Huang, F., Li, G.,
+Chen, G., Yin, H., Wu, J., Zhou, J., et al. Tongyi deepre-
+search technical report. arXiv preprint arXiv:2510.24701,
+2025.
+Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C.,
+Moi, A., Cistac, P., Rault, T., Louf, R., Funtowicz, M.,
+Davison, J., Shleifer, S., von Platen, P., Ma, C., Jernite,
+Y., Plu, J., Xu, C., Scao, T. L., Gugger, S., Drame, M.,
+Lhoest, Q., and Rush, A. M. Huggingface’s transformers:
+State-of-the-art natural language processing, 2020. URL
+https://arxiv.org/abs/1910.03771.
+Xi, Z., Huang, J., Liao, C., Huang, B., Guo, H., Liu, J.,
+Zheng, R., Ye, J., Zhang, J., Chen, W., et al. Agentgym-
+rl: Training llm agents for long-horizon decision making
+through multi-turn reinforcement learning. arXiv preprint
+arXiv:2509.08755, 2025.
+Xia, H., Leong, C. T., Wang, W., Li, Y., and Li, W. Token-
+skip: Controllable chain-of-thought compression in llms.
+arXiv preprint arXiv:2502.12067, 2025.
+Xu, H., Wang, Z., Zhu, Z., Pan, L., Chen, X., Fan, S., Chen,
+L., and Yu, K. Alignment for efficient tool calling of large
+language models. In Proceedings of the 2025 Conference
+on Empirical Methods in Natural Language Processing,
+pp. 17787–17803, 2025.
+Xue, T., Qi, W., Shi, T., Song, C. H., Gou, B., Song, D. X.,
+Sun, H., and Su, Y. An illusion of progress? assessing
+the current state of web agents. ArXiv, abs/2504.01382,
+2025.
+Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B.,
+Yu, B., Gao, C., Huang, C., Lv, C., Zheng, C., Liu, D.,
+Zhou, F., Huang, F., Hu, F., Ge, H., Wei, H., Lin, H.,
+Tang, J., Yang, J., Tu, J., Zhang, J., Yang, J., Yang, J.,
+Zhou, J., Zhou, J., Lin, J., Dang, K., Bao, K., Yang, K.,
+Yu, L., Deng, L.-C., Li, M., Xue, M., Li, M., Zhang, P.,
+Wang, P., Zhu, Q., Men, R., Gao, R., Liu, S.-Q., Luo, S.,
+Li, T., Tang, T., Yin, W., Ren, X., Wang, X., Zhang, X.,
+Ren, X., Fan, Y., Su, Y., Zhang, Y.-C., Zhang, Y., Wan,
+Y., Liu, Y., Wang, Z., Cui, Z., Zhang, Z., Zhou, Z., and
+Qiu, Z. Qwen3 technical report. ArXiv, abs/2505.09388,
+2025.
+Yang, J., Jimenez, C. E., Wettig, A., Lieret, K., Yao,
+S., Narasimhan, K., and Press, O. Swe-agent: Agent-
+computer interfaces enable automated software engineer-
+ing. Advances in Neural Information Processing Systems,
+37:50528–50652, 2024a.
+Yang, Q. A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu,
+B., Li, C., Liu, D., Huang, F., Dong, G., Wei, H., Lin,
+H., Yang, J., Tu, J., Zhang, J., Yang, J., Yang, J., Zhou,
+J., Lin, J., Dang, K., Lu, K., Bao, K., Yang, K., Yu,
+L., Li, M., Xue, M., Zhang, P., Zhu, Q., Men, R., Lin,
+R., Li, T., Xia, T., Ren, X., Ren, X., Fan, Y., Su, Y.,
+Zhang, Y.-C., Wan, Y., Liu, Y., Cui, Z., Zhang, Z., Qiu,
+Z., Quan, S., and Wang, Z. Qwen2.5 technical report.
+ArXiv, abs/2412.15115, 2024b.
+Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan,
+K., and Cao, Y. React: Synergizing reasoning and acting
+in language models. ArXiv, abs/2210.03629, 2022.
+Zhang, J., Zhu, Y., Sun, M., Luo, Y., Qiao, S., Du, L., Zheng,
+D., Chen, H., and Zhang, N. Lightthinker: Thinking step-
+by-step compression. arXiv preprint arXiv:2502.15589,
+2025.
+Zhang, X., He, Z., Zhu, Y., Wu, S., Yu, S., Chu, M., Zhang,
+W., Tan, H., and Jia, J. Searchgym: Bootstrapping real-
+world search agents via cost-effective and high-fidelity en-
+vironment simulation. arXiv preprint arXiv:2601.14615,
+2026.
+Zheng, L., Chiang, W.-L., Sheng, Y., Zhuang, S., Wu, Z.,
+Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E. P., Zhang,
+H., Gonzalez, J. E., and Stoica, I. Judging llm-as-a-judge
+with mt-bench and chatbot arena. ArXiv, abs/2306.05685,
+2023.
+Zheng, Y., Li, P., Yan, M., Zhang, J., Huang, F., and Liu,
+Y. Budget-constrained tool learning with planning. In
+12
+
+=== [page 13] ===
+Budget-Constrained Agentic Large Language Models
+Annual Meeting of the Association for Computational
+Linguistics, 2024a.
+Zheng, Y., Zhang, R., Zhang, J., Ye, Y., Luo, Z., Feng, Z.,
+and Ma, Y. Llamafactory: Unified efficient fine-tuning of
+100+ language models, 2024b. URL https://arxiv.
+org/abs/2403.13372.
+Zhou, A., Yan, K., Shlapentokh-Rothman, M., Wang, H.,
+and Wang, Y.-X. Language agent tree search unifies
+reasoning acting and planning in language models. ArXiv,
+abs/2310.04406, 2023.
+13
+
+=== [page 14] ===
+Budget-Constrained Agentic Large Language Models
+A. Oracle Implementations
+A.1. Training
+Trajectory Collection.
+All oracle models are trained
+on agent interaction logs naturally collected from user
+conversations.
+Each log corresponds to a task in-
+stance I
+=
+(q, B, M) sampled from the task distri-
+bution D, and contains a ReAct-style trajectory τ
+=
+[h0, r1, a1, o1, r2, a2, o2, . . . , aK], where rt is the reason-
+ing trace, at is the agent action, and ot is the environment
+observation. No additional data collection or synthetic tra-
+jectories are introduced.
+Language World Model. Wϕ is instantiated as a large
+language model fine-tuned on tool interaction records. Each
+training example consists of a tool call and its observed
+response (at, ot), and the model is trained by standard next-
+token prediction to approximate Wϕ(ot | [Tt, ut]).
+Latent Intention Annotation. The intention variable zt
+is not directly observable. For each triple (rt, at, ot), we
+apply an LLM-as-a-Judge (Zheng et al., 2023) to determine
+whether the observation semantically satisfies the intention
+of the tool call expressed in rt, yielding a binary label zt ∈
+{0, 1}.
+Conditional Generator. Wψ is implemented as a large lan-
+guage model trained on positive intention samples (at, ot)
+with zt = 1, learning the conditional distribution Wψ(ot |
+[Tt, ut], zt = 1).
+Intention Predictor. Wρ is an encoder-only Transformer
+with a classification head. It is trained as a binary classifier
+on (rt, at, zt) using standard cross-entropy loss to estimate
+the success probability ˜ρt = P(zt = 1 | [rt, Tt, ut]). More-
+over, to obtain well-calibrated probabilities, we apply post-
+hoc temperature scaling (Guo et al., 2017) on a held-out
+validation set. The calibrated score ˜ρt is used for geometric
+cost estimation in the oracle.
+A.2. Additional Mechanisms
+In addition to the core oracle logic, we adopt several
+lightweight mechanisms in implementation to reduce re-
+dundant rollouts and unnecessary exploration. These mech-
+anisms do not alter the underlying decision rules of the
+oracle, but improve computational efficiency in practical
+deployments. We incorporate these mechanisms in the main
+algorithm.
+Rollout Cache. As described in the Section 3.3, we cache
+the future action sequence Ct = [˜at+1, ˜at+2, . . . , ˜aK] ob-
+tained from the ideal trajectory ˜τ ∗upon acceptance. If
+the agent’s subsequent proposal satisfies at+1 ≈˜at+1
+(e.g., tolerant for some argument mismatches), we imply
+plan continuity and skip simulation, directly approving
+the action (as long as the action is budget feasible, i.e.,
+COST(at+1) ≤Bt), and then the cache queue pops to
+Ct+1 ←[˜at+2, . . . , ˜aK], accordingly. If a cache miss hap-
+pens instead, the rollout cache is emptied Ct+1 ←[], and
+will be replace by the new rollout Ct+1 ←[˜a′
+t+2, . . . , ˜a′
+K]
+if the current action at+1 gets approved.
+Last Call Cache. Let ¯at denote the last rejected action
+recorded at step t (or ∅if none). Upon a rejection at step
+t, we set ¯at+1 ←at. If at step t + 1 the agent proposes the
+same action again at+1 = ¯at+1, this might be interpreted as
+a strong evidence that the action is necessary under current
+situation in the agent’s view. Therefore we directly accept it
+(provided COST(at+1) ≤Bt+1) without additional rollout,
+and then clear the cache ¯at+2 ←∅.
+Blacklist.
+During rollout,
+for any action at
+=
+(CALL, Tt, ut) with predicted success probability ˜ρt < δ,
+we add the corresponding tool to a blacklist set B =
+B ∪{Tt}. All tools in B are permanently excluded from the
+candidate action space for the current task instance I, i.e.,
+M ←M \ B.
+A.3. Algorithms
+In this section, we provide the detailed pseudocode for the
+proposed framework and the oracle implementations.
+Budgeted-Constrained Agent. Algorithm 1 summarizes
+the overall execution loop of an oracle-guided, budget-
+constrained agent. At each step, the agent follows a standard
+ReAct-style (Yao et al., 2022) interaction pattern and pro-
+poses an action, which is then intercepted by an oracle for
+budget feasibility checking. The oracle operates purely at in-
+ference time and does not modify the agent policy, but only
+decides whether to ACCEPT the costly tool call to be exe-
+cuted in the real environment or return a synthetic feedback
+signal for re-planning. Algorithm 2 and Algorithm 3 instan-
+tiate the two concrete oracle implementations introduced in
+the Section 3, namely the Monte Carlo Oracle (MCO) and
+the proposed Intention-Based Oracle (INTENT).
+Notably, in Algorithm 3, we explicitly distinguish between
+the core components and the engineering optimizations. The
+core logic is highlighted in blue. The auxiliary mechanisms
+introduced to improve efficiency, i,e. the Rollout Cache,
+Last Call Cache, and Blacklist, are marked in gray.
+14
+
+=== [page 15] ===
+Budget-Constrained Agentic Large Language Models
+Algorithm 1 Oracle-Guided Budget-Constrained Agent
+Require: Task instance I = (q, B, M), Agent policy πθ,
+Environment E
+1: Initialize: History h0 ←[System, q, B, M], Step
+t ←1, Current budget Bt ←B
+2: while Bt ≥0 do
+3:
+Reasoning: rt ∼πθ(· | ht)
+4:
+Action: at ∼πθ(· | [ht, rt])
+5:
+if at is (ANSWER, y) then
+6:
+return y
+▷Terminate and return final answer
+7:
+end if
+8:
+// CONSULT THE SPECIFIC ORACLE IMPLEMEN-
+TATION (MCO OR INTENT)
+9:
+decision, ˆot ←ORACLE(ht, rt, at, Bt)
+10:
+if decision = ACCEPT then
+11:
+Execute: ot ∼E(· | at) ▷Real tool execution
+12:
+Bt+1 ←Bt −COST(at)
+13:
+else
+14:
+Intervention: ot ←ˆot
+▷Oracle returns
+simulated failure trace
+15:
+// AGENT WILL RE-PLAN BASED ON THIS
+FEEDBACK IN NEXT ITER
+16:
+end if
+17:
+Update: ht+1 ←[ht, rt, at, ot]
+18:
+t ←t + 1
+19: end while
+20: return FAILURE
+▷Budget exhausted
+Algorithm 2 Monte Carlo Oracle (MCO)
+1: function ORACLE(ht, rt, at, Bt)
+2:
+Lookahead: Simulate trajectory ˜τ starting from ht
+3:
+˜τ ←[at]
+4:
+while a ←LAST(˜τ) is not ANSWER do
+5:
+˜o ∼Wϕ(· | a)
+▷World Model Prediction
+6:
+˜r, ˜a ∼πθ(· | [ht, rt, ˜τ, ˜o])
+▷Agent Policy
+7:
+˜τ ←[˜τ, ˜o, ˜r, ˜a]
+8:
+end while
+9:
+Cost Estimation: COST(˜τ) ←P
+a∈˜τ COST(a)
+10:
+if COST(˜τ) ≤Bt then
+11:
+return ACCEPT, ∅
+12:
+else
+13:
+ˆot ←EXTRACTACTIONS(˜τ)
+▷Return
+predicted future action sequence as hints
+14:
+return REJECT, ˆot
+15:
+end if
+16: end function
+Algorithm 3 Intention-Based Oracle (INTENT)
+1: Global: Risk Factor γ, Rollout Cache C ←[], Last
+Rejected ¯a ←∅, Blacklist B ←∅, Blacklist Threshold
+δ, Market Snapshot M
+2: function ORACLE(ht, rt, at, Bt)
+3:
+// LAST CALL CACHE
+4:
+if at ≈¯a and COST(at) ≤Bt then
+5:
+Global ¯a ←∅; return ACCEPT, ∅
+6:
+end if
+7:
+// ROLLOUT CACHE (SIMULATION REUSE)
+8:
+if C is not empty and at ≈C[0] then
+9:
+Pop C[0]
+10:
+return ACCEPT, ∅
+▷Plan continues
+11:
+else
+12:
+C ←[]
+▷Cache miss, clear cache
+13:
+end if
+14:
+Ideal Trajectory Simulation:
+15:
+Initialize ˜τ ∗←[], k ←t, ak ←at, rk ←rt
+16:
+Total Expected Cost σ ←0
+17:
+loop
+18:
+// 1. INTENTION PREDICTION
+19:
+˜ρk ←Wρ(z = 1 | [rk, Tk, uk])
+20:
+// BLACKLIST UPDATE
+21:
+if ˜ρk < δ then
+22:
+B ←B ∪{Tk}
+23:
+M ←M \ B
+24:
+end if
+25:
+// 2. GEOMETRIC COST CALIBRATION
+26:
+˜ck ←COST(ak)/˜ρk
+27:
+σ ←σ + ˜ck
+28:
+// 3. CONDITIONAL GENERATION
+29:
+˜ok ∼Wψ(· | [Tk, uk], z = 1)
+30:
+˜τ ∗←[˜τ ∗, rk, ak, ˜ok]
+31:
+Agent Step:
+32:
+˜rk+1, ˜ak+1 ∼πθ(· | [ht, ˜τ ∗], M)
+33:
+if ˜ak+1 is ANSWER then
+34:
+break
+35:
+end if
+36:
+k ←k + 1, ak ←˜ak+1, rk ←˜rk+1
+37:
+end loop
+38:
+Decision:
+39:
+if COST(at) ≤Bt and γ · σ ≤Bt then
+40:
+C ←[˜at+1, . . . , ˜aK]
+▷Update Rollout Cache
+41:
+Global ¯a ←∅
+42:
+return ACCEPT, ∅
+43:
+else
+44:
+ˆot ←[at, ˜ρt, . . . , ˜aK]
+▷Failure risk feedback
+45:
+Global ¯a ←at
+▷Record rejection
+46:
+return REJECT, ˆot
+47:
+end if
+48: end function
+15
+
+=== [page 16] ===
+Budget-Constrained Agentic Large Language Models
+B. Implementation Details
+B.1. Training and Inference Details
+Data. We train all oracle components using interaction logs
+provided by StableToolBench (Guo et al., 2024). Specifi-
+cally, for the Language World Model and the Conditional
+Generator, we use the MirrorAPI-Cache training split (Guo
+et al., 2025), which consists of approximately 100k real tool
+interaction trajectories collected from RapidAPI. Following
+prior work, we employ GPT-4.1-mini as an LLM-as-a-judge
+to annotate intention satisfaction and retain 28k trajectories
+where the tool calls are deemed successful.
+For the Intention Predictor, we construct a separate dataset
+following the ToolBench Reproduction Data (Qin et al.,
+2023), yielding 86k (r, a, o) triples. Each triple is annotated
+using GPT-4.1-mini to determine whether the tool outcome
+satisfies the agent’s expressed intention. All datasets are
+split into training, development, and test sets with an 8:1:1
+ratio. The development split is used for checkpoint selection
+and post-hoc probability calibration.
+Base Models. Both the Language World Model and the
+Conditional Generator are instantiated using Qwen2.5-3B-
+Instruct (Yang et al., 2024b). The Intention Predictor is
+implemented based on Qwen3-0.6B-Embedding (Yang et al.,
+2025) with a additional classification head.
+Optimization.
+We employ the standard AdamW
+(Loshchilov & Hutter, 2017) optimizer to train all com-
+ponents. For the Language World Model and Conditional
+Generator, we use a batch size of 64 and a learning rate of
+7 × 10−5, with a linear warmup over the first 5% of steps
+followed by cosine decay (Loshchilov & Hutter, 2016). The
+Intention Predictor is trained with batch size 32, learning
+rate 5 × 10−5. All models undergo BF16 (Micikevicius
+et al., 2017) full-parameter fine-tuning for 2 epochs.
+Infrastructure. All experiments are conducted on a single
+NVIDIA RTX Pro 6000 GPU. World Model and Condi-
+tional Generator are trained with LLaMA-Factory (Zheng
+et al., 2024b), while the Intention Predictor is trained and
+calibrated using Transformers (Wolf et al., 2020) and scikit-
+learn (Pedregosa et al., 2018). FlashAttention-2 (Dao, 2023)
+is enabled throughout. Inference-time model serving uses
+vLLM (Kwon et al., 2023) with a FastAPI (Ramírez, 2026)
+frontend. Inference over task sequences in the benchmark is
+parallelized with a thread pool of up to 40 workers.
+B.2. Algorithm Implementation
+DFSDT (Qin et al., 2023). The original DFSDT imple-
+mentation does not explicitly account for monetary budgets.
+We augment it with a budget enforcement mechanism: if
+a proposed action incurs a cost exceeding the remaining
+budget, the corresponding branch is immediately pruned.
+The search width is fixed to 10 in all experiments.
+BTP (Zheng et al., 2024a). We implement BTP on top
+of the DFSDT framework. The past experience E is con-
+structed from the same Reproduction Data used in our ex-
+periments. Tool scores SCORE(U) are computed following
+the original formulation, using GPT-4.1-mini as the evalu-
+ator. Tool similarity SIM(qu, q) is measured using Qwen3-
+0.6B-Embedding. We enable the Blacklist mechanism with
+threshold τ = 0.15, consistent with the original setting.
+BATS (Liu et al., 2025). We faithfully reproduce the orig-
+inal BATS pipeline and prompts. Since BATS assumes
+per-tool budgets, we adapt it to a unified global budget con-
+straint. To control inference overhead, we cap the number
+of Self-varification Module calls at K = 5 per iteration.
+MCO. For Monte Carlo Oracle, the Language World Model
+sampling temperature is set to 1.0. We enable the Rollout
+Cache to reuse simulated trajectories across steps.
+INTENT. For INTENT, the Conditional Generator sam-
+pling temperature is set to 0.3. We enable the Rollout
+Cache, the Last Call Cache, and the Blacklist mechanism.
+Across all experiments, we fix the risk preference param-
+eter γ = 0.5 and the rejection tolerance δ = 0.1. No
+task-specific hyperparameter tuning is performed.
+B.3. Evaluation Details
+Automatic Evaluation. PASS RATE and WIN RATE are
+evaluated using the same logic as SoPR and SoWR in Sta-
+bleToolBench, with two modifications: (i) Solutions are
+additionally required to satisfy the budget constraint, and
+(ii) The evaluator model is upgraded to GPT-4.1-mini. Prior
+work has shown strong agreement between this evaluation
+protocol and human judgments (Qin et al., 2023). For WIN
+RATE, the reference solution is generated by the PROMPT
+baseline using GPT-5-mini. All evaluations are conducted
+using major voting aggregation (3 times).
+Budget-Optimal Pass Rate. To estimate the achievable
+upper bound used in the BUDGET-OPTIMAL PASS RATE
+metric, we perform an exhaustive search using DFSDT with
+width w = 10, powered by GPT-5-nano. For each query, we
+enumerate tool-use trajectories until collecting five unique
+solutions that satisfy the budget constraint. If at least one
+solution is judged correct by the evaluator, the query is
+marked as solvable under the given budget. This procedure
+yields an empirical upper bound on achievable performance.
+C. Group-wise Breakdown of Pass Rate
+StableToolBench (Guo et al., 2024) further partitions tasks
+into several predefined groups that are largely orthogonal
+to the cost-sensitive decision setting studied in this work.
+Although these groupings are not directly aligned with
+16
+
+=== [page 17] ===
+Budget-Constrained Agentic Large Language Models
+Table 2. Group-wise Pass Rate breakdown on cost-augmented
+StableToolBench. The table reports disaggregated Pass Rate across
+6 benchmark-defined task groups, under non-reasoning (
+GPT
+4.1 mini) and reasoning (
+GPT 5 nano) backbones.
+Method
+PASS RATE ↑
+G1-C
+G1-I
+G1-T
+G2-C
+G2-I
+G3-I
+Non-Reasoning Model
+Raw
+33.6
+14.9
+17.2
+21.2
+10.9
+8.7
+Prompt
+42.6
+30.9
+37.6
+27.3
+20.1
+10.7
+DFSDT
+59.7
+42.9
+47.7
+44.6
+36.3
+33.6
+BTP
+48.8
+42.3
+54.4
+47.0
+37.0
+45.4
+BATS
+66.6
+45.7
+55.6
+56.6
+49.7
+43.7
+MCO
+63.5
+55.5
+58.9
+64.6
+47.9
+64.5
+INTENT
+69.2
+58.6
+65.9
+68.4
+55.0
+63.9
+Reasoning Model
+Raw
+25.2
+15.1
+16.8
+15.2
+19.2
+16.1
+Prompt
+55.9
+48.2
+48.6
+54.3
+38.1
+37.2
+DFSDT
+64.2
+51.4
+58.0
+56.6
+59.4
+50.8
+BTP
+67.1
+55.2
+55.7
+51.9
+54.7
+63.1
+BATS
+60.2
+46.3
+50.1
+57.8
+48.7
+54.9
+MCO
+75.0
+62.7
+69.1
+78.6
+71.2
+77.9
+INTENT
+81.9
+69.2
+75.7
+78.3
+73.1
+79.5
+Max.
+84.9
+78.0
+80.7
+85.3
+79.6
+86.9
+our modeling assumptions, we report the group-wise PASS
+RATE breakdown in Table 2 for completeness.
+Across all task groups, oracle-based methods consistently
+outperform other baselines. In particular, when instantiated
+with the
+GPT 5 nano backbone, INTENT achieves uni-
+formly strong performance across groups and closely tracks
+the empirical upper bound that marked in gray.
+D. Further Experiments
+In this section, we present additional experiments to fur-
+ther analyze the behavior of INTENT, including compo-
+nent ablations (Appendix D.1), efficiency mechanisms (Ap-
+pendix D.2), and sensitivity analysis (Appendix D.3). All
+experiments are conducted using
+GPT 4.1 mini.
+D.1. Ablation of Oracle Components
+To understand the contribution of each design choice in
+INTENT, we conduct fine-grained ablation studies by selec-
+tively modifying the Intention Predictor and the Conditional
+Generator, while keeping the underlying agent and algorith-
+mic logic unchanged. Results are summarized in Table 3.
+Intention Predictor. We consider three variants that alter
+how success probabilities are estimated. (i) OPTIMISTIC as-
+sumes all future tool calls succeed with probability one, i.e.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+True Probability
+ECEraw = 0.0443
+ECEcal = 0.0077
+Ideal
+Before Calibration
+After Calibration
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Predicted Probability
+0.0
+0.1
+0.2
+Fraction
+Before Dist.
+After Dist.
+Figure 6. Calibration of the intention predictor. Top: Reliability
+diagram comparing predicted probabilities with empirical success
+rates, before and after post-hoc calibration. Calibration substan-
+tially reduces misalignment to the ideal diagonal and improves
+expected calibration error (ECE). Bottom: Distribution of predicted
+probabilities before and after calibration, showing improved prob-
+ability spreading without collapsing to degenerate extremes.
+Table 3. Component ablation of the INTENT oracle. We report
+the overall PASS RATE by ablating key components of INTENT.
+Removing or simplifying either modules consistently degrades
+performance, highlighting the complementary roles of calibrated
+intention estimation and ideal-trajectory generation.
+Method
+PR ↑
+INTENT
+63.8
+INTENTION PREDICTOR
+,→Optimistic
+59.3
+,→Uncalibrated
+59.7
+,→Empirical Mean
+62.7
+CONDITIONAL GENERATOR
+,→Stochastic
+62.0
+,→No Rollout
+60.2
+,→No Trace
+62.7
+˜ρ = 1 for any tool call pairs ( ˜T, ˜u); (ii) UNCALIBRATED
+uses the raw output probabilities of the predictor without
+post-hoc temperature scaling (Guo et al., 2017), see the cali-
+bration curve in Figure 6; (iii) EMPIRICAL MEAN replaces
+the predictor with a non-parametric baseline that assigns
+17
+
+=== [page 18] ===
+Budget-Constrained Agentic Large Language Models
+Table 4. Impact of Additional Mechanisms. Removing rollout
+caching, last-call caching, or blacklisting leads to substantially
+higher end-to-end time and latency, while having limited impact
+on Pass Rate, indicating that these mechanisms primarily improve
+efficiency without altering the core decision logic.
+Method
+PR ↑
+EFFICIENCY
+Time ↓
+Lat. ↓
+Tok. ↓
+INTENT
+63.8
+1.23×
+1.76×
+1.70×
+ADDITIONAL MECHANISMS
+w/o Rollout Cache
+65.3
+1.50×
+2.66×
+1.78×
+w/o Last Call Cache
+63.4
+1.46×
+2.57×
+1.69×
+w/o Blacklist
+62.5
+1.84×
+2.65×
+1.73×
+each tool a fixed predicted success probability equal to its
+empirical success frequency in the training data, ignoring
+contextual reasoning ˜r and arguments ˜u.
+Conditional Generator. We evaluate three alternatives that
+remove or weaken the lantent plan elicitation. (i) STOCHAS-
+TIC replaces intention-satisfying rollouts with stochastic
+sampling from the language world model, analogous to
+MCO; (ii) NO ROLLOUT disables lookahead entirely and
+only checks whether the immediate action satisfies the risk-
+adjusted cost constraint, without simulating future steps. (iii)
+NO TRACE removes the oracle-predicted trajectory upon
+rejection, leaving the agent with only budget-related signals.
+We observe consistent performance degradation when either
+component is ablated, confirming that both calibrated inten-
+tion prediction and ideal trajectory simulation are essential
+for stable and effective budget-aware planning.
+D.2. Ablation of Additional Mechanisms
+Table 4 reports an ablation study on the additional mecha-
+nisms used in INTENT. Removing any individual mecha-
+nism leads to a noticeable degradation in efficiency, reflected
+by increased end-to-end time and latency, while the overall
+task performance remains largely stable.
+D.3. Sensitivity Analysis
+We analyze the sensitivity of INTENT to the risk preference
+parameter γ, which controls the degree of conservatism in
+cost estimation. A larger γ penalizes uncertain future tool
+usage more heavily, leading to more conservative behavior,
+while a smaller γ encourages aggressive exploration.
+Figure 7 illustrates the trade-off between task performance
+and cost efficiency as γ varies. As γ increases, the aver-
+age cost consistently decreases, reflecting stricter budget
+control, while the pass rate gradually declines due to re-
+duced exploration. Importantly, this trade-off is smooth and
+well-behaved, without abrupt performance degradation.
+.1
+.3
+.5
+.7
+.9
+1.1 1.3 1.5
+Risk Preference 
+55
+60
+65
+Pass Rate (%)
+PR
+AC
+10
+20
+30
+Average Cost
+Figure 7. Sensitivity to risk preference γ. Pass Rate and Average
+Cost as functions of the risk preference parameter γ. Increasing γ
+leads to more conservative behavior with lower cost but reduced
+task success, revealing a clear performance–cost trade-off.
+Notably, INTENT exhibits a broad sweet spot at intermedi-
+ate values of γ (e.g., γ ≈0.5–0.7), where the agent achieves
+high pass rate while substantially reducing average cost,
+indicating that INTENT is not overly sensitive to precise
+tuning of γ, and allows flexible control over the trade-off.
+E. Case Study
+To provide a concrete and intuitive illustration of how
+INTENT operates, in this section, we present a detailed
+case study based on a representative task instance (ID:
+70610) from the cost-augmented StableToolBench (Guo
+et al., 2024). Agents are instantiated by
+GPT 4.1 mini.
+This instance corresponds to a financial analysis scenario,
+where the user asks the agent to gather relevant information
+about a target stock. The agent is presented with 30 available
+tools, and multiple tool chains can potentially solve the
+task, leading to a combinatorially large space of feasible
+strategies. The full task description is provided below.
+Task Description
+Query: My friend is interested in investing in
+stocks and wants to know more about Google.
+Can you fetch the quarterly cash flow, balance
+sheet, income statement, and ratios for Google?
+It would be great to have data on net income,
+total assets, revenue, and current ratio to assess
+the company’s financial health.
+Budget: 50 credit units.
+Market Snapshot: 30 Tools with heterogenous
+per-call costs, e.g. get_company_income_
+statement costs 11.
+We first demonstrate how the direct PROMPT approach fails
+under hard budget constraints, despite having access to ex-
+plicit cost information (Appendix E.1). We then show how
+INTENT intervenes at inference time, guiding the agent
+18
+
+=== [page 19] ===
+Budget-Constrained Agentic Large Language Models
+toward a feasible and ultimately successful solution through
+intention-aware planning (Appendix E.2).
+E.1. Failure of Direct Prompt
+In PROMPT, the budget constraint is explicitly incorporated
+into the user query, and the per-call cost of each tool is ap-
+pended to its description. The agent is therefore fully aware
+of the available budget and the monetary implications of
+each tool invocation. Despite this explicit information, the
+agent adopts a sequential data-collection strategy, beginning
+with the most expensive cash flow retrieval.
+Thought 1
+I’ll start by fetching Google’s quarterly cash flow
+data. This will help in assessing the company’s
+cash management and overall financial health. I
+need to be mindful of the 50 credits budget.
+Action 1 (TOOL CALL)
+get_company_quarterly_cash_
+flow(symbol="GOOGL")
+Cost: 38
+Observation 1
+{"symbol":"GOOGL","cash_flow":
+[{"date":"2023-01-31","net_
+income":7600000000,"operating_
+cash_flow":15200000000,"capital_
+expenditures":4500000000,"free_
+cash_flow":10700000000},...]}
+Total Spent: 38. Remaining Budget: 12.
+After each tool execution, the updated budget status is also
+injected into the observation, making the remaining budget
+explicitly visible to the agent. In the subsequent reasoning
+step, the agent indeed acknowledges that only a limited
+budget remains. However, it still proceeds to invoke another
+expensive tool to retrieve balance sheet data. This decision
+ultimately pushes the total expenditure beyond the allowed
+budget, resulting in a failed trajectory despite the agent’s
+apparent awareness of the constraint.
+Thought 2
+I have obtained Google’s quarterly cash flow data
+including net income. Next, I will use the remain-
+ing 12 credits to fetch the quarterly balance sheet
+to get data about total assets and current ratio
+for the company, as these are important to assess
+financial health.
+Action 2 (TOOL CALL)
+get_company_quarterly_balance_
+sheet(symbol="GOOGL")
+Cost: 23
+Observation 2
+{"Company":"AlphabetInc.
+","Symbol":"GOOGL",
+"QuarterlyBalanceSheets":
+[{"Date":"2023-06-30",
+"CashandCashEquivalents":
+15000000000,"TotalAssets":
+300000000000,...},...]}
+Total Spent: 61. Remaining Budget: -11.
+Thought 3
+Oops! The budget has been exceeded. Now I
+have to synthesize the final answer based on the
+information collected so far.
+Action 3 (ANSWER)
+Answer: I fetched Google’s recent quarterly fi-
+nancial data. Net income for the last quarters
+is around $7.1B to $7.6B. Total assets are ap-
+proximately $295B to $300B. Cash and Cash
+Equivalents are roughly $15B. The current ratio
+was not directly provided, but you can estimate
+financial health from assets and liabilities. These
+insights provide a view into Google’s strong fi-
+nancial position. Note: The budget of 50 credits
+was exceeded by 11 credits.
+E.2. Solution Trajectory of INTENT
+Thought 1
+The user wants multiple financial data for Google,
+but the budget is 50 credits. To stay within budget,
+I should carefully choose which functions to call.
+Each function has a specific credit cost. I’ll start
+by fetching Google’s quarterly cash flow, which
+costs 38 credits, leaving only 12 credits left. Then,
+given the remaining budget, I may fetch the income
+statement next, which costs 11 credits. This will
+probably leave no credits for ratios or balance sheet.
+However, quarterly cash flow and income statement
+usually contain net income and cash flow metrics.
+So it’s a good first step. I will fetch quarterly cash
+flow first for "GOOGL".
+19
+
+=== [page 20] ===
+Budget-Constrained Agentic Large Language Models
+Action 1 (TOOL CALL)
+get_company_quarterly_cash_
+flow("symbol":"GOOGL") Cost: 38, p:0.35
+Under INTENT, the agent initially proposes a similar strat-
+egy, planning to retrieve financial data step by step. It im-
+plicitly hopes that earlier tool calls may provide sufficient
+coverage, potentially compensating for information that
+could not be obtained later due to budget limitations.
+#
+INTENT ORACLE: IDEAL TRAJECTORY
+SIMULATION
+Nothing in cache, rollout begins...
+Simulated Observation 1
+[SomeUsefulData]
+Simulated Thought 2
+I have obtained quarterly cash flow data for
+Google including net income (10 billion), total
+assets (300 billion), and net assets, which are
+useful. However, the balance sheet is needed
+to get the current ratio ...
+Simulated Action 2
+get_company_quarterly_income_
+statement(symbol="GOOGL")
+Cost:
+11, p:0.97
+Simulated Observation 2
+[SomeUsefulData]
+Simulated Thought 3
+I have Google’s annual income statement data
+showing revenue and net income for recent
+years, but user wanted quarterly info. The cash
+flow data provided quarterly info for 2023 Q2.
+The income statement API gave...
+Simulated Action 3
+Answer: [ReturnedAnswer]
+Risk-Adjusted Cost (γ = 0.5):
+0.5[(38/0.35) + (11/0.97)] = 60.36 > 50
+. Decision: REJECT (Insufficient budget for the
+complete latent plan).
+However, after performing intention-aware lookahead, the
+oracle determines that the projected total cost of the current
+plan would exceed the remaining budget. As a result, the
+proposed tool call is intercepted and prevented from being
+executed in the real environment.
+Observation 1 (ORACLE)
+Budget check failed. Your current plan is pre-
+dicted to exceed the remaining budget. Pay at-
+tention to the predicted success probability, some
+tools may have a significantly lower chance than
+you expected, try to avoid them in the next itera-
+tion. [BudgetStateInformation]
+Predicted
+Tool
+Trace:
+[{"action":
+"get_company_quarterly_cash_
+flow","price":38,"p_success":
+0.35,"expected_cost":109.
+34},{"action":"get_company_
+quarterly_income_statement",
+"price":11,"p_success":0.97,
+"expected_cost":11.39}]
+Please revise your plan (fewer calls / different
+tools / answer directly).
+To facilitate more informed replanning, the oracle constructs
+a synthetic observation that includes the updated budget sta-
+tus, the anticipated sequence of future actions, and their
+corresponding predicted success probabilities. This feed-
+back exposes the projected risk structure of the current plan,
+allowing the agent to identify potential bottlenecks and ad-
+just its strategy accordingly.
+Importantly, the trace does not reveal the predicted argu-
+ments or simulated observations of future tool calls. This
+design deliberately avoids injecting noisy or speculative
+content into the context, and prevents potential information
+leakage that could otherwise enable the agent to exploit the
+simulation as a shortcut to the final answer.
+Thought 2
+The initial tool call is predicted to exceed the budget
+due to a low success probability. To reduce cost
+and risk, I’ll switch to a cheaper tool for quarterly
+cash flow data. The quarterly_cashflow_
+statements from Freedom Finance costs only
+7 credits, which is much cheaper. I can try this tool
+first to fetch Google’s quarterly cash flow. Then, if
+budget allows, I will decide on the next call.
+Action 2 (TOOL CALL)
+quarterly_cashflow_
+statements("symbol":"GOOGL") Cost: 7,
+p:0.02
+20
+
+=== [page 21] ===
+Budget-Constrained Agentic Large Language Models
+Based on the oracle’s feedback, the agent identifies the bot-
+tleneck in its original plan: the expensive cash flow tool has
+a relatively low predicted success probability in satisfying
+its intention, making it a high-risk and high-cost choice
+under the remaining budget.
+Consequently, the agent revises its strategy and substitutes
+it with a cheaper alternative tool from a different source
+(Freedom Finance), trading marginal information quality
+for substantially improved budget feasibility.
+#
+INTENT ORACLE: IDEAL TRAJECTORY
+SIMULATION
+Nothing in cache, rollout begins...
+Simulated Observation 2
+[SomeUsefulData]
+Simulated Thought 3
+I successfully retrieved Google’s quarterly cash
+flow statements with the recent quarters’ oper-
+ating cash flow and free cash flow. The cost
+was only 7 credits, leaving enough credits for
+further data. Next, I wi...
+Simulated Action 3
+quarterly_income_
+statements(symbol="GOOGL") Cost:
+13, p:0.01
+Simulated Observation 3
+[SomeUsefulData]
+Simulated Thought 4
+I have successfully retrieved Google’s quarterly
+income statement including revenue and net
+income for recent quarters from the freedom
+finance source at a cost of 13 credits. I still
+have about 30 credits left....
+Simulated Action 4
+get_company_quarterly_
+ratios(symbol="GOOGL")
+Cost: 45,
+p:0.72
+Simulated Observation 4
+[SomeUsefulData]
+...
+Risk-Adjusted Cost (γ = 0.5): 1308.34 > 50
+. Decision: REJECT.
+Observation 2 (ORACLE)
+Budget check failed.
+[Prompt] [BudgetStateInformation]
+Predicted Tool Trace: [...]
+Please revise your plan (fewer calls / different
+tools / answer directly).
+However, a second intention-aware lookahead reveals that
+the revised plan remains infeasible. Although the newly
+selected tool is cheaper, it exhibits low predicted intention-
+satisfaction probability. As a result, repeated retries are
+likely to be triggered, and the accumulated cost may still
+exhaust the remaining budget. The oracle therefore blocks
+this call as well, preventing the agent from entering a high-
+variance failure loop.
+Notably, when the optional BLACKLIST mechanism
+is
+enabled,
+tools
+whose
+predicted
+success
+proba-
+bilities
+are
+extremely
+low,
+such
+as
+quarterly_
+cashflow_statements and quarterly_income_
+statements in this instance, are temporarily removed
+from the candidate tool set. This prevents the agent from
+repeatedly reconsidering high-risk tools in subsequent steps,
+further stabilizing the planning process.
+Thought 3
+The cheaper tool for quarterly cash flow also is pre-
+dicted to exceed budget due to very low success
+probability. Given strict budget and Oracle feed-
+back, I should consider a tool with higher success
+rate or move to a single reliable call that may cover
+multiple requested data points. The Holistic Finance
+Stock Data provides annual or quarterly cash flow
+statements at 9 credits, which is cheaper and might
+have better success chance. I will try this one for
+quarterly cash flow.
+Action 3 (TOOL CALL)
+cashflow(period":"quarterly",
+symbol="GOOGL")
+Cost: 9, p:0.71
+After receiving this additional feedback, the agent explores
+an alternative strategy and identifies a more suitable solution
+path. In particular, the tools provided by Holistic Finance
+Stock Data offer a favorable trade-off. It is relatively in-
+expensive and might be capable of returning aggregated
+financial information in a single call.
+21
+
+=== [page 22] ===
+Budget-Constrained Agentic Large Language Models
+#
+INTENT ORACLE: IDEAL TRAJECTORY
+SIMULATION
+Nothing in cache, rollout begins...
+Simulated Observation 3
+[SomeUsefulData]
+Simulated Thought 4
+I have fetched quarterly cash flow data for
+Google (GOOGL) from a cost-effective source.
+Next, I need to get at least one more major data
+piece that includes net income, total assets, rev-
+enue, and current ratio. ...
+Simulated Action 4
+get_company_quarterly_income_
+statement(symbol="GOOGL")
+Cost:
+11, p:0.94
+Simulated Observation 4
+[SomeUsefulData]
+Simulated Thought 5
+I have obtained Google’s quarterly income
+statement with net income and revenue, but
+I still lack total assets and current ratio for a
+complete assessment. The balance sheet would
+provide total assets and curren...
+Simulated Action 5
+get_company_quarterly_balance_
+sheet(symbol="GOOGL")
+Cost: 23,
+p:0.90
+Simulated Observation 5
+[SomeUsefulData]
+...
+Risk-Adjusted Cost (γ = 0.5): 49.88 < 50
+- Decision: ACCEPT.
+Given this revised plan, after performing another rollout,
+the oracle determines that the revised plan now exhibits
+both a lower projected cost and a higher predicted intention-
+satisfaction probability. The corresponding risk-adjusted
+total expenditure falls within the remaining budget.
+Consequently, the oracle finally approves the proposed ac-
+tion, allowing the tool call to be executed in the real envi-
+ronment and the trajectory to proceed.
+Observation 3
+[{’symbol’:’GOOGL’,’date’:
+’2023-05-05’,’period’:’Q1’
+,’reportedCurrency’:’USD’,’
+netCashFlow’:109131000000,
+’freeCashFlow’:77307000000,
+’cashFlowPerShare’:25.161,...}]
+Total Spent: 9. Remaining Budget: 41.
+Thought 4
+I successfully fetched Google’s quarterly cash flow
+data for Q1 2023 at a cost of 9 credits, leaving 41
+credits. Next, I need to get the quarterly balance
+sheet (for total assets) and income statement (for
+revenue and net income). The income statement
+costs 11 credits, balance sheet 23 credits. I have
+enough budget to get income statement next, which
+is most critical for net income and revenue. Then,
+if budget allows, I will get the balance sheet. I will
+proceed with getting the quarterly income statement
+for Google.
+The actual execution outcome aligns with the agent’s expec-
+tation inferred from the ideal rollout. As a result, the agent
+proceeds to the next tool call following the anticipated plan.
+Action 4 (TOOL CALL)
+get_company_quarterly_income_
+statement(symbol="GOOGL")
+Cost: 11
+#
+INTENT ORACLE
+Rollout Cache: [get_company_
+quarterly_income_statement,get_
+company_quarterly_balance_sheet]
+Cache hit, allow tool call attempt.
+- Decision: ACCEPT.
+As anticipated, the actual tool call matches the action
+recorded in the previously cached rollout (we only cache
+tool names in experiments for convenience). This plan conti-
+nuity allows the oracle to directly approve the action without
+performing an additional lookahead.
+Observation 4
+{"symbol":"GOOGL","income_
+statement":[{"fiscal_date":
+"2023-09-30","revenue":
+69782000000,"operating_expense":
+15500000000,...},...]}
+Total Spent: 20. Remaining Budget: 30.
+22
+
+=== [page 23] ===
+Budget-Constrained Agentic Large Language Models
+Thought 5
+I obtained Google’s quarterly income statement
+showing recent revenues and net incomes at a cost
+of 11 credits, leaving 30 credits. The last requested
+data is the quarterly balance sheet for total assets
+and current ratio. The balance sheet call costs 23
+credits, which is within the budget. I will call for
+the quarterly balance sheet next.
+Action 5 (TOOL CALL)
+get_company_quarterly_balance_
+sheet(symbol="GOOGL")
+Cost: 11
+#
+INTENT ORACLE
+Rollout Cache: [get_company_
+quarterly_balance_sheet]
+Cache hit, allow tool call attempt.
+- Decision: ACCEPT.
+Similarly, the outcome of this tool call is consistent with
+the agent’s prior expectation under the simulated ideal tra-
+jectory. The next proposed action therefore aligns with the
+cached plan, resulting in another cache hit. Since the re-
+maining sequence has already been validated to satisfy the
+risk-adjusted budget constraint, the oracle directly approves
+the action without additional rollout.
+Observation 5
+[{"symbol":"GOOGL","date":
+"2023-09-30","currency":"USD",
+"cash_and_cash_equivalents":
+154831000000,"short_term_
+investments":79101000000,"net_
+receivables":26484000000,...}]
+Total Spent: 43. Remaining Budget: 7.
+Thought 6
+I have successfully fetched Google’s quarterly bal-
+ance sheet data including total assets and current
+assets at a cost of 23 credits. With the data from
+cash flow, income statement, and balance sheet, I
+can now calculate the current ratio and compile net
+income, total assets, and revenue for the user. I
+will now summarize all the gathered data in a final
+answer and finish the task.
+Ultimately, after gathering sufficient information, the agent
+terminates with a final answer, successfully completing the
+task within the prescribed budget.
+Action 6 (ANSWER)
+Answer: I have gathered the latest financial data
+for Google (GOOGL) to help your friend assess
+the company’s financial health:
+1. Quarterly Cash Flow (Q1 2023):
+- Operating Activities Cash Flow: $41.68 billion
+- Investing Activities Cash Flow: $31.12 billion
+- Financing Activities Cash Flow: -$9.18 billion
+- Net Cash Flow: $109.13 billion
+- Free Cash Flow: $77.31 billion
+2. Quarterly Income Statement (Q2/Q3 2023):
+- Revenue (Q3 2023): $69.78 billion
+- Net Income (Q3 2023): $25.42 billion
+- Revenue (Q2 2023): $76.04 billion
+- Net Income (Q2 2023): $26.67 billion
+3. Quarterly Balance Sheet (Q3 2023):
+- Total Assets: $766.94 billion
+- Total Current Assets: $327.52 billion
+- Total Liabilities: $608.26 billion
+- Total Shareholders’ Equity: $158.68 billion
+4. Financial Ratio - Current Ratio (Current As-
+sets / Current Liabilities):
+- Total Current Liabilities can be approximated
+as Total Liabilities minus Shareholders’ Equity:
+$608.26B - $158.68B = $449.58 billion
+- Current Ratio = 327.52 / 449.58 ≈0.73
+Summary: Google has strong revenue and net
+income figures in recent quarters. The total as-
+sets are very large, and the current ratio of ap-
+proximately 0.73 indicates that current liabilities
+exceed current assets, which could mean tighter
+short-term liquidity. However, the company also
+shows robust cash flows.
+If your friend needs more detailed financial anal-
+ysis or other data, feel free to ask!
+This case study illustrates that INTENT does not merely
+act as a budget checker that blocks infeasible actions. In-
+stead, by exposing the risk structure of anticipated plans,
+it actively reshapes the agent’s search trajectory toward
+structurally efficient and budget-feasible solutions. Once a
+stable and cost-effective plan is identified, subsequent execu-
+tion proceeds smoothly with minimal intervention through
+rollout reuse. Together, these behaviors demonstrate how
+lightweight, intention-aware inference-time planning can
+reconcile strong agentic capability with strict monetary con-
+straints in dynamic tool markets.
+23

@@ -1,0 +1,101 @@
+
+
+    Cutting MCP Token Costs by 92% at 500+ Tools
+
+            Try Bifrost Enterprise free for 14 days.
+            Request access
+
+                        Download SVG
+
+                        Brand assets
+
+                    MCP Gateway
+
+Cutting MCP Token Costs by 92% at 500+ Tools
+
+                    Kuldeep Paul
+
+                Apr 20, 2026
+
+                    7 min
+
+MCP tool lists blow up context windows as agents scale. Here is how Bifrost's Code Mode cuts token costs by up to 92.8% at 500+ tools, verified in benchmarks.
+MCP token costs are the quiet infrastructure bill that surprises every serious AI team. Agents that worked fine with three Model Context Protocol servers start burning hundreds of dollars per day once twenty servers and a few hundred tools are connected. The culprit is not the model and it is not the prompt. It is the default MCP execution pattern itself, which injects every tool definition from every connected server into context on every single request. Bifrost, the open-source AI gateway built by Maxim AI, addresses this directly with a Code Mode execution path that reduced input tokens by 92.8% at 508 tools in controlled benchmarks, with zero loss of accuracy.
+This post unpacks why MCP costs scale the way they do, how the industry is converging on code execution as the fix, and what the Bifrost benchmark numbers reveal about the real economics of agent infrastructure.
+Why MCP Token Costs Explode at Scale
+The Model Context Protocol, introduced by Anthropic, standardizes how AI applications connect to external tools. The default client behavior is to load every tool definition from every connected MCP server directly into the model's context on every turn. Anthropic's engineering team described the problem plainly in their analysis of code execution with MCP: as the number of connected tools grows, loading all tool definitions upfront and routing intermediate results through the context window slows agents down and increases cost.
+The arithmetic is unforgiving. Connect five MCP servers with thirty tools each and the model receives 150 tool definitions before the user prompt is even parsed. Multi-step workflows compound the problem because intermediate tool outputs, often large documents or datasets, flow back through context more than once. Anthropic reports that a single Google Drive to Salesforce transcript workflow can drop from roughly 150,000 tokens under the default pattern to around 2,000 tokens when restructured as code execution, a reduction of approximately 98.7%.
+Four concrete drivers turn MCP adoption into a cost curve:
+Full tool catalog per turn: every tool schema is serialized into the prompt, whether or not the model will use it
+Intermediate result round-trips: data retrieved by one tool is pushed back through context before being handed to the next
+Multi-turn agent loops: each new turn re-attaches the full tool list
+Multi-server fanout: adding MCP servers is linear in integration effort but roughly linear in token tax per request
+The standard mitigation, trimming the tool list, is not a solution. It is a capability tradeoff dressed up as optimization.
+The Industry Shift Toward Code Execution for MCP
+A better pattern has been taking shape across AI infrastructure teams over the last several months. Instead of exposing tools to the model as flat function-call schemas, expose them as a typed API and let the model write a short program that orchestrates multiple calls. The model reads documentation on demand, composes logic locally, and returns only the final result.
+Cloudflare pioneered the public version of this pattern with Code Mode. In their Code Mode announcement, they showed that converting an MCP server into a TypeScript API and asking the model to write code against it delivered a roughly 81% reduction in token usage compared to direct tool calling. In a follow-up Cloudflare MCP server implementation, the entire Cloudflare API, spanning more than 2,500 endpoints across DNS, Workers, R2, and Zero Trust, is exposed through just two meta-tools (search() and execute()) using approximately 1,000 tokens regardless of catalog size. An equivalent flat-tool MCP server would consume over one million tokens, more than the context window of most foundation models.
+Anthropic's engineering team independently published the same pattern for MCP, framing it as a way to handle more tools while using fewer tokens. The pattern is now widely known as code execution with MCP or Code Mode. Three properties define it:
+The model treats MCP tools as a filesystem of typed API stubs, not as a flat tool list
+The model reads only the stubs it needs for the current task
+The model writes a short script that runs inside a sandbox, calling tools directly and returning only the final result
+Bifrost's Code Mode is the gateway-level implementation of this idea, built into the same control plane that already handles routing, access control, and observability.
+Inside Bifrost Code Mode: Python Stubs and a Starlark Sandbox
+Bifrost exposes connected MCP servers as a virtual filesystem of lightweight Python stub files. Python was chosen over JavaScript because large language models have seen substantially more real-world Python than any other language in their training data, which produces higher first-pass success rates on generated orchestration code. A dedicated documentation tool further reduces the context footprint by letting the model pull doc strings for a specific tool only when it is about to use it.
+The model works through four meta-tools:
+listToolFiles: discover which servers and tools are available
+readToolFile: load Python function signatures for a specific server or tool
+getToolDocs: fetch detailed documentation for a specific tool before use
+executeToolCode: run the orchestration script against live tool bindings
+Generated code runs in a sandboxed Starlark interpreter with no imports, no file I/O, and no network access. Execution is deterministic and safe to auto-run inside an agent loop. Bindings at the server or tool level let platform teams expose one stub per server for compact discovery or one stub per tool for granular permissioning. Tool-level scoping is enforced by virtual keys, so a model that is not permitted to call a tool never sees its definition in the first place. The full governance picture, including MCP Tool Groups and per-tool cost tracking, is covered in the Bifrost engineering writeup on MCP access control, cost governance, and 92% lower token costs at scale.
+Benchmark: 96, 251, and 508 Tools Measured
+To quantify the savings, Bifrost ran three rounds of controlled benchmarks with Code Mode on and off, scaling the tool count between rounds. The same query set ran against the same models in every configuration. Pass rate was measured to confirm accuracy was preserved.
+The headline results:
+Round 1, 96 tools across 6 servers: input tokens fell from 19.9M to 8.3M (−58.2%), estimated cost from $104.04 to $46.06 (−55.7%), pass rate 100% in both configurations
+Round 2, 251 tools across 11 servers: input tokens fell from 35.7M to 5.5M (−84.5%), estimated cost from $180.07 to $29.80 (−83.4%), pass rate 100% with Code Mode on
+Round 3, 508 tools across 16 servers: input tokens fell from 75.1M to 5.4M (−92.8%), estimated cost from $377.00 to $29.00 (−92.2%), pass rate 100% in both configurations
+Two things stand out. First, savings are not linear. They compound as the MCP footprint grows because the classic pattern's cost scales with tool count while Code Mode's cost scales with what the model actually reads. Second, accuracy was not traded away to get there. Pass rate remained at 100% in Rounds 1 and 3 and reached 100% in Round 2. The complete methodology and raw data are published in the Bifrost MCP Code Mode benchmark report.
+What the Curve Reveals About MCP Economics
+The benchmark's most interesting finding is the shape of the savings curve. At roughly 100 tools, Code Mode delivers a meaningful but moderate win. At 250 tools the gap widens sharply. At 500 tools the two approaches live in different economic universes, around 14× fewer input tokens per query and a total cost ratio of roughly 13 to 1.
+Three implications follow for teams planning AI infrastructure in 2026:
+Agent capability is bounded by context economics, not tool count. The question is no longer "how many tools can we connect?" but "how many tools can we afford to expose on every turn?" Code execution removes that ceiling.
+MCP governance and MCP cost are the same problem. The best way to stop paying for tool definitions that never get used is to stop injecting them into context by default. Scoped access via virtual keys, tool groups, and per-tool bindings all reduce both blast radius and token bill.
+The gateway layer is where this gets solved. Implementing code execution per-agent or per-application is fragile and duplicative. Implementing it inside a gateway that already handles routing, authentication, and observability gives every consumer of the MCP fleet the same economics with no client changes.
+Teams evaluating this pattern alongside broader gateway capabilities can review the Bifrost MCP gateway resource page for the full feature surface and architecture.
+Implementing Code Mode in Production
+Enabling Code Mode in Bifrost is a configuration toggle, not a rewrite. The rollout pattern that has worked best in practice follows four steps:
+Add MCP clients: register each MCP server with its connection type (HTTP, SSE, STDIO, or in-process). Bifrost discovers tools and begins periodic sync.
+Enable Code Mode per client: flip the toggle in the client settings. The four meta-tools replace the flat tool catalog automatically. No schema changes or redeployment are required.
+Configure auto-execution: mark safe, read-only tools as auto-executable. executeToolCode becomes auto-executable only when every tool the generated script calls is already on the auto-executable list, which keeps write operations behind explicit approval by default.
+Scope access with virtual keys and MCP Tool Groups: issue scoped credentials per consumer and group tools into named collections that attach to keys, teams, or customers. Access control and enterprise AI governance are enforced at request time.
+Every tool call becomes a first-class log entry with tool name, server, arguments, result, latency, the virtual key that triggered it, and the parent LLM request that initiated the agent loop. That telemetry is what makes the cost curve auditable rather than anecdotal.
+Getting Started with Bifrost Code Mode
+MCP token costs stop being a scaling ceiling when tool exposure is decoupled from context loading. In controlled benchmarks at 508 tools across 16 servers, Bifrost Code Mode reduced input tokens by 92.8% and estimated cost by 92.2% with no accuracy loss, and the gap widens as the MCP footprint grows. To see how Bifrost handles MCP token cost optimization, governance, and observability in production, book a Bifrost demo with the team.
+
+Read next
+
+Top 5 MintMCP Alternatives for Governing MCP in 2026
+
+MintMCP, now renamed Mintive, is a managed MCP gateway for governing which tools AI agents can reach. This guide compares five MintMCP alternatives, including Bifrost, Docker MCP Gateway, IBM ContextForge, and Obot, on deployment, tool-level access control, identity, and audit.
+
+Best MCP Servers for Cursor in 2026 and One Gateway to Run Them
+
+The best MCP servers for Cursor connect the editor to design files, browsers, docs, and delivery tools. This guide ranks Figma, Playwright, Context7, GitHub, Linear, and five more by Cursor workflow, then shows how Bifrost runs them all behind one governed endpoint.
+
+15 Best MCP Servers for Claude Code in 2026, and How to Run Them Through One Gateway
+
+The best MCP servers for Claude Code are vendor-maintained servers that connect the terminal agent to GitHub, Sentry, Playwright, Context7, Supabase, and more. This guide covers 15 of them, how to add each one, and how to run them all through Bifrost as one MCP gateway.
+
+More in MCP Gateway
+
+The Hidden Cost of Connecting Multiple MCP Servers to an Agent
+
+The hidden cost of multiple MCP servers compounds with every tool you add. Learn how token bloat, intermediate results, and governance gaps inflate agent spend.
+
+Every team building production AI agents eventually reaches the same moment: the agent works, more tools get connected, and then the bill arrives. The hidden
+
+How to Govern MCP Access Across Teams, Customers, and Third-Party Integrations
+
+MCP access governance requires scoped credentials, tool-level permissions, and audit trails. Learn how to govern MCP access across teams and integrations.
+
+The Model Context Protocol (MCP) has become the de facto standard for connecting AI agents to external tools, data sources, and business systems. As production deployments grow, MCP
+
