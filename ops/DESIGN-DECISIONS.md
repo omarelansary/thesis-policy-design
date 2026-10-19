@@ -139,3 +139,10 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - The human lifted the numeric caps on the literature check (AUTH-013). Rounds 3 and 4 added sources on false-positive tool calling, overuse, memory, code mode, cost-aware tool use; results in `design/package-v4/05` sections 3-4 and `findings/SUM-0006..0008`.
 - Corrections to the lead's own text after the challenger (RV-0007): the Reasoning Trap's rate is a rate of not declining; a snippet-derived "65/65 passes" was removed; "more likely a real gap" retracted.
 - The bill-versus-tokens switch and the memory scope stay pending on the supervisor (see STATE).
+
+## WD-024 Open-items ledger placed in the repo (AUTH-016, 2026-10-19)
+- The human asked to put the open-items workbook in the repo and to close items commit by commit with evidence (verbatim in AUTH-016). Answers to the lead's four questions: location `design/ledger/`; first commit workbook only; CSV export of Ledger, Questions and Change log; evidence = repo first, then web fetches for the named item.
+- Decision (lead): the workbook `design/ledger/PROJECT_A_OPEN_ITEMS_LEDGER.xlsx` is the single canonical copy and is edited in place, never rebuilt from scripts (a rebuild would overwrite typed answers). The CSV export (`design/ledger/export_ledger.py`, `design/ledger/export/`) is derived and exists so that commit diffs show per-item changes; the script computes the formula columns itself because no spreadsheet engine is installed here to recalculate.
+- Decision (lead): rows are never renumbered; Joaa's statements are recorded verbatim (sheet "Supervisor statements") and described as his proposals; the review report and SRC-11/12 stay untracked in `.workspace` (human's choice) until admitted.
+- Limits found: the workbook was open in another program when the lead tried to move it, so it was copied; the old copy in `.workspace` is a duplicate to delete once it is closed.
+- Not covered: no AUTH admits SRC-11/12 or the review report; no experiment, parameter or thesis-question choice is made by AUTH-016.
