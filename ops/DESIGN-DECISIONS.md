@@ -146,3 +146,10 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Decision (lead): rows are never renumbered; Joaa's statements are recorded verbatim (sheet "Supervisor statements") and described as his proposals; the review report and SRC-11/12 stay untracked in `.workspace` (human's choice) until admitted.
 - Limits found: the workbook was open in another program when the lead tried to move it, so it was copied; the old copy in `.workspace` is a duplicate to delete once it is closed.
 - Not covered: no AUTH admits SRC-11/12 or the review report; no experiment, parameter or thesis-question choice is made by AUTH-016.
+
+## WD-025 Ledger batch 1 (AUTH-016, thread T-20261019-99, 2026-10-19)
+- Process (lead): four evidence-stewards in parallel on disjoint files read stored sources at pointer ranges the lead located by keyword; the lead re-checked key quotes against the extracts and then updated the workbook in place. Steward findings are FND-0008..0011 (findings/SUM-0010..0013), extracts EXT-0114..0148.
+- Result: 4 rows closed on evidence and archived (C-S08/BFCLDEF, C-E02/E20, N-18, N-24); 12 rows sharpened to PARTLY ANSWERED with a stated remainder; 1 new row (C-E01/E01-ROW6); C-R03/STUB unchanged (not stated in the ranges read).
+- Corrections of earlier wording are recorded in the ledger, not by editing v4-05: BFCL definitions; BFCL paper is stored in full; Bedrock minimum 512; Anthropic counts tool-search-loaded definitions as input tokens; the full-miss exception belongs to the inline-tools beta.
+- Mechanical: the guard lets a subagent write only `ops/threads/*/evidence-steward.md`, so the lead wrote the per-steward logs from the hand-backs and did not change `config/ownership.json`; one steward front matter had unquoted EXT ids (the verifier rejects that) and was fixed after the steward finished.
+- Retained limits: all four stewards and the lead share a model family (C-E04); vendor pages are vendor claims dated 2026-10-11.
