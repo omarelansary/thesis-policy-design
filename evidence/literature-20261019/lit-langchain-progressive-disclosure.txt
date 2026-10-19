@@ -1,0 +1,129 @@
+
+
+Progressive Tool Disclosure with Deep Agents | LangChain Knowledge Base
+
+        Ask AI
+
+    Home
+
+    Docs
+
+    Status Page
+
+    Forum
+
+    US Status
+    EU Status
+    Ask AI
+
+Progressive Tool Disclosure with Deep Agents
+
+                  Last updated 6 months ago
+
+Problem
+When an agent has access to many tools (30+), sending all tool definitions on every model call creates significant context bloat. This can degrade model accuracy, increase latency, and waste tokens. The model performs better when it chooses from a smaller, relevant set of tools.
+Solution
+Use a wrap_model_call middleware to control which tools the model sees on each turn. Pass all tools in the tools= list when creating the agent (so the executor can run any of them), then use middleware to filter which ones the model actually sees at inference time.
+The core API is request.override(tools=filtered_tools), which returns a new request with only the tools you specify.
+Example
+from langchain.tools import tool
+from langchain.agents.middleware import wrap_model_call, ModelRequest, ModelResponse
+from deepagents import create_deep_agent
+from typing import Callable
+
+# All tools registered upfront
+ALL_TOOLS = [tool_a, tool_b, tool_c, ...]  # 45 tools
+
+# A small set always visible to the model
+CORE_TOOLS = {"search_tools", "read_file", "write_file"}
+
+@tool
+def search_tools(query: str) -> str:
+    """Search for available tools by keyword. Use this when you need
+    a capability that isn't currently available."""
+    matches = [
+        f"- {t.name}: {t.description}"
+        for t in ALL_TOOLS
+        if query.lower() in t.name.lower()
+        or query.lower() in t.description.lower()
+    ]
+    return "\n".join(matches) if matches else "No matching tools found."
+
+@wrap_model_call
+def progressive_disclosure(
+    request: ModelRequest,
+    handler: Callable[[ModelRequest], ModelResponse],
+) -> ModelResponse:
+    active = set(CORE_TOOLS)
+
+    # Scan message history for prior search_tools calls
+    for msg in request.state["messages"]:
+        if hasattr(msg, "tool_calls"):
+            for tc in msg.tool_calls:
+                if tc["name"] == "search_tools":
+                    q = tc["args"].get("query", "").lower()
+                    for t in ALL_TOOLS:
+                        if q in t.name.lower() or q in t.description.lower():
+                            active.add(t.name)
+
+    filtered = [t for t in request.tools if t.name in active]
+    return handler(request.override(tools=filtered))
+
+agent = create_deep_agent(
+    model="anthropic:claude-sonnet-4-6",
+    tools=[search_tools, *ALL_TOOLS],
+    middleware=[progressive_disclosure],
+)
+How it works
+
+The model always sees a small core set of tools plus search_tools
+
+When the model needs a capability it doesn't have, it calls search_tools with a keyword
+
+The middleware scans message history for prior search_tools calls and adds matching tools to subsequent model calls
+
+Tools are "discovered" progressively, keeping each prompt compact
+Notes
+
+This pattern uses the same middleware system (wrap_model_call + request.override) documented in the LangChain custom middleware guide
+
+create_deep_agent accepts custom middleware via the middleware= parameter; your middleware runs after the built-in stack
+
+For simpler cases where tools can be categorized statically (e.g. by user role or conversation phase), you can skip search_tools entirely and filter based on state or runtime context. See Filtering pre-registered tools
+
+If you want to track discovered tools in graph state (instead of scanning message history), define a custom state_schema with a discovered_tools field and update it from before_model. See Custom state schema
+
+OSS (LangChain and LangGraph)
+
+                How to Implement System Prompt Caching in AWS Bedrock using LangChain
+
+                LangGraph Thread Deletion Runbook
+
+                How do I configure checkpointing in LangGraph?
+
+                MCP Server Runtime in Google Colab / Jupyter Notebook
+
+                Isolating Subgraph State When Calling Graphs from Tools
+
+                How do I connect JIRA, Slack, and Confluence MCPs with LangChain?
+
+                Why Do Pydantic date Fields Fail in LangGraph State?
+
+                Configuring Timeout for init_chat_model in LangChain
+
+                Using Local LLM and LangChain Anonymizer for PII Anonymization
+
+                LLM Not Following Nested Tool Schema? Use strict=True
+
+                How do I retrieve the most recent conversations using PostgresStore search?
+
+                LangGraph CLI Not Detecting Custom Graph Classes
+
+                Progressive Tool Disclosure with Deep Agents
+
+                How do I resolve memory issues when streaming tokens with Deepagents and subagents using JavaScript?
+
+                Attaching per-message context metadata for LLM awareness (LangChain.js)
+
+                StreamChunkTimeoutError during async streaming with langchain-openai
+

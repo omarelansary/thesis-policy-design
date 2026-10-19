@@ -1,0 +1,5 @@
+# Log: evidence-steward-4b (T-20261019-102; written by the lead from the steward's final answer)
+- Wrote findings/SUM-0019-batch4b-procedural-memory.md (FND-0017). Texts: SkillLens, Skill-Pro (stored as lit-procmem-2602.01869.txt; the paper is titled Skill-Pro), CodeMem, efficient-agents survey, MemSkill. No new EXT ids, no messages.
+- N-6: NOT FOUND IN THESE TEXTS (no cross-session measurement of persisting knowledge of which tools exist or were used; CodeMem asserts reuse without a no-memory baseline).
+- N-6/SKILLMEM: PARTLY by the steward (mechanism, cost of persisted memory: SkillLens x3.21 retrieval time and +22.7% tokens from 25% to 100% of the skill pool; MemSkill first-turn 1,313 vs 4,949 tokens, a one-task case study); lead closed the row on its own criterion (search done, related work read), noting unread cited papers and appendices.
+- Largest library in any experiment: no count stated in these texts (CodeMem 25 tasks with 2-8 tools each; MemSkill 6 skills). Coverage gaps are listed in the finding. Lead second reader: SkillLens and MemSkill numbers re-checked in the stored texts.

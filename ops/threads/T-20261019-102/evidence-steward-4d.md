@@ -1,0 +1,4 @@
+# Log: evidence-steward-4d (T-20261019-102; written by the lead from the steward's final answer)
+- Wrote findings/SUM-0021-batch4d-missing-sources.md (FND-0019). Texts: three Cursor forum threads, Claude Code issues #59650 and #30920 (mirrors), ToolHop. No origin extractions, no messages.
+- C-E02/E21: PARTLY (user reports of a 40-tool cap, one user quoting the docs; a 2026-03-03 post about dynamic context discovery and 80+ tools; no staff statement; forum posts are not Cursor documentation). C-E02/E25 and C-S03/DEFUSAGE: PARTLY (#59650 is one user's self-measurement whose figures do not reconcile, closed not planned; #30920 is an API 400 with a workaround). C-E02/E26: ToolHop answered for what it measures (composition, not discovery or token cost); Schlapbach and other docs remain.
+- Lead second reader: #59650 figures, #30920 title and status, Cursor 2026-03 lines and ToolHop counts re-checked in the stored texts.

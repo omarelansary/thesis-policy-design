@@ -1,0 +1,397 @@
+ Comparing BM25, TF-IDF, and Hybrid Search for MCP Tool Discovery | StackOne          
+Skip to main content
+
+   Announcing Tool Gateway MCP: the universal MCP Read the announcement    
+
+ Connectors 
+
+Platform
+
+    Connect   
+
+ Pre-Built Connectors    
+560+ Connectors and 35,000+ Actions    
+
+ AI Connector Builder    
+Build/Extend your connector via code in minutes    
+
+ Managed Authentication    
+OAuth, API keys, and token refresh – all handled    
+
+ Tool Gateway MCP    
+One universal MCP for every AI assistant you run    
+
+ Agent Webhooks    
+Trigger agentic workflows from app events     
+
+Connect to everything your agents need, without writing the infrastructure to get there.   
+
+    Secure   
+
+ Prompt Injection Guard    
+Block prompt injections before they reach your agent    
+
+ PII Redaction    
+Remove personal data from tool calls and logs   
+
+ Governance    
+Govern how teams use AI agents         
+
+ Tool Policies   New   
+Field-level control over reads and writes    
+
+ Connector Access    
+Scope actions and share account access    
+
+ Identity    
+SSO and directory sync for team access    
+
+ Observability & Audit    
+Action logs, changes and sign-in activity    
+
+ Deployment    
+Regional cloud, dedicated or self-hosted       
+
+Enterprise-grade controls to ensure your agent always meets security & compliance standards.   
+
+    Optimize   
+
+ Tool Discovery    
+Find the right action, skip the schema bloat    
+
+ Deep Query    
+Filter and aggregate synced data for faster answers    
+
+ Falcon Execution Engine    
+Actions your agents get right the first time     
+
+Maximise agent efficiency – faster responses, increased accuracy, fewer tokens used.        
+
+Solutions
+
+ HRIS/HCM (6)  
+
+ Employee Onboarding     
+
+ Employee Offboarding      
+
+ Recruiting (7)  
+
+ Application Screening     
+
+ Interview Scheduling       
+
+ Customer Support (8)  
+
+ Ticket Triage     
+
+ Voice Call Summarization      
+
+ Sales & CRM (7)  
+
+ Deal Risk Scoring     
+
+ Lead Qualification       
+
+ Accounting & Finance (13)  
+
+ Invoice Processing     
+
+ Month-End Accruals      
+
+ Marketing (4)  
+
+ Campaign Reports     
+
+ Lead Nurture Sequences           
+      Explore More Use-Cases  
+
+Resources
+
+ Learn  
+
+ Blog   
+Insights on agentic infrastructure   
+
+ Case Studies   
+Customer stories & results   
+
+ Events   
+Talks, meetups, livestreams & launches   
+
+ Partners   
+Partner with StackOne    
+
+ Developers  
+
+ Documentation   
+Guides, SDKs & API reference   
+
+ Changelog   
+What’s new in agentic infrastructure   
+
+ Status   
+System uptime & incidents    
+
+ Company  
+
+ About   
+Our mission and team   
+
+ Careers   
+Build the future with us   
+
+ Press   
+News, mentions & media   
+
+ Security & Privacy   
+Compliance, certifications & trust        
+      Next up: Meet us at Workday Rising EMEA 2026  
+         Pricing   
+ Login 
+  Book Demo    Start Free        
+
+ Connectors  
+Platform
+
+    Connect  
+Connect to everything your agents need, without writing the infrastructure to get there.  
+
+ Pre-Built Connectors      
+
+ AI Connector Builder      
+
+ Managed Authentication      
+
+ Tool Gateway MCP      
+
+ Agent Webhooks        
+
+    Secure  
+Enterprise-grade controls to ensure your agent always meets security & compliance standards.  
+
+ Prompt Injection Guard      
+
+ PII Redaction      
+
+ Governance          
+
+ Tool Policies  New      
+
+ Connector Access      
+
+ Identity      
+
+ Observability & Audit      
+
+ Deployment         
+
+    Optimize  
+Maximise agent efficiency – faster responses, increased accuracy, fewer tokens used.  
+
+ Tool Discovery      
+
+ Deep Query      
+
+ Falcon Execution Engine           
+  Use-Cases  
+Resources
+
+ Learn  
+
+ Blog    
+ Case Studies    
+ Events    
+ Partners     
+
+ Developers  
+
+ Documentation    
+ Changelog    
+ Status     
+
+ Company  
+
+ About    
+ Careers    
+ Press    
+ Security & Privacy        
+  Pricing  
+  Book Demo    Start Free          
+
+  Guillaume Lebedel ·  February 17, 2026   · 10 min   
+
+ Comparing BM25, TF-IDF, and Hybrid Search for MCP Tool Discovery    
+
+Table of Contents
+
+When you connect 20 MCP servers to an agent, tool definitions alone consume roughly 138,000 tokens. Each tool definition averages 150 tokens (name, description, JSON schema for inputs and outputs), and 916 tools across providers like Jira, GitHub, Salesforce, Gmail, and Slack add up to two-thirds of a 200K context window, before the agent has processed a single user query.
+
+We benchmarked three search approaches for finding the right tool in that haystack: BM25, TF-IDF, and a hybrid of both. Here’s what we found across 2,700 test cases. (Hybrid keyword + semantic scoring also drives the architectural choice in RAG vs MCP for AI agents, where it determines whether to pre-index content or fetch it live through MCP.)
+
+The context cost of MCP tool definitions
+
+Tool definitions scale linearly with the number of connected providers: 10 providers with 50 tools each costs 75K tokens, while 20 providers costs 150K. (We cover the broader context management problem in MCP Code Mode and the failure patterns that cause agents to exceed their context budgets in Agentic Context Engineering.) Factory.ai’s research on context utilization found that accuracy drops 30% when you pack a 128K context window full. LLMs also suffer from positional bias in tool selection, where tools listed earlier in the prompt get selected disproportionately, regardless of fit.
+
+Developers on r/AI_Agents report the same pattern: “Once an agent has access to 5+ tools, accuracy drops.”
+
+Source: Based on 150 tokens avg per tool definition across StackOne MCP tools  
+
+Progressive tool discovery: replacing 916 tools with 2
+
+Replace 916 tools with 2:
+
+// Instead of 916 tool definitions in context...
+const metaTools = [
+  {
+    name: "search_tools",
+    description: "Search for relevant tools using a natural language query. Returns tool names, descriptions, and schemas.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Natural language description of the tool you need" },
+        limit: { type: "number", description: "Max results to return", default: 5 }
+      },
+      required: ["query"]
+    }
+  },
+  {
+    name: "execute_tool",
+    description: "Execute a previously discovered tool by name with the given arguments.",
+    input_schema: {
+      type: "object",
+      properties: {
+        tool_name: { type: "string" },
+        arguments: { type: "object" }
+      },
+      required: ["tool_name", "arguments"]
+    }
+  }
+];
+
+Two tool definitions total roughly 300 tokens, down from 138K (a 460x reduction).
+
+The agent searches for tools on demand, gets back the relevant 3-5 tool schemas, and calls the one it needs. This is progressive tool discovery, and the concept isn’t new. Anthropic shipped a Tool Search Tool in January 2026 using BM25 internally. Speakeasy measured a 96.7% token reduction with dynamic toolsets. Lunar.dev wrote about the MCP tool overload problem and reached the same conclusion.
+
+The architecture is simple. The search algorithm is the hard part.
+
+BM25’s weakness: common verbs dominate rankings
+
+BM25 is a term-frequency ranking algorithm. It scores documents by how often query terms appear, adjusted for document length. Most text search systems use it: Elasticsearch, Lucene, Anthropic’s Tool Search Tool.
+
+The problem with BM25 for tool search: common verbs dominate. When an agent searches “Create a Jira ticket,” BM25 scores every tool with “create” in its name or description highly. The word “create” appears in hundreds of tools across dozens of providers. “Jira” appears in maybe 30.
+
+BM25 doesn’t know that “jira” is the important word. It weights both terms roughly equally, and since “create” matches more tools, the top results skew toward whichever provider’s “create” tool has the best term-frequency stats.
+
+Here’s what happened in our eval suite:
+
+QueryBM25 Top ResultCorrect?
+“Create a Jira ticket”ashby_create_candidateNo
+“Send a Slack message”gmail_send_messageNo
+“List Greenhouse candidates”ashby_list_candidatesNo
+
+Our eval runs 2,700 test cases across 270 tools from 11 API categories (HRIS, ATS, CRM, Ticketing, IAM, Messaging, Marketing, and more). BM25 finds the correct tool as the #1 result just 14% of the time. It’s better at Top-5 (87%), meaning the right tool is usually somewhere in the results, but the agent picks the top result, not the fifth.
+
+Stacklok benchmarked this at larger scale with 2,792 tools: BM25-only accuracy dropped to 34%.
+
+Source: StackOne eval suite: 2,700 test cases across 270 tools, test split (540 cases)  
+
+BM25 + TF-IDF hybrid: the 20/80 formula
+
+TF-IDF (Term Frequency-Inverse Document Frequency) weighs terms by how rare they are in the corpus. “Create” appears in hundreds of tool definitions, so its IDF is low. “Jira” appears in a few dozen, so its IDF is high. When you search “Create a Jira ticket,” TF-IDF gives “jira” 3-4x the weight of “create.”
+
+The hybrid formula combines both:
+
+const HYBRID_ALPHA = 0.2; // 20% BM25, 80% TF-IDF
+const score = HYBRID_ALPHA * bm25Score + (1 - HYBRID_ALPHA) * tfidfScore;
+
+Why not pure TF-IDF? Because BM25 handles document length normalization well. Short tool names with exact matches should still rank high even if TF-IDF doesn’t favor them. The 20/80 split keeps BM25’s length normalization while letting TF-IDF’s term rarity do the heavy lifting.
+
+We tested the full alpha range from 0.0 (pure TF-IDF) to 1.0 (pure BM25) on our 543-case test split:
+
+ AlphaBM25 WeightTF-IDF WeightTop-1 Accuracy    
+ 0.0  0%  100%  20.8%  
+ 0.1  10%  90%  21.3%  
+ 0.2  20%  80%  21.2%  
+ 0.5  50%  50%  19.9%  
+ 0.8  80%  20%  16.1%  
+ 1.0  100%  0%  13.7%      
+Alpha grid search on 543 test cases. Alpha 0.1-0.2 is optimal. Pure BM25 (1.0) is worst. 
+
+The sweet spot is alpha 0.1-0.2. Pure BM25 sits at 13.7% Top-1. Adding TF-IDF weighting pushes that to 21.3%, a 55% improvement. The gains flatten past alpha 0.2 because pure TF-IDF (20.8%) is already close to optimal. The small BM25 component adds just enough length normalization to edge ahead.
+
+At Top-5, the gap narrows: BM25 hits 87%, hybrid 90%. The right tool is usually in the results regardless of method. But agents pick the top result, so Top-1 accuracy determines whether the tool call succeeds on the first try or requires a retry.
+
+Implementation: BM25 via Orama, custom TF-IDF
+
+BM25 uses Orama, an open-source search engine with built-in stemming and tokenization. The TF-IDF implementation is roughly 200 lines of custom TypeScript with no additional dependencies.
+
+IDF calculation counts how many documents each term appears in, then applies the standard inverse-document-frequency formula:
+
+function computeIDF(documents: string[][]): Map<string, number> {
+  const docCount = documents.length;
+  const docFreq = new Map<string, number>();
+
+  for (const doc of documents) {
+    const unique = new Set(doc);
+    for (const term of unique) {
+      docFreq.set(term, (docFreq.get(term) ?? 0) + 1);
+    }
+  }
+
+  const idf = new Map<string, number>();
+  for (const [term, freq] of docFreq) {
+    idf.set(term, Math.log((docCount - freq + 0.5) / (freq + 0.5) + 1));
+  }
+  return idf;
+}
+
+The TF-IDF scoring uses cosine similarity between the query vector and each tool’s document vector. Combined with BM25, the final ranking captures both term importance (TF-IDF) and document length normalization (BM25).
+
+The full implementation lives in stackone-ai-node, our open-source TypeScript SDK for building agents with StackOne tools.
+
+Semantic search vs hybrid: when to use embeddings
+
+Embedding-based search (using models like text-embedding-3-small) reaches 38% Top-1 accuracy in our eval, nearly double the hybrid’s 21%. It understands meaning, not just term overlap. “Make a task in my project tracker” would match jira_create_issue even though none of those words appear in the tool name.
+
+But embeddings require infrastructure: an embedding model (API call or local model), a vector store, and index management. For most MCP setups with under 2,000 tools, the hybrid approach is the better trade-off. If you want the full story on how we built semantic search with embeddings for StackOne’s 35,000+ actions, see Building Semantic Search with Enhanced Embeddings.
+
+ MethodTop-1Top-5LatencyDependencies    
+ BM25 only  14%  87%  <1ms  Orama  
+ BM25+TF-IDF  21%  90%  <1ms  Orama + custom  
+ Embeddings  38%  85%  50-200ms  Embedding API  
+ Reranker  40%+  90%+  200-500ms  Reranking model      
+Trade-offs across search methods. Hybrid is the zero-API-call sweet spot. 
+
+It runs in under a millisecond with no API calls and no vector database. For agents connecting 10-30 MCP servers (the common case today), the hybrid search is the right default. When you outgrow it, your eval suite will tell you.
+
+Building the eval suite
+
+The algorithm is 200 lines. The eval suite is what makes it trustworthy. We run 2,700 test cases: 270 tools, each with 10 natural-language queries, split into train/test/validation sets. Each test case is a query, the expected tool, and optionally a list of acceptable alternatives:
+
+const evalTests = [
+  { query: "Create a Jira ticket", expected: "jira_create_issue" },
+  { query: "Send a Slack message", expected: "slack_send_message" },
+  { query: "List open pull requests", expected: "github_list_pull_requests" },
+  { query: "Get employee details from BambooHR", expected: "bamboohr_get_employee" },
+  // ... 2,696 more test cases across 11 API categories (HRIS, ATS, Ticketing, IAM, Messaging...)
+];
+
+Every time we add a new MCP provider or change tool descriptions, the eval suite runs. This makes it safe to swap the search algorithm later, because you’ll know immediately whether the new approach performs better or worse on real queries.
+
+Update (May 2026)
+
+We’ve since fine-tuned a 109M embedding model that beats BM25 and BGE-base by significant margins on tool retrieval benchmarks. Read the v2 fine-tuned embedding benchmark.     
+
+Share 
+
+On this page
+
+Share 
+
+ Put your AI agents to work  
+ All the tools you need to build and scale AI agent integrations, with best-in-class connectivity, execution, and security.   
+  Start Free   
+Book Demo
+
+                 

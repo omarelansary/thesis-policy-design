@@ -1,0 +1,1949 @@
+
+=== [page 1] ===
+SkillLens: Adaptive Multi-Granularity Skill Reuse for Cost-Efficient LLM
+Agents
+Ziyang Yu1,*
+Yongliang Miao1,*
+Liang Zhao1,2,†
+Bowen Zhu2
+Hasibul Haque2
+1Emory University
+2Casual Dynamics Lab
+*Equal contribution
+†Corresponding author
+Abstract
+Skill libraries let LLM agents reuse procedu-
+ral experience across tasks. However, existing
+systems treat skills as flat, single-resolution
+prompt blocks.
+This creates a tension be-
+tween relevance and cost: injecting coarse
+skills can introduce irrelevant or misleading
+context, while rewriting entire skills is expen-
+sive and often unnecessary. We propose Skill-
+Lens, a hierarchical skill-evolution framework
+that organizes skills into a four-layer graph
+of policies, strategies, procedures, and prim-
+itives, and retrieves them at mixed granular-
+ity. Given a task, SkillLens first retrieves se-
+mantically relevant skill seeds, expands them
+through degree-corrected random walk over the
+skill graph, and then uses a verifier to decide
+whether each visited unit should be accepted,
+decomposed, rewritten, or skipped. This lets
+the agent reuse compatible subskills directly
+while adapting only locally mismatched com-
+ponents. Over time, SkillLens further refines
+multi-granularity skills and the verifier’s rout-
+ing decisions. We provide theoretical analy-
+sis showing that mixed-granularity adaptation
+incurs sublinear cost under sparse mismatch
+assumptions and that the evolutionary update
+rule monotonically improves the validation ob-
+jective until a local optimum.
+Across Mu-
+Locbench and ALFWorld, SkillLens consis-
+tently improves over strong skill-based base-
+lines, achieving up to a 6.31 percentage-point
+Acc@1 gain for bug localization and raising
+agent success rate from 45.00% to 51.31%.
+1
+Introduction
+Large language model (LLM) agents are increas-
+ingly used to solve tasks that require multi-step in-
+teraction rather than single-shot prediction. In soft-
+ware engineering, web navigation, tool use, data
+analysis, and interactive decision-making, agents
+must plan over multiple steps, call external tools,
+inspect intermediate states, and revise their behav-
+ior based on feedback (Yao et al., 2023; Schick
+et al., 2023; Wang et al., 2024b; Madaan et al.,
+2023). A recurring observation across these set-
+tings is that successful agent trajectories often con-
+tain reusable procedural patterns: recurring ways
+of decomposing goals, selecting tools, checking
+intermediate results, and recovering from failed ac-
+tions. Skill libraries have therefore emerged as a
+practical mechanism for externalizing such proce-
+dural experience. Instead of relying on the model
+to rediscover useful behavior from scratch for ev-
+ery new task, an agent can retrieve relevant prior
+skills and use them as task-time guidance without
+retraining the underlying model.
+Skill externalization falls into three broad lines:
+episodic verbal-feedback memories such as Reflex-
+ion (Shinn et al., 2023); flat skill libraries that in-
+crementally collect executable behaviors, exempli-
+fied by Voyager (Wang et al., 2024a) and SkillAct
+(Liu et al., 2024); and natural-language manuals
+or insights distilled from trajectories, such as Ex-
+peL (Zhao et al., 2024) and AutoManual (Chen
+et al., 2024). More recent systems push toward
+richer memory infrastructures, including dynami-
+cally linked agentic memory (Xu et al., 2025), pro-
+cedural memory lifecycle management (Fang et al.,
+2025), and self-evolving skill ecosystems (Zhang
+et al., 2026). Despite this progress, these systems
+share a structural limitation: each skill or memory
+unit is treated as an atomic, single-resolution en-
+try. Retrieval is essentially flat lookup followed
+by full verbatim insertion of the matched skill into
+the prompt. As a result, when a retrieved skill is
+only partially compatible with the current task, the
+agent is forced into a binary choice between accept-
+ing an imperfect block, which inflates context and
+seeds hallucinations, or discarding it entirely and re-
+solving from scratch. This limitation also appears
+in the bug-localization and repository-grounded
+agent literature (Zhou et al., 2012; Saha et al., 2013;
+Rahman and Roy, 2018; Zhang et al., 2023; Yang
+et al., 2024; Zhang et al., 2024a; Xia et al., 2024;
+Asad et al., 2025), where pipelines either commit
+1
+arXiv:2605.08386v2  [cs.AI]  1 Oct 2026
+
+=== [page 2] ===
+to a single granularity (file-level ranking) or rely on
+purely tool-driven exploration without a reusable
+procedural backbone, so cross-issue regularities are
+repeatedly rediscovered at inference time.
+This raises a precise question: at what resolu-
+tion should a retrieved skill be reused? A retrieved
+skill is rarely uniformly useful. Its high-level plan
+may match the task while some concrete steps are
+irrelevant; conversely, a low-level operation may
+transfer even when the surrounding strategy does
+not. Treating the whole skill as the reuse unit there-
+fore hides the actual source of transfer: the useful
+part may live at a coarser level, a finer level, or
+inside a small component that only needs local
+adaptation. We introduce SkillLens to make this
+resolution choice explicit. Rather than assuming
+that skills are inherently trees, SkillLens uses a
+hierarchy as an operational decomposition inter-
+face: it tells the agent where a retrieved skill can
+be accepted as-is, expanded into finer units, locally
+rewritten, or skipped. Given a task, SkillLens re-
+trieves relevant skill seeds, expands them through
+the skill graph, and uses a verifier to construct a
+compact task-specific skill context from units at
+mixed granularities. The same view also changes
+skill evolution: failures should not only update
+stored procedural content, but also refine the veri-
+fier’s routing knowledge about when to reuse, drill
+down, rewrite, or discard retrieved experience.
+SkillLens couples inference-time adaptation
+with evolution-time refinement. Given a task, it
+retrieves semantically relevant skill seeds, expands
+them through degree-corrected random walk over
+the skill graph, and uses a verifier to route each
+visited unit to ACCEPT, DECOMPOSE, REWRITE,
+or SKIP. The final context is composed only from
+accepted and locally rewritten units, so the agent
+receives a compact task-specific skill context rather
+than a full retrieved skill block. SkillLens also
+extends this mechanism to evolution: gap reports
+from failed trajectories refine both the agent-side
+procedural registry and the verifier-side routing
+knowledge, improving not only what skills are
+stored but also how they are reused. We evaluate
+SkillLens on MuLocbench and ALFWorld to study
+mixed-granularity skill reuse in repository-level lo-
+calization and long-horizon interactive agent tasks.
+In summary, our contributions are threefold:
+1. We formulate skill reuse as a context selection
+and adaptation problem: instead of directly in-
+jecting retrieved skills as flat prompt blocks, the
+agent should identify which parts of the retrieved
+knowledge are useful for the current task and
+compose them into a compact skill context.
+2. We introduce SkillLens, a resolution-aware
+framework that builds skill contexts through hi-
+erarchical retrieval, verifier-guided decomposi-
+tion, and localized adaptation. This allows par-
+tially relevant skills to be reused at the appropri-
+ate granularity rather than accepted or discarded
+wholesale.
+3. We provide theoretical and empirical evidence
+that SkillLens improves both efficiency and per-
+formance. We show sublinear adaptation cost un-
+der sparse mismatch assumptions and monotone
+improvement of the evolution objective; empiri-
+cally, SkillLens improves MuLocbench Acc@1
+by up to 6.31 points and raises ALFWorld suc-
+cess rate from 45.00% to 51.31%.
+2
+Related Work
+Skill libraries as procedural memory.
+LLM
+agents increasingly externalize experience as
+reusable procedural memory. Early agent frame-
+works such as ReAct (Yao et al., 2023), Tool-
+former (Schick et al., 2023), CodeAct (Wang et al.,
+2024b), and Self-Refine (Madaan et al., 2023) com-
+bine reasoning, tool use, and feedback to solve in-
+teractive tasks. Building on this, Reflexion (Shinn
+et al., 2023), Voyager (Wang et al., 2024a), Skil-
+lAct (Liu et al., 2024), ExpeL (Zhao et al., 2024),
+AutoManual (Chen et al., 2024), and Skill-Pro (Mi
+et al., 2026) store reflections, executable skills, dis-
+tilled insights, or reusable procedures. Recent sur-
+veys further formalize agent skills as modular pack-
+ages of instructions, code, and resources that can
+extend agent capabilities without retraining (Xu
+and Yan, 2026). However, most skill libraries still
+treat a skill as a flat unit that is retrieved and in-
+serted as a whole, which makes partial reuse diffi-
+cult; SkillLens instead represents skills as hierar-
+chical procedural objects and constructs contexts
+from selected sub-units.
+Evolving agent memory and skill systems.
+An-
+other line studies how agent memories and skills
+evolve. MemoryBank (Zhong et al., 2023), A-
+MEM (Xu et al., 2025), Mem0 (Chhikara et al.,
+2025), and Memp (Fang et al., 2025) organize
+and revise long-term or procedural memories.
+Skill-evolution systems such as AutoSkill (Yang
+et al., 2026), EvoSkill (Alzubi et al., 2026), and
+EvoSkills (Zhang et al., 2026) use interaction
+traces, failure analysis, or co-evolutionary verifica-
+tion to refine reusable skill packages while keeping
+2
+
+=== [page 3] ===
+the base model fixed. These methods show that
+external skills can evolve through feedback, but
+they mainly optimize the stored skill content itself,
+while the decision of how to reuse a retrieved skill
+remains implicit or coarse-grained. SkillLens ad-
+dresses this limitation with a dual-registry design
+that evolves both the agent-side procedural registry
+and the verifier-side routing knowledge.
+Skill routing and context construction.
+As skill
+libraries scale, selecting useful context becomes a
+key bottleneck. SkillRouter (Zheng et al., 2026)
+shows that large-scale skill routing requires more
+than shallow metadata matching, while recent
+benchmarks find that skill use becomes fragile
+when agents retrieve from large, noisy collections
+or receive imperfectly matched skills (Liu et al.,
+2026). More broadly, memory-augmented agents
+rely on retrieved context for long-horizon reason-
+ing and decision-making (Zhang et al., 2024b;
+Du, 2026). However, most approaches focus on
+which skill or memory to retrieve, while still con-
+suming the selected context at a single resolution.
+SkillLens addresses this limitation by constructing
+mixed-granularity skill contexts after retrieval, en-
+abling useful subunits to be accepted, decomposed,
+or adapted under token and computation budgets.
+3
+Methodology
+3.1
+Problem Formulation
+Setup.
+We study skill-mediated problem solv-
+ing for a language agent Aθ acting on tasks
+(Q, Y ) ∼D, where Q is a problem instance and
+Y its ground-truth answer or successful trajec-
+tory. The agent has access to a skill library S
+of textual procedural units. Given Q, a retrieval
+and adaptation procedure constructs a skill con-
+text K(Q; S) from S and augments the agent’s
+prompt with K; the agent then produces an out-
+put OS(Q) = Aθ(Q, K(Q; S)). Task quality is
+measured by a metric M(Y, OS(Q)) ∈[0, 1], and
+the cost of constructing and consuming K (token
+count for retrieval, recursive verification, localized
+rewriting, and final inference) is summarized by a
+normalized cost C(Q, S).
+Hierarchical skill graph. We organize S into
+a four-layer skill graph G = (S, E) that adapts
+temporal-abstraction hierarchies from the options
+framework (Sutton et al., 1999), feudal manager–
+worker designs (Vezhnevets et al., 2017), three-
+layer robotic architectures (Gat, 1998), and HTN
+planning (Erol et al., 1994) to skill-mediated LLM
+agents (Yao et al., 2023; Wang et al., 2024a). Each
+skill s ∈S carries a tuple (ℓ(s), ch(s), τ(s)) with
+layer index ℓ(s) ∈{1, 2, 3, 4}, an ordered set of
+children ch(s) realizing s at the next finer layer,
+and textual procedural content τ(s); the four val-
+ues of ℓname the abstraction layers: (1) ℓ=1 (Pol-
+icy): routes a task to a downstream strategy; (2)
+ℓ=2 (Strategy): gives long-horizon plans answer-
+ing how to solve overall; (3) ℓ=3 (Procedure):
+provides reusable SOPs as ordered step sequences
+with explicit branching and retry; (4) ℓ=4 (Prim-
+itive): holds atomic executable units (tool calls,
+environment actions) that are not further decom-
+posed (Schick et al., 2023).
+Hierarchical edges Eh connect only adjacent lay-
+ers (ℓ(sj) = ℓ(si) + 1) along ch(·), while lateral
+edges Elat connect siblings within a layer; weights
+combine semantic and structural signal, eij =
+simemb(si, sj) · wij, with simemb the embedding
+cosine similarity and wij determined by whether
+si, sj are in a parent–child or sibling relation.
+Optimization objective. We frame the design of
+the skill system as a optimization problem over
+the skill registry. Let Dev be the evolution split,
+the data used to drive iterative updates of the skill
+registry. It is analogous to a training split, but con-
+sumed for registry evolution rather than gradient-
+based weight updates, since Aθ is a frozen LLM.
+We seek
+S∗= arg maxS J(S),
+(1)
+J(S) :=
+E
+(Q,Y )∼Dev
+
+M
+ Y, OS(Q)
+
+−C(Q, S)
+
+.
+The metric M
+ Y, OS(Q)
+
+rewards output correct-
+ness, while C(Q, S) penalizes the inference-time
+resources used to produce OS(Q). Section 3.2 ad-
+dresses zero-shot adaptation, where M is unavail-
+able at query time, by retrieving and routing over
+multi-granularity skills from a fixed S. Section 3.3
+uses M on the evolution split to jointly refine the
+skills and S under a single iterative update rule.
+3.2
+Hierarchical Skill Graph and
+Mixed-Granularity Adaptation
+Our key insight is that skill compatibility is rarely
+uniform across a retrieved skill: parts of a skill
+are reusable as-is, parts need to be expanded
+to a finer resolution, parts need to be locally
+rewritten, and parts should be discarded.
+We
+exploit the four-layer structure of G to make
+each of these decisions locally, on the smallest
+necessary unit, and we surface procedurally related
+3
+
+=== [page 4] ===
+skills via a degree-corrected random walk that
+resists collapse into dense similarity clusters.
+Concretely, a retrieved high-level skill is not an
+indivisible prompt block but a subtree of G: a
+policy node expands into strategy children, a
+strategy expands into procedures, and a procedure
+expands into primitives. This recursive structural
+mapping turns each retrieved skill into a procedural
+object addressable at multiple resolutions, and the
+remainder of this section operates on this subtree.
+Per-query surrogate objective. At fixed registries,
+Eq. (1) decouples across queries through K(Q),
+and the routing {au} of Eq. (3) fully determines
+K(Q) via Eq. (4). Let R = {u : au = ACCEPT} ∪
+{u : au = REWRITE} ⊆S be the retained units
+and B = {u : au = REWRITE} ⊆R the rewritten
+subset. Since M is unobservable at query time and
+the retrieval term is combinatorial, we replace M
+by the tractable surrogate
+bUQ(R, B) = FQ(R) +
+X
+u∈B ∆rw
+Q (u),
+(2)
+where FQ is a monotone submodular query–skill
+relevance aggregator and ∆rw
+Q (u) is the predicted
+utility gain from rewriting u (additive because Wϕ
+acts on each unit independently). The per-query
+objective bUQ(R, B) −C(Q, S) thus separates into
+a retrieval block (in R) and a rewrite block (in B,
+as a tree dynamic program over the decomposi-
+tion subtree). Algorithm 1 approximates the two
+blocks in lines 1–4 and lines 5–15 respectively; the
+composed guarantee is Proposition 3.4 (proof in
+Appendix B.3).
+Compatibility partition and verifier-driven
+traversal. The scores s partition retrieved can-
+didates into three tiers via calibrated intervals: fully
+compatible skills, which are injected directly; par-
+tially relevant skills, which require recursive adap-
+tation; and mismatched skills, which are discarded.
+For partially relevant skills, full-scale rewriting
+conflates compatible substructure with local mis-
+matches and inflates token cost. Instead, we tra-
+verse the skill’s decomposition subtree top-down,
+expanding a node only when its utility cannot be de-
+cided at the current granularity. The verifier emits,
+for each visited unit u, a compact routing action:
+au = Vϕ(Q, u) ∈{ACCEPT, DECOMPOSE,
+REWRITE, SKIP}.
+(3)
+ACCEPT retains an informative compatible unit
+and terminates traversal of its subtree; DECOM-
+POSE expands the unit into its lower-level children
+for further evaluation; REWRITE locally adapts a
+Algorithm 1 Mixed-Granularity Skill Adaptation
+Require: Query Q; skill graph G; agent Aθ; verifier Vϕ;
+writer Wϕ
+Ensure: Skill context K(Q)
+Stage 1: Trigger, seed retrieval, and RWR (standard
+components).
+1: if confidence of Aθ(Q) exceeds threshold then return ∅
+2: Retrieve top-K embedding seeds p0 over S
+3: Run degree-corrected RWR on G from p0 to obtain can-
+didate scores s
+4: Partition candidates by s into Cfull, Cpart, Cmis; set K ←
+Cfull
+Stage 2: Verifier-driven recursive traversal (proposed).
+5: for each root r ∈Cpart do
+6:
+Initialize stack Q ←{r}
+7:
+while Q̸ = ∅do
+8:
+u ←pop(Q);
+au ←Vϕ(Q, u)
+9:
+if au = ACCEPT then K ←K ∪{u}
+10:
+else if au = DECOMPOSE then push children
+ch(u) onto Q
+11:
+else if au
+=
+REWRITE then K
+←
+K ∪
+{Wϕ(Q, u)}
+12:
+else if au = SKIP then continue
+13:
+end if
+14:
+end while
+15: end for
+16: return Compose(K)
+useful but mismatched unit via the writer Wϕ; and
+SKIP excludes the unit. The set of nodes terminated
+by ACCEPT or SKIP forms an adaptive frontier over
+the hierarchy. The frontier is consolidated into the
+final context:
+K(Q) = Compose
+ {u : au = ACCEPT}
+∪{Wϕ(Q, u) : au = REWRITE}
+
+, (4)
+which is then concatenated with the prompt for
+a second reasoning pass by Aθ, yielding the final
+output. Token and computation cost scale with
+the number of visited and rewritten units, not the
+size of the retrieved skill tree. Algorithm 1 sum-
+marizes the procedure: the first stage (lines 1–4)
+reuses standard components, namely confidence-
+gated triggering, embedding-based top-K retrieval,
+and degree-corrected random walk with restart, to
+produce a scored candidate set partitioned into com-
+patibility tiers, and the second stage (lines 5–15)
+is the proposed verifier-driven recursive traversal
+over the decomposition subtree of each partially
+relevant candidate.
+3.3
+Dual-Registry Evolutionary Refinement
+We separate the skill registry of Section 3.1
+into two coupled components:
+the agent reg-
+istry S, the procedural knowledge consulted by
+Aθ, and the verifier registry SV, which param-
+eterizes the routing policy of (when to AC-
+CEPT/DECOMPOSE/REWRITE/SKIP). The infer-
+ence procedure of Section 3.2 treats both as fixed:
+4
+
+=== [page 5] ===
+localized rewrites by Wϕ act on retrieved skill in-
+stances for the current query and are not written
+back into S. We therefore approach the joint objec-
+tive in Eq. (1) via an iterative dual-registry update
+rule that first updates SV and then derives S from
+it.
+Gap-report construction. For each task in the evo-
+lution split, we run the mixed-granularity adapta-
+tion protocol of Section 3.2 to obtain OS(Q), then
+compare it against the ground truth Y to construct
+a gap report. The report records (i) the error type,
+(ii) the retrieved skills and recursive traversal path,
+(iii) the verifier’s routing actions {au}, and (iv) the
+units invoked or rewritten. This isolates whether a
+failure stems from missing/incorrect agent-side pro-
+cedural knowledge or from miscalibrated verifier-
+side routing, and supplies the writer Wϕ with error-
+conditioned signals for proposing edits.
+Algorithm 2 Dual-Registry Evolutionary Refine-
+ment (one iteration)
+Require: Registries
+(S(t), S(t)
+V );
+split
+Dev;
+Aθ, Vϕ, Wϕ; objective J
+Ensure: Updated (S(t+1), S(t+1)
+V
+)
+1: Rt ←∅
+2: for (Q, Y ) ∈Dev do
+3:
+Run Alg. 1 to get OS(Q) and trace TQ; if
+M(Y, OS(Q)) < 1, add (err, TQ) to Rt
+4: end for
+5: Pt ←{(S(t), S(t)
+V )}
+▷fallback
+6: for r ∈Rt, target t inferred from r, op ∈
+{ADD, DEL, UPD, MRG} do
+7:
+Pt += {Wϕ(op, t, r; S(t), S(t)
+V )}
+8: end for
+9: return arg max(S,SV)∈Pt J(S, SV)
+Coupled update rule. The two registries are not
+optimized independently: SV is updated first, and
+the agent registry S is then determined by it. Given
+a verifier registry SV, the resulting routing de-
+cisions (ACCEPT/DECOMPOSE/REWRITE/SKIP)
+over trajectories on Dev specify which units are
+kept, decomposed, or rewritten, and Wϕ material-
+izes the corresponding agent-side edits. We there-
+fore treat the next agent registry as an induced out-
+put Φ(S(t), SV), where Φ denotes the agent-side
+edits applied by Wϕ to the current S(t) under the
+trajectories that SV routes on Dev. At iteration
+t, gap reports drive Wϕ to propose a finite set of
+single-operator edits to SV, which in turn induces a
+finite candidate set Ct = {Φ(S(t), SV) : SV ∈Pt}
+of agent registries (with S(t) ∈Ct as a fallback).
+We then commit the candidate that maximizes the
+evolution objective J of Eq. (1):
+S(t+1) = arg maxS ∈Ct J(S(t), S(t)
+V ).
+(5)
+Verifier-side edits sharpen routing so that the syn-
+thesized context fed to Aθ is more useful, and the
+induced agent-side edits via Φ directly improve the
+procedural knowledge Aθ consults. Because both
+updates are driven by the same writer from a uni-
+fied gap report, the two registries co-evolve on the
+same error signal. In summary, one evolution itera-
+tion proceeds in three steps: gap reports are built
+from failed evolution-split trajectories; the writer
+proposes a finite candidate set of single-operator
+edits to either registry; and the pair maximizing
+the evolution objective J is committed, with the
+current pair retained as a fallback.
+3.4
+Theoretical Analysis
+We provide two complementary results that jus-
+tify our design:
+(i) the inference-time mixed-
+granularity adaptation incurs sublinear cost in the
+size of the retrieved skill tree, and (ii) the evolution-
+stage updates yield monotone improvement and
+converge to a local optimum of the evolution objec-
+tive. The proof is deferred to Appendix B.
+Proposition 1 (Sublinear cost of adaptation). Let
+the retrieved skill tree T (the four-layer hierarchy
+of Section 3.2) have n nodes, maximum branching
+factor b, and depth D = O(logb n), and suppose
+the verifier routes only a small fraction ρ < 1/b
+of subtrees to DECOMPOSE (the remainder being
+ACCEPTed, locally REWRITEn, or SKIPped). Let
+Nvis be the number of nodes visited by the verifier-
+driven traversal and Nrw the number of REWRITE
+actions on T. Then the per-task adaptation cost
+satisfies Cadapt = o(n).
+Proposition 2 (Monotone improvement and con-
+vergence to a local optimum). Let J be the evo-
+lution objective in Eq. (1) and let S(t) evolve un-
+der the update rule in Eq. (5). Since M ∈[0, 1]
+and C ≥0, J is bounded above; the candidate
+set Ct always includes S(t) as a “do nothing” fall-
+back (Eq. (5)). Then the sequence {J(t)}t≥0 with
+J(t) = J(S(t)) is non-decreasing and converges to
+a value J† ≤J∗, where J∗= maxS J(S). More-
+over, the limit point S† is a local optimum in the
+sense that no atomic operator applied to either reg-
+istry strictly increases J.
+Proposition 3 (Composed approximation guar-
+antee). Suppose: (a) the retrieval scores rQ(u) cal-
+5
+
+=== [page 6] ===
+ibrate the per-skill utility FQ({u}) up to error ϵret;
+(b) FQ is monotone submodular; (c) the degree-
+corrected RWR score s(u) estimates the marginal
+gain ∆(u | R) up to error ϵrwr; and (d) the verifier
+matches the optimal local action of Eq. (3) up to er-
+ror ϵver. Let ( bR, bB) be the retrieved-and-rewritten
+pair returned by Algorithm 1 and (R∗, B∗) the op-
+timum of the surrogate JQ (the objective of Eq. (1)
+with the unobservable correctness term replaced by
+its tractable surrogate). Then
+JQ( bR, bB) ≥(1 −1/e) Jret
+Q (R∗) + Jrw
+Q (B∗)
+−
+ ϵret + ϵrwr + | bR| ϵver
+
+.
+(6)
+In practice,
+two factors tighten the sub-
+optimality gap: (i) the gap report supplies error-
+conditioned proposals, biasing Pt toward edits
+that are likely to yield large positive ∆J; and
+(ii) the four operators are jointly closed under
+composition over the registry space (any reg-
+istry pair is reachable via a finite sequence of
+ADD/DELETE/UPDATE/MERGE operations), so
+the only obstruction to global optimality is the
+greedy single-step commit rule rather than the ex-
+pressiveness of the action set.
+4
+Experiment
+4.1
+Experimental Setup
+We evaluate SkillLens on MuLocbench (Zhang
+et al., 2025) and ALFWorld (Shridhar et al., 2021)
+using Codex GPT-5.2, and compare it with Vanilla,
+AutoSkill (Yang et al., 2026), and EvoSkill (Alzubi
+et al., 2026) under matched agents, data splits, exe-
+cution budgets, and task environments. Full model
+configurations, dataset construction, baseline defi-
+nitions, and evolution and evaluation protocols are
+provided in Appendix A.
+4.2
+Main Results
+SkillLens achieves superior performance across
+both benchmarks. On MuLocbench, SkillLens ob-
+tains the best Acc@1 at all three localization gran-
+ularities, reaching 61.13%, 59.26%, and 43.68% at
+the file, module, and function levels, respectively.
+On ALFWorld, it achieves a 51.31% overall suc-
+cess rate, improving over Vanilla by 6.31 percent-
+age points and over both AutoSkill and EvoSkill
+by 4.17 points.
+Advantages grow with task difficulty. On Mu-
+Locbench, the gain over Vanilla increases from
+2.26 percentage points at the file level to 3.70 points
+at the module level and 6.31 points at the function
+level. On ALFWorld, simple subtasks such as Look
+and Pick are near saturation, whereas SkillLens
+reaches 50.00% on Heat and 54.17% on Pick2,
+outperforming all baselines. The pattern suggests
+that mixed-granularity adaptation is most useful for
+fine-grained or compositional tasks.
+Mixed granularity and dual-registry drive the
+gains. AutoSkill attains high file-level Recall@10
+on MuLocbench (54.87%) but lower Precision@10
+(43.07%), while EvoSkill reaches 47.14% success
+on ALFWorld.
+SkillLens instead uses verifier-
+driven decomposition and local rewriting to pre-
+serve useful subunits, while dual-registry evolution
+jointly improves skill retrieval and routing.
+4.3
+Ablation Studies
+Effect of Degree-Corrected Random Walk. To
+isolate the contribution of degree-corrected RWR,
+we compare the full pipeline against a variant
+that uses only embedding-based top-K retrieval
+as the skill source (w/o RWR), while keeping all
+subsequent components including verifier-driven
+traversal identical. This ablation directly measures
+whether propagating seed signals through the skill
+graph improves retrieval quality beyond flat embed-
+ding similarity.
+Table 3 shows that RWR consistently improves
+performance across all three granularities, with
+gains that correlate with graph structural density.
+At the module level, which serves as the structural
+bottleneck of the four-layer hierarchy with the
+densest hierarchical and lateral edges, RWR deliv-
+ers the largest relative improvement: Acc@1 rises
+from 54.07% to 59.26% (+5.19 pp) while Acc@5
+increases only modestly (+1.48 pp). This pattern
+indicates that RWR primarily re-ranks candidates
+rather than merely adding new ones—the correct
+module already exists in the top-5 but is promoted
+to the top position through graph propagation. At
+the function level, the most fine-grained and chal-
+lenging setting, RWR achieves the largest absolute
+gain (Acc@1 +7.37 pp, Recall@1 +5.34 pp),
+demonstrating its ability to surface procedurally
+relevant units that are textually distant from the
+query but structurally reachable via hierarchical
+edges. File-level gains are smallest, consistent with
+the sparser connectivity among file nodes in the
+skill graph. Across all granularities, precision does
+not degrade despite increased recall, confirming
+that degree correction successfully prevents the
+walk from collapsing into dense similarity clusters
+6
+
+=== [page 7] ===
+Table 1: MuLocbench results across different granularity levels. All values are reported in percentage. Better values
+are in bold.
+Granularity
+Method
+Accuracy
+Recall
+Precision
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+File
+Baseline
+58.87
+70.57
+72.45
+72.83
+31.82
+46.39
+49.08
+49.62
+58.87
+49.06
+48.21
+47.97
+AutoSkill
+58.58
+71.70
+72.78
+73.37
+34.33
+51.83
+54.03
+54.87
+58.58
+45.46
+43.30
+43.07
+EvoSkill
+56.80
+63.31
+63.91
+63.91
+32.97
+44.13
+45.60
+45.95
+56.80
+46.35
+45.56
+45.41
+Ours
+61.13
+72.19
+74.34
+75.47
+34.60
+47.38
+50.44
+51.48
+61.13
+50.44
+49.98
+49.73
+Module
+Baseline
+55.56
+62.22
+62.22
+62.22
+33.98
+43.56
+43.73
+43.73
+55.56
+49.26
+48.06
+47.65
+AutoSkill
+46.99
+55.42
+56.63
+56.63
+36.12
+45.65
+45.96
+45.96
+46.99
+43.37
+42.87
+42.71
+EvoSkill
+49.40
+55.42
+55.42
+55.42
+36.93
+46.60
+47.20
+47.50
+49.40
+45.98
+45.82
+45.67
+Ours
+59.26
+66.67
+67.41
+67.41
+39.43
+46.90
+47.89
+48.29
+59.26
+53.33
+52.23
+51.97
+Function
+Baseline
+37.37
+54.21
+55.79
+57.89
+20.45
+36.45
+37.94
+40.30
+37.37
+35.00
+32.68
+32.05
+AutoSkill
+39.29
+51.79
+55.36
+56.25
+24.19
+32.35
+34.34
+32.97
+39.29
+28.87
+27.99
+27.67
+EvoSkill
+39.29
+50.89
+50.89
+51.79
+24.15
+33.02
+33.79
+33.83
+39.29
+32.59
+30.94
+30.77
+Ours
+43.68
+58.95
+61.58
+62.63
+25.98
+38.63
+42.08
+43.05
+43.68
+36.84
+35.69
+34.92
+Table 2: ALFWorld results across different subtasks.
+We report the average success rate for each subtask as
+well as the overall result. Better values are in bold.
+Method
+Heat
+Pick2
+Clean
+Cool
+Look
+Pick
+Overall
+Baseline
+43.75
+50.00
+25.93
+16.00
+76.92
+65.71
+45.00
+AutoSkill
+37.50
+50.00
+37.04
+24.00
+76.92
+62.86
+47.14
+EvoSkill
+31.25
+50.00
+40.74
+20.00
+76.92
+65.71
+47.14
+Ours
+50.00
+54.17
+37.04
+24.00
+76.92
+65.71
+51.31
+Selective
+All
+Parent
+0
+25
+50
+75
+100
+Evolution Time (min)
+78.6
+102.7
+87.6
+(a) Evolution Time
+Selective
+All
+Parent
+0
+50
+100
+Evolution API Tokens (M)
+16.4
+115.5
+78.3
+(b) API Token Cost
+Figure 1: Evolution computation cost of three re-writing
+methods.
+that would otherwise introduce noise. These results
+validate that propagating relevance along the skill
+graph yields better-ranked and more complete skill
+contexts than flat embedding retrieval alone.
+Effect of different partial-rewrite strategies. To
+evaluate the effectiveness and efficiency of our se-
+lective rewriting strategy, where we perform sub-
+tree drill-down on partial skill nodes and selectively
+rewrite only a subset of their child skill nodes, we
+compare it with two baselines:
+(i) rewrite all child skill nodes, which skips the
+verification step and rewrites all child skill nodes
+before merging them; and (ii) rewrite parent skill
+nodes, which rewrites only the partial skill nodes
+that serve as parent nodes.
+Selective drill-down rewriting improves local-
+ization coverage while reducing evolution cost.
+Compared with Parent-only and Rewrite-all from
+Table 4, our method mainly improves the com-
+pleteness of the returned candidate set. At the
+file level, although Parent-only slightly leads
+on Acc@1 (61.51% vs.
+61.13%), our method
+achieves higher Acc@3/10 (72.19%/75.47%) than
+Parent-only (70.68%/73.96%) and Rewrite-all
+(70.68%/74.71%).
+At the module level, our
+method obtains the best Acc@1–10, exceeding
+Parent-only and Rewrite-all by 1.48 and 3.70
+points on Acc@1. At the function level, Parent-
+only has higher Acc@1 (45.79% vs. 43.68%),
+but our method achieves the best Acc@3/5/10
+(58.95%/61.58%/62.63%) and Recall@1/3/5/10
+(26.12%/38.63%/42.08%/43.05%). These gains
+are not due to a larger rewriting budget: Rewrite-
+all costs 6,161.83 seconds and 115.51M tokens,
+Parent-only costs 5,257.82 seconds and 78.35M
+tokens, while our method uses only 4,718.54 sec-
+onds and 16.41M tokens. This shows that drilling
+down before rewriting preserves compatible sub-
+skills, avoids unnecessary edits, and yields a more
+task-specific skill context.
+4.4
+Computational Cost Analysis
+To analyze the impact of the number of initialized
+skills on computational cost, we conduct compar-
+ative experiments under different initial skill ra-
+tios, ranging from 25% to 100%. Specifically, we
+measure the token consumption of the main agent
+model, as well as the time spent on skill retrieval
+and skill evolution.
+As shown in Figure 2, increasing the initial skill
+7
+
+=== [page 8] ===
+Table 3: MuLocBench ablation results for RWR across different granularity levels. All values are reported in
+percentage. Better values are in bold.
+Granularity
+Method
+Accuracy
+Recall
+Precision
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+File
+w/o RWR
+60.00
+68.68
+71.32
+73.21
+32.53
+43.68
+46.50
+48.22
+60.00
+48.87
+48.95
+48.77
+Ours
+61.13
+72.19
+74.34
+75.47
+34.60
+47.38
+50.44
+51.48
+61.13
+50.44
+49.98
+49.73
+Module
+w/o RWR
+54.07
+63.71
+65.93
+65.19
+34.05
+45.01
+47.56
+47.86
+54.07
+49.87
+49.19
+48.80
+Ours
+59.26
+66.67
+67.41
+67.41
+39.43
+46.90
+47.89
+48.29
+59.26
+53.33
+52.23
+51.97
+Function
+w/o RWR
+36.31
+54.74
+58.42
+60.00
+20.64
+34.64
+38.88
+40.03
+36.31
+34.03
+33.11
+32.22
+Ours
+43.68
+58.95
+61.58
+62.63
+25.98
+38.63
+42.08
+43.05
+43.68
+36.84
+35.69
+34.92
+Table 4: MuLocbench ablation results under different partial-rewrite strategies. All values are reported in percentage.
+Better values are in bold.
+Granularity
+Method
+Accuracy
+Recall
+Precision
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+@1
+@3
+@5
+@10
+File
+Parent-only
+61.51
+70.68
+73.58
+73.96
+35.45
+46.64
+50.45
+50.99
+61.51
+50.00
+49.77
+49.49
+Rewrite-all
+60.37
+70.68
+74.34
+74.71
+33.97
+45.93
+49.98
+50.78
+60.37
+48.87
+49.15
+48.71
+Ours
+61.13
+72.19
+74.34
+75.47
+34.60
+47.38
+50.44
+51.48
+61.13
+50.44
+49.98
+49.73
+Module
+Parent-only
+57.78
+65.93
+66.67
+66.67
+39.43
+47.05
+47.42
+47.96
+57.78
+51.55
+50.05
+49.96
+Rewrite-all
+55.56
+64.45
+65.93
+65.93
+36.28
+44.99
+47.25
+47.30
+55.56
+51.10
+49.70
+49.50
+Ours
+59.26
+66.67
+67.41
+67.41
+39.43
+46.90
+47.89
+48.29
+59.26
+53.33
+52.23
+51.97
+Function
+Parent-only
+45.79
+58.42
+61.05
+61.05
+25.98
+38.55
+41.92
+42.86
+45.79
+36.70
+35.48
+34.70
+Rewrite-all
+45.26
+56.84
+60.00
+60.53
+25.70
+37.43
+40.66
+42.23
+45.26
+35.53
+33.84
+32.88
+Ours
+43.68
+58.95
+61.58
+62.63
+26.12
+38.63
+42.08
+43.05
+43.68
+36.84
+35.69
+34.92
+0.25
+0.50
+0.75
+1.00
+Skill ratio
+25
+50
+75
+100
+125
+150
+175
+200
+Value
+Computation Cost under Different Skill Ratio
+Total time (min)
+Retrieval time (min)
+Token (M) × 50
+Figure 2: Computation cost under different initial skill
+ratios.
+ratio mainly increases retrieval overhead. When
+the skill ratio grows from 25% to 100%, total
+retrieval time rises from 18.28 to 58.72 minutes,
+a 3.21× increase. Main-agent token usage also
+increases, but more moderately, from 3.17M to
+3.89M tokens, corresponding to a 22.7% increase.
+In contrast, total evolution time is not monotonic
+across skill ratios, suggesting that wall-clock cost
+is also affected by parallel execution, the number
+of triggered refinement steps, and per-instance
+runtime variation. Overall, scaling the initialized
+skill pool primarily increases retrieval cost, while
+token growth and total evolution time remain
+comparatively less sensitive.
+5
+Conclusion
+This work examines a key limitation of existing
+skill-based LLM agents: retrieved skills are usually
+reused as flat prompt blocks. When a skill is only
+partially relevant, this all-or-nothing design can
+introduce noise, waste reusable substructure, or
+require unnecessary rewriting. Motivated by this
+problem, we introduce SkillLens, a framework that
+organizes skills hierarchically and constructs task-
+specific skill contexts at the appropriate resolution.
+Experiments on MuLocbench and ALFWorld show
+that SkillLens outperforms strong evolving-skill
+baselines, with larger gains on fine-grained and
+compositional tasks.
+Future work will extend
+SkillLens to multimodal tool-use, web navigation,
+and multi-agent settings, while improving skill
+compression for large evolving libraries.
+Limitations
+Our evaluation covers two task families: repository-
+level bug localization and interaction in a text-
+based embodied environment. Both benchmarks
+8
+
+=== [page 9] ===
+are English-centric and use fixed task protocols.
+The results therefore support the effectiveness of
+mixed-granularity skill reuse in these settings, but
+do not by themselves establish the same benefits
+for other languages, multimodal agents, or safety-
+critical deployments. Likewise, benchmark task
+distributions may not capture the full diversity of
+open-ended agent use.
+SkillLens also depends on the quality of its initial
+skill library and on the verifier’s routing decisions.
+Noisy or poorly structured skills can still lead to
+unnecessary decomposition or rewriting, and the
+four-level ontology used in this work may not be
+the most suitable organization for every domain.
+In addition, our experiments use one agent–writer
+model family, one verifier model, and one embed-
+ding model; the magnitude of the gains may vary
+with other model and retrieval choices.
+Finally, hierarchical retrieval and registry evolu-
+tion introduce verifier calls and maintenance over-
+head relative to an agent without external skills.
+Although we analyze computation under different
+initialization ratios, we do not study continual li-
+brary growth over very long deployments. Our
+theoretical results also rely on sparse-mismatch
+and retrieval-calibration assumptions. They charac-
+terize the intended operating regime of SkillLens
+rather than guarantee identical improvements for
+arbitrary skill graphs or task distributions.
+References
+Salaheddin Alzubi, Noah Provenzano, Jaydon Bingham,
+Weiyuan Chen, and Tu Vu. 2026. EvoSkill: Auto-
+mated skill discovery for multi-agent systems. arXiv
+preprint arXiv:2603.02766.
+Moumita Asad, Rafed Muhammad Yasir, Armin
+Geramirad, and Sam Malek. 2025.
+GenLoc:
+Leveraging large language models for information
+retrieval-based bug localization.
+arXiv preprint
+arXiv:2508.00253.
+Minghao Chen, Yihang Li, Yanting Yang, Shiyu Yu,
+Binbin Lin, and Xiaofei He. 2024. AutoManual:
+Constructing instruction manuals by LLM agents via
+interactive environmental learning. In Advances in
+Neural Information Processing Systems.
+Prateek Chhikara, Dev Khant, Saket Aryan, Taranjeet
+Singh, and Deshraj Yadav. 2025. Mem0: Building
+production-ready AI agents with scalable long-term
+memory. arXiv preprint arXiv:2504.19413.
+Pengfei Du. 2026.
+Memory for autonomous LLM
+agents: Mechanisms, evaluation, and emerging fron-
+tiers. arXiv preprint arXiv:2603.07670.
+Kutluhan Erol, James Hendler, and Dana S. Nau. 1994.
+HTN planning: Complexity and expressivity. In Pro-
+ceedings of the AAAI Conference on Artificial Intelli-
+gence, pages 1123–1128.
+Runnan Fang, Yuan Liang, Xiaobin Wang, Jialong
+Wu, Shuofei Qiao, Pengjun Xie, Fei Huang, Hua-
+jun Chen, and Ningyu Zhang. 2025. Memp: Ex-
+ploring agent procedural memory. arXiv preprint
+arXiv:2508.06433.
+Erann Gat. 1998. On three-layer architectures. In David
+Kortenkamp, R. Peter Bonasso, and Robin Murphy,
+editors, Artificial Intelligence and Mobile Robots,
+pages 195–210. AAAI Press.
+Anthony Z. Liu, Jongwook Choi, Sungryull Sohn, Yao
+Fu, Jaekyeom Kim, Dong-Ki Kim, Xinhe Wang, Jae-
+won Yoo, and Honglak Lee. 2024. SkillAct: Using
+skill abstractions improves LLM agents. In ICML
+2024 Workshop on LLMs and Cognition.
+Yujian Liu, Jiabao Ji, Li An, Tommi Jaakkola, Yang
+Zhang, and Shiyu Chang. 2026. How well do agen-
+tic skills work in the wild: Benchmarking LLM
+skill usage in realistic settings.
+arXiv preprint
+arXiv:2604.04323.
+Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler
+Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon,
+Nouha Dziri, Shrimai Prabhumoye, Yiming Yang,
+Shashank Gupta, Bodhisattwa Prasad Majumder,
+Katherine Hermann, Sean Welleck, Amir Yazdan-
+bakhsh, and Peter Clark. 2023. Self-refine: Iterative
+refinement with self-feedback. In Advances in Neu-
+ral Information Processing Systems.
+Qirui Mi, Zhijian Ma, Mengyue Yang, Haoxuan Li,
+Yisen Wang, Haifeng Zhang, and Jun Wang. 2026.
+ProcMEM: Learning reusable procedural memory
+from experience via non-parametric PPO for LLM
+agents. arXiv preprint arXiv:2602.01869.
+George L. Nemhauser, Laurence A. Wolsey, and Mar-
+shall L. Fisher. 1978. An analysis of approximations
+for maximizing submodular set functions—i. Mathe-
+matical Programming, 14(1):265–294.
+Mohammad Masudur Rahman and Chanchal K. Roy.
+2018.
+Improving IR-based bug localization with
+context-aware query reformulation. In ACM Joint
+European Software Engineering Conference and Sym-
+posium on the Foundations of Software Engineering,
+pages 495–506.
+Ripon K. Saha, Matthew Lease, Sarfraz Khurshid, and
+Dewayne E. Perry. 2013. Improving bug localization
+using structured information retrieval. In IEEE/ACM
+International Conference on Automated Software En-
+gineering, pages 345–355.
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta
+Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola
+Cancedda, and Thomas Scialom. 2023. Toolformer:
+Language models can teach themselves to use tools.
+In Advances in Neural Information Processing Sys-
+tems.
+9
+
+=== [page 10] ===
+Noah Shinn, Federico Cassano, Edward Berman, Ash-
+win Gopinath, Karthik Narasimhan, and Shunyu Yao.
+2023. Reflexion: Language agents with verbal rein-
+forcement learning. In Advances in Neural Informa-
+tion Processing Systems.
+Mohit Shridhar, Xingdi Yuan, Marc-Alexandre Cote,
+Yonatan Bisk,
+Adam Trischler,
+and Matthew
+Hausknecht. 2021. Alfworld: Aligning text and em-
+bodied environments for interactive learning. In In-
+ternational Conference on Learning Representations.
+Richard S. Sutton, Doina Precup, and Satinder Singh.
+1999. Between MDPs and semi-MDPs: A framework
+for temporal abstraction in reinforcement learning.
+Artificial Intelligence, 112(1–2):181–211.
+Alexander Sasha Vezhnevets, Simon Osindero, Tom
+Schaul, Nicolas Heess, Max Jaderberg, David Silver,
+and Koray Kavukcuoglu. 2017. FeUdal networks for
+hierarchical reinforcement learning. In International
+Conference on Machine Learning, pages 3540–3549.
+Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Man-
+dlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan, and An-
+ima Anandkumar. 2024a. Voyager: An open-ended
+embodied agent with large language models. Trans-
+actions on Machine Learning Research.
+Xingyao Wang, Yangyi Chen, Lifan Yuan, Yizhe Zhang,
+Yunzhu Li, Hao Peng, and Heng Ji. 2024b. Exe-
+cutable code actions elicit better LLM agents. In
+International Conference on Machine Learning.
+Chunqiu Steven Xia, Yinlin Deng, Soren Dunn, and
+Lingming Zhang. 2024. Agentless: Demystifying
+LLM-based software engineering agents.
+arXiv
+preprint arXiv:2407.01489.
+Renjun Xu and Yang Yan. 2026.
+Agent skills for
+large language models: Architecture, acquisition,
+security, and the path forward.
+arXiv preprint
+arXiv:2602.12430.
+Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Jun-
+tao Tan, and Yongfeng Zhang. 2025.
+A-MEM:
+Agentic memory for LLM agents. arXiv preprint
+arXiv:2502.12110.
+John Yang, Carlos E. Jimenez, Alexander Wettig, Kilian
+Lieret, Shunyu Yao, Karthik Narasimhan, and Ofir
+Press. 2024. SWE-agent: Agent-computer interfaces
+enable automated software engineering. In Advances
+in Neural Information Processing Systems.
+Yutao Yang, Junsong Li, Qianjun Pan, Bihao Zhan, Yux-
+uan Cai, Lin Du, Jie Zhou, Kai Chen, Qin Chen,
+Xin Li, Bo Zhang, and Liang He. 2026. AutoSkill:
+Experience-driven lifelong learning via skill self-
+evolution. arXiv preprint arXiv:2603.01145.
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak
+Shafran, Karthik Narasimhan, and Yuan Cao. 2023.
+ReAct: Synergizing reasoning and acting in language
+models. In International Conference on Learning
+Representations.
+Fengji Zhang, Bei Chen, Yue Zhang, Jacky Keung, Jin
+Liu, Daoguang Zan, Yi Mao, Jian-Guang Lou, and
+Weizhu Chen. 2023. RepoCoder: Repository-level
+code completion through iterative retrieval and gen-
+eration.
+In Conference on Empirical Methods in
+Natural Language Processing.
+Hanrong Zhang, Shicheng Fan, Henry Peng Zou, Yankai
+Chen, Zhenting Wang, Jiayu Zhou, Chengze Li, Wei-
+Chieh Huang, Yifei Yao, Kening Zheng, Xue Liu,
+Xiaoxiao Li, and Philip S. Yu. 2026. EvoSkills: Self-
+evolving agent skills via co-evolutionary verification.
+arXiv preprint arXiv:2604.01687.
+Yuntong Zhang, Haifeng Ruan, Zhiyu Fan, and Ab-
+hik Roychoudhury. 2024a. AutoCodeRover: Au-
+tonomous program improvement. In ACM SIGSOFT
+International Symposium on Software Testing and
+Analysis.
+Zejun Zhang, Jian Wang, Qingyun Yang, Yifan Pan,
+Yi Tang, Yi Li, Zhenchang Xing, Tian Zhang, Xuan-
+dong Li, and Guoan Zhang. 2025. A benchmark
+for localizing code and non-code issues in software
+projects. arXiv preprint arXiv:2509.25242.
+Zeyu Zhang, Xiaohe Bo, Chen Ma, Rui Li, Xu Chen,
+Quanyu Dai, Jieming Zhu, Zhenhua Dong, and Ji-
+Rong Wen. 2024b. A survey on the memory mech-
+anism of large language model based agents. arXiv
+preprint arXiv:2404.13501.
+Andrew Zhao, Daniel Huang, Quentin Xu, Matthieu
+Lin, Yong-Jin Liu, and Gao Huang. 2024. ExpeL:
+LLM agents are experiential learners. In Proceedings
+of the AAAI Conference on Artificial Intelligence,
+volume 38, pages 19632–19642.
+YanZhao Zheng, ZhenTao Zhang, Chao Ma, YuanQiang
+Yu, JiHuan Zhu, Baohua Dong, and Hangcheng Zhu.
+2026.
+SkillRouter: Retrieve-and-rerank skill se-
+lection for LLM agents at scale.
+arXiv preprint
+arXiv:2603.22455.
+Wanjun Zhong, Lianghong Guo, Qiqi Gao, He Ye, and
+Yanlin Wang. 2023. MemoryBank: Enhancing large
+language models with long-term memory.
+arXiv
+preprint arXiv:2305.10250.
+Jian Zhou, Hongyu Zhang, and David Lo. 2012. Bu-
+gLocator: Where should the bugs be fixed? more
+accurate information retrieval-based bug localization
+based on bug reports. In International Conference
+on Software Engineering, pages 14–24.
+A
+Implementation Details
+A.1
+Models and Initialization
+We use Codex GPT-5.2 for the agent Aθ and skill
+writer Wϕ, GPT-5-mini for the verifier, and text-
+embedding-3-small for retrieval and graph initial-
+ization. For both benchmarks, the evolution and
+validation sets are split 7:3, with held-out test
+sets. The skill library is initialized with antigravity-
+awesome-skills.
+10
+
+=== [page 11] ===
+A.2
+Datasets and Evaluation
+For repository-localization tasks, the training
+dataset contains 36 repositories:
+AutoGPT,
+ChatGLM-6B,
+ComfyUI,
+Deep-Live-Cam,
+DeepSeek-V3, Fooocus, MetaGPT, PaddleOCR,
+Real-Time-Voice-Cloning, ansible, core, cpython,
+face_recognition,
+faceswap,
+fastapi,
+flask,
+gpt-engineer, gpt4free, gpt_academic, grok-1,
+hackingtool,
+langflow,
+llama,
+manim,
+odoo,
+open-interpreter,
+private-gpt,
+pytorch,
+rich,
+scikit-learn, scrapy, thefuck, transformers, yolov5,
+youtube-dl, and yt-dlp. The test dataset contains
+10 repositories:
+LLaMA-Factory, OpenHands,
+keras, localstack, pandas, requests, screenshot-
+to-code, sherlock, stable-diffusion-webui, and
+text-generation-webui.
+We evaluate on Mu-
+Locbench, where the agent predicts ranked file-,
+module-, and function-level candidates for each
+issue, and report accuracy, recall, and precision at
+all three granularities.
+For text-environment tasks, we evaluate ALF-
+World with full-episode rollouts of at most 50 steps.
+We report episode success rate (won) as the primary
+metric together with per-subtask success rates. The
+training split is used for evolution and validation,
+and the valid-seen split is reserved for testing.
+A.3
+Baselines
+We compare SkillLens with three baselines: (i)
+Vanilla, the base Codex GPT-5.2 agent without
+external skills; (ii) AutoSkill (Yang et al., 2026),
+a flat skill self-evolution method that abstracts
+reusable skills from interaction traces; and (iii)
+EvoSkill (Alzubi et al., 2026), a failure-driven
+method that refines skills from failed executions.
+All methods use the same underlying agent, data
+splits, execution budget, and task environments;
+they differ only in how skills are constructed, re-
+trieved, adapted, and evolved.
+A.4
+Evolution and Evaluation Protocol
+For
+both
+repository-localization
+and
+text-
+environment experiments, we first run the base
+agent Aθ on the evolution split and construct gap
+reports from failed cases.
+Each report records
+the error type, failed prediction or trajectory,
+ground-truth target, retrieved skills, verifier routing
+decisions, and invoked or rewritten skill units. The
+reports are then used to update the skill graph and
+refine retrievable skill units. After each iteration,
+we evaluate the updated system on the validation
+split and select the best version for a single final
+test-set evaluation.
+All evaluations are executed in reproducible iso-
+lated environments. For code-agent tasks, each
+issue is run in a repository-specific sandbox at
+the target code snapshot. For ALFWorld, each
+episode uses an independent TextWorld/ALFWorld
+instance with a fixed step budget.
+B
+Proofs
+B.1
+Proof of Proposition 1 (Sublinear cost of
+adaptation)
+Each ACCEPT or SKIP decision terminates explo-
+ration of the corresponding subtree, so the visited
+set is exactly the adaptive frontier together with its
+ancestors. The expected size of the visited frontier
+at depth d satisfies E[|Fd|] ≤(ρb)d, and summing
+along the tree yields
+E[Nvis] ≤
+D
+X
+d=0
+(ρb)d = O
+
+1
+1 −ρb
+
+= O(1),
+E[Nrw] ≤E[Nvis].
+(7)
+Hence Cadapt = O(Nvis + Nrw) is independent of
+n in expectation, and in the worst case (ρb →1)
+is bounded by O(D) = O(log n). In both regimes
+Cadapt = o(n), in contrast to flat full-skill injection
+whose token cost is Θ(n). □
+B.2
+Proof of Proposition 2 (Monotone
+improvement and convergence to a local
+optimum)
+Monotonicity follows directly from including the
+previous pair in the candidate set, which guarantees
+J(t+1) ≥J(t). Since M is bounded (as a task met-
+ric in [0, 1]) and C is bounded below, J is bounded
+above, so {J(t)} is monotone and bounded and
+hence convergent. At the limit, by definition of
+the update rule no atomic edit in P∞yields strict
+improvement, so S† is a fixed point of the opera-
+tor family, i.e. a local optimum under the neigh-
+borhood induced by single atomic edits. The gap
+J∗−J† is in general non-zero because the search
+proceeds via finite atomic neighborhoods rather
+than a global combinatorial sweep over all skill-
+pair configurations; this yields the claimed sub-
+optimality with respect to the evolution objective.
+□
+11
+
+=== [page 12] ===
+B.3
+Proof of Proposition 3 (Composed
+approximation guarantee)
+The three stages of Algorithm 1 approximate the
+surrogate JQ block-by-block, and their errors com-
+pose additively under assumptions (a)–(d).
+Step 1 (retrieval block). Top-K embedding re-
+trieval reduces to a singleton-relevance subproblem
+maxR:|R|≤K
+P
+u∈R rQ(u).
+Since rQ calibrates
+FQ({u}) up to ϵret, the returned seed set bR0 satis-
+fies P
+u∈bR0 FQ({u}) ≥maxR
+P
+u∈R FQ({u}) −
+ϵret, i.e. optimal up to ϵret.
+Step 2 (random-walk expansion).
+Under as-
+sumption (b), FQ is monotone submodular, so
+the classical greedy bound applies to any selec-
+tion rule that picks elements in order of estimated
+marginal gain.
+By assumption (c), the degree-
+corrected RWR score s(u) approximates the true
+marginal gain ∆(u | R) up to ϵrwr; standard noisy-
+greedy analysis (Nemhauser et al., 1978) then
+yields Jret
+Q ( bR) ≥(1 −1/e) Jret
+Q (R∗) −ϵrwr, in-
+heriting the (1−1/e) submodular guarantee on the
+retrieval block.
+Step 3 (verifier-driven rewrite). Because the
+writer Wϕ operates on each unit independently,
+the rewrite block is additive over routed nodes:
+Jrw
+Q (B) = P
+u∈bR ϕ(au) for per-node action util-
+ities ϕ(·).
+Under assumption (d), the verifier
+matches the optimal local action of Eq. (3) up to
+per-node error ϵver, so summing over the | bR| routed
+nodes gives Jrw
+Q ( bB) ≥Jrw
+Q (B∗) −| bR| ϵver. Step
+3 is exact when ϵver = 0 and otherwise degrades
+linearly in the number of routed nodes.
+Composition. Since the surrogate decomposes
+additively as JQ = Jret
+Q + Jrw
+Q , summing the three
+per-block bounds yields Eq. (6). The procedure
+is therefore not an exact optimizer of the unob-
+servable correctness metric M, but an objective-
+consistent approximation to its tractable surrogate,
+with each step playing a clean role in Eq. (1). □
+C
+Case Study
+C.1
+MuLocbench Example: YOLOv5
+Root-Path Failure
+Issue.
+Repository: ultralytics/yolov5. The
+user reports that loading a custom model through
+Torch Hub fails:
+Problem instance
+Command:
+torch.hub.load(
+’ultralytics/yolov5’, ’custom’,
+path=’yolov5/path/last.pt’,
+force_reload=True)
+Observed error:
+ValueError: ‘C:\Users\aaa\
+.cache\torch\hub\
+ultralytics_yolov5_master’
+does not start with
+‘C:\Users\aaa\PycharmProjects\
+project\proejct1’
+This indicates a mismatch between the repository root
+resolved inside the cached Torch Hub checkout and
+the user’s current working directory.
+Retrieved skill
+Skill: External-loader path-root localization
+Policy. If a Python project fails only when loaded
+through an external mechanism such as torch.hub,
+a package cache, or a plugin loader, first inspect how
+the code computes the repository root and whether
+that root is forcibly converted relative to Path.cwd().
+Procedure.
+• Trace the reported execution entry and identify
+the first repository modules imported on that
+path.
+• Search these modules for root-path construc-
+tion with Path(__file__), Path.cwd(), and
+relative_to.
+• If the error says one path “does not start
+with”
+another,
+prioritize
+direct
+calls
+to
+ROOT.relative_to(Path.cwd()).
+• Prefer a guarded fallback: keep relative paths
+when valid, but preserve the absolute root when
+the repository is outside the current working
+directory.
+Drill-down result
+Kept context.
+• The
+reported
+command
+uses
+torch.hub.load(..., ’custom’, ...).
+• Therefore, the primary search path is the Hub
+loading path rather than standalone training or
+inference scripts.
+• The error pattern strongly suggests failure in
+repository-root normalization.
+• The most likely problematic operation is
+ROOT.relative_to(Path.cwd()).
+Task-specific focus.
+12
+
+=== [page 13] ===
+• Inspect the modules directly involved in Hub-
+based model loading.
+• Prioritize models/yolo.py.
+• Treat models/tf.py, detect.py, train.py,
+val.py, and export.py as secondary locations
+only if they reuse the same fragile pattern.
+Final localization
+With the refined context, the agent localizes the issue
+to YOLOv5’s root-path conversion logic.
+Primary file:
+• models/yolo.py
+Secondary consistency files:
+• models/tf.py
+• detect.py
+• train.py
+• val.py
+• export.py
+Localized
+fix.
+Guard
+the
+root
+conversion
+ROOT
+=
+ROOT.relative_to(Path.cwd()) with
+try/except ValueError. If the repository is loaded
+from the Torch Hub cache and is not under the user’s
+current working directory, keep ROOT as an absolute
+path instead of raising an exception.
+Gap Analysis
+The retrieved skill correctly identifies the failure pat-
+tern as an unsafe conversion from an absolute repos-
+itory root to a path relative to Path.cwd() under an
+external loader.
+However, the initial localization remains broader than
+necessary: it expands from the Hub loading path to
+several additional files that share similar root-handling
+logic. For this issue, the reported command primar-
+ily exercises the Torch Hub model-loading path, so
+models/yolo.py should receive the highest priority.
+Updated skill fragment
+When a repository behaves differently under an ex-
+ternal loader than in direct execution, treat path-root
+resolution as a first-class localization target. Inspect
+how the project derives its repository root, how that
+root is normalized, and whether absolute paths are
+implicitly assumed to be inside the caller’s current
+working directory.
+Prioritize files that lie on the failing loader’s actual im-
+port or execution path before expanding to other mod-
+ules with similar path-handling code. Prefer guarded
+root-normalization logic: use relative paths only when
+the path relationship is valid, and otherwise preserve
+the absolute root so externally cached or relocated
+repositories remain loadable.
+C.2
+ALFWorld Example: Mixed-Granularity
+Skill Reuse
+Problem instance
+Goal: Put a cooled apple on the dining table.
+Environment context: The agent starts in a kitchen-
+like environment. The apple may be inside a drawer,
+cabinet, or on a countertop. To complete the task,
+the agent must first obtain the apple, cool it using a
+refrigerator, and then place it on the dining table.
+Retrieved skill: Clean object then place
+Policy. For object-state-and-placement tasks, separate
+the plan into three reusable stages: find and pick up
+the target object, transform the object’s state using the
+correct appliance, and place the object at the requested
+destination.
+Strategy.
+• Search likely receptacles until the target object is
+found.
+• Pick up the object before applying any state-
+changing operation.
+• Use the environment object that matches the re-
+quested state change.
+• After the state change is complete, navigate to the
+target receptacle and place the object there.
+Stored procedure from prior task.
+• Locate the apple.
+• Pick up the apple.
+• Clean the apple in the sink.
+• Place the apple on the dining table.
+Drill-down result
+Kept units.
+• Search likely receptacles for the apple.
+• Pick up the apple after it is found.
+• Navigate to the dining table after the state change.
+• Put the apple on the dining table.
+Rewritten unit.
+• Replace “clean the apple in the sink” with “cool
+the apple in the fridge”.
+Dropped units.
+• Sink-specific actions such as opening the sink,
+placing the apple in the sink basin, or using water
+are not included.
+Constructed task-specific context
+For a “cooled object then place” task, first locate and
+pick up the target object. Then navigate to the refrig-
+erator, open it, put the object inside, close it if needed,
+reopen it, and take the cooled object back. Finally,
+navigate to the requested destination and place the
+object there. Do not use sink-specific cleaning actions
+unless the task explicitly asks for a cleaned object.
+13
+
+=== [page 14] ===
+Final execution plan
+1. Search likely locations such as the countertop,
+cabinet, and drawer.
+2. Take the apple once it is found.
+3. Go to the refrigerator.
+4. Open the refrigerator.
+5. Put the apple in the refrigerator.
+6. Close the refrigerator if the environment requires
+it.
+7. Open the refrigerator again and take the cooled
+apple.
+8. Go to the dining table.
+9. Put the cooled apple on the dining table.
+Gap Analysis
+Successful transfer. The retrieved skill correctly
+provides the high-level structure for object-state-and-
+placement tasks: find the object, transform its state,
+and place it at the requested destination.
+Local mismatch. The retrieved procedure contains
+a cleaning operation, but the current task requires
+cooling.
+The mismatch is isolated to the state-
+transformation step rather than the whole skill.
+Agent-side update. Store a reusable procedure for
+cooled-object placement: use the refrigerator as the
+default appliance for cooling tasks, then return the
+object to the requested destination.
+Verifier-side update. When a retrieved skill matches
+the object and destination but has a different state
+transformation, keep the acquisition and placement
+units, but rewrite only the state-changing procedure.
+Updated skill fragment
+For ALFWorld object-state-and-placement tasks,
+compare the requested state transformation before
+reusing a prior skill. If the object and destination
+match but the transformation differs, preserve the lo-
+cate, pick, navigate, and place procedures, and rewrite
+only the transformation step. Use the sink for clean-
+ing, the refrigerator for cooling, and the microwave or
+stove for heating, depending on the task instruction.
+14

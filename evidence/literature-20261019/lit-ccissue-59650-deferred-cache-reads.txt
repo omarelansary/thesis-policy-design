@@ -1,0 +1,186 @@
+ Claude Code: Deferred MCP tool schemas inflate cache reads a... · #59650   
+  ›_ Claude Code Issues   ☰       
+ Claude Code Issues / #59650  
+Deferred MCP tool schemas inflate cache reads and per-turn token counts unnecessarily 
+
+ Status  Closed — not planned    
+ Maintainer reply None cached   
+ Activity  2 comments · opened May 16, 2026  · closed Jun 14, 2026     
+
+Preflight Checklist
+
+[x] I have searched existing issues and this hasn't been reported yet
+
+[x] This is a single bug report (please file separate reports for different bugs)
+
+[x] I am using the latest version of Claude Code
+
+What's Wrong?
+
+Summary
+During a long Claude Code session (Opus 4.7, 1M context), I observed cumulative cache-read tokens reaching ~35.3M and at least one individual turn reported at ~150k tokens. After running /context, I noticed a large chunk of context is consumed by deferred MCP tool schemas that are never invoked during the session.
+
+/context breakdown (at the time of investigation)
+
+Total: 239.9k / 1M (24%)
+System prompt: 9.5k
+System tools: 18.3k
+MCP tools (active): 2.6k
+MCP tools (deferred): 87.8k
+System tools (deferred): 15.1k
+Memory files: 1.3k
+Skills: 4k
+Messages: 204.2k
+The combined ~103k of deferred tool definitions is loaded into the cache and re-read on every API call, including for tools I never invoke this session (e.g. Base44, MailerLite, Klaviyo, Replicate, Outlook/SharePoint connectors, etc.).
+
+Impact
+
+Each tool call = one API call = one full cache read of the context (~240k+).
+Heavy turns make 20–30+ tool calls, so a single turn can re-read cache 20–30 times.
+Over 100+ API calls in a session, the ~103k of deferred-tool overhead alone contributes roughly 10M of cumulative cache reads for tools that were never used.
+Cache reads are billed at 10% of input price, but the figure still looks alarming in the UI and contributes to per-turn token counts that surprised me (e.g. ~150k on a single turn).
+Suggested investigation / fix ideas
+
+Lazy-load deferred MCP tool schemas — keep only names in the constant cache block, fetch full schemas on demand via ToolSearch (which already exists).
+Allow per-session opt-out of unused MCP servers so their schemas don't enter the cache at all.
+Surface a "your cache has X tokens of unused tool definitions" hint in /context so users can act on it.
+Consider whether ToolSearch results (full schemas of tools the user has loaded) should also be evictable from later turns once invoked, rather than persisting in cache for the rest of the session.
+Environment
+
+Model: claude-opus-4-7 (1M context)
+Interface: Claude Code CLI on Windows 11 / PowerShell
+Session length: long (multi-hour, many tool calls)
+
+What Should Happen?
+
+Expected behaviour
+
+The cache should only carry tool schemas the session is actually using. Specifically:
+
+Deferred MCP tools should be name-only in the base cache.
+Today, ~88k of MCP tool schemas (parameters, descriptions, JSONSchemas) sit in every cache read even when zero of those tools are invoked. The intent of "deferred" already implies "don't load until needed" — that should extend to the schema itself, not just the call surface. The base cache should carry only:
+the tool name
+a one-line description
+the server it belongs to
+…and nothing else until the model calls ToolSearch to materialise the full schema.
+ToolSearch results should be evictable.
+Right now, once I load a tool's schema via ToolSearch, it sticks in cache for the rest of the session. After I finish using preview_* for a verification step, those schemas should be dropped from cache on the next turn unless re-referenced. A simple "if a deferred tool wasn't invoked in the last N turns, evict its schema" policy would reclaim a lot of room on long sessions.
+/context should call out reclaimable tokens.
+The current breakdown shows "MCP tools (deferred): 87.8k" but doesn't flag that this is overhead, not work product. It should say something like:
+MCP tools (deferred): 87.8k — none invoked this session, can be reclaimed
+…so users know it's an actionable inefficiency rather than a fixed cost.
+
+A single turn should not silently emit 150k tokens.
+Even when a turn does heavy work (many tool calls, large file reads), the user should see a per-turn estimate before it runs — not discover it after the fact. A pre-flight "this turn will consume approximately X tokens" warning, or a soft cap with a confirmation prompt, would let me catch runaway turns early.
+Cumulative cache-read counts should be presented in cost terms, not raw tokens.
+"35.3M cache reads" sounds alarming but actually costs the same as ~3.5M input tokens (cache reads bill at 10%). The UI should show both — raw count for transparency, and the cost-equivalent so users don't conflate the two.
+End state I'd expect after these fixes
+
+For a session like mine (long, many tool calls, mostly Glob/Grep/Read/Edit, no MCP tools beyond preview):
+
+Base cache per API call: ~50k instead of ~240k (the deferred-tools bulk gone).
+Cumulative cache reads over the whole session: ~5–8M instead of 35M.
+/context clearly distinguishes "working set" from "reclaimable overhead".
+No surprise 150k-token turns — either the harness warns me, or the underlying inefficiency is gone so it doesn't happen.
+
+Error Messages/Logs
+
+Steps to Reproduce
+
+Steps to reproduce
+
+Set up a Claude Code session with multiple MCP servers connected.
+Anthropic-side MCP servers like Base44, MailerLite, Outlook/SharePoint, Claude in Chrome, computer-use, scheduled-tasks, etc. all expose deferred tools that go into the cache. The more servers, the larger the overhead. (In my session this totalled ~88k of deferred MCP tool schemas.)
+Run /context immediately after starting the session, before doing any work.
+Note the "MCP tools (deferred)" and "System tools (deferred)" line items. On my machine this was ~88k + ~15k = ~103k of schemas loaded before I'd done anything.
+Do a moderate-size coding task that involves many tool calls.
+A representative task: ask Claude to survey a feature surface, edit ~5–7 files, and verify the changes. Tool calls accumulate fast — file Reads, Edits, Bash, Grep, preview_start, preview_eval, etc. A single multi-file refactor easily makes 20–30 tool calls.
+Watch the per-turn token counts in the status line as work happens.
+On a heavy turn (many tool calls, larger file reads) you should see individual turns reporting 100k+ tokens. Mine reported ~150k on the mass-email refactor turn.
+After 1–2 hours of work, run /cost.
+Note the cumulative cache-read tokens. In my session this hit 35.3M.
+Run /context again and compare to step 2.
+The "MCP tools (deferred): 87.8k" line will be unchanged — confirming those schemas were loaded into every API call's cache read despite never being invoked. None of the Base44/MailerLite/Klaviyo/etc. tools were used in my session, but they were re-read on every one of the ~100+ API calls.
+Expected vs. actual
+
+Expected: deferred tools that are never invoked do not contribute to per-turn cache reads.
+Actual: deferred tool schemas are loaded into the base cache block and re-read on every API call regardless of whether the model invokes them.
+Minimal repro (faster)
+
+If you don't want to do a full coding session:
+
+Start a fresh Claude Code session with at least 3 MCP servers connected (any combination of Base44, MailerLite, Klaviyo, Outlook, computer-use will do).
+Run /context — note the deferred MCP tools number.
+Ask Claude to do 10 trivial Reads in a row (e.g. "read these 10 files: …").
+Run /cost. Cumulative cache reads will be roughly 10 × current context size even though no MCP tool was used.
+Session characteristics that amplify the issue
+
+Long sessions (1m context window, multi-hour work).
+Many MCP servers connected (Anthropic's default-installed plus any user plugins).
+Tasks involving many tool calls per turn (refactors, audits, anything with verification steps).
+Each individual tool result echoing back state (Edit results in particular).
+
+Claude Model
+
+None
+
+Is this a regression?
+
+Yes, this worked in a previous version
+
+Last Working Version
+
+_No response_
+
+Claude Code Version
+
+claude code
+
+Platform
+
+Anthropic API
+
+Operating System
+
+Windows
+
+Terminal/Shell
+
+Terminal.app (macOS)
+
+Additional Information
+
+_No response_ 
+
+View original on GitHub ↗
+
+ This issue has 2 comments on GitHub. Read the full discussion on GitHub ↗   
+Related Claude Code issues 
+
+Matched on shared title terms, labels, topic and reported release — ranked so issues with
+          real discussion come first.
+
+ /context counts tool schemas as "Messages" — needs separate "System tools" and "MCP tools" rows 
+ Open 💬 1 v2.1.185 #80527  
+ Sub-agents return "0 tool uses / Done" when parent session has deferred tool schemas 
+ Resolved 💬 2  #74907  
+ Desktop: ~3.9k tokens of built-in MCP tool schemas load non-deferred with no opt-out; built-in server instructions exceed the documented 2KB cap 
+ Open 💬 1 v2.1.201 #76372  
+ [BUG] Agent Tool Used Unnecessarily 
+ Resolved 💬 3 v2.1.84 #44397  
+ MCP deferred tool loading returns empty parameter schemas, breaking parameterized tools 
+ Resolved 💬 3  #34974  
+ Per-server defer/eager policy for MCP tool schemas (extend existing deferred-tools mechanism) 
+ Resolved 💬 2  #97388  
+ [BUG] MCP deferred tools not available on first turn — breaks scheduled/automated tasks 
+ Resolved 💬 8  #42148  
+ MCP tool schemas loaded from permissions even when server is not configured or removed 
+ Resolved 💬 3  #15913      
+Browse by topic  
+
+Same class of failure, ranked by community engagement — this issue is one of many, so it
+          may not appear in the visible list:
+ MCP server connection issues  
+ Browse all Claude Code issue topics →      
+
+   

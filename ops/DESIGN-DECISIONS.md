@@ -166,3 +166,10 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Price recheck (2026-10-19 vs 2026-10-11): no change in the Anthropic multipliers, the OpenAI page or the Gemini storage price; Gemini added a model that supports implicit caching only.
 - Mechanical: the pinned fetch helper writes `"auth": "AUTH-013"` into the manifest; the fetches of this batch were made under AUTH-016 (the helper was not changed). Stored page images (PNG) are a reading aid with SHA-256 in `evidence/literature-20261019/pages/INDEX.md`; the text copies are the evidence.
 - Retained limits: all readers share a model family (C-E04); image reading is by models, checked by two readers.
+
+## WD-028 Ledger batch 4: literature pass and missing sources (AUTH-016, thread T-20261019-102, 2026-10-19)
+- Process (lead): 10 logged standard-mode searches; 18 sources stored with `tools/litfetch.py` (papers, a vendor blog, three Cursor forum threads, two Claude Code issue mirrors, LangChain and Embabel pages); four stewards read them in parallel on disjoint rows; the lead re-checked the key quotes and updated the workbook in place.
+- Result: 2 rows closed on evidence and archived (N-6/SKILLMEM, AS-05, the latter only for the existence of published prior art); 12 rows sharpened to PARTLY ANSWERED; N-6 set to NOT LOCATED. No supervisor assertion (AS-01, AS-03, AS-04) was closed: the texts show evidence in both directions on retrieval metrics and nothing tests an agent in our setting.
+- Source types: forum posts and issue mirrors are user reports, not vendor documentation; the StackOne figures are a vendor's own evaluation (its page says 540 and 543 test cases).
+- Mechanical: the manifest entries say `"auth": "AUTH-013"` because the pinned helper hard-codes it; this batch ran under AUTH-016.
+- Retained limits: all readers share a model family (C-E04); stewards did not read every range (coverage in each finding).

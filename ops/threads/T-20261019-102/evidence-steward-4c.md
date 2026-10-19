@@ -1,0 +1,5 @@
+# Log: evidence-steward-4c (T-20261019-102; written by the lead from the steward's final answer)
+- Wrote findings/SUM-0020-batch4c-retrieval-descriptions-priorart.md (FND-0018); created EXT-0181 (ToolRet Table 6 rows) and EXT-0182 (Tool Preferences abstract and intro); 2 of 4 extractions used.
+- AS-01 / AS-03: retrieval numbers in both directions (ToolRet BM25s 22.32 N@10; ToolDreamer BM25 29.55 vs Qwen3-8B 38.43; StackOne vendor eval Top-1 14/21/38%, Top-5 87/90/85%); retrieval metrics only, no agent test; PARTLY.
+- AS-04: Tool Preferences abstract and intro only (over 10x; over 7x one sentence; over 11x combined; BFCL; 17 models); PARTLY. AS-05: ToolDreamer (+8% to +19% over zero-shot, offline cost under $5, cites Kachuee 2025); closed on its criterion in the narrow sense. C-D06/NOVELTY: LangChain and Embabel mechanisms recorded, no novelty assessment.
+- Lead second reader: StackOne table and setup lines, ToolDreamer averages and cost, Tool Preferences figures and EXT-0181 rows re-checked; the StackOne page itself says 540 and 543 test cases.

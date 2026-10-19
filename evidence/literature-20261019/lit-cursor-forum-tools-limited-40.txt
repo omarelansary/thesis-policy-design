@@ -1,0 +1,226 @@
+
+
+    Tools limited to 40 total - Feature Requests - Cursor - Community Forum
+
+  Cursor - Community Forum
+
+      Tools limited to 40 total
+
+                Ideas
+
+                Feature Requests
+
+                mieslep
+
+                (Phil)
+
+                    March 21, 2025,  3:41pm
+
+              1
+
+I added/enabled github, astra-db-mcp, and finally slack MCP servers.
+
+The claude-3.5-sonnet (and 3.7) failed to find the last 4 tools provided by slack, despite these tools being listed on the MCP tab (and also in MCP Inspector, and in Claude Desktop).
+
+I was able to get the Agent to see the “missing” Slack tools by disabling the github MCP server, implying there is somewhere an effective limit of 40 tools that can be enabled in total across all MCP servers.
+
+While I can understand 100% the need to limit tools to the Agent, setting a hard-coded limit like this seems a pretty blunt instrument.
+
+Seems to me the agent should be given a list of MCP servers available, asked to decide “what server(s) do you want to see tools from”, and then given a subset of tools.
+
+Some user feedback that I was hitting such a limit would also have been welcome…
+
+                      Exceeding total tools limit
+
+                wesley-harding
+
+                (Wesley Harding)
+
+                    March 21, 2025,  3:45pm
+
+              2
+
+      Cursor
+
+Cursor – Model Context Protocol
+
+Learn how to add and use custom MCP tools within Cursor feature
+
+Some MCP servers, or user’s with many MCP servers active, may have many tools available for Cursor to use. Currently, Cursor will only send the first 40 tools to the Agent.
+
+                FreeLiC
+
+                (Steven Li)
+
+                    March 26, 2025,  5:57am
+
+              3
+
+I don’t think there is a limit on how many tool calls can be made in the model, this is just an artificial limit imposed by you.
+
+                mieslep
+
+                (Phil)
+
+                    March 26, 2025,  2:05pm
+
+              4
+
+It’s not about how many tool calls can be made but rather how many of the available tools Cursor presents to the Agent, it is capped at 1. So as @wesley-harding pointed out from that doc, it is only the “first 40 tools”.
+
+                mieslep
+
+                (Phil)
+
+                    March 26, 2025,  2:07pm
+
+              5
+
+Thanks I did not find that doc but ultimately inferred that is what it was doing via observed behaviour. It seems sort of a dumb limitation - it does not make any sense to send 100s of tools to an Agent (at least not with current SotA), but on the other hand sending a list of MCP servers on the initial call, allowing the agent to ask “tell me about the tools available on X and Y” (as a sort of pre-tool-selection step) which can then give a more targeted list of tools would be a useful (if not latency-increasing) capability.
+
+                condor
+
+                (Condor (Tee))
+
+                    March 26, 2025,  2:11pm
+
+              6
+
+I think issue with offering ‘list of mcp servers’ would then need to be asked on every prompt you send. or?
+
+                mieslep
+
+                (Phil)
+
+                    March 26, 2025, 10:05pm
+
+              7
+
+At the moment, the Agent model is called with a list of tools, the “first” tools in a list up to 40 long. It then decides “it needs a tool” and then has the client invoke the tool with the relevant parameter(s), and call the model back.
+
+Conceptually, one could give the Agent “here are the toolboxes you have available, if one or more of them are useful I have a tool that gives you a list of tools within the box”.
+
+It is effectively an extra tool call, sure, but from an IDE configuration perspective you can have a GH server (which has more than different tools), configured simultaneous with (possibly) many other servers, possibly 100s of potential tools which, if presented to the agent on the first call, could well overwhelm the context/logic of tool calling (which is why there is this limit of “40” in the first place).
+
+As I say, it’s an extra tool call, increases latency somewhat, but also potentially allows the LLM to discover tools that could be more immediately relevant to the current problem it is trying to solve.
+
+                bsmi021
+
+                (Brian W. Smith)
+
+                    March 30, 2025,  1:24pm
+
+              8
+
+It’s a pretty dumb restriction, considering even Claude Desktop can handle 100s of tools. Now why do I have so many tools? Because I do, don’t worry about it. What I want is the ability of using all of them in Cursor.
+
+image896×641 36 KB
+
+Pretty ridiculous if you ask me.
+
+                brandoncollins7
+
+                (Brandoncollins7)
+
+                    April 2, 2025,  4:14pm
+
+              9
+
+yeah this is stupid, I only have this jira mcp server so that my agent can read tickets, I don’t need all the tools that came with this server. yet I can’t disable individual tools? I have to disable the whole thing cause it pushes me over the limit?
+
+image1058×194 12.3 KB
+
+                mieslep
+
+                (Phil)
+
+                    April 3, 2025,  9:51am
+
+              10
+
+Fundamentally, the current state-of-the-art for thinking, tool-calling models is that they can only handle a “limited” number of tools before they become overwhelmed. That limitation is certainly model-dependent but the real problem here is how Cursor is exposing this to the end developer.
+
+We shouldn’t have to “pick and choose” what servers we are enabling for what prompt, Cursor’s internal mechanisms should consult a model as to what tools it thinks makes sense to include on the prompt (e.g. “here is the request, here are the MCP servers available (with a tool count per), what server tools should we include on the request?”
+
+So I think it is an “okay” approach from a Cursor MVP situation, but the tool limit was hidden from me at the time of positing (seemingly that is now clearer), and the reality is that complex services (like GitHub) are going to have an ever-increasing number of tools available.
+
+As you say, Claude Desktop handles this reasonably well, so why can’t Cursor…
+
+                brandoncollins7
+
+                (Brandoncollins7)
+
+                    April 3, 2025,  5:20pm
+
+              11
+
+Well we should be able to enable disable at the tool level instead of the server level, that would help a lot. If I could click to turn off many of the tools I don’t use that a server provides it would be much better.
+
+                deanrie
+
+                (Dean Rie)
+
+                    April 4, 2025,  4:34am
+
+              12
+
+Hey, I think we will be able to implement this soon.
+
+    Related topics
+
+          Topic
+
+          Replies
+          Views
+          Activity
+
+                About limitation of the number of MCP tools
+
+                      Discussions
+
+              5
+
+              1472
+
+              July 4, 2025
+
+                MCP Server 40-Tool Limit in Cursor – Is This Frustrating Your Workflow?
+
+                      Discussions
+
+              3
+
+              1073
+
+              June 14, 2025
+
+                Request: Increase MCP Tools Limit for Enhanced Development Workflow
+
+                      Feature Requests
+
+              9
+
+              1262
+
+              January 8, 2026
+
+                Exceeding total tools limit
+
+                      Feature Requests
+
+              0
+
+              139
+
+              September 21, 2025
+
+                Tool limit reached on MCP
+
+                      Help
+
+              2
+
+              650
+
+              April 6, 2025
+

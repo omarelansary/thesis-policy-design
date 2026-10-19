@@ -1,0 +1,248 @@
+
+
+    UnfoldingTool
+
+Embabel Agent Documentation/com.embabel.agent.api.tool.progressive/UnfoldingTool
+
+UnfoldingTool
+
+interface UnfoldingTool : ProgressiveTool
+A ProgressiveTool with a fixed set of inner tools that are revealed when invoked, regardless of the agent process context.
+This pattern is useful for:
+
+Reducing tool set complexity for the LLM
+
+Grouping related tools under a category facade
+
+Progressive disclosure based on LLM intent
+Progressive disclosure: parent description + childToolUsageNotes
+Information about an UnfoldingTool reaches the LLM in two stages:
+
+Up front, the parent tool's description is in the catalog. It     advertises the capability so the LLM can decide whether to descend.     Keep this short — every loaded UnfoldingTool pays for it on every turn.
+
+On invocation, the unfolded message returned by call lists the     revealed inner tools and then appends childToolUsageNotes verbatim.     Only the LLM that just chose to descend pays for this text. It can     therefore be as long as needed: workflow guidance, the body of an     agent skill, "use X for Y, Z for W" routing rules between siblings,     background context the inner tools need to be used correctly.
+The split is deliberate. Putting the same content in description would tax every turn, even ones that have nothing to do with this tool. Putting it in childToolUsageNotes defers the cost until the LLM has committed.
+Context Preservation
+When an UnfoldingTool is expanded, a context tool can be created that preserves the parent's description and optional usage notes. This solves the problem where child tools would lose context about the parent's purpose.
+Example:
+
+val spotifyTool = UnfoldingTool.of(
+    name = "spotify_search",
+    description = "Search Spotify for music data including artists, albums, and tracks.",
+    innerTools = listOf(vectorSearchTool, textSearchTool, regexSearchTool),
+    childToolUsageNotes = "Try vector search first for semantic queries like 'upbeat jazz'. " +
+        "Use text search for exact artist or album names. " +
+        "Use regex search for pattern matching on metadata."
+)
+Content copied to clipboard
+See also
+
+ProgressiveTool
+
+for context-dependent tool revelation
+Inheritors
+
+MatryoshkaTool
+
+MembersMembers & Extensions
+
+Types
+
+Companion
+
+Link copied to clipboard
+
+object Companion : UnfoldingTool.Factory
+
+Factory
+
+Link copied to clipboard
+
+open class Factory
+
+Factory methods for creating UnfoldingTool instances. This is an open class so that subinterface companions can extend it.
+
+Properties
+
+childToolUsageNotes
+
+Link copied to clipboard
+
+open val childToolUsageNotes: String?
+
+Detail that is progressively disclosed: hidden until the LLM invokes this tool, then appended verbatim to the unfolded message returned by call (after the "Tools now available: …" preamble).
+
+definition
+
+Link copied to clipboard
+
+abstract val definition: Tool.Definition
+
+Tool definition for LLM
+
+exclusive
+
+Link copied to clipboard
+
+open val exclusive: Boolean
+
+When true, expanding this tool removes ALL other tools from the LLM's tool set — the LLM will only see the inner tools until the interaction ends. Use this for tools where the LLM consistently picks the wrong sibling tool instead of using the inner tools (e.g., personality changes).
+
+innerTools
+
+Link copied to clipboard
+
+abstract override val innerTools: List<Tool>
+
+The inner tools that will be exposed when this tool is invoked. This is a fixed set that does not vary by context.
+
+metadata
+
+Link copied to clipboard
+
+open val metadata: Tool.Metadata
+
+Optional metadata
+
+removeOnInvoke
+
+Link copied to clipboard
+
+open val removeOnInvoke: Boolean
+
+Whether to remove this tool after invocation.
+
+Functions
+
+call
+
+Link copied to clipboard
+
+abstract fun call(input: String): Tool.Result
+
+Execute the tool with JSON input.
+open fun call(input: String, context: ToolCallContext): Tool.Result
+
+Execute the tool with JSON input and out-of-band context.
+
+innerTools
+
+Link copied to clipboard
+
+open override fun innerTools(process: AgentProcess): List<Tool>
+
+Returns the fixed innerTools regardless of process context.
+
+requireType
+
+Link copied to clipboard
+
+inline fun <T : Any> Tool.requireType(message: String? = null): Tool
+
+Wrap this tool to require a value of type T before execution (reified).
+fun <T : Any> Tool.requireType(type: Class<T>, messageProvider: (String) -> String? = { null }): Tool
+
+Wrap this tool to require a value of type T before execution.
+
+selectTools
+
+Link copied to clipboard
+
+open fun selectTools(input: String): List<Tool>
+
+Select which inner tools to expose based on invocation input.
+
+toSpringToolCallback
+
+Link copied to clipboard
+
+fun Tool.toSpringToolCallback(): <Error class: unknown class>
+
+Extension function to convert an Embabel Tool to a Spring AI ToolCallback.
+
+unwrapAs
+
+Link copied to clipboard
+
+inline fun <T : Tool> Tool.unwrapAs(): T?
+
+Unwrap a tool to find a specific type, or return null if not found.
+
+withAwaiting
+
+Link copied to clipboard
+
+fun Tool.withAwaiting(decider: AwaitDecider): Tool
+
+Wrap this tool to conditionally await before execution.
+
+withConfirmation
+
+Link copied to clipboard
+
+fun Tool.withConfirmation(messageProvider: (String) -> String): Tool
+fun Tool.withConfirmation(message: String): Tool
+
+Wrap this tool to always require confirmation before execution.
+
+withDefinitionMetadata
+
+Link copied to clipboard
+
+open fun withDefinitionMetadata(entries: Map<String, Any>): Tool
+
+Create a new tool with additional definition metadata entries merged in. Existing keys are overwritten by the new values.
+open fun withDefinitionMetadata(key: String, value: Any): Tool
+
+Create a new tool with a single definition metadata entry added.
+
+withDescription
+
+Link copied to clipboard
+
+open fun withDescription(newDescription: String): Tool
+
+Create a new tool with a different description. Useful for providing context-specific descriptions while keeping the same functionality.
+
+withEventPublication
+
+Link copied to clipboard
+
+fun Tool.withEventPublication(agentProcess: AgentProcess, action: Action?, llmOptions: <Error class: unknown class>): Tool
+
+Extension function to wrap a Tool with event publication.
+
+withName
+
+Link copied to clipboard
+
+open fun withName(newName: String): Tool
+
+Create a new tool with a different name. Useful for namespacing tools when combining multiple tool sources.
+
+withNote
+
+Link copied to clipboard
+
+open fun withNote(note: String): Tool
+
+Create a new tool with an additional note appended to the description. Useful for adding context-specific hints to an existing tool.
+
+withToolObject
+
+Link copied to clipboard
+
+open fun withToolObject(toolObject: Any): UnfoldingTool
+
+Create a new UnfoldingTool with tools added from an annotated object.
+
+withTools
+
+Link copied to clipboard
+
+open fun withTools(vararg tools: Tool): UnfoldingTool
+
+Create a new UnfoldingTool with additional tools added.
+
+        © 2026 CopyrightGenerated by dokka
+

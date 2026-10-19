@@ -1,0 +1,121 @@
+ Claude Code: API Error: MCP tools cannot have both defer_loa... · #30920   
+  ›_ Claude Code Issues   ☰       
+ Claude Code Issues / #30920  
+[BUG] API Error: MCP tools cannot have both defer_loading=true and cache_control set 
+
+ Status  Closed — not planned   
+ Reported on v2.1.69  
+ Maintainer reply None cached  
+ Workaround ✓ Mentioned in description ↑  
+ Activity  3 comments · opened Mar 5, 2026  · closed Apr 2, 2026     
+
+Preflight Checklist
+
+[x] I have searched existing issues and this hasn't been reported yet
+
+[x] This is a single bug report (please file separate reports for different bugs)
+
+[x] I am using the latest version of Claude Code
+
+What's Wrong?
+
+When using Claude Code with multiple MCP servers (3+ servers, ~50+ tools total), every API request fails with a 400 error. The tool schema builder sets both defer_loading=true and cache_control on the same MCP tool definition. The API rejects this combination, making Claude Code completely unusable — no prompts can be processed, and the error persists across sessions.
+
+What Should Happen?
+
+Claude Code should not set both defer_loading=true and cache_control on the same tool. When tool search/defer loading is active, cache_control should be omitted from deferred tools (or vice versa). MCP tools should work regardless of how many servers are configured.
+
+Error Messages/Logs
+
+API Error: 400
+{"type":"error","error":{"type":"invalid_request_error",
+"message":"Tool 'mcp__atlassian__getConfluencePage' cannot have both
+defer_loading=true and cache_control set. Tools with defer_loading
+cannot use prompt caching."}}
+
+Steps to Reproduce
+
+Configure 3+ MCP servers in Claude Code settings (e.g., Atlassian SSE + GitHub + any other HTTP/SSE MCP server) with a combined total of ~50+ tools
+Start Claude Code: claude
+Enter any prompt that would invoke an MCP tool (e.g., "fetch this Confluence page" or "list GitHub PRs")
+Every request fails with: Tool 'mcp__<server>__<tool>' cannot have both defer_loading=true and cache_control set
+No recovery within the session — switching models (/model opus) does not help
+Workaround: ENABLE_TOOL_SEARCH=false claude disables defer_loading and resolves the issue.
+
+Claude Model
+
+Opus
+
+Is this a regression?
+
+I don't know
+
+Last Working Version
+
+_No response_
+
+Claude Code Version
+
+2.1.69 (Claude Code)
+
+Platform
+
+Anthropic API
+
+Operating System
+
+macOS
+
+Terminal/Shell
+
+VS Code integrated terminal
+
+Additional Information
+
+The root cause is in the tool schema builder function where both flags are unconditionally set:
+
+if (q.deferLoading) z.defer_loading = true;
+if (q.cacheControl) z.cache_control = q.cacheControl;
+
+Suggested fix — make them mutually exclusive:
+
+if (q.deferLoading) {
+  z.defer_loading = true;
+} else if (q.cacheControl) {
+  z.cache_control = q.cacheControl;
+}
+
+Tool search defaults to "tst" mode when ENABLE_TOOL_SEARCH is unset, which enables defer loading for all MCP tools. The conflict occurs because prompt caching also applies cache_control to the same tools. 
+
+View original on GitHub ↗
+
+ This issue has 3 comments on GitHub. Read the full discussion on GitHub ↗   
+Related Claude Code issues 
+
+Matched on shared title terms, labels, topic and reported release — ranked so issues with
+          real discussion come first.
+
+ [BUG] Claude Code 2.1.69 breaks all MCP tool calls with defer_loading + cache_control conflict 
+ Resolved 💬 2 v2.1.69 #30989  
+ [BUG] defer_loading + cache_control 400 still present in 2.1.223 (recurrence of #30920) 
+ Resolved 💬 3 v2.1.223 #86743  
+ [Feature Request] Support for defer_loading (Tool Search Tool) in Claude Code CLI 
+ Resolved 💬 3  #15862  
+ [FEATURE] defer_loading for Managed Agents 
+ Resolved 💬 1  #82915  
+ [Bug?] `defer_loading` in `.claude.json` mcpServers has no effect 
+ Resolved 💬 4 v2.1.47 #26844  
+ [BUG] API Error: 400 tools.0.custom.defer_loading: Extra inputs are not permitted on every request in v2.1.69 
+ Resolved 💬 4 v2.1.69 #31033  
+ [BUG] tools.N.custom.defer_loading: Extra inputs are not permitted (400) when MCP tools are configured 
+ Resolved 💬 1 v2.1.49 #27065  
+ [Bug] Tool result timeout causes model to assume instead of defer to user 
+ Open 💬 0 v2.1.198 #90312      
+Browse by topic  
+
+Same class of failure, ranked by community engagement — this issue is one of many, so it
+          may not appear in the visible list:
+ MCP server connection issues  
+ Browse all Claude Code issue topics →      
+
+   

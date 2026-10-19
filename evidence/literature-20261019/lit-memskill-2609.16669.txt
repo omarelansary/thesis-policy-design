@@ -1,0 +1,1213 @@
+
+=== [page 1] ===
+MEMORY–SKILL ISOMORPHISM:
+ONE SKILL CARRIER, TWO NATIVE USES
+Kang Ruiyuan
+X32 Studio
+kang@x32studio.com
+ABSTRACT
+Memory and skills are two principal ways to improve agents without changing
+weights: memory carries prior experience, skills carry reusable procedures. Wrap-
+ping both in stores, routers, retrieval, reflection, and update paths makes the ma-
+chinery needed to reuse knowledge grow with what is accumulated.
+Part of this duplication need not be rebuilt: a Skill is already a natural carrier
+for distilled memory. In our implementation, the memory component is itself a
+Skill: resident description holds hot cues, on-demand SKILL.md a colder
+index and curation policy, and reference/*.md files detailed memories for
+on-demand reading or search (levels L0 →L1 →L2). The deployment’s gov-
+erned 1,024-character description budget forces the resident index to stay com-
+pressed. Memory and capability can thus share one progressive-disclosure carrier
+and read mechanism; reflection evolves either Skill. Their writes still fork: histor-
+ical evidence is appended, whereas current indexes and procedures are rewritten
+and revalidated.
+In one deployed system, the most complete identification is governance: 4 write
+entries exist, but only 1/4 reaches the settlement ledger. At the priced operating
+point, one L1 lesson-1 point measurement adds 1,313 first-turn tokens against a
+1,462-token baseline—tied at k = 1 (1,313 versus 1,365), 4,949 at k = 5; session
+totals differ by only 1.18× with overlapping last-turn ranges, and price decompo-
+sition is unavailable. File-copy migration needs no harness integration or restarts,
+but behavioral preservation is untested (double floor). On one selected task us-
+ing one model, exposing the lesson is associated with fewer failures (0/8 or 1/8
+with the lesson versus a shared non-concurrent 6/6 historical floor, unadjusted for
+multiplicity). The task was selected on prior floor evidence, so this is a selected-
+task post-selection existence signal, not a confirmatory rate. Resident and BM25
+carriers show no detected behavioral difference in two small comparisons. These
+measurements motivate a candidate RSI design rule: one Skill carrier family for
+memory and capability, a shared read side, and governed distinct writes. Body
+delivery h := P(D | A) is uninstrumented in RQ1–RQ2, so the evidence evalu-
+ates a resident-index implementation; the resident description alone may carry the
+effect.
+1
+INTRODUCTION: ONE SHARED READ CARRIER, TWO WRITE SEMANTICS
+Memory and skills are two central components of capable agents: memory carries durable facts
+and experience; skills carry reusable procedures and executable workflows Huang et al. (2026);
+Agent Skills specification; Wang et al. (2023). Systems therefore build memory stores and skill
+libraries, each with its own retrieval and routing. Self-improving agents place another loop around
+both: Hermes, for example, combines curated persistent memory, autonomous skill creation and
+improvement, and cross-session retrieval Nous Research (2026). Each component is useful.
+Why the problem compounds.
+Separate subsystems imply separate stores, routing decisions,
+context injection, update APIs, and validators, so a successful loop makes its own control plane
+harder to operate. Collapsing everything into one mutable memory is not the answer: rewriting
+1
+arXiv:2609.16669v1  [cs.SE]  15 Sep 2026
+
+=== [page 2] ===
+current advice must not erase the historical evidence that justified it. The first-principles question
+is therefore: which operations genuinely differ across knowledge classes, and which are duplicate
+machinery?
+The overlooked reuse.
+To change a future action, off-weight knowledge must remain in context
+or become discoverable on demand. A standard Skill already implements both Agent Skills spec-
+ification; Zhang et al. (2025): its short description L0 is mounted proactively; a matching
+task opens the body L1; supporting references L2 are read or searched only when deeper detail is
+needed—the hot, warm, and cold read requirements of distilled experience. We therefore make ϕ
+literal: the memory component is not a service beside the Skill system; it is a memory Skill. Its L0
+stores the hottest cues, its L1 stores a colder memory index and curation policy, and its L2 stores
+detailed lessons; Table 1 gives the complete mapping.
+This observation organizes reflection around one decision: classify new evidence by semantics—
+archive raw outcomes, update the memory Skill with reusable experience and capability Skills
+with executable procedure—reusing one carrier family, mounting, loading, and structural valida-
+tion. The reuse stops at writing: history is append-only while current indexes and procedures must
+be rewritable and revalidated. Our thesis is therefore: memory and skill are isomorphic (defini-
+tionally, by construction) at the progressive-disclosure carrier (ϕ preserves reads; §3.1), while
+safe RSI must preserve two write semantics (append Ht+1 = append(Ht, e) versus rewrite–
+revalidate St+1 = validate(f(St))). The body-delivery half would fall if E1’s description-only arm
+succeeds alongside full disclosure (preregistered sufficiency zone). Figure 1 shows the resulting
+loop.
+We evaluate the thesis as a single-deployment audit with a priced operating-point note, separating
+availability (P(fail | lesson) ∈{0/8, 1/8} versus P(fail | ¬lesson) = 6/6 on the selected task)
+from carrier form (two nulls: 8/10 vs 8/10 and 6/8 vs 5/8, not equivalence). First-turn Cres =
+1,313 tokens versus Cret(1) = 1,365 and Cret(5) = 4,949—with session prompts at 1.18× and
+overlapping last-turn ranges; 0 of 11 content changes touch harness code against 15 machinery
+edits; ledger coverage is 1/4. These establish resource and governance properties, not behavioral
+superiority.
+Contributions.
+(1) Memory–Skill isomorphism (a definitional carrier mapping, not a mea-
+sured advantage): the map ϕ sends proactive mounting, on-demand reading, progressive disclo-
+sure, bounded resident cues, and deep lookup onto native Skill structure (L0 →L1 →L2), making
+memory one concrete Skill rather than a parallel memory service. (2) A shared-carrier evolution
+design: reflection evolves experience and capability through one carrier family, while append-only
+history (Ht+1 = append(Ht, e)) and rewritable current state (St+1 = validate(f(St))) retain dif-
+ferent write semantics. (3) An operating-point measurement: behavior, context, migration, and
+write coverage jointly locate where this reuse lowers first-turn context and where governance re-
+mains incomplete: 4 write entries with ledger coverage 1/4.
+2
+RELATED WORK
+Memory and skill carriers.
+Agent memory spans retrievable logs, streams, banks, and external
+stores Park et al. (2023); Zhong et al. (2023); Packer et al. (2024); Chhikara et al. (2025); Xu et al.
+(2025); benchmarks continue to expose disagreements about what long-term memory should mea-
+sure Wu et al. (2025); Tan et al. (2025). Skills are commonly treated as procedural memory Huang
+et al. (2026). Agent Skills supplies the trigger–body format and progressive disclosure used here,
+while Voyager already pairs descriptions with on-demand skill bodies Agent Skills specification;
+Zhang et al. (2025); Wang et al. (2023). Agent tooling also routes durable instructions through mem-
+ory and skill files Claude Code memory documentation. MemGPT’s core versus archival memory
+already separates mutable resident state from append-oriented external history Packer et al. (2024);
+event sourcing established append-only logs with materialized current views Fowler (2005). These
+are format, practice, and state-management precedents. We study a different boundary: where this
+fork lands on a shared Skill disclosure stack, and whether a deployment actually governs every
+mutation path.
+2
+
+=== [page 3] ===
+WRITE A: Evidence archive
+append history
+reflection
+distill reusable knowledge
+Shared disclosure stack
+resident description
+on-demand body + references
+Distilled memory
+memory Skill
+WRITE B: Current capability
+rewrite + validate current state
+Agent acts again
+use both knowledge forms
+Outcomes re-enter the learning cycle:
+implemented loop; compounding not measured
+Figure 1: From outcomes to reusable knowledge. The memory Skill represents distilled experience
+as a Skill: resident description →on-demand body →searchable references. Capability Skills
+reuse the same progressive-disclosure carrier, so reflection evolves one carrier family. WRITE A
+accumulates history; WRITE B rewrites and validates current state. Arrows show the implemented
+loop structure (backdrop AI-generated; labels overlaid); compounding gain remains unmeasured;
+body delivery is unmeasured in RQ1–RQ2 and instrumented in E1 (§B.3); write audit: 4 entries,
+ledger 1/4.
+Evolving textual artifacts.
+ExpeL distills experience, and Agent Workflow Memory induces
+reusable procedures from trajectories Zhao et al. (2024); Wang et al. (2024). Dynamic Cheatsheet,
+ACE, and Symbolic Learning evolve textual state, while Reflexion and Self-Refine use language
+feedback within or across episodes Suzgun et al. (2025); Zhang et al. (2026); Zhou et al. (2024);
+Shinn et al. (2023); Madaan et al. (2023). Hermes runs a learning loop over distinct memory and skill
+facilities, while Memento-Skills explicitly evolves structured skill files as persistent memory Nous
+Research (2026); Zhou et al. (2026). We therefore do not claim the first reflection loop, self-authored
+skill, or skill-as-memory usage. Our delta is to map memory requirements to the native Skill dis-
+closure stack, measure that reuse against a separate retriever, and audit the write semantics and
+governance it leaves behind.
+Self-improvement and retrieval.
+Self-improvement spans self-evolving systems and weight-level
+adaptation Schmidhuber (2006); Gao et al. (2026); Zweiger et al. (2025); retrieval augmentation
+provides the external-store alternative Lewis et al. (2021); Karpukhin et al. (2020). Our comparison
+instead measures first-turn cost and governance for a compact set of distilled lessons. Recursive
+self-improvement (RSI) studies such loops directly Duan et al. (2026); this paper contributes one
+audited iteration on a shared carrier.
+Gap.
+Prior systems establish both separate memory/skill facilities and evolving skills as mem-
+ory, and we concede the format, the loop, and skill-as-memory usage. What remains missing is a
+measurement-and-governance account for a shared Skill carrier: which disclosure operations dis-
+tilled memory reuses, what that reuse costs against a separate retriever, and where write governance
+diverges. We supply that account under one deployment boundary, organized by Eq. (4) and Design
+Rule 1.
+3
+DESIGN: ONE READ CARRIER, TWO WRITE SEMANTICS
+Knowledge that never re-enters the decision context cannot change an action. Off-weight knowl-
+edge returns by staying resident or being pulled, and pulling needs a resident trigger or an external
+3
+
+=== [page 4] ===
+retriever Zweiger et al. (2025); Lewis et al. (2021); Asai et al. (2023); Chhikara et al. (2025). The
+design question is: what is worth keeping resident?
+3.1
+FORMAL SETUP
+A Skill s exposes three disclosure levels: L0(s), the resident description; L1(s), the body opened
+on demand; and L2(s), references read or searched on demand. Two tiers share this shape: distilled
+memory m and capability c. Read operations are identical for both:
+mount(L0),
+open(L1 | L0),
+query(L2 | L0).
+(1)
+Let ϕ : N →S map the five memory read needs N onto the five Skill affordances S (the rows of
+Table 1), bijectively by construction. It preserves reads and pointedly fails on writes: the history log
+Ht appends,
+Ht+1 = append(Ht, e),
+(2)
+while current state St rewrites and revalidates, for system-specific procedures f and validate (on
+rejection, St+1 = St),
+St+1 = validate(f(St)).
+(3)
+The “isomorphism” of the subtitle is exactly this bijection ϕ on reads, in the finite sense: five read
+requirements matched to five Skill affordances. It asserts no shared write semantics, content, prove-
+nance, or lifecycle, and ϕ admits no extension to writes that would identify append with rewrite.
+A lesson’s path to behavior travels A →D →U →O: availability A, body delivery D, use U,
+and the observable task endpoint O. The chain below assumes Markov dependence (each stage only
+on its predecessor). The chain path is not necessary—all four lesson-3 units apply without D—so it
+governs lesson-caused effects only:
+P(A, D, U, O) = P(A) P(D | A) P(U | D) P(O | U).
+(4)
+Causal readings come only from controlled contrasts—here, RQ1’s post-selected floor arm—never
+from O alone. U and O currently share the frozen-checker proxy; separating them needs a process
+trace. The delivery probability h := P(D | A) is the common missing instrument: without it, a null
+outcome cannot separate routing failure from a weak lesson.
+First-turn knowledge cost is the measured prompt delta against the L1 k=0 baseline (1,462 tokens),
+before any body opens:
+Cres := ∆(1)
+I ,
+Cret(k) := ∆(1)
+R (k),
+(5)
+evaluated once (Table 4): Cres = 1,313 from behavioral-batch lesson-1 I units; Cret(1) = 1,365,
+Cret(3) = 3,980, Cret(5) = 4,949 from the lesson-1 R-arm token curve. Structurally this realizes
+mounted descriptions plus six-skill scaffolding versus injected blocks, but the equation names the
+measured deltas, not the decomposition. Sessions need their own priced sum; dollars are not Eq. (5)
+times turns.
+These definitions support one compact design rule:
+Design Rule 1 (shared carrier). Two distilled tiers may share one disclosure stack when
+(i) both re-enter decisions through a trigger–body shape, (ii) description routing is an as-
+sumption to be instrumented, not a measured mechanism, and (iii) each tier declares write
+invariants the append/rewrite fork preserves. The rule is refuted by incompatible discov-
+ery operations or by one governed transition covering both invariants (see Falsifiability).
+As a consistency check (not an independent test), the rule agrees with the design on the
+raw archive, which fails (ii)–(iii) and stays unmounted. E1’s arms D0 (description-only)
+and D1 (full resident) probe (ii) as a future test: only delivery-stratified gains with h in-
+strumented could support the shared carrier; the lesson-2/3 dissociations already refute a
+trigger–body causal reading here.
+3.2
+WHY MEMORY CAN BE A SKILL
+The memory component is not a service beside the Skill system. It is a Skill directory loaded by
+the same mechanism as every capability Skill. The shared read structure follows from three levels
+of disclosure. The host proactively mounts each description L0 as a resident trigger. When
+4
+
+=== [page 5] ===
+Table 1: Distilled memory requirements map onto native Skill affordances (the 1,024-character limit
+belongs to the governed deployment, not the Agent Skills specification).
+Memory
+require-
+ment
+Native Skill affordance
+Memory realization
+Proactive
+mount-
+ing
+Resident
+description (L0)
+Hot cues and the highest-value memory index
+On-demand read-
+ing
+Body L1 opened when
+relevant
+Colder index plus memory and curation policy
+Progressive
+dis-
+closure
+L0 →L1 →L2
+Hot cues →cold index →detailed memory
+Bounded resident
+gateway
+Governed
+1,024-
+character description
+Reflection must compress or replace cues rather than accu-
+mulate them
+Deep lookup
+Supporting files can be
+read or searched
+Detailed reference/*.md memories, including grep-
+style lookup
+that trigger is relevant, the agent can open the body L1; it reads or searches references L2 only
+when the task needs deeper detail. In the memory Skill, these levels become a hot memory index, a
+colder index plus memory curation policy, and detailed cold memories. The map ϕ reuses mounting,
+routing, loading, and supporting-file lookup rather than building a second memory retriever. The
+format itself remains prior art Agent Skills specification; Zhang et al. (2025).
+The component constraints make the reuse consequential. A controlled-write gate caps each resident
+description at 1,024 characters. Because that description text recurs in every request, the cap
+forces the hot experience index to be compressed and rewritten as current state while the evidence
+and reference store remains uncapped. It bounds the resident-text gateway without guaranteeing
+that the model attends to a trigger or pulls the correct body. The latter is the body-pull fraction h,
+unmeasured in RQ1–RQ2 and instrumented in E1 (§B.3).
+Not every memory object belongs in this stack. Raw outcomes and provenance are source material
+rather than distilled policy; they remain in an unmounted, append-only archive and are searched
+during reflection.
+3.3
+THE IMPROVEMENT LOOP
+Figure 1 shows how the parts compose. This loop instantiates the reflector–curator pattern studied
+in prior experience-learning systems Zhang et al. (2026); Zhao et al. (2024); the contribution here
+is its carrier and governance, not the loop itself. Task outcomes first remain as attributable evidence
+before reflection routes them: raw observations stay archived, situational lessons update the memory
+Skill, and stable procedures revise a capability Skill, with only the two distilled tiers sharing one
+discovery loader. On later tasks, m and c shape new actions, producing new evidence, closing the
+recursive feedback path from outcomes O back to availability A; compounding gain across cycles
+is not yet measured, and no saving against a separately built memory subsystem is claimed here.
+Update invariants stay distinct, with history accumulating while current indexes and procedures are
+replaced under validation.
+A companion repository publishes the same organizational guidance and agent-facing skill set X32
+Studio (2026).
+3.4
+WHY THE WRITE LAYER MUST FORK
+Sharing a read carrier does not imply one write operation. Historical evidence must preserve prove-
+nance, so it is appended. Current procedures must track the best known state, so they are replaced
+and then revalidated. Both are intended to obey one governance contract while retaining different
+state transitions; measured ledger coverage is 1/4 (Table 2), so unification is a goal, not a result.
+Here, the settlement ledger pairs a predicted consequence with the observed post-write outcome.
+The audit changes the engineering claim: not “one update function” but one auditable contract
+covering every official entry while preserving append-only history and rewritable current state. The
+present implementation has not reached that goal; an ordinary file-write bypass remains outside the
+5
+
+=== [page 6] ===
+Table 2: Read sharing and write governance in the audited deployment.
+Audit question
+Observed
+Interpretation
+Do distilled tiers share a
+read carrier?
+Yes
+Same trigger–body discovery shape
+How many write entries
+were enumerated?
+4
+A single physical path is refuted in this deployment
+How many enumerated
+entries reach the ledger?
+1/4
+Three observed entries escape the common ledger
+Must history and current
+state write differently?
+Yes
+Eqs. (2)–(3) preserve different invariants
+settlement ledger. Appendix D enumerates the paths, source locations, and contradictory contract
+clauses. This is Design Rule 1 in prose: the audit tests whether the deployed write paths honor the
+fork the rule requires.
+Falsifiability.
+The write fork would be unnecessary if one governed transition could preserve
+provenance while retiring obsolete procedure without distinguishable replacement semantics; a sin-
+gle append-only log with validated current-state projections still exposes both transitions, so it is
+an instance of this framework, not a counterexample. No cross-implementation impossibility is
+claimed; the fork is a deployment-level requirement.
+4
+EVALUATION
+The shared-carrier audit earns its keep only if three measurements hold. The knowledge must matter
+to behavior; the native Skill carrier must be priced against a retrieval baseline rather than asserted by
+definition; and the design goal is to avoid a second discovery loader (the subsystem comparison itself
+was not run). Each question is answered within a single batch and model, except the runtime table,
+split into point-measurement and batch panels with per-row denominators; no cross-batch pooling
+is performed. Three questions organize the measurements:
+1. Value: does P(fail | lesson) < P(fail | ¬lesson)?
+2. Carrier comparison: how do lesson application, i.e. use U per arm (U I vs U R), and
+runtime cost (Cres vs Cret(k)) vary with delivery form?
+3. RSI operation: what integration work, maintenance coupling, and ledger coverage remain
+after reuse?
+All behavioral decisions use frozen task checkers and paired seeds where available; invalid and su-
+perseded runs remain archived outside the reported denominators. Appendix B contains the protocol
+fingerprints, task chronology, and per-unit records.
+4.1
+RQ1: AN EXPLORATORY ANECDOTE ON KNOWLEDGE AVAILABILITY (SELECTED TASK)
+On the selected delegation task with opencode-go/deepseek-flash, failure means omitting
+an explicit provider/model binding or the post-dispatch runner confirmation (frozen conjunctive
+checker), and lower reproduction is better. Lesson, model, paired-seed design, and per-arm size
+were fixed before the expansion run; the result remains specific to that selected lesson. With F the
+failure event and α, β, γ the arms, P(F | α) = 0/8, P(F | β) = 1/8, and P(F | γ) = 6/6
+for the historical floor (exact Fisher values in Appendix B: a historical, non-concurrent, shared-
+arm, unadjusted, post-selection computation). Thus, for this task and model, exposing the lesson
+is associated with different outcomes in this exploratory anecdote. These values are post-selection
+descriptive statistics; they do not generalize to a population of tasks. A preregistered description-
+only ablation (E1, n=8/arm, paired seeds; §B.3) gives P(F | D0) = 0/8 versus P(F | D1) = 1/8
+(∆= −12.5 pp, Fisher p = 1.0, CI [−47.09, +30.20] pp, descriptive): the body adds nothing on
+this task.
+6
+
+=== [page 7] ===
+Table 3: Behavioral results answer distinct questions (failure lower-is-better; application higher-is-
+better). Tests are Fisher exact; exact availability p-values are in Appendix B. A screened rerun (6/8
+vs 5/8) was marked insufficient/void and is discussed in text only.
+Question
+Contrast
+Result
+Conclusion
+Knowledge
+avail-
+able?
+Form A vs no les-
+son
+0/8 vs 6/6
+Selected-task existence signal
+Knowledge
+avail-
+able?
+Form B vs no les-
+son
+1/8 vs 6/6
+Same directional signal
+Writing form bet-
+ter?
+A vs B
+0/8
+vs
+1/8;
+p=1.0
+No detected difference
+Carrier form better?
+Resident vs BM25
+8/10
+vs 8/10;
+p=1.0
+No detected difference
+Table 4: Priced operating point, split by denominator. (a) First-turn tokens: one L1 lesson-1 point
+measurement per cell, slice labeled per row. (b) The k = 5 behavioral batch (5 tasks, ten paired units
+per arm). Session prompts 1.18×; cache split 1.84× / 1.05×; price decomposition unavailable.
+(a) Carrier
+First-turn
+added tokens
+Slice (differs by row)
+Resident index
+1,313
+Behavioral batch, lesson-1 I
+BM25, k = 1
+1,365
+R-arm token curve (point only)
+BM25, k = 3
+3,980
+Same curve (point only)
+BM25, k = 5
+4,949
+Same curve (point only)
+(b) Carrier
+Applied lesson
+Batch cost
+Resident index
+8/10
+$0.09619
+BM25, k = 5
+8/10
+$0.12521
+The two forms serve primarily as independent realizations of knowledge-present; their comparison is
+secondary (∆= −12.5 pp, CI [−47, +30] pp, p = 1.0; paired McNemar p = 1.0; the single failure
+misses only the confirmation step): availability on this task and model, not phrasing or carrier. One
+arm carries the rule at the resident level while both expose the full detail store, so the batch cannot
+separate cue-only from full-body effects—the prerequisite holds, not the mechanism.
+4.2
+RQ2: UNDERPOWERED CARRIER COMPARISON WITH LOWER FIRST-TURN CONTEXT
+Arms are I (resident index) and R (BM25 retrieval): a deployed 6-skill versus 0-skill contrast
+with unconditional sparse-BM25 injection only. The main carrier comparison holds tasks, model
+(openrouter/z-ai/glm-5.3-flash), and paired seeds fixed. Arm I keeps a compact index
+in every request and reads bodies on demand. The BM25 arm unconditionally injects the top-k
+retrieved body text every turn; a conditional policy would shift the profile (Appendix C). Table 4
+reports the knowledge component relative to a 1,462-token no-knowledge first-turn baseline.
+At k = 1, Cres ≈Cret; at k = 5, Cret/Cres = 3.8× first-turn. In the behavioral batch, provider-
+reported cost is 1.302× higher for retrieval, while U I = U R = 8/10. First-turn accounting therefore
+favors the resident index at k = 5 in this point measurement, not overall or behavioral superiority:
+the wide uncertainty below still permits consequential behavioral differences. The shared carrier
+avoids in-loop retrieval calls at this operating point, but session-level prompt volume differs by only
+1.18× with overlapping last-turn ranges, so first-turn deltas must not be read as session savings;
+knowledge-component chars differ by 3.41× (268,576 vs 916,903); the comparison is underpowered
+and cannot distinguish carrier forms.
+Paired by lesson and seed, the ten pairs split 8 agree-pass, 2 agree-fail, and 0 discordant (McNemar
+p = 1.0, uninformative); the Fisher value and CI below are unpaired descriptives. The uncertainty
+is wide: ∆= 0 pp with CI [−45.3, +45.3] pp. A screened rerun likewise gives 6/8 versus 5/8, CI
+[−35.5, +57.5] pp, p = 1.0. The archived recomputer marks the screened batch insufficient/void, so
+these are descriptive values excluded from all confirmatory reading; the literal preregistration clause
+7
+
+=== [page 8] ===
+Table 5: Migration, maintenance, and write-governance measurements.
+Measurement
+Result
+Conclusion
+Migration start snapshot
+21 files, 177,321
+bytes
+File-level portability; second snapshot disagrees
+Integration work
+0 code lines, 0
+restarts
+Copy, not harness integration
+Behavior after migration
+0/8 vs 0/8, p=1.0
+Double floor; preservation untested
+Content-change window
++64%
+store
+growth,
+0/11
+harness touches
+Content additions were decoupled in this window
+Machinery changes
+15 edits
+Building and maintaining machinery was not free
+would have read “supported”, so voiding on the T2 exclusion was a post-hoc conservative override.
+Neither study is an equivalence test.
+The diagnostic target_found values are deliberately not compared: an observed reference-file
+read and inclusion in injected text answer different questions. The body-pull fraction remains the
+common missing instrument.
+Within the resident arm, observed detail reads occur in only 3/10 units while the failure is avoided
+in 8/10; the retained cascade dissociations—retrieved lesson-2 units failing despite delivery and
+lesson-3 units applying without it—already refute a trigger–body causal reading here, so no routing-
+sufficiency mechanism is claimed.
+Retrospective proxy tabulation finds no detected association in either arm (all p = 1.0): resident
+3/3 vs 5/7; retrieved 6/8 vs 2/2; screened resident 2/2 vs 4/6—within-arm descriptives only, never
+contrasted across arms. Both cascade dissociations appear, retained per protocol; a prospective
+delivery instrument remains required (Appendix B).
+4.3
+RQ3: THE CARRIER MOVES WITHOUT HARNESS INTEGRATION; GOVERNANCE REMAINS
+The carrier moves cleanly as files, but preservation is untestable at double floor. Likewise, eleven
+content changes touched no harness code, yet the machinery itself changed fifteen times (13 in-
+strumentation plus 2 write-entry): content addition decoupled from code in one window, not zero
+maintenance. Two payload snapshots disagree (177,321 vs 185,582 bytes; Appendix), so the con-
+clusion is copy-based integration, not byte-identical carriers.
+Together, these measurements locate the remaining problem: read-side sharing lowers first-turn
+tokens in this point measurement with copy-level integration, but write-side consolidation is incom-
+plete, with mutation paths still escaping the common settlement contract.
+Boundaries.
+The study covers one deployment and small behavioral samples; Appendix A gives
+the complete claim contract and protocol-specific qualifications.
+5
+DISCUSSION: ORTHOGONAL AXES AND THE OPERATING POINT
+Availability, carrier form, and write semantics are different axes.
+The experiments become
+coherent once these axes are separated. Availability asks whether the task-relevant lesson is exposed
+(A assigned); the floor comparison gives a selected-task existence signal. Carrier form asks whether
+fixed Cres undercuts dynamic Cret(k) in this point measurement, at indistinguishable 8/10 vs 8/10
+whose interval still permits ∼45 pp. Write semantics asks which state transition is valid: Eq. (2) or
+Eq. (3). That axis is established by artifact invariants and audited entry points, not by the behavioral
+comparison. A carrier-form null does not erase the availability result, and availability does not prove
+either carrier superior.
+8
+
+=== [page 9] ===
+Table 6: Four loop measurements. Availability and outcome are identified on one selected task with
+an application proxy; delivery is instrumented only in E1.
+Stage
+Question
+Status in this study
+Availability
+Is the relevant lesson ex-
+posed to the agent?
+Controlled by the knowledge-present versus floor arms
+Delivery
+Did the intended body en-
+ter context before action?
+Unmeasured common quantity h; confounded with avail-
+ability in RQ1
+Use
+Did the artifact avoid the
+recorded failure?
+Frozen checker; an application proxy, not a process trace
+Outcome
+Did
+task
+behavior
+change?
+Selected-task existence signal; carrier comparison under-
+powered
+5.1
+A MEASUREMENT STACK FOR EVOLVING AGENTS
+RAG evaluation already separates retrieval from support Lewis et al. (2021); with delivery instru-
+mented, a null still locates routing, application, or task execution. Eq. (4) models the lesson-caused
+path alone; outside that path is off-model by design, and endpoint-only testing cannot distinguish a
+weak lesson from routing failure.
+The shared carrier has a specific operating point.
+Table 4 differs across the measured points:
+near-tied at single-body retrieval, resident smaller at broader retrieval.
+Growing carrier sets,
+semantic-match misses, and cache pricing can move the comparison; no tool-call interface appears
+in all 75 rows carrying the field. Prospective delivery logging in E1 records zero body/reference
+opens in 16/16 units, closing the uninstrumented-h gap with a zero reading rather than a new gap.
+Governance determines whether consolidation stays safe.
+Sharing discovery moves responsi-
+bility to the shared interface, so ledger coverage is the deployment criterion: every official entry
+must participate without erasing either transition.
+What should be measured next.
+The missing instrument was delivery: E1 (§B.3) records whether
+each matched body entered context before action on the L5 task and reads zero (0/16 opens); repeat-
+ing it at larger n across tasks is next. The observed null claims no routing-sufficiency mechanism:
+the retained lesson-2/3 dissociations refute a trigger–body causal reading.
+An RSI reading.
+One loop iteration is audited end to end—experience as attributable evidence,
+reflection distilling it, the skill carrying it back, the entry-point audit bounding rewrites. E1 adds
+zero body opens (0/16) on the L5 task. Genuine RSI further requires compounding across cycles
+(unmeasured) and ledger coverage of every write path (1/4 here): the carrier is a candidate substrate,
+not a demonstration.
+6
+CONCLUSION
+Memory and skill need not imply two read systems: memory is a Skill whose L0 →L1 →L2
+disclosure implements hot-to-cold memory access. Executable capability uses the same carrier, so
+reflection evolves one Skill family for knowledge and capability; One Skill carrier, two native uses
+is the read-side result (Eq. (1)). Safe evolution adds the fork: Eq. (2) for history, Eq. (3) for current
+state.
+The experiments distinguish value from mechanism. Relevant distilled knowledge is associated with
+fewer failures on the selected single-model task in an exploratory anecdote, while the underpowered
+carrier comparison cannot distinguish forms (no detected difference in either small comparison).
+The structural evidence is independent: lower first-turn context in a point measurement, copy-based
+migration, and harness-decoupled content additions.
+Sharing a carrier does not automatically unify governance: the audit finds 4 write entries with only
+1/4 reaching settlement. Next: instrument body delivery before enlarging another carrier-form batch;
+closing the three unledgered entries stays open. E1 is reported as Z-mixed (provisional) under its
+9
+
+=== [page 10] ===
+frozen rule: an O-difference with no carrier conclusion. The present evidence supports selected-task
+knowledge availability, first-turn context accounting, windowed maintenance decoupling, and sepa-
+rate write semantics—not behavioral superiority: a single-deployment audit plus a priced operating-
+point note, with every number linked to its source in the appendix.
+10
+
+=== [page 11] ===
+REFERENCES
+Agent Skills specification.
+Specification — Agent Skills.
+Agent Skills open specification
+(agentskills.io), n.d. URL https://agentskills.io/specification. The complete
+format specification for Agent Skills. Fetched 2026-09-11; the page carries no publication date.
+https://agentskills.io/specification.
+Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-RAG: Learning
+to Retrieve, Generate, and Critique through Self-Reflection, 2023. URL https://arxiv.
+org/abs/2310.11511. https://arxiv.org/abs/2310.11511 — metadata fetched
+2026-09-11 from https://arxiv.org/bibtex/2310.11511.
+Prateek Chhikara, Dev Khant, Saket Aryan, Taranjeet Singh, and Deshraj Yadav. Mem0: Build-
+ing Production-Ready AI Agents with Scalable Long-Term Memory, 2025. URL https://
+arxiv.org/abs/2504.19413.
+https://arxiv.org/abs/2504.19413 — meta-
+data fetched 2026-09-11 from https://arxiv.org/bibtex/2504.19413.
+Claude Code memory documentation.
+How Claude remembers your project.
+Claude Code
+documentation, Anthropic, n.d. URL https://code.claude.com/docs/en/memory.
+Fetched 2026-09-11 from https://docs.claude.com/en/docs/claude-code/memory, which redirects
+to https://code.claude.com/docs/en/memory. The page carries no publication date. https://
+code.claude.com/docs/en/memory.
+Yi Duan, Ying Liu, Zirui Tang, Haodong Chen, Jun Zhou, Yumou Liu, Bangrui Xu, Yukai Wu, Sidi
+Chen, Yuhan Zhou, Haoyu Wang, Xiaoyou Yu, Shaokun Han, Xuzhou Zhu, Le Zhou, Bolin Lu,
+Wei Zhou, Jiachen Liu, Nuozhou Fang, Jiaxin Tian, Ruoyu Chen, Yuxuan Li, Kai Zuo, Kaiyan
+Zhang, Jiantao Qiu, Conghui He, Guoliang Li, Bowen Zhou, Zhiyuan Liu, Zhoufutu Wen, Jihua
+Kang, Xuanhe Zhou, and Fan Wu. The Last AI Built by Humans: Toward Genuine Recursive Self-
+Improvement, 2026. URL https://arxiv.org/abs/2609.11873. https://arxiv.
+org/abs/2609.11873 — details read from the published PDF 2026-09-12, not yet cross-
+checked against the arXiv API.
+Martin Fowler. Event Sourcing. martinfowler.com, 2005. URL https://martinfowler.
+com/eaaDev/EventSourcing.html. Append-only event log with derived current state;
+the storage precedent for separate history and current-state semantics. Fetched 2026-09-12.
+https://martinfowler.com/eaaDev/EventSourcing.html.
+Huan-ang Gao, Jiayi Geng, Wenyue Hua, Mengkang Hu, Xinzhe Juan, Hongzhang Liu, Shi-
+long Liu, Jiahao Qiu, Xuan Qi, Yiran Wu, Hongru Wang, Han Xiao, Yuhang Zhou, Shaokun
+Zhang, Jiayi Zhang, Jinyu Xiang, Yixiong Fang, Qiwen Zhao, Dongrui Liu, Qihan Ren, Cheng
+Qian, Zhenhailong Wang, Minda Hu, Huazheng Wang, Qingyun Wu, Heng Ji, and Mengdi
+Wang. A Survey of Self-Evolving Agents: What, When, How, and Where to Evolve on the
+Path to Artificial Super Intelligence, 2026. URL https://arxiv.org/abs/2507.21046.
+https://arxiv.org/abs/2507.21046 — metadata fetched 2026-09-11 from https:
+//arxiv.org/bibtex/2507.21046.
+Wei-Chieh Huang, Weizhi Zhang, Yueqing Liang, Yuanchen Bei, Yankai Chen, Tao Feng, Xinyu
+Pan, Zhen Tan, Yu Wang, Tianxin Wei, Shanglin Wu, Ruiyao Xu, Liangwei Yang, Rui Yang,
+Wooseong Yang, Chin-Yuan Yeh, Hanrong Zhang, Haozhen Zhang, Siqi Zhu, Henry Peng
+Zou, Wanjia Zhao, Song Wang, Wujiang Xu, Zixuan Ke, Zheng Hui, Dawei Li, Yaozu Wu,
+Langzhou He, Chen Wang, Xiongxiao Xu, Baixiang Huang, Juntao Tan, Shelby Heinecke, Huan
+Wang, Caiming Xiong, Ahmed A. Metwally, Jun Yan, Chen-Yu Lee, Hanqing Zeng, Ying-
+long Xia, Xiaokai Wei, Ali Payani, Yu Wang, Haitong Ma, Wenya Wang, Chenguang Wang,
+Yu Zhang, Xin Eric Wang, Yongfeng Zhang, Jiaxuan You, Hanghang Tong, Xiao Luo, Xue
+Liu, Yizhou Sun, Wei Wang, Julian McAuley, James Zou, Jiawei Han, Philip S. Yu, and Kai
+Shu. A Survey of Agent Memory in the Second Half: Towards Self-Evolving and Long-Horizon
+Agents, 2026. URL https://arxiv.org/abs/2602.06052. https://arxiv.org/
+abs/2602.06052 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/
+2602.06052.
+11
+
+=== [page 12] ===
+Vladimir Karpukhin, Barlas O˘guz, Sewon Min, Patrick Lewis, Ledell Wu, Sergey Edunov,
+Danqi Chen, and Wen tau Yih. Dense Passage Retrieval for Open-Domain Question Answer-
+ing, 2020.
+URL https://arxiv.org/abs/2004.04906.
+https://arxiv.org/
+abs/2004.04906 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/
+2004.04906.
+Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman
+Goyal, Heinrich Küttler, Mike Lewis, Wen tau Yih, Tim Rocktäschel, Sebastian Riedel, and
+Douwe Kiela.
+Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks, 2021.
+URL https://arxiv.org/abs/2005.11401. https://arxiv.org/abs/2005.
+11401 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/2005.
+11401.
+Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri
+Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, Shashank Gupta, Bodhisattwa Prasad
+Majumder, Katherine Hermann, Sean Welleck, Amir Yazdanbakhsh, and Peter Clark. Self-Refine:
+Iterative Refinement with Self-Feedback, 2023. URL https://arxiv.org/abs/2303.
+17651. https://arxiv.org/abs/2303.17651 — metadata fetched 2026-09-11 from
+https://arxiv.org/bibtex/2303.17651.
+Nous Research.
+Hermes Agent: A Self-Improving Agent with Memory and Skills.
+Open-
+source agent and documentation, 2026.
+URL https://github.com/NousResearch/
+hermes-agent. The documented learning loop combines persistent memory, autonomous skill
+creation, skill improvement, and session recall. Fetched 2026-09-12. https://github.com/
+NousResearch/hermes-agent.
+Charles Packer, Sarah Wooders, Kevin Lin, Vivian Fang, Shishir G. Patil, Ion Stoica, and Joseph E.
+Gonzalez. MemGPT: Towards LLMs as Operating Systems, 2024. URL https://arxiv.
+org/abs/2310.08560. https://arxiv.org/abs/2310.08560 — metadata fetched
+2026-09-11 from https://arxiv.org/bibtex/2310.08560.
+Joon Sung Park, Joseph C. O’Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, and
+Michael S. Bernstein.
+Generative Agents: Interactive Simulacra of Human Behavior, 2023.
+URL https://arxiv.org/abs/2304.03442. https://arxiv.org/abs/2304.
+03442 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/2304.
+03442.
+Juergen Schmidhuber. Goedel Machines: Self-Referential Universal Problem Solvers Making Prov-
+ably Optimal Self-Improvements, 2006. URL https://arxiv.org/abs/cs/0309048.
+https://arxiv.org/abs/cs/0309048 — metadata fetched 2026-09-11 from https:
+//arxiv.org/bibtex/cs/0309048.
+Noah Shinn, Federico Cassano, Edward Berman, Ashwin Gopinath, Karthik Narasimhan, and
+Shunyu Yao.
+Reflexion:
+Language Agents with Verbal Reinforcement Learning, 2023.
+URL https://arxiv.org/abs/2303.11366. https://arxiv.org/abs/2303.
+11366 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/2303.
+11366.
+Mirac Suzgun, Mert Yuksekgonul, Federico Bianchi, Dan Jurafsky, and James Zou. Dynamic Cheat-
+sheet: Test-Time Learning with Adaptive Memory, 2025. URL https://arxiv.org/abs/
+2504.07952. https://arxiv.org/abs/2504.07952 — metadata fetched 2026-09-11
+from https://arxiv.org/bibtex/2504.07952.
+Haoran Tan, Zeyu Zhang, Chen Ma, Xu Chen, Quanyu Dai, and Zhenhua Dong.
+Mem-
+Bench: Towards More Comprehensive Evaluation on the Memory of LLM-based Agents, 2025.
+URL https://arxiv.org/abs/2506.21605. https://arxiv.org/abs/2506.
+21605 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/2506.
+21605.
+Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan,
+and Anima Anandkumar.
+Voyager: An Open-Ended Embodied Agent with Large Language
+Models, 2023. URL https://arxiv.org/abs/2305.16291. https://arxiv.org/
+12
+
+=== [page 13] ===
+abs/2305.16291 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/
+2305.16291.
+Zora Zhiruo Wang, Jiayuan Mao, Daniel Fried, and Graham Neubig.
+Agent Workflow Mem-
+ory, 2024.
+URL https://arxiv.org/abs/2409.07429.
+https://arxiv.org/
+abs/2409.07429 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/
+2409.07429.
+Di Wu, Hongwei Wang, Wenhao Yu, Yuwei Zhang, Kai-Wei Chang, and Dong Yu. LongMemEval:
+Benchmarking Chat Assistants on Long-Term Interactive Memory, 2025.
+URL https://
+arxiv.org/abs/2410.10813.
+https://arxiv.org/abs/2410.10813 — meta-
+data fetched 2026-09-11 from https://arxiv.org/bibtex/2410.10813.
+X32
+Studio.
+Best
+Practice
+for
+Skills
+System.
+Open-source
+companion
+skill
+set
+and
+organizational
+guidance,
+2026.
+URL
+https://github.com/X32Studio/
+best-practice-for-skills-system.
+Agent-facing skills and pointers for organiz-
+ing a coherent skill system. Fetched 2026-09-12. https://github.com/X32Studio/
+best-practice-for-skills-system.
+Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao Tan, and Yongfeng Zhang.
+A-MEM:
+Agentic Memory for LLM Agents, 2025. URL https://arxiv.org/abs/2502.12110.
+https://arxiv.org/abs/2502.12110 — metadata fetched 2026-09-11 from https:
+//arxiv.org/bibtex/2502.12110.
+Barry
+Zhang,
+Keith
+Lazuka,
+and
+Mahesh
+Murag.
+Equipping
+agents
+for
+the
+real
+world
+with
+Agent
+Skills.
+Anthropic
+Engineering
+blog,
+2025.
+URL
+https://www.anthropic.com/engineering/
+equipping-agents-for-the-real-world-with-agent-skills.
+Published
+2025-10-16
+(page
+states
+“Published
+Oct
+16,
+2025”).
+Fetched
+2026-09-11.
+https://www.anthropic.com/engineering/
+equipping-agents-for-the-real-world-with-agent-skills.
+Qizheng Zhang, Changran Hu, Shubhangi Upasani, Boyuan Ma, Fenglu Hong, Vamsidhar Ka-
+manuru, Jay Rainton, Chen Wu, Mengmeng Ji, Hanchen Li, Urmish Thakker, James Zou, and
+Kunle Olukotun. Agentic Context Engineering: Evolving Contexts for Self-Improving Language
+Models, 2026. URL https://arxiv.org/abs/2510.04618. https://arxiv.org/
+abs/2510.04618 — metadata fetched 2026-09-11 from https://arxiv.org/bibtex/
+2510.04618.
+Andrew Zhao, Daniel Huang, Quentin Xu, Matthieu Lin, Yong-Jin Liu, and Gao Huang. ExpeL:
+LLM Agents Are Experiential Learners, 2024.
+URL https://arxiv.org/abs/2308.
+10144. https://arxiv.org/abs/2308.10144 — metadata fetched 2026-09-11 from
+https://arxiv.org/bibtex/2308.10144.
+Wanjun Zhong, Lianghong Guo, Qiqi Gao, He Ye, and Yanlin Wang. MemoryBank: Enhancing
+Large Language Models with Long-Term Memory, 2023. URL https://arxiv.org/abs/
+2305.10250. https://arxiv.org/abs/2305.10250 — metadata fetched 2026-09-11
+from https://arxiv.org/bibtex/2305.10250.
+Huichi Zhou, Siyuan Guo, Anjie Liu, Zhongwei Yu, Ziqin Gong, Bowen Zhao, Zhixun Chen, Men-
+glong Zhang, Yihang Chen, Jinsong Li, Runyu Yang, Qiangbin Liu, Xinlei Yu, Jianmin Zhou,
+Na Wang, Chunyang Sun, and Jun Wang. Memento-Skills: Let Agents Design Agents. arXiv
+preprint arXiv:2603.18743, 2026. URL https://arxiv.org/abs/2603.18743.
+Wangchunshu Zhou, Yixin Ou, Shengwei Ding, Long Li, Jialong Wu, Tiannan Wang, Jiamin Chen,
+Shuai Wang, Xiaohua Xu, Ningyu Zhang, Huajun Chen, and Yuchen Eleanor Jiang. Symbolic
+Learning Enables Self-Evolving Agents, 2024.
+URL https://arxiv.org/abs/2406.
+18532. https://arxiv.org/abs/2406.18532 — metadata fetched 2026-09-11 from
+https://arxiv.org/bibtex/2406.18532.
+Adam Zweiger, Jyothish Pari, Han Guo, Ekin Akyürek, Yoon Kim, and Pulkit Agrawal.
+Self-Adapting Language Models, 2025. URL https://arxiv.org/abs/2506.10943.
+https://arxiv.org/abs/2506.10943 — metadata fetched 2026-09-11 from https:
+//arxiv.org/bibtex/2506.10943.
+13
+
+=== [page 14] ===
+A
+EVIDENCE CONTRACT AND ARTIFACT MAP
+The paper reports a deployed case study, not a universal benchmark. Table 7 records the claim
+boundary that governs every result. Task prompts, unit records, outputs, checker code, source ex-
+cerpts, and hashes are distributed with the artifact; session transcripts and the external deployment
+history are not. The appendix summarizes rather than reproduces those files.
+Table 7: Claim contract. A null superiority test is never interpreted as equivalence.
+Question
+Evidence
+Supported conclusion
+Knowledge
+avail-
+ability
+Selected L5 floor con-
+trast
+Post-selection descriptive association on this task and model
+Writing form
+A versus B
+No detected difference; wide uncertainty
+Carrier form
+Resident versus BM25
+in two small batches
+No detected behavioral difference; not equivalent
+Runtime
+Measured
+first-turn
+prompts and provider
+records
+Lower first-turn knowledge-component at k = 5 in one
+L1 point measurement; session prompts 1.18×; last-turn
+ranges overlap; dollars 1.302× with undecomposed cache
+pricing
+Portability
+File-copy migration
+No code integration or restart required; behavioral preserva-
+tion untested
+Recursive gain
+Implemented
+pathway
+only
+Compounding is unmeasured
+Artifact map.
+The behavioral studies live under data/03-pilot/{semantic-semret-
+v2,memret,migration}.
+The availability batch lives in data/03-pilot/results/
+expand-L5-verdict.md
+with
+records
+data/03-pilot/records/expand-L5-*.
+jsonl and the historical floor data/03-pilot/records/calib-step2-floor.jsonl.
+Resident-index instrumentation is under data/04-instrumentation; design audits and
+the claim–evidence ledger are under design/00-design; integrated recomputation is under
+scripts/. MANIFEST.txt gives the size and SHA256 of every distributed file. Invalid and
+superseded attempts remain in the records and are excluded only according to the frozen protocol.
+Disclosure boundary.
+The audited loader treats memory as an ordinary Skill: its description
+is resident and its body and references are opened on demand. The controlled-write gate refuses
+descriptions above 1,024 characters; an ordinary file edit can bypass that gate and does not update
+the running process immediately. The bound is therefore an enforced property of the governed path,
+not a universal filesystem invariant.
+B
+BEHAVIORAL PROTOCOLS AND UNCERTAINTY
+B.1
+KNOWLEDGE-AVAILABILITY FLOOR
+The activating task asks whether an agent reproduces a previously observed L5 failure (missing
+binding or missing runner confirmation, conjunctive checker). Lower is better. Form A carries the
+rule in L0 (with the full lesson also in L2); Form B carries a narrative in L0 with the full lesson
+only in L2; L1 is an identical invite stub in both; C withholds everything. The valid outcomes are
+A 0/8, B 1/8, and C 6/6, all on opencode-go/deepseek-flash. C is a same-day historical
+floor, not concurrent with the A/B expansion; the 8/8/6 allocation reuses six calibration units. The
+Fisher tables are
+  0 8
+6 0
+
+(A vs C) and
+  1 7
+6 0
+
+(B vs C), rows = arms, columns = (fail, avoid); values are
+0.00033 and 0.00466, unadjusted for multiplicity across the two tests sharing the floor arm. A versus
+B gives a -12.5-percentage-point difference, CI [−47, +30] pp, and p=1.0. The experiment therefore
+reports a post-selection availability association on this task and model, not superior phrasing.
+B.2
+RESIDENT VERSUS RETRIEVED CARRIER
+The first carrier batch crosses five tasks with two paired seeds. Each arm has 10 valid units and all 20
+deliver artifacts. Lesson application is 8/10 in each arm, a difference of 0 pp with CI [−45.3, +45.3]
+14
+
+=== [page 15] ===
+pp and Fisher p=1.0. A screened batch admits only tasks failed twice without the target lesson.
+Four of five candidates enter; T2 is voided. Among the admitted units, the descriptive contrast is
+resident 6/8 versus BM25 5/8, difference +12.5 pp, CI [−35.5, +57.5] pp, and McNemar p=1.0.
+The frozen preregistration’s literal §2.1 criterion would read supported; because T2 was voided,
+this paper adopts the recomputer’s more conservative insufficient/void. The first batch, paired by
+lesson and seed, has paired table
+  8 0
+0 2
+
+(rows = I applied?, columns = R applied?): 8 agree-pass,
+2 agree-fail, 0 discordant (McNemar p=1.0); the reported Fisher value and interval are unpaired
+descriptives. Main-batch intervals subtract Wilson endpoints (a conservative approximation, not
+Newcombe/MOVER); the screened batch quotes its frozen recomputer’s interval descriptively only
+because the batch is voided (a Wald-type hybrid, valid under no standard method: neither Wald
+nor Newcombe score). Both intervals are too wide to establish equivalence. The first batch runs
+openrouter/z-ai/glm-5.3-flash and the screened batch openrouter/deepseek/
+deepseek-v4.1-flash.
+Non-comparable diagnostic.
+target_found means an observed reference-file read in the res-
+ident arm but inclusion in injected top-k text in the BM25 arm. Its 3/10 and 8/10 values are reported
+separately and never contrasted; neither is a common measure of body delivery before action. Ses-
+sion transcripts are not archived, so the resident path-substring aperture cannot be re-scanned; 3/10
+is a lower bound.
+Retrospective delivery stratification.
+This retrospective proxy tabulation stratifies frozen units
+on the delivery proxy (observed reference read in the resident arm; top-k inclusion in the retrieval
+arm): 3/3 versus 5/7 resident (Fisher p=1.0) and 6/8 versus 2/2 retrieved (p=1.0); the screened batch
+gives 2/2 versus 4/6 resident, with all 8 retrieved units carrying the target, so prediction cannot
+be assessed there. No detected association in any assessable batch (tiny-n, task-confounded, all
+p=1.0). The resident and retrieval proxies answer different questions and are reported separately,
+never contrasted. Both retrieved lesson-2 units fail despite delivery (D̸ ⇒U) while all four lesson-3
+units apply without it (O without D); both tasks are retained per protocol, and their heterogeneity
+motivates body-necessary task design for the prospective h study.
+B.3
+E1: DESCRIPTION-ONLY ABLATION (PREREGISTERED, N=8/ARM)
+Design.
+D0 (description-only, L1 stub) versus D1 (full resident) on the L5 delegation task, with 8
+valid units per arm on paired seeds (11/22, 4 replicates each, paired by the seed–replicate key); the
+L0 text is byte-identical across arms and the only permitted difference is the L1 body. Both arms
+run openrouter/deepseek/deepseek-v4.1-flash; E1 values are juxtaposed with RQ1
+qualitatively only, never tabulated together for statistical comparison.
+Main outcome (frozen instruments, descriptive only).
+Fail rates are 0/8 in D0 and 1/8 in D1, a
+difference ∆= −12.5 pp (D0 minus D1, so positive would mean the body helps); Fisher exact two-
+sided p=1.0 on
+  0 8
+1 7
+
+(rows = arms, columns = fail/avoid); Wilson 95% intervals [0.00%, 32.44%]
+(D0) and [2.24%, 47.09%] (D1), subtracted as [−47.09, +30.20] pp (endpoint subtraction, a con-
+servative approximation, not Newcombe/MOVER); paired McNemar exact two-sided p=1.0 (7
+concordant-avoid pairs, 0 concordant-fail, one discordant pair at seed 22 replicate 1); binding holds
+in 100% of both arms and runner confirmation in 100% (D0) versus 87.5% (D1, 7/8; the single
+fail keeps its binding and misses only the runner-confirmation form). At n=8 per arm the interval
+spans on the order of ±45 pp, so every p value and interval in this subsection is descriptive, never
+confirmatory. No RQ1 value shares a table with E1 values here.
+Prospective h.
+The delivery flag was logged prospectively in every unit under one schema de-
+coupled from the checker: 0/16 body/reference opens before action across both arms, so the D=1
+stratum is empty in each arm. This is a prospective zero reading, not a retrospective lower bound,
+and it is not comparable with the historical retrospective proxy.
+Zone verdict (frozen zone table, provisional).
+The frozen table provides: Z-suffice (description
+suffices, provisional) when ∆≤+12.5 pp and, within D0, D=1 versus D=0 shows no associa-
+tion (Fisher p=1.0 direction) with equal D=0-substrata fail rates across arms; Z-necessary (body-
+necessary signal) when ∆≥+25 pp with gains concentrated in the D=1 stratum; Z-mixed when
+15
+
+=== [page 16] ===
+the outcome layer meets a threshold but the stratification fails the corresponding attached condition;
+Z-indeterminate otherwise; both named zones are provisional at this n. Here ∆= −12.5 pp meets
+the Z-suffice outcome layer but not the Z-necessary one, and the attached condition fails: the D=1
+stratum is empty in both arms (the within-D0 comparison degenerates to 0/0 versus 0/8, which can-
+not count as a satisfied no-association check), and the D=0 substrata are unequal (0/8 versus 1/8).
+The verdict is therefore Z-mixed (provisional): mechanism unclear, outcome difference only, no
+carrier conclusion.
+Plain description (no zone or carrier language).
+15 of 16 valid units avoid the L5 failure and
+1 fails; no unit opened the skill body or any reference before acting; within the D=0 substrata D0
+avoids 8/8 and D1 avoids 7/8, the single fail being a final-answer citation-form miss while its binding
+stands. Literally: the description stayed resident throughout yet the body was never opened, and the
+batch still met both conjunctive requirements in all but one unit.
+Sensitivity.
+Dropping the two read-visibility-flagged D0 units at seed 22 (replicates 2 and 3) gives
+0/6 versus 1/8 with the same -12.5 pp difference and an unchanged Z-mixed (provisional) verdict.
+Disclosures.
+The preregistration froze at 2026-09-12T14:54:00Z with a three-item amend-
+ment (sandbox source switched to the archived deployment tree; dual-hash reconciliation of the
+memory text matched so the archived copy was used directly with no deviation; execution-order
+fix of the setup snippet with the scheme unchanged); the checker ran at v2 throughout (v1 misfired
+both ways under this harness, so v2 recognizes only genuine dispatch lines while the prose rule is
+unchanged and v1 stays archived); seeds are newly set with the paired structure kept; D0 unmounts
+L1 by file-stub replacement because no first-class unmount switch exists; the prospective h schema
+is E1-internal and not comparable with history; the single-turn sandboxed call chain is newly built
+with a turn shape not fully isomorphic to the original; the reconstructed task wording, the strict
+before-dispatch binding and read-back checker details, and the stand-in recall text are disclosed
+limitations; in-unit re-bindings after credential or allowlist refusals earned B/R through the unit’s
+own dispatch and read-back; a few units performed read-only recon of sibling records, traces, or the
+checker source inside the run tree with zero writes and stay valid per precedent subject to validity re-
+view; system-temp scratch outside the run and frozen trees, dismissed orphan first legs, one retained
+in-file void row with analysis taking the latest valid row per unit, and the same-key retry rule with
+its stop criterion never triggered are all on record; sixteen per-unit records ship with the artifact.
+C
+RUNTIME, MIGRATION, AND MAINTENANCE
+C.1
+RUNTIME ACCOUNTING
+The no-knowledge first-turn prompt is a single L1 point measurement of 1,462 tokens. Subtract-
+ing that baseline gives 1,313 tokens for the resident arm and 1,365, 3,980, and 4,949 for BM25 at
+k = 1, 3, 5. Token-curve sessions ran under a 120s cap and take first-turn prompts only; they are
+marked not-run for behavior, and k = 0 is a token baseline rather than a behavior arm. The be-
+havioral comparison uses k = 5. Across its valid units, provider-reported cost is $0.09619 resident
+versus $0.12521 retrieved; prompt volume and provider pricing are not interchangeable, so the paper
+reports both rather than inferring a price decomposition. Session prompt totals are 1,218,713 versus
+1,436,897 (1.18×); uncached input differs by 1.84× while cache-read tokens differ by only 1.05×,
+so cache pricing moves the dollar ratio independently of prompt size. The calibrated char-to-token
+interval for the resident index does not contain the measured first-turn delta, so char counts are never
+used as token estimators here. Last-turn prompt ranges overlap (5,181–29,955 versus 9,398–30,517).
+A second batch (semantic-semret-v2, voided; descriptive only) gives mean first-turn +1,522.8 res-
+ident versus +11,999.2 BM25 at k = 5 (∼7.9×): the ratio is lesson- and corpus-dependent. Cite
+3.8× as the L1 first-turn point measurement; ∼7.9× is the voided batch’s mean, reported to bound
+regime-dependence.
+The arms differ by more than delivery: the resident arm mounts six real skills while the retrieval
+arm mounts zero, so the comparison is a deployed system against a retrieval arm. Injection is
+unconditional every turn, matching the batch’s every-turn cost shape; a conditional-retrieval policy
+would shift the profile, and the k = 1 near-tie bounds the headline.
+16
+
+=== [page 17] ===
+L0
+description
+L1
+body
+L2
+references
+WRITE A append
+WRITE B rewrite+validate
+(c) Read carrier with forked writes (schematic, no data)
+1
+3
+5
+k (discrete)
+0
+1000
+2000
+3000
+4000
+5000
+first-turn added tokens
+1,365
+3,980
+4,949
+resident 1,313
+(a) First-turn tokens vs k
+40
+20
+0
+20
+40
+60
+difference (pp)
+screened 6/8 vs 5/8
+main 8/10 vs 8/10
+-45.3
++45.3
+-35.5
++57.5
+(b) Between-arm differences with wide intervals
+Figure 2: Measured operating point, appendix exhibit (same slices and denominators as Tables 4
+and 3). (a) First-turn added tokens at k = 1, 3, 5: BM25 1,365, 3,980, 4,949 (discrete points)
+against resident 1,313 (same-unit deltas; absolute baseline in Table 4). (b) Between-arm application
+contrasts with wide intervals: 8/10 vs 8/10; ∆= 0 pp, CI [−45.3, +45.3] pp; screened 6/8 vs 5/8, CI
+[−35.5, +57.5] pp. Top strip recalls the L0 →L1 →L2 read carrier with append versus rewrite–
+revalidate writes; delivery h is unmeasured in RQ1–RQ2 and instrumented in E1 (§B.3).
+Table 8: What differs between the carrier arms. Task, model, and paired seeds are held fixed.
+Dimension
+Resident carrier
+BM25 carrier
+Routing
+Resident
+descrip-
+tions; body read on
+demand
+Query and inject top-k body text
+Knowledge context
+Fixed compact index
+each turn
+Retrieved text injected each turn
+External
+retrieval
+call
+None in the agent
+loop
+BM25 selection before the model call
+Irrelevant carriers
+Five unrelated skills
+also resident
+Zero skills
+Behavioral
+end-
+point
+8/10 applied
+8/10 applied
+This is a comparison with sparse BM25 retrieval, not with dense, graph, or learned retrieval. At
+k = 1 the measured context costs are nearly tied; at k = 5 the resident arm is smaller. Corpus size,
+prompt caching, pricing, and semantic-retrieval coverage requirements can move the cost compari-
+son.
+C.2
+PORTABILITY AND MAINTENANCE
+Migration starts by copying 21 files and 177,321 bytes (manifest snapshot, taken as authoritative);
+a second snapshot records 185,582 bytes, and the recording file internally contradicts itself about
+which snapshot it describes, so no drift-over-time claim is made. The migration changes 0 code
+lines and restarts 0 services. Carriers are present in all 8/8 inspected units. The behavioral endpoint
+is 0/8 versus 0/8 with p=1.0; this double floor cannot establish preservation.
+Across the observed maintenance window, the content store grows +64%; none of 11 content
+changes touches harness code. The machinery itself changes 15 times (13 instrumentation plus
+2 write-entry, per the pinned deployment history’s changed paths). The supported conclusion is that
+content addition was decoupled from harness edits in this window, not that the machinery is free or
+asymptotically constant. Migration units run openrouter/z-ai/glm-5.3-flash.
+17
+
+=== [page 18] ===
+D
+WRITE-GOVERNANCE AUDIT
+The installed system exposes four physical write entries (Table 9). The official carrier operation can
+rewrite a SKILL.md or append a reference attachment after validation, but three other entries re-
+main. Only apply_change records an expectation in the settlement ledger; coverage is therefore
+1/4.
+Table 9: Physical write surface on the audited deployment. Source locations and excerpts are in
+design/00-design/live-citations.txt; the 15-edit count traces to deployment history
+at commit 57ecad8dd3.
+Entry
+State transition
+Governance
+apply_change
+Rewrite skill or ap-
+pend attachment
+Gate, adoption, rollback, settlement
+facts_append
+Append
+raw
+evi-
+dence
+Append enforced by construction; no settlement
+lesson_append
+Append lesson de-
+tail
+Local refusal rule; no settlement
+Bare write/edit
+Arbitrary file muta-
+tion
+Bypasses carrier gate and ledger
+The official carrier operation now routes reference attachments to a path-confined, append-only
+target. This closes official reachability but does not remove the other entries or extend ledger cov-
+erage. The architectural distinction is semantic: evidence history is append-only, whereas current
+executable state is rewritable and must be revalidated.
+E
+VERIFICATION AND REPRODUCTION
+Recompute.
+From the artifact root (Python ≥3.12):
+python3 scripts/section7_recompute.py --json --no-checker
+python3 scripts/recompute_rq1_sessions.py --json
+python3 data/03-pilot/memret/analyze_memret.py
+python3 data/03-pilot/migration/analyze_migration.py
+python3 data/03-pilot/semantic-semret-v2/recompute_v2.py --
+json
+All but the last exit 0 (migration also writes its analysis.json). The final command exits 4 by
+design because the preregistered screened batch is marked insufficient/void; it still reproduces its
+descriptive statistics. All 20/20 memret answers match the unit ledger on byte length, and the five
+frozen checkers reproduce all recorded artifact decisions.
+Next measurements.
+Five instruments would each unlock a decision this study cannot make: (i) h,
+separating “the carrier failed” from “the carrier never delivered”—now instrumented prospectively
+in E1 with 0/16 body/reference opens, so the missing measurement is a zero reading, not a gap;
+(ii) an equivalence design with a predeclared margin, licensing “no worse than retrieval”; (iii) a
+dense-retrieval arm, locating the crossover beyond sparse BM25; (iv) a non-floor migration endpoint,
+testing behavioral preservation; (v) repeated reflection cycles, testing compounding gain. These are
+missing measurements, not zero-valued results; §5 orders them by information value. A frozen
+preregistration for the cheapest decisive test—a description-only ablation on the L5 task, n = 8/arm
+on paired seeds—ships in design/00-design/prereg-e1-description-only.md.
+Provenance and ethics.
+Figure 1 carries the implemented loop over an AI-generated backdrop
+(labels overlaid).
+Figure 2 was generated by figs/data-panels.py from figs/data-
+values.json; all plotted values repeat Tables 4 and 3 verbatim. Drafting used LLM assistance
+with human verification of every reported number. The study uses no human subjects and no per-
+sonal data.
+18
