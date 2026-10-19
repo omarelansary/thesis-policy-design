@@ -1,0 +1,202 @@
+
+
+From 10 tools to infinity: how we built progressive tool loading in Slite
+
+サインインデモ予約無料で始める
+
+すべての記事
+From 10 tools to infinity: how we built progressive tool loading in Slite
+
+Every team building on top of LLMs eventually hits the same wall: the more your agent can do, the worse it gets at doing any one thing.
+At Slite, we built Super (now Slite agent), the hub for accurate company answers, for humans and for agents. 
+Slite agent connects to your team's knowledge wherever it lives, and increasingly it does that through MCP. That's how we ran straight into the wall.
+This is the story of how we went from around 10 built-in tools to an effectively unbounded set and why the answer wasn't "add more tools," but "stop loading them all upfront."
+We started with ~10 built-in tools
+In late 2024, Super's toolset was small and hand-picked. A handful of data sources, plus a couple of agent capabilities:
+ToolType
+SliteData source
+Google DriveData source
+NotionData source
+ConfluenceData source
+JiraData source
+LinearData source
+SearchSemantic search
+ChartsVisualization
+At that size, the naive approach works fine: hand the model every tool definition upfront, on every request, and let it choose.
+Then the toolset exploded
+Two things changed. We added far more native integrations and then MCP let any team plug in their own tools. The number stopped being a number and became unbounded.
+Data sources: Slite, Google Drive, Notion, Confluence, Jira, Linear, GitHub, GitLab, Slack, Intercom, Salesforce, HubSpot, SharePoint, BigQuery, Asana, Attio, Git, Websites, Files, Custom Sources…
+Agent tools: semantic search, read context, web search, charts, template formatting, for-each, thinking, image generation, list/inspect/query BigQuery tables, list repos, list directories, find files, read file, grep code…
+MCPs: Postgres, Stripe, ProfitWell, Zendesk, Datadog, Sentry, AWS, Twilio, Segment, Amplitude, Mixpanel, Metabase, dbt, Fivetran… and whatever a customer connects next.
+A good problem to have, except the naive approach falls apart at this scale.
+The core tension
+We want Slite agent to be able to answer anything, because that's what makes it a daily habit. But every tool you add upfront makes the agent worse on three axes at once:
+↓ Accuracy (more tools means more noise for the model to sort through)
+↑ Cost (every tool definition consumes input tokens on every request)
+↑ Latency (larger prompts mean a slower time to first token)
+Concretely, it came down to two hard problems.
+Problem 1: the context budget
+Tool definitions eat context before the agent even starts working. This isn't a rounding error:
+20%+ of the context window consumed by just three standard MCP servers.
+40 (the tool cap in Cursor).
+128 (the tool cap in Copilot).
+Everyone shipping agents has hit this ceiling, which is why those caps exist. 
+We didn't want a cap. We wanted infinity.
+Problem 2: cache invalidation
+This one is subtler and, for us, more expensive. Modern LLM APIs let you cache the prefix of a prompt (the tool definitions, the system prompt, the conversation so far) so repeated turns are cheap and fast. 
+But the cache is a chain: change anything early in it, and everything after is invalidated.
+{
+  "tools": [
+    "searchTool",
+    "readContext",
+    "chartTool"        // ← added mid-conversation
+  ],
+  "system": "...",      // ⚠ cache miss
+  "messages": [
+    { "turn 1..." },
+    { "turn 2..." },
+    { "turn 3..." }     // ⚠ all re-processed
+  ]
+}
+So "just load the tool when you need it" naively means: mutate the tool list mid-conversation → blow away the entire prompt cache → re-process every prior turn. 
+The thing that should make the agent cheaper makes it dramatically more expensive.
+First attempt: disambiguation tools
+Our first move was to stop loading every source's full toolset upfront, and instead let the agent discover the right tool on demand. 
+The agent calls a lightweight disambiguation tool:
+{
+  "tool": "disambiguateGithub",
+  "parameters": {
+    "dateRange": { "from": "2026-02-23", "to": "2026-03-02" }
+  }
+}
+…and gets back a full, team-specific tool definition:
+{
+  "name": "githubSearch",
+  "parameters": {
+    "properties": {
+      "owner": { "enum": ["sliteteam"] },
+      "assignees": { "enum": ["Antoine Duban", "Charley DAVID", "Florian", "..."] },
+      "labels": { "enum": ["Fix", "Priority-high", "Priority-urgent"] }
+    }
+  }
+}
+The enum values are populated dynamically from this team's setup, so the model gets a precise, grounded tool instead of a generic one.
+This helped. But it didn't scale, because disambiguation was per-source:
+disambiguateSliteTools
+disambiguateGoogleDriveTools
+disambiguateNotionTools
+disambiguateConfluenceTools
+disambiguateGitHubTools
+disambiguateLinearTools
+disambiguateJiraTools
+disambiguateIntercomTools
+disambiguateSalesforceTools
+disambiguateBigQueryTools
+...
+One disambiguation tool per source, so the upfront list just kept growing again. 
+We'd moved the problem, not solved it.
+The insight: this was already progressive loading
+Then it clicked. The disambiguation pattern (call a tool, get back another tool) was already a one-step special case of something we were doing elsewhere. 
+It looked exactly like the way the agent queries a database:
+findTables() → inspectTable() → queryTable()
+Each step reveals the next. That's progressive loading. We just needed to generalize it from a one-step special case into a proper, multi-level structure.
+The solution: a just-in-time tool-loading tree
+We replaced the flat list of N disambiguation tools with a small number of themed entrypoints. 
+Each node in the tree loads its children on demand — just in time — and a single call can return everything the agent needs for a task in one round trip:
+getDevAndProjectTools(
+  for: "last month",
+  kinds: git, github, linear
+)
+That one call returns all the relevant tool definitions, scoped to the team's sources and timeframe, replacing what used to be many separate disambiguation tools. 
+The full tree looks like this:
+progressiveSearch
+├── readContext
+├── expandDocument
+└── getMoreResults
+
+devAndProjectTools
+├── github
+│   ├── search ──→ getMore
+│   └── aggregate ──→ chart ✦
+├── linear
+│   ├── search ──→ getMore
+│   └── aggregate ──→ chart ✦
+└── jira, gitlab, asana…
+
+codeExplorer
+├── listRepos
+├── listDirectory
+├── findFiles
+├── readFile
+└── grep
+
+bigquery
+├── findTables
+├── inspectTables
+└── queryTables ──→ chart ✦
+
+crmTools
+├── attio
+│   ├── search ──→ getMore
+│   └── aggregate ──→ chart ✦
+└── hubspot, salesforce…
+The agent only ever sees the entrypoints upfront. 
+It walks deeper into a branch only when the task requires it and tools like chart (the ✦ nodes) are injected the moment they become relevant, not before.
+Progressive loading in practice
+Here's a real path through the tree with the agent answering "I need an MRR chart" against BigQuery. 
+Each step dynamically loads the next tool:
+"I need an MRR chart, let me use BigQuery…" - the three BigQuery tool definitions get loaded on demand.
+findTables - discover what tables exist in the dataset.
+inspectTable - check the schema of the most relevant table.
+queryTable - run the SQL, get the grouped data back.
+chartTool ← dynamically injected - a grouping query is detected, so chartTool is loaded for the first time and the result gets visualized.
+At no point was the full menu of dozens of tools sitting in context. The agent loaded five definitions, in order, exactly when each was useful.
+The results
+We benchmarked the unified agent against our old v2 engine on 63 complex questions (an automated benchmark):
+17 tools loaded upfront (down from the entire menu).
+65+ tools available on demand, unbounded once you count MCPs.
+−23% cost per question, and −12% response time.
+Cheaper, faster, and able to reach far more tools than before — at the same time. 
+The context budget and cache-invalidation problems both came from the same root cause: loading everything upfront. 
+Fix the root cause and both problems go away together.
+What about Claude's "deferred tools"?
+A fair question, since Claude now exposes a tool-search feature (behind beta headers) that helps a model discover tools without loading every definition upfront.
+It's genuinely useful and we build on top of it. 
+We wrap the deferred-tools mechanism to fully control dynamic tool loading, rather than handing the model everything upfront. It's one piece of the puzzle that helped us solve the cache-invalidation problem, but you need real orchestration built around it to get the rest of the way.
+This is our current approach — not an evergreen recommendation
+We're not claiming this is the final answer. It's where we are today, and the ground keeps moving. 
+Our next problem is already in view: managing context memory — what gets stored where, and the retrieval skills the agent needs to use it well.
+The direction we're most excited about is going from many tools and MCPs to fewer, smarter sub-agents. One clean way to generalize this optimization across every provider: expose fewer tools, and let purpose-built agents manage their own internal complexity.
+Take editing a Slite document over MCP. Today it's N separate operations the orchestrator has to sequence correctly:
+append_block(...)
+modify_block(...)
+remove_block(...)
+get_note(...)
+update_note(...)
+Tomorrow, it's one agent that owns that complexity:
+edit_document("Update the Q1 section with the latest metrics")
+The orchestrator stops juggling block-level primitives and starts delegating intent. Fewer tools at the top, more capability underneath.
+Building agents and hit the same wall? I'd love to compare notes!
+
+最終更新
+2026年7月1日
+
+この記事をシェア
+
+Christophe Pasquier による執筆
+
+Chris founded Slite in 2017 and has spent the decade since thinking about how teams actually keep track of what they know. He writes about where the category is going next — agentic knowledge management, context graphs, and the parts of knowledge work AI is quietly rewriting. He's been wrong about the future before. Mostly he's been early. Find him @Christophepas on Twitter!
+
+関連記事
+
+Say hello to Slite, the self-maintaining knowledge base
+Christophe Pasquier による
+The Knowledge Suite: your docs are great, but they're not everything
+Christophe Pasquier による
+How we built Super - The 1st reliable Enterprise Search
+Christophe Pasquier による
+
+チームとエージェントが信頼できる、自己管理型ナレッジベース
+デモを予約料金を見る
+
+    

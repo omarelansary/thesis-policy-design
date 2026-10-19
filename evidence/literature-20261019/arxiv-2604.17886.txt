@@ -1,0 +1,4690 @@
+
+=== [page 1] ===
+Latent Preference Modeling for Multi-Session Personalized Tool Calling
+Yejin Yoon*
+Minseo Kim*
+Taeuk Kim†
+Hanyang University, Seoul, Republic of Korea
+{stillwithyou, er1123090, kimtaeuk}@hanyang.ac.kr
+Abstract
+Users often omit essential details in their re-
+quests to LLM-based agents, resulting in under-
+specified inputs for tool use. This poses a fun-
+damental challenge for tool-augmented agents,
+as API execution typically requires complete
+arguments, highlighting the need for person-
+alized tool calling. To study this problem, we
+present Multi-Session Personalized Tool Call-
+ing (MPT), a benchmark comprising 4,695 in-
+stances over 459 multi-session interaction his-
+tories that cover three challenges: Preference
+Recall, Induction, and Transfer. We further pro-
+pose PREFINE, a test-time memory method
+that maintains the user’s latent preference as
+a textual hypothesis revised through a generate–
+verify–refine loop. Across five LLMs, existing
+memory systems often fail to improve on full-
+history prompting; PREFINE outperforms all
+baselines and alone surpasses it on Preference
+Transfer. These results indicate that memory
+for personalized agents must abstract behavior
+into preferences, rather than simply archive it.
+1
+Introduction
+LLM-based agents increasingly rely on external
+tools to perform complex tasks such as deep re-
+search (Xu and Peng, 2025) and computer use
+(Sager et al., 2026). These tools, typically realized
+as parameterized functions, are invoked with ar-
+guments often missing from user requests; e.g., a
+query as simple as “Book a flight for my trip” speci-
+fies neither the origin, the destination, nor the price.
+A direct solution to such underspecification is to
+ask the user clarifying questions about the missing
+arguments. A more proactive agent, however, could
+infer them from user preferences with minimal in-
+tervention, akin to a recommender system—the
+core idea behind personalized tool calling (Moghe
+et al., 2024; Xu et al., 2025).
+* Equal contribution. † Corresponding author.
+Prior work in this direction has largely as-
+sumed that user preferences are provided explicitly.
+Standing-instruction and profile-based approaches
+(Moghe et al., 2024; Huang et al., 2025) inject cu-
+rated preferences into the input, while retrieval- and
+memory-based agents (Lewis et al., 2020; Chhikara
+et al., 2025; LangChain AI, 2025; Xu et al., 2026)
+assume the target arguments have appeared earlier
+in the context. In both cases, personalized tool call-
+ing reduces to a search problem. More challenging
+benchmarks merely make the preference harder
+to locate or apply: it may be indirectly phrased,
+context-dependent, or later superseded (Zhao et al.,
+2025; Kim et al., 2025; Jiang et al., 2025a,b); the
+task nevertheless remains one of search.
+In this work, we argue that user preferences are,
+in reality, latent, and thus should be inferred rather
+than retrieved (see Figure 1). In other words, the
+cues are mostly implicit in the user’s past tool calls.
+Consider a user who books a cheap restaurant, tours
+a free attraction, and rents a compact car, each
+choice triggering a distinct tool with no shared
+parameters. To infer that this user favors affordable
+options, a preference never stated, the agent must
+generalize across these seemingly unrelated calls.
+To evaluate this capability in LLM-based agents,
+we propose Multi-Session Personalized Tool Call-
+ing (MPT), a benchmark of 4,695 instances over
+459 multi-session histories drawn from three cor-
+pora. MPT comprises three scenarios that differ
+in how much evidence prior sessions provide for
+the target argument. In (1) Preference Recall, the
+argument is hinted at multiple times, as in exist-
+ing benchmarks, so direct reuse is sufficient; in
+(2) Preference Induction, a single explicit mention
+must be corroborated by cross-function evidence;
+and in (3) Preference Transfer, the preference must
+be applied to an argument absent from the history.
+Alongside MPT, we introduce PREFINE, a test-
+time memory method that maintains the estimate
+of the user’s preference as a textual hypothesis,
+1
+arXiv:2604.17886v3  [cs.CL]  14 Oct 2026
+
+=== [page 2] ===
+INTERACTION HISTORY + CURRENT QUERY
+s₁
+💬USER Restaurant tonight. →AGENT Any cuisine? →USER Korean, and make it cheap.
+🍽️ GetRestaurants(category="Korean", price_range="cheap" , …)
+· · ·
+s₇
+💬USER Suggest places to visit this weekend? →AGENT Budget-friendly or popular
+spots? →USER Cost first — free-entry attractions in Seattle.
+🧳 GetTravel(location="Seattle", …, free_entry="True" )
+s₈
+💬USER Need a compact rental car in Seattle. →AGENT Pickup date? →USER March 8.
+🚗 GetRentalCars(pickup_city="Seattle", …, car_type="Compact" )
+current
+💬USER Book a flight for my trip. →AGENT Where from and to?
+→USER London to Paris.
+Explicit: origin="London", destination="Paris"
+Under-specified: flight_class = ?
+PREDICTED TOOL CALL
+💡 Preference reasoning needed — the
+current session alone is incomplete, so
+the agent fills missing args. by reasoning
+over the interaction history.
+User prefers budget-friendly options 💸
+Ground Truth Tool Call
+GetFlights(
+origin="London",
+destination="Paris",
+flight_class="Economy" )
+↑ Preference-inferred Args.
+Figure 1: Example of latent preference modeling for personalized tool calling. No prior session involves flights, so
+flight_class=“Economy” cannot be retrieved from past calls. Instead, the agent must model the user’s preference
+from its cross-function expressions (price_range, free_entry, car_type) and apply it to the unseen argument.
+revised across sessions through a generate–verify–
+refine loop. A candidate hypothesis enters memory
+only after being verified against the accumulated
+behavioral record, yielding a memory that is an
+abstraction of user behavior rather than a raw log.
+Across five LLMs and six methods, agents
+reliably recover explicit arguments but struggle
+with omitted preference-sensitive ones, and perfor-
+mance degrades from Recall through Induction to
+Transfer. Retrieval- and organization-based mem-
+ories (RAG, Mem0, LangMem) even fall below
+full-history prompting, indicating that surfacing
+past records is not enough unless the evidence is
+abstracted into a preference. PREFINE, in contrast,
+outperforms all baselines, and is the only method to
+exceed full-history prompting on Transfer without
+session context. Its advantage also holds as compet-
+ing and unrelated observations accumulate in his-
+tory, a difficulty we quantify with a new evidence
+interference score: all methods degrade under high
+interference, but PREFINE remains the best. Abla-
+tions on PREFINE further show that verification,
+not repeated refinement, drives these gains.
+2
+Related Work
+Personalized Tool Calling
+Existing tool-use
+benchmarks primarily evaluate planning, failure
+recovery, and chained execution in multi-turn set-
+tings (Wang et al., 2024; Lee et al., 2024; Yao et al.,
+2025; Patil et al., 2025; Chakraborty et al., 2025;
+Shim et al., 2025). Personalized tool-calling studies
+further incorporate standing instructions, user pro-
+files, or prior API calls to constrain tool arguments
+(Moghe et al., 2024; Xu et al., 2025).
+However, these methods use explicit preference
+profiles or derive tool preferences from history,
+without evaluating whether implicit preferences
+can be inferred from cross-function evidence and
+Benchmark
+Preference
+Source
+Implicit
+Preference
+Preference
+Scope
+Unseen
+Target
+Quant.
+Interf.
+NLSI
+Instruction
+✗
+Parameter
+✗
+✗
+PTBench
+Profile
+✗
+Profile field
+✗
+✗
+PEToolBench
+Tool calls
+✓
+Tool
+Tool
+✗
+PrefEval
+Dialog
+✓
+Topic
+✗
+✓
+CUPID
+Dialog
+✓
+Context
+✗
+✗
+PersonaMem
+Dialog
+✓
+Topic
+Scenario
+✗
+MPT (ours) Dialog + calls
+✓
+Cross-function Argument
+✓
+Table 1: Comparison of personalized interaction bench-
+marks. Quant. Interf.: whether interference is quanti-
+fied per instance.
+applied to arguments absent from the history.
+Latent Preference Modeling
+A related line of
+research recovers user preferences from implicit
+interaction histories. In dialogue systems, PrefE-
+val (Zhao et al., 2025), CUPID (Kim et al., 2025),
+and PersonaMem (Jiang et al., 2025a,b) eval-
+uate whether LLMs recognize and apply such
+preferences. Conversational recommender systems
+similarly model preferences as latent variables
+learned from behavior, generalizing beyond ob-
+served choices (Luo et al., 2020; Chen et al., 2019;
+Zhou et al., 2020a; Li et al., 2025a).
+Table 1 compares these benchmarks along five
+axes: where the preference comes from, whether
+it remains implicit, how many decisions it gov-
+erns, what kind of target is absent from the history,
+and whether interference is quantified per instance.
+Only MPT tests whether an unstated cross-function
+preference transfers to an unseen argument (Prefer-
+ence Transfer; 29.3% of its instances).
+Memory for Long-Horizon Agents
+Agentic
+memory research studies how agents maintain and
+update information across interactions (Park et al.,
+2023; Packer et al., 2024; Shinn et al., 2023; Wang
+et al., 2023; Wei et al., 2025), with work on multi-
+session collaboration (Mehri et al., 2026; He et al.,
+2
+
+=== [page 3] ===
+2026), memory compression (Liu et al., 2025), and
+memory policies (Zhou et al., 2025; Wang et al.,
+2026). Profile-based methods organize and update
+user information (Kwon et al., 2023; Zhang et al.,
+2025; Chhikara et al., 2025); PREFINE instead
+keeps a single preference hypothesis, revised only
+when verified against the accumulated history and
+applied to the tool schema at inference.
+3
+Problem Definition
+Tool Calling
+Let S = {s1, . . . , sT } denote a se-
+quence of past dialogue sessions between a single
+user and an AI agent, where each session st con-
+sists of a multi-turn dialogue in which the agent
+may execute API calls. The agent operates over a
+tool schema F, a set of available functions, where
+each f ∈F is a tuple (id, K) of an identifier and
+a set of parameters. Tool calling is then the task
+of producing an API call a = (id, {(k, v)}), i.e.,
+selecting a function and assigning an appropriate
+argument (value) v to each parameter (key) k ∈K,
+e.g., GetFlights(flight_class=“Economy”).
+Let A denote the list of all API calls executed
+in S. We define the user’s interaction history H =
+(S, A). At timestep T + 1, the agent observes a
+query q, consisting of the turns of a new session
+sT+1 up to the API decision point, and must pro-
+duce the corresponding API call aT+1. In person-
+alized tool calling, preference-sensitive arguments
+unspecified in q must be inferred by modeling the
+user’s latent preference from H.
+Latent Preference Modeling
+How the missing
+arguments are filled depends on a latent prefer-
+ence p, a user-level variable not directly observed.
+We study preferences that satisfy three conditions:
+(C1) p can be instantiated as API arguments across
+multiple functions, so that it can transfer between
+them (cross-function instantiation); (C2) those
+arguments admit different preferred values across
+users, such that no universal default value is suffi-
+cient (variation across users); and (C3) p persists
+across a user’s sessions rather than varying with
+each request (persistence within a user).
+For instance, a user who prefers low_cost
+may choose price_range=cheap when search-
+ing restaurants and flight_class=Economy when
+booking flights, without ever stating the preference.
+We assume that calls supporting p strictly outnum-
+ber those conflicting with it (§4.2). The agent, how-
+ever, is never told which arguments express p and
+must infer it across functions.
+§4.1 PREPROCESSING
+source corpora
+SGD
+DuRecDial
+HomeBench
+low_cost
+GetRestaurants(price_range="cheap") · GetFlights(flight_cla…
+⋯
+prefers_star
+GetMusic(artist=⟨celebrity⟩) · GetMovies(starring=⟨cele…
+⋯
+eco
+GetHeating(eco_mode="on") ⋯
+5 preferences over 16 function–parameter pairs across 13 functions
+§4.2 HISTORY COMPOSITION
+𝓗 = 💬 sessions + 🛠️ API calls
+(i) Composition of Users
+(ii) Assignment of Users to Preferences
+(iii) Injection of Competing and Unrelated Evidence (+ rows), interleave
+s₁
+💬 "Korean dinner t…
+🍽️ GetRestaurants(…, price_range="cheap" )
+s₂
+💬 "Weekend sightseeing"
+🧳 GetTravel(…, free_entry="True" )
++
+s₃
+💬 "Songs by Andy Lau"
+🎵 GetMusic(…, artist="Andy Lau")
++
+s₄
+💬 "Warm room, save power"
+🔥 GetHeating(…, eco_mode="on")
++
+s₅
+💬 "Hotel for the trip"
+🏨 GetHotels(…, average_star="5" )
+· · ·
+s₇
+💬 "Rental car this we…
+🚗 GetRentalCars(…, car_type="Compact" )
+⇒establishes
+low_cost
+— strict plurality: supporting 3 > competing 1
+§4.3 QUERY CONSTRUCTION
+✈️ GetFlights
+🍽️ GetRestaurants
+🎵 GetMusic
+… one template set per function
+Function:
+GetFlights
+Explicit args: origin="London",
+destination="Paris"
+Under-specified args:
+flight_class = ?
+§4.4 INSTANTIATION
+instance
+§4.2 history 𝓗
+s₁ 🍽️
+s₂ 🧳
+s₃ 🎵
+s₄ 🔥
+s₅ 🏨
+⋯
+s₇ 🚗
+⇒
+low_cost
+§4.3 query 💬"Book a flight for my trip." → ⋯ → "London to Paris."
+= Answer: ✈️ GetFlights(
+origin="London", destination="Paris", flight_class="Economy" )
+AGENT Where from and to?
+USER London to Paris.
+CONTEXT-GUIDED
+USER Book a flight for my trip.
+CONTEXT-FREE
++
+Figure 2: Overview of MPT construction. Sessions from
+three source corpora are composed into multi-session
+interaction histories H, from which gold-standard latent
+preferences p∗are established. Each query q often leaves
+preference-sensitive arguments unspecified, and pairing
+q with H yields a concrete instance in MPT.
+Formulation
+In summary, resolving an under-
+specified argument requires (1) inferring p from
+past behavior and (2) applying it to the target func-
+tion, rather than retrieving previously observed val-
+ues. Formally, the agent predicts a fully instantiated
+API call a∗for aT+1 consistent with both q and p:
+ˆp = ψ(S, A≤T ),
+a∗= arg maxa π(a | q, ˆp, F),
+(1)
+where ψ estimates the latent preference as ˆp, π gen-
+erates the tool call, both implemented with LLMs,
+and a ranges over API calls admissible under F.
+Finally, C2 and C3 restrict which arguments
+can express p. Arguments specifying what is
+done (e.g., destination, date) vary by request,
+whereas those specifying how (e.g., price_range,
+flight_class, eco_mode) are user-specific. La-
+tent preferences thus inform these how-arguments.
+3
+
+=== [page 4] ===
+Preference
+Function(parameter = argument)
+low_cost
+GetRestaurants(price_range = cheap)
+GetRentalCars(car_type = Compact)
+GetHotels(average_star = 1,2)
+GetRideSharing(shared_ride = True)
+GetTravel(free_entry = True)
+GetFlights(flight_class = Economy)
+high_cost
+GetRentalCars(car_type = Full-size)
+GetHotels(average_star = 4,5)
+prefers_star
+GetMovies(starring = ⟨celebrity⟩)
+GetMusic(artist = ⟨celebrity⟩)
+eco
+GetAirConditioner(eco_mode = on)
+GetHeating(eco_mode = on)
+GetWaterHeater(eco_mode = on)
+solo_usage
+GetBuses(group_size = 1)
+GetFlights(passengers = 1)
+GetRideSharing(number_of_seats = 1)
+GetEvents(number_of_tickets = 1)
+GetRestaurants(number_of_seats = 1)
+Table 2: Preferences in MPT. Values listed together ex-
+press the same preference (e.g., average_star = 1,2).
+The placeholder ⟨celebrity⟩stands for one of the 20
+celebrities in DuRecDial 2.0, instantiated per user.
+4
+Benchmark Construction: MPT
+Building on §3, we present Multi-Session Person-
+alized Tool-Calling (MPT),1 a benchmark that
+evaluates whether an agent can infer the dominant
+preference from a history H and apply it to a query
+q with unspecified preference-sensitive arguments.
+We construct separate pools of histories (§4.2) and
+queries (§4.3), then pair them into final instances
+(§4.4). Figure 2 illustrates the overall process.
+4.1
+Preprocessing
+Source Corpora
+We reviewed 23 dialogue cor-
+pora against multi-session structure, API calls with
+arguments, and satisfaction of C1–C3 (§3), se-
+lecting SGD (Rastogi et al., 2020), the English
+portion of DuRecDial 2.0 (Liu et al., 2021), and
+HomeBench (Li et al., 2025b). See Appendix B.1
+for screening and preprocessing details.
+Preference Realization
+We group preference-
+relevant arguments across functions into latent
+preferences. For example, price_range=“cheap”
+in GetRestaurants and free_entry=True in
+GetTravel both express low_cost.2 MPT defines
+each preference over multiple functions rather than
+a single parameter or tool (Table 1). This require-
+ment (C1) restricts the eligible preferences in the
+source corpora. The resulting five latent prefer-
+ences nevertheless cover 18 realizations over 16
+1https://anonymous.4open.science/r/MPT-4051/
+2We keep the original schema definitions and apply nor-
+malization following Moghe et al. (2024); see Appendix A.7.
+function–parameter pairs in 13 functions (Table 2).
+Human validation of the cost and party-size prefer-
+ences yielded 89.7% and 97.4% agreement (Fleiss’
+κ = 0.701 and 0.880; 19 annotators); ambiguous
+preferences were excluded (Appendix B.2).
+4.2
+History Composition
+While preference realization identifies which ar-
+guments can express a preference, no single call
+suffices to establish it. We thus build multi-session
+histories H, in three steps, from which a preference
+emerges as a recurring behavioral pattern. We refer
+readers to Appendix A.4 for further details.
+(i) Composition of Users
+In our setup, a multi-
+session history presupposes a user behind all of its
+sessions. We obtain such users by grouping dia-
+logues by seeker in DuRecDial 2.0, splitting each
+multi-intent instruction in HomeBench into single-
+intent sessions, and assembling synthetic ones from
+SGD sessions, since SGD lacks user identifiers.
+(ii) Assignment of Users to Preferences
+To
+align an interaction history with a preference (e.g.,
+a user favors affordable options), we label each user
+from the first step with the preference that their API
+calls demonstrate. Specifically, a user is assigned
+to a preference p if their calls consistently express
+p across at least two functions, following C1 (cross-
+function instantiation) in §3. The sessions of such
+users then serve as supporting evidence for p.
+(iii) Injection of Competing and Unrelated Evi-
+dence
+To reflect a more realistic setting, we aug-
+ment the supporting histories from the previous
+steps with competing sessions expressing opposing
+preferences (e.g., high_cost vs. low_cost) and
+sessions unrelated to the target preference. To keep
+the target preference dominant (C3 in §3), support-
+ing calls must strictly outnumber competing ones
+(strict plurality; ties excluded); 46.9% of merged
+histories contain competing calls. Added sessions
+are randomly interleaved while preserving the orig-
+inal order within each source. The counts of sup-
+porting, competing, and unrelated observations are
+later used to compute the interference score (§7.1).
+4.3
+Query Construction
+For each function f, we manually create query tem-
+plates that leave one or more arguments unspecified.
+Context-guided queries (qcg) retain initial turns of
+the current session, providing direct clues for some
+arguments, while context-free queries (qcf) omit
+4
+
+=== [page 5] ===
+this context, requiring tool calls based solely on ˆp
+inferred from H (see Table 6 for examples).
+4.4
+Instantiation
+An MPT instance pairs a query q with a history
+H. Its reasoning type depends on how often H
+instantiates the target parameter left unspecified by
+q.3 Specifically, we consider three types:
+Preference Recall
+The target argument v recurs
+in H, allowing direct reuse. This setting supports
+comparison with retrieval-oriented benchmarks and
+provides a reference for the two harder types.
+Preference Induction
+The target argument v oc-
+curs only once in H. Since a single occurrence may
+reflect either a persistent preference or an incidental
+choice, the agent must corroborate it with evidence
+of the same preference elsewhere in H.
+Preference Transfer
+The target argument v
+never occurs in H, although its function may. Re-
+solving it requires generalization: the agent must
+infer p from its realizations in other functions and
+apply it to an argument without direct evidence.
+4.5
+Benchmark Statistics
+MPT comprises 4,695 instances over 459 multi-
+session dialogues, totaling 6,961 sessions and
+95,523 turns (on average, 15.2 sessions per dia-
+logue and 13.7 turns per session). It includes 1,375
+Recall, 1,944 Induction, and 1,376 Transfer in-
+stances. Of the dialogues, 164 (35.7%) support
+two to four distinct preferences and yield 2,432
+instances (51.8%; Table 7 in Appendix A.6).
+5
+Experimental Settings
+5.1
+Methods
+We test five models: GPT-5, Claude-4.5-Haiku,
+GPT-OSS-20B, Gemma-4-12B-IT, and Qwen3-8B.
+Each is combined with the six methods below. Full
+model and method details are given in Appendix C.
+Non-Memory-Based Methods
+In Full-History
+Prompting, the model receives (S, A≤T ), q, and
+F, and directly generates a tool call. RAG (Lewis
+et al., 2020) instead replaces the full interaction
+history with utterances retrieved by relevance to q.
+3Note that one history H can appear in multiple instances,
+each with a different unspecified parameter (and hence reason-
+ing type) or targeted preference.
+Algorithm 1 PREFINE Memory Update
+Require: Mt, st+1, at+1, Ht+1; refinement budget K = 5
+Ensure: Updated memory Mt+1
+1: η ←GENERATE(Mt, st+1, at+1)
+2: for k = 1 to K do
+3:
+(α, ϕ) ←VERIFY(η, Ht+1)
+4:
+if α = ACCEPT then
+5:
+return η
+6:
+end if
+7:
+η ←REFINE(η, ϕ)
+8: end for
+9: return Mt
+Memory-Based Methods
+We compare three
+memory
+systems:
+Mem0
+(Chhikara
+et
+al.,
+2025) consolidates extracted facts; LangMem
+(LangChain AI, 2025) maintains structured user
+profiles; and A-MEM (Xu et al., 2026) organizes
+evolving atomic notes. Memories for these base-
+lines are constructed with GPT-OSS-20B.4
+PREFINE
+We further propose PREFINE, a test-
+time memory-based method that estimates the la-
+tent preference p with a revisable memory MT :
+MT = ψPREFINE(S, A).
+Algorithm 1 summarizes how PREFINE updates
+its preference memory. After each session st+1
+(t = 0, . . . , T −1), a generator proposes a prefer-
+ence hypothesis η from the previous memory Mt,
+the session st+1, and its executed tool calls at+1. A
+verifier evaluates η against the accumulated history
+Ht+1 = (S≤t+1, A≤t+1) for (1) evidence support,
+(2) abstraction quality, (3) actionability, and (4)
+temporal consistency.4 If accepted, the hypothesis
+is updated as Mt+1. Otherwise, the verifier returns
+feedback ϕ that is used to refine the candidate. A
+single PREFINE hypothesis can encode multiple
+preference constraints, as illustrated in Figure 10.
+This generate–verify–refine procedure follows
+prior self-refinement methods (Madaan et al., 2023;
+Shinn et al., 2023) in form, but differs in what the
+verifier scores against. Rather than a task outcome,
+the target is the accumulated behavioral record
+Ht+1, and a hypothesis survives only if it holds as
+a cross-session regularity. We allow up to K = 5
+refinement steps (ablation in §7.2).
+At inference, MT serves as ˆp in Equation 1. As
+with the other memory-based methods, we con-
+struct PREFINE memories using GPT-OSS-20B.5
+4Figure 7 traces the loop on a concrete example. Ap-
+pendix E provides the used rubrics and prompts.
+5Appendix D.2 reports results with memories constructed
+by Gemma-4-12B-IT and Qwen3-8B.
+5
+
+=== [page 6] ===
+Context-Guided Query (qcg)
+Context-Free Query (qcf )
+LLM + Method
+Recall
+Induction
+Transfer
+Avg.
+∆Avg.
+Recall
+Induction
+Transfer
+Avg.
+∆Avg.
+GPT-5
+66.94
+66.50
+42.85
+58.76
+–
+52.73
+48.14
+21.17
+40.68
+–
++ RAG
+64.86
+66.55
+63.40
+64.94
++6.17
+32.18
+39.25
+17.49
+29.64
+-11.04
++ Mem0
+64.24
+66.98
+62.98
+64.73
++5.97
+38.15
+45.47
+19.85
+34.49
+-6.19
++ LangMem
+67.89
+68.43
+62.04
+66.12
++7.36
+47.82
+50.72
+22.33
+40.29
+-0.39
++ A-MEM
+70.47
+68.11
+62.23
+66.94
++8.18
+61.42
+58.45
+19.58
+46.48
++5.80
++ PREFINE (Ours)
+84.04
+79.47
+67.99
+77.17
++18.40
+82.33
+76.19
+39.92
+66.15
++25.47
+Claude Haiku 4.5
+77.28
+71.04
+48.90
+65.74
+–
+65.47
+52.22
+14.15
+43.95
+–
++ RAG
+71.85
+64.69
+61.25
+65.93
++0.19
+37.59
+33.23
+13.24
+28.02
+-15.93
++ Mem0
+72.67
+66.41
+61.04
+66.71
++0.97
+49.80
+42.31
+13.34
+35.15
+-8.79
++ LangMem
+74.30
+70.13
+61.09
+68.51
++2.77
+52.43
+48.05
+13.81
+38.10
+-5.85
++ A-MEM
+75.86
+70.04
+60.95
+68.95
++3.21
+72.59
+63.63
+12.35
+49.52
++5.57
++ PREFINE (Ours)
+82.37
+79.00
+64.00
+75.12
++9.38
+79.76
+75.63
+29.79
+61.73
++17.78
+GPT-OSS-20B
+59.25
+57.31
+44.42
+53.66
+–
+44.00
+30.10
+14.27
+29.45
+–
++ RAG
+64.71
+60.03
+56.28
+60.34
++6.68
+31.98
+28.68
+13.20
+24.62
+-4.83
++ Mem0
+63.33
+60.57
+52.14
+58.68
++5.02
+39.35
+29.84
+12.52
+27.24
+-2.22
++ LangMem
+64.35
+62.09
+51.21
+59.22
++5.56
+42.45
+38.65
+11.46
+30.85
++1.40
++ A-MEM
+63.93
+58.91
+59.80
+60.88
++7.22
+60.62
+49.43
+8.51
+39.52
++10.07
++ PREFINE (Ours)
+77.22
+70.28
+62.38
+69.96
++16.30
+71.74
+59.91
+24.67
+52.11
++22.65
+Gemma4-12B
+67.86
+66.69
+57.80
+64.12
+–
+47.55
+34.16
+19.27
+33.66
+–
++ RAG
+67.59
+65.00
+61.17
+64.59
++0.47
+29.37
+26.83
+13.06
+23.09
+-10.57
++ Mem0
+67.72
+67.66
+61.96
+65.78
++1.66
+36.28
+32.87
+12.48
+27.21
+-6.45
++ LangMem
+69.64
+69.33
+60.15
+66.37
++2.26
+42.39
+39.59
+13.78
+31.92
+-1.74
++ A-MEM
+74.40
+69.28
+60.71
+68.13
++4.01
+66.05
+54.80
+11.70
+44.18
++10.52
++ PREFINE (Ours)
+81.36
+77.65
+66.11
+75.04
++10.92
+76.00
+70.55
+39.89
+62.14
++28.49
+Qwen3-8B
+52.94
+53.43
+39.40
+48.59
+–
+36.19
+31.21
+18.69
+28.70
+–
++ RAG
+54.73
+49.08
+42.77
+48.86
++0.27
+25.91
+24.05
+19.07
+23.01
+-5.69
++ Mem0
+55.33
+50.37
+43.38
+49.69
++1.10
+40.30
+36.09
+20.11
+32.17
++3.47
++ LangMem
+54.78
+50.62
+42.79
+49.40
++0.80
+37.64
+37.81
+21.17
+32.21
++3.51
++ A-MEM
+54.68
+51.61
+48.70
+51.66
++3.07
+59.26
+51.61
+14.97
+41.95
++13.25
++ PREFINE (Ours)
+77.68
+74.16
+59.81
+70.55
++21.96
+78.36
+76.17
+27.29
+60.61
++31.91
+FIVE-MODEL MACRO AVERAGE
+Full-History Prompting
+64.85
+63.00
+46.67
+58.17
+–
+49.19
+39.16
+17.51
+35.29
+–
+RAG
+64.75
+61.07
+56.98
+60.93
++2.76
+31.41
+30.41
+15.21
+25.67
+-9.61
+Mem0
+64.66
+62.40
+56.30
+61.12
++2.94
+40.78
+37.32
+15.66
+31.25
+-4.04
+LangMem
+66.19
+64.12
+55.46
+61.92
++3.75
+44.55
+42.96
+16.51
+34.67
+-0.61
+A-MEM
+67.87
+63.59
+58.48
+63.31
++5.14
+63.99
+55.58
+13.42
+44.33
++9.04
+PREFINE (Ours)
+80.53
+76.11
+64.06
+73.57
++15.39
+77.64
+71.69
+32.31
+60.55
++25.26
+Table 3: O-F1 scores for context-guided (qcg) and context-free (qcf) queries across five LLMs and methods. ∆Avg
+is relative to Full-History Prompting. Bold/underline denote best/second-best results within each model block.
+5.2
+Metrics
+Context-guided queries require both extracting ex-
+plicitly stated arguments and completing omitted
+preference-sensitive arguments. We report Explicit-
+F1 (EXP-F1) for the first subproblem and Implicit-
+F1 (IMP-F1) for the second. Overall-F1 (O-F1)
+evaluates the complete tool call over both. For
+context-free queries (qcf), with no explicitly stated
+arguments, O-F1 reduces to IMP-F1 (no EXP-F1).
+6
+Experimental Results
+6.1
+Overall Results
+Table 3 shows that PREFINE outperforms all base-
+lines on both query types, with O-F1 scores of
+73.57 (context-guided) and 60.55 (context-free).
+On qcf, RAG, Mem0, and LangMem underperform
+Full-History Prompting (35.29) in the five-model
+macro average, whereas A-MEM reaches 44.33.
+PREFINE’s further improvement to 60.55 suggests
+that preference-level abstraction offers benefits be-
+yond retrieval and memory organization.
+The largest distinction emerges on context-free
+Preference Transfer: PREFINE is the only method
+to outperform Full-History Prompting, while even
+A-MEM falls below it. This suggests that verified
+preference hypotheses are particularly valuable for
+cross-function generalization.
+6.2
+Results by Metric and Reasoning Type
+Figure 3(a) decomposes context-guided perfor-
+mance into explicit argument extraction (EXP-F1)
+and preference-driven completion (IMP-F1) across
+three reasoning types. While EXP-F1 remains rel-
+atively high, IMP-F1 drops sharply on Preference
+Transfer, indicating that completing preference-
+sensitive parameters is substantially harder than ex-
+tracting explicit ones. On Transfer, however, PRE-
+FINE preserves strong EXP-F1 (77.9) while lifting
+IMP-F1 to 30.4, leading baselines on IMP-F1.
+6
+
+=== [page 7] ===
+O-F1
+40
+70
+100
+Recall
+Induction
+Transfer
+0
+81.2
+81.2
+81.2
+75.5
+75.5
+75.5
+63.2
+63.2
+63.2
+64.9
+64.9
+64.9
+63.0
+63.0
+63.0
+46.7
+46.7
+46.7
+EXP-F1
+40
+70
+100
+Recall
+Induction
+Transfer
+0
+86.9
+86.9
+86.9
+76.9
+76.9
+76.9
+77.9
+77.9
+77.9
+81.3
+81.3
+81.3
+73.2
+73.2
+73.2
+59.5
+59.5
+59.5
+IMP-F1
+0
+50
+100
+Recall
+Induction
+Transfer
+74.4
+74.4
+74.4
+74.1
+74.1
+74.1
+30.4
+30.4
+30.4
+46.5
+46.5
+46.5
+51.0
+51.0
+51.0
+20.8
+20.8
+20.8
+Full-History
+Prompting
+RAG
+Mem0
+LangMem
+A-MEM
+PRefine
+(a) O-F1, EXP-F1, and IMP-F1 for context-guided queries qcg across three reasoning types.
+IMP-F1
+20
+60
+100
+Q1
+0.60
+Q2
+0.80
+Q3
+0.87
+Q4
+0.90
+Q5
+0.93
+Recall
+0
+88.5
+88.5
+88.5
+82.2
+82.2
+82.2
+74.9
+74.9
+74.9
+67.9
+67.9
+67.9
+70.2
+70.2
+70.2
+60.1
+60.1
+60.1
+53.4
+53.4
+53.4
+47.0
+47.0
+47.0
+38.7
+38.7
+38.7
+40.1
+40.1
+40.1
+IMP-F1
+20
+60
+100
+Q1
+0.53
+Q2
+0.76
+Q3
+0.83
+Q4
+0.88
+Q5
+0.92
+Induction
+0
+87.5
+87.5
+87.5
+78.1
+78.1
+78.1
+71.3
+71.3
+71.3
+65.9
+65.9
+65.9
+59.5
+59.5
+59.5
+54.0
+54.0
+54.0
+50.5
+50.5
+50.5
+41.2
+41.2
+41.2
+41.7
+41.7
+41.7
+38.1
+38.1
+38.1
+IMP-F1
+0
+50
+100
+Q1
+0.66
+Q2
+0.82
+Q3
+0.87
+Q4
+0.89
+Q5
+0.93
+Transfer
+41.7
+41.7
+41.7
+31.8
+31.8
+31.8
+24.6
+24.6
+24.6
+23.5
+23.5
+23.5
+17.9
+17.9
+17.9
+31.0
+31.0
+31.0
+22.7
+22.7
+22.7
+13.6
+13.6
+13.6
+15.4
+15.4
+15.4
+13.1
+13.1
+13.1
+(b) IMP-F1 across interference quintiles (Q1–Q5), within each reasoning type; numbers below each quintile are mean I.
+Figure 3: Diagnostic results by reasoning type and evidence interference.
+7
+Analysis
+7.1
+Evidence Interference
+Definition
+To test the robustness of PREFINE’s
+advantage to evidence composition, we define the
+Evidence Interference Score (I), a post-hoc diag-
+nostic index for ranking instances by difficulty.
+Given a preference p, we classify each observa-
+tion in H as supporting (R), competing (C), or
+unrelated (U): a supporting observation contains a
+parameter–argument pair mapped to p; a competing
+observation contains preference-relevant evidence
+that is inconsistent with, or offers an alternative
+to, p; and an unrelated observation contains no pa-
+rameter tied to p. Let R, C, and U denote their
+respective counts. We then define,
+I =
+βC + γU
+R + βC + γU .
+(2)
+Supporting observations serve as the unit-weight
+baseline, and we impose the qualitative ordering
+β > 1 > γ > 0. Competing evidence is weighted
+more heavily, as it presents an inconsistent or alter-
+native preference signal, while unrelated evidence
+receives a smaller nonzero value since it primar-
+ily increases the filtering burden. We use β = 4
+and γ = 0.25 as a reference parameterization (vali-
+dation and sensitivity analyses in Appendix D.3).
+A higher I indicates a greater weighted burden of
+potentially interfering evidence.
+IMP-F1
+0
+50
+100
+Recall
+42.7
+42.7
+42.7
+53.9
+53.9
+53.9
+68.6
+68.6
+68.6
+85.6
+85.6
+85.6
+Induction
+41.0
+41.0
+41.0
+49.2
+49.2
+49.2
+63.1
+63.1
+63.1
+82.3
+82.3
+82.3
+Transfer
+12.3
+12.3
+12.3
+23.9
+23.9
+23.9
+17.4
+17.4
+17.4
+35.9
+35.9
+35.9
+Full-History
+RAG
+Mem0
+LangMem
+A-MEM
+PRefine
+C > 0
+C = 0
+Figure 4: IMP-F1 with (C > 0) and without (C =
+0) competing evidence across Recall, Induction, and
+Transfer (§7.1).
+Results
+We rank instances by I and divide them
+into quintiles within each reasoning type, combin-
+ing both query settings; Q5 denotes the highest-
+interference subset. All methods perform worse at
+Q5 than at Q1, confirming that I reflects difficulty.
+PREFINE nevertheless achieves the highest IMP-
+F1 in all 15 reasoning-type × quintile cells (Fig-
+ure 3(b)), although its margin narrows on Transfer.
+A-MEM is the strongest memory baseline on high-
+interference Recall and Induction, but its advantage
+7
+
+=== [page 8] ===
+Method
+Generate
+Verify
+Refine
+Context-Guided Queries (qcg)
+Context-Free Queries (qcf )
+Overall
+Full-History Prompting
+–
+–
+–
+51.99
+29.66
+44.82
+Generator-only
+✓
+–
+–
+51.17
+21.51
+43.81
+Generator-Refiner
+✓
+–
+K=1
+50.53
+14.29
+42.34
+K=3
+49.90
+11.96
+41.46
+K=5
+50.37
+13.43
+42.09
+Generator–Verifier–Refiner
+✓
+✓
+K=1
+63.78
+55.70
+61.47
+K=3
+66.08
+57.34
+63.49
+K=5
+66.45
+57.94
+63.95
+K=10
+63.71
+57.05
+61.84
+Table 4: Ablation study of PREFINE (O-F1). Memories are constructed with GPT-OSS-20B, and results are averaged
+over GPT-OSS-20B, Qwen3-8B, and Gemma4-12B-It.
+Context-Guided
+Context-Free
+LLM + Method
+O-F1
+∆
+O-F1
+∆
+Qwen3-8B
+71.84
+–
+24.58
+–
++ RAG
+71.89
++0.05
+32.27
++7.69
++ Mem0
+72.24
++0.40
+26.64
++2.06
++ LangMem
+65.46
+-6.38
+40.97
++16.39
++ A-MEM
+75.62
++3.78
+35.69
++11.11
++ PREFINE (Ours)
+85.91
++14.07
+43.68
++19.10
+GPT-OSS-20B
+78.60
+–
+41.72
+–
++ RAG
+84.44
++5.84
+53.83
++12.11
++ Mem0
+83.14
++4.54
+52.51
++10.79
++ LangMem
+86.19
++7.59
+65.95
++24.23
++ A-MEM
+86.46
++7.86
+60.84
++19.12
++ PREFINE (Ours)
+89.75
++11.15
+66.67
++24.95
+Table 5: O-F1 on seven functions unseen during memory
+construction (Appendix D.6). ∆: difference from Full-
+History Prompting with the same LLM.
+does not carry over to Transfer.
+Focus on Competing Evidence
+Every method
+drops when competing evidence is present (C > 0;
+Figure 4). Under C > 0, A-MEM is the strongest
+memory baseline on Recall and Induction but falls
+below Full-History Prompting on Transfer (8.58 vs.
+12.29 IMP-F1), whereas PREFINE reaches 17.38.
+Thus, memory gains on Recall and Induction do
+not necessarily generalize to competing-evidence
+Transfer, whereas PREFINE provides gains when
+preference inference must also support an argument
+absent from the history.
+7.2
+Effectiveness and Efficiency of PREFINE
+Verification and Memory Quality
+Table 4 com-
+pares generation-only, unverified refinement, and
+full PREFINE across K. Generation alone fails to
+improve on Full-History Prompting, and unverified
+refinement lowers context-free O-F1 from 21.51 to
+13.43 at K = 5. Verifier-guided refinement instead
+reaches 57.94, demonstrating the contribution of
+verification beyond repeated refinement. Increasing
+the budget to K = 10 provides no further gain.
+Table 12 shows how the verifier revises unsup-
+ported or over-specific hypotheses into evidence-
+grounded, reusable preference constraints. To ana-
+lyze whether these abstractions retain preferences
+relevant to tool calling, we conduct a manual post
+hoc evaluation (Table 17). Final hypotheses capture
+at least one annotated preference in 82.8% of his-
+tories (380/459), indicating PREFINE’s hypotheses
+retain relevant preference information. Aligned his-
+tories achieve higher O-F1 than contradictory his-
+tories in both query settings (+10.78 points context-
+free; +3.47 context-guided), suggesting an associ-
+ation between preference fidelity and tool-calling
+accuracy. Appendix D.5 details both analyses.
+Token Efficiency
+Table 15 compares memory
+construction costs per session. Including the full
+generate–verify–refine loop, PREFINE uses 8,856
+tokens per session, 6.0% fewer than Mem0 and
+67.5% fewer than A-MEM. Although RAG and
+LangMem remain cheaper to construct, PREFINE
+achieves higher O-F1. At inference, its compact
+preference hypothesis adds only 26 memory tokens
+per instance versus 97–1,083 for the retrieval and
+memory baselines, with a nearly constant memory
+footprint across sessions (Appendix D.4).
+Generalization to Unseen Schemas
+PREFINE’s
+hypotheses express preferences as behavioral crite-
+ria that can be applied through the current API
+schema. To test whether these hypotheses sup-
+port argument selection in new APIs, we introduce
+seven functions unseen during memory construc-
+tion only at inference, keeping the original histories
+and memories unchanged. Table 5 shows that PRE-
+FINE achieves the highest context-guided/context-
+free O-F1. These results suggest that PREFINE cap-
+tures reusable preferences that apply to new APIs
+without rebuilding the memory (Appendix D.6).
+8
+Conclusion
+We propose MPT, a benchmark for multi-session
+personalized tool calling that evaluates latent pref-
+8
+
+=== [page 9] ===
+erence reasoning under varying evidence interfer-
+ence. We further propose PREFINE, a test-time
+memory method that maintains a verified latent
+preference hypothesis. Across five LLMs, PRE-
+FINE outperforms all baselines, with gains driven
+by verification. Its hypotheses also guide argument
+selection in unseen APIs without rebuilding mem-
+ory. These findings support verified preference ab-
+stractions as reusable memory for personalization.
+Limitations
+This work focuses on a controlled setting for eval-
+uating latent preference reasoning in personalized
+tool-calling. In particular, we study whether an
+agent can infer reusable preference constraints
+from interaction history and apply them to under-
+specified API parameters under a schema-bounded
+action space.
+A history may reflect several preferences, but
+each MPT query targets only one, which persists
+across sessions (C3) and keeps the gold argument
+unambiguous. Preferences that shift over time or
+combine within a query are a natural extension.
+The five preferences in Table 2 can be extended
+by adding realization mappings, and inferred pref-
+erences transfer to seven unseen functions (§7.2).
+PREFINE keeps its memory as free text, so a hy-
+pothesis can state several constraints, though select-
+ing among them per query is not evaluated. Finally,
+users are composed from existing corpora, since a
+latent preference must be known to be scored.
+Ethics Statement
+MPT is derived from three publicly released cor-
+pora. SGD is distributed under CC BY-SA 4.0 and
+DuRecDial 2.0 under CC BY-NC-SA 4.0. We re-
+lease the corresponding portions of MPT under
+terms compatible with each. HomeBench is re-
+leased publicly for research use without a license
+file, so for that source we distribute our annotations
+and augmented turns with a script that reconstructs
+the instances from the original release, rather than
+redistributing the underlying data. All three sources
+consist of synthetic or crowdsourced dialogues and
+contain no personally identifying information. The
+user identities in MPT are constructed and do not
+correspond to real individuals.
+The preference grouping was validated in a sur-
+vey of 19 participants recruited through an open
+call, who judged schema values from the publicly
+released corpora and participated voluntarily with-
+out compensation; no personal information was
+collected.
+Beyond the benchmark, inferring preferences
+a user never stated is a form of user profiling. A
+deployed system could apply such inferences in un-
+intended ways, for example to steer choices rather
+than to complete an underspecified request. PRE-
+FINE keeps its memory as a single natural-language
+hypothesis that a user can inspect and correct, and
+we recommend exposing it this way in deployment.
+References
+Emanuele Bastianelli, Andrea Vanzo, Pawel Swietojan-
+ski, and Verena Rieser. 2020. SLURP: A spoken lan-
+guage understanding resource package. In Proceed-
+ings of the 2020 Conference on Empirical Methods
+in Natural Language Processing (EMNLP), pages
+7252–7262, Online. Association for Computational
+Linguistics.
+Paweł Budzianowski, Tsung-Hsien Wen, Bo-Hsiang
+Tseng, Iñigo Casanueva, Stefan Ultes, Osman Ra-
+madan, and Milica Gaši´c. 2018. MultiWOZ - a large-
+scale multi-domain Wizard-of-Oz dataset for task-
+oriented dialogue modelling. In Proceedings of the
+2018 Conference on Empirical Methods in Natural
+Language Processing, pages 5016–5026, Brussels,
+Belgium. Association for Computational Linguistics.
+Bill Byrne, Karthik Krishnamoorthi, Chinnadhurai
+Sankar, Arvind Neelakantan, Ben Goodrich, Daniel
+Duckworth, Semih Yavuz, Amit Dubey, Kyu-Young
+Kim, and Andy Cedilnik. 2019. Taskmaster-1: To-
+ward a realistic and diverse dialog dataset. In Pro-
+ceedings of the 2019 Conference on Empirical Meth-
+ods in Natural Language Processing and the 9th In-
+ternational Joint Conference on Natural Language
+Processing (EMNLP-IJCNLP), pages 4516–4525,
+Hong Kong, China. Association for Computational
+Linguistics.
+Amartya Chakraborty, Paresh Dashore, Nadia Bathaee,
+Anmol Jain, Anirban Das, Shi-Xiong Zhang, Sam-
+bit Sahu, Milind Naphade, and Genta Indra
+Winata. 2025. T1: A tool-oriented conversational
+dataset for multi-turn agentic planning. Preprint,
+arXiv:2505.16986.
+Qibin Chen, Junyang Lin, Yichang Zhang, Ming Ding,
+Yukuo Cen, Hongxia Yang, and Jie Tang. 2019. To-
+wards knowledge-based recommender dialog system.
+In Proceedings of the 2019 Conference on Empirical
+Methods in Natural Language Processing and the
+9th International Joint Conference on Natural Lan-
+guage Processing (EMNLP-IJCNLP), pages 1803–
+1813, Hong Kong, China. Association for Computa-
+tional Linguistics.
+Prateek Chhikara, Dev Khant, Saket Aryan, Taranjeet
+Singh, and Deshraj Yadav. 2025. Mem0: Building
+9
+
+=== [page 10] ===
+production-ready ai agents with scalable long-term
+memory. arXiv preprint arXiv:2504.19413.
+Alice Coucke, Alaa Saade, Adrien Ball, Théodore
+Bluche, Alexandre Caulier, David Leroy, Clément
+Doumouro, Thibault Gisselbrecht, Francesco Calt-
+agirone, Thibaut Lavril, Maël Primet, and Joseph
+Dureau. 2018. Snips voice platform: an embedded
+spoken language understanding system for private-by-
+design voice interfaces. Preprint, arXiv:1805.10190.
+Layla El Asri, Hannes Schulz, Shikhar Sharma, Jeremie
+Zumer, Justin Harris, Emery Fine, Rahul Mehrotra,
+and Kaheer Suleman. 2017. Frames: a corpus for
+adding memory to goal-oriented dialogue systems.
+In Proceedings of the 18th Annual SIGdial Meeting
+on Discourse and Dialogue, pages 207–219, Saar-
+brücken, Germany. Association for Computational
+Linguistics.
+Mihail Eric, Lakshmi Krishnan, Francois Charette, and
+Christopher D. Manning. 2017. Key-value retrieval
+networks for task-oriented dialogue. In Proceedings
+of the 18th Annual SIGdial Meeting on Discourse
+and Dialogue, pages 37–49, Saarbrücken, Germany.
+Association for Computational Linguistics.
+Nicholas Farn and Richard Shin. 2023. ToolTalk: Evalu-
+ating tool-usage in a conversational setting. Preprint,
+arXiv:2311.10775.
+Joseph L. Fleiss. 1971. Measuring nominal scale agree-
+ment among many raters. Psychological Bulletin,
+76(5):378–382.
+Shirley Anugrah Hayati, Dongyeop Kang, Qingxi-
+aoyang Zhu, Weiyan Shi, and Zhou Yu. 2020. IN-
+SPIRED: Toward sociable recommendation dialog
+systems. In Proceedings of the 2020 Conference on
+Empirical Methods in Natural Language Processing
+(EMNLP), pages 8142–8152, Online. Association for
+Computational Linguistics.
+Zexue He, Yu Wang, Churan Zhi, Yuanzhe Hu, Tzu-
+Ping Chen, Lang Yin, Ze Chen, Tong Arthur Wu,
+Siru Ouyang, Zihan Wang, and 1 others. 2026. Mem-
+oryarena: Benchmarking agent memory in interde-
+pendent multi-session agentic tasks. arXiv preprint
+arXiv:2602.16313.
+Xu Huang, Yuefeng Huang, Weiwen Liu, Xingshan
+Zeng, Yasheng Wang, Ruiming Tang, Hong Xie,
+and Defu Lian. 2025. Advancing and benchmark-
+ing personalized tool invocation for llms. Preprint,
+arXiv:2505.04072.
+Meihuizi Jia, Ruixue Liu, Peiying Wang, Yang Song,
+Zexi Xi, Haobin Li, Xin Shen, Meng Chen, Jinhui
+Pang, and Xiaodong He. 2022. E-ConvRec: A large-
+scale conversational recommendation dataset for E-
+commerce customer service. In Proceedings of the
+Thirteenth Language Resources and Evaluation Con-
+ference, pages 5787–5796, Marseille, France. Euro-
+pean Language Resources Association.
+Bowen Jiang, Zhuoqun Hao, Young-Min Cho, Bryan
+Li, Yuan Yuan, Sihao Chen, Lyle Ungar, Camillo J.
+Taylor, and Dan Roth. 2025a. Know me, respond
+to me: Benchmarking llms for dynamic user profil-
+ing and personalized responses at scale. Preprint,
+arXiv:2504.14225.
+Bowen Jiang, Yuan Yuan, Maohao Shen, Zhuoqun Hao,
+Zhangchen Xu, Zichen Chen, Ziyi Liu, Anvesh Rao
+Vijjini, Jiashu He, Hanchao Yu, Radha Poovendran,
+Gregory Wornell, Lyle Ungar, Dan Roth, Sihao Chen,
+and Camillo Jose Taylor. 2025b. Personamem-v2:
+Towards personalized intelligence via learning im-
+plicit user personas and agentic memory. Preprint,
+arXiv:2512.06688.
+Tae Soo Kim, Yoonjoo Lee, Yoonah Park, Jiho Kim,
+Young-Ho Kim, and Juho Kim. 2025.
+Cupid:
+Evaluating personalized and contextualized align-
+ment of llms from interactions.
+arXiv preprint
+arXiv:2508.01674.
+Deuksin Kwon, Sunwoo Lee, Ki Hyun Kim, Seojin
+Lee, Taeyoon Kim, and Eric Davis. 2023. What,
+when, and how to ground: Designing user persona-
+aware conversational agents for engaging dialogue.
+In Proceedings of the 61st Annual Meeting of the
+Association for Computational Linguistics (Volume
+5: Industry Track), pages 707–719, Toronto, Canada.
+Association for Computational Linguistics.
+J. Richard Landis and Gary G. Koch. 1977. The mea-
+surement of observer agreement for categorical data.
+Biometrics, 33(1):159–174.
+LangChain AI. 2025.
+LangMem: Long-term mem-
+ory SDK for LLM agents. https://langchain-ai.
+github.io/langmem/. Accessed: 2025-11-20.
+Stefan Larson, Anish Mahendran, Joseph J. Peper,
+Christopher Clarke, Andrew Lee, Parker Hill,
+Jonathan K. Kummerfeld, Kevin Leach, Michael A.
+Laurenzano, Lingjia Tang, and Jason Mars. 2019. An
+evaluation dataset for intent classification and out-of-
+scope prediction. In Proceedings of the 2019 Confer-
+ence on Empirical Methods in Natural Language Pro-
+cessing and the 9th International Joint Conference
+on Natural Language Processing (EMNLP-IJCNLP),
+pages 1311–1316, Hong Kong, China. Association
+for Computational Linguistics.
+Shinbok Lee, Gaeun Seo, Daniel Lee, Byeongil
+Ko, Sunghee Jung, and Myeongcheol Shin. 2024.
+Functionchat-bench: Comprehensive evaluation of
+language models’ generative capabilities in korean
+tool-use dialogs. Preprint, arXiv:2411.14054.
+Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio
+Petroni, Vladimir Karpukhin, Naman Goyal, Hein-
+rich Küttler, Mike Lewis, Wen-tau Yih, Tim Rock-
+täschel, and 1 others. 2020. Retrieval-augmented gen-
+eration for knowledge-intensive nlp tasks. Advances
+in neural information processing systems, 33:9459–
+9474.
+10
+
+=== [page 11] ===
+Guanrong Li, Kuo Tian, Jinnan Qi, Qinghan Fu, Zhen
+Wu, and Xinyu Dai. 2025a. Harmonizing large lan-
+guage models with collaborative behavioral signals
+for conversational recommendation. arXiv preprint
+arXiv:2503.10703.
+Minghao Li, Yingxiu Zhao, Bowen Yu, Feifan Song,
+Hangyu Li, Haiyang Yu, Zhoujun Li, Fei Huang,
+and Yongbin Li. 2023. API-bank: A comprehensive
+benchmark for tool-augmented LLMs. In Proceed-
+ings of the 2023 Conference on Empirical Methods
+in Natural Language Processing, pages 3102–3116,
+Singapore. Association for Computational Linguis-
+tics.
+Raymond Li, Samira Ebrahimi Kahou, Hannes Schulz,
+Vincent Michalski, Laurent Charlin, and Chris Pal.
+2018. Towards deep conversational recommenda-
+tions. Advances in neural information processing
+systems, 31.
+Silin Li, Yuhang Guo, Jiashu Yao, Zeming Liu, and
+Haifeng Wang. 2025b.
+homebench: Evaluating
+LLMs in smart homes with valid and invalid instruc-
+tions across single and multiple devices. In Proceed-
+ings of the 63rd Annual Meeting of the Association
+for Computational Linguistics (Volume 1: Long Pa-
+pers), pages 12230–12250, Vienna, Austria. Associa-
+tion for Computational Linguistics.
+Jiaqi Liu, Yaofeng Su, Peng Xia, Yiyang Zhou, Si-
+wei Han, Zeyu Zheng, Cihang Xie, Mingyu Ding,
+and Huaxiu Yao. 2025.
+Simplemem: Efficient
+lifelong memory for llm agents.
+arXiv preprint
+arXiv:2601.02553.
+Qianchu Liu, Diana McCarthy, and Anna Korhonen.
+2020. Towards better context-aware lexical seman-
+tics:adjusting contextualized representations through
+static anchors. In Proceedings of the 2020 Confer-
+ence on Empirical Methods in Natural Language
+Processing (EMNLP), pages 4066–4075, Online. As-
+sociation for Computational Linguistics.
+Zeming Liu, Haifeng Wang, Zheng-Yu Niu, Hua Wu,
+and Wanxiang Che. 2021. DuRecDial 2.0: A bilin-
+gual parallel corpus for conversational recommen-
+dation. In Proceedings of the 2021 Conference on
+Empirical Methods in Natural Language Processing,
+pages 4335–4347, Online and Punta Cana, Domini-
+can Republic. Association for Computational Lin-
+guistics.
+Kai Luo, Scott Sanner, Ga Wu, Hanze Li, and Hojin
+Yang. 2020. Latent linear critiquing for conversa-
+tional recommender systems. In Proceedings of The
+Web Conference 2020, WWW ’20, page 2535–2541,
+New York, NY, USA. Association for Computing
+Machinery.
+Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler
+Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon,
+Nouha Dziri, Shrimai Prabhumoye, Yiming Yang,
+Shashank Gupta, Bodhisattwa Prasad Majumder,
+Katherine Hermann, Sean Welleck, Amir Yazdan-
+bakhsh, and Peter Clark. 2023. Self-refine: Iterative
+refinement with self-feedback. In Advances in Neu-
+ral Information Processing Systems, volume 36.
+Shuhaib Mehri, Priyanka Kargupta, Tal August, and
+Dilek Hakkani-Tür. 2026.
+Learning user prefer-
+ences through interaction for long-term collaboration.
+arXiv preprint arXiv:2601.02702.
+Nikita Moghe, Patrick Xia, Jacob Andreas, Jason Eis-
+ner, Benjamin Van Durme, and Harsh Jhamtani. 2024.
+Interpreting user requests in the context of natural
+language standing instructions. In Findings of the
+Association for Computational Linguistics: NAACL
+2024, pages 4043–4060, Mexico City, Mexico. Asso-
+ciation for Computational Linguistics.
+Seungwhan Moon, Pararth Shah, Anuj Kumar, and Ra-
+jen Subba. 2019. OpenDialKG: Explainable conver-
+sational reasoning with attention-based walks over
+knowledge graphs. In Proceedings of the 57th An-
+nual Meeting of the Association for Computational
+Linguistics, pages 845–854, Florence, Italy. Associa-
+tion for Computational Linguistics.
+Charles Packer, Sarah Wooders, Kevin Lin, Vivian Fang,
+Shishir G. Patil, Ion Stoica, and Joseph E. Gonzalez.
+2024. Memgpt: Towards llms as operating systems.
+Preprint, arXiv:2310.08560.
+Joon Sung Park, Joseph C. O’Brien, Carrie J. Cai,
+Meredith Ringel Morris, Percy Liang, and Michael S.
+Bernstein. 2023.
+Generative agents: Interac-
+tive simulacra of human behavior.
+Preprint,
+arXiv:2304.03442.
+Shishir G. Patil, Huanzhi Mao, Charlie Cheng-Jie Ji,
+Fanjia Yan, Vishnu Suresh, Ion Stoica, and Joseph
+E. Gonzalez. 2025. The berkeley function calling
+leaderboard (bfcl): From tool use to agentic eval-
+uation of large language models. In Forty-second
+International Conference on Machine Learning.
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan
+Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang,
+Bill Qian, Sihan Zhao, Lauren Hong, Runchu Tian,
+Ruobing Xie, Jie Zhou, Mark Gerstein, Dahai Li,
+Zhiyuan Liu, and Maosong Sun. 2024. ToolLLM:
+Facilitating large language models to master 16000+
+real-world APIs. In The Twelfth International Con-
+ference on Learning Representations.
+Jun Quan, Shian Zhang, Qian Cao, Zizhong Li, and
+Deyi Xiong. 2020. RiSAWOZ: A large-scale multi-
+domain Wizard-of-Oz dataset with rich semantic an-
+notations for task-oriented dialogue modeling. In
+Proceedings of the 2020 Conference on Empirical
+Methods in Natural Language Processing (EMNLP),
+pages 930–940, Online. Association for Computa-
+tional Linguistics.
+Abhinav Rastogi, Xiaoxue Zang, Srinivas Sunkara,
+Raghav Gupta, and Pranav Khaitan. 2020.
+To-
+wards scalable multi-domain conversational agents:
+The schema-guided dialogue dataset.
+Preprint,
+arXiv:1909.05855.
+11
+
+=== [page 12] ===
+Pascal J Sager, Benjamin Meyer, Peng Yan, Rebekka
+von Wartburg-Kottler, Layan Etaiwi, Aref Enay-
+ati, Gabriel Nobel, Ahmed Abdulkadir, Benjamin F
+Grewe, and Thilo Stadelmann. 2026. A comprehen-
+sive survey of agents for computer use: Foundations,
+challenges, and future directions. Journal of Artifi-
+cial Intelligence Research, 85.
+Jeonghoon Shim, Gyuhyeon Seo, Cheongsu Lim, and
+Yohan Jo. 2025. Tooldial: Multi-turn dialogue gen-
+eration method for tool-augmented language models.
+Preprint, arXiv:2503.00564.
+Noah Shinn, Federico Cassano, Edward Berman, Ash-
+win Gopinath, Karthik Narasimhan, and Shunyu Yao.
+2023. Reflexion: Language agents with verbal rein-
+forcement learning. Preprint, arXiv:2303.11366.
+Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Man-
+dlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan, and
+Anima Anandkumar. 2023.
+Voyager: An open-
+ended embodied agent with large language models.
+Preprint, arXiv:2305.16291.
+Jize Wang, Zerun Ma, Yining Li, Songyang Zhang, Cail-
+ian Chen, Kai Chen, and Xinyi Le. 2024. GTA: A
+benchmark for general tool agents. In Advances in
+Neural Information Processing Systems, volume 37.
+Zhenting Wang, Huancheng Chen, Jiayun Wang, and
+Wei Wei. 2026. Memex (rl): Scaling long-horizon
+llm agents via indexed experience memory. arXiv
+preprint arXiv:2603.04257.
+Tianxin Wei, Noveen Sachdeva, Benjamin Coleman,
+Zhankui He, Yuanchen Bei, Xuying Ning, Mengting
+Ai, Yunzhe Li, Jingrui He, Ed H. Chi, Chi Wang,
+Shuo Chen, Fernando Pereira, Wang-Cheng Kang,
+and Derek Zhiyuan Cheng. 2025.
+Evo-memory:
+Benchmarking llm agent test-time learning with self-
+evolving memory. Preprint, arXiv:2511.20857.
+Qiancheng Xu, Yongqi Li, Heming Xia, Fan Liu, Min
+Yang, and Wenjie Li. 2025. PEToolLLM: Towards
+personalized tool learning in large language models.
+In Findings of the Association for Computational
+Linguistics: ACL 2025, pages 21488–21503, Vienna,
+Austria. Association for Computational Linguistics.
+Renjun Xu and Jingwen Peng. 2025. A comprehensive
+survey of deep research: Systems, methodologies,
+and applications. arXiv preprint arXiv:2506.12594.
+Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao
+Tan, and Yongfeng Zhang. 2026. A-mem: Agentic
+memory for llm agents. Advances in Neural Informa-
+tion Processing Systems, 38:17577–17604.
+Shunyu Yao, Noah Shinn, Pedram Razavi, and
+Karthik R Narasimhan. 2025. {$\tau$}-bench: A
+benchmark for \underline{T}ool-\underline{A}gent-
+\underline{U}ser interaction in real-world domains.
+In The Thirteenth International Conference on Learn-
+ing Representations.
+Zhehao Zhang, Ryan A. Rossi, Branislav Kveton, Yi-
+jia Shao, Diyi Yang, Hamed Zamani, Franck Der-
+noncourt, Joe Barrow, Tong Yu, Sungchul Kim,
+Ruiyi Zhang, Jiuxiang Gu, Tyler Derr, Hongjie Chen,
+Junda Wu, Xiang Chen, Zichao Wang, Subrata Mitra,
+Nedim Lipka, and 2 others. 2025. Personalization of
+large language models: A survey. Transactions on
+Machine Learning Research. Survey Certification.
+Siyan Zhao, Mingyi Hong, Yang Liu, Devamanyu Haz-
+arika, and Kaixiang Lin. 2025. Do LLMs recognize
+your preferences? evaluating personalized preference
+following in LLMs. In The Thirteenth International
+Conference on Learning Representations.
+Kun Zhou, Wayne Xin Zhao, Shuqing Bian, Yuanhang
+Zhou, Ji-Rong Wen, and Jingsong Yu. 2020a. Im-
+proving conversational recommender systems via
+knowledge graph based semantic fusion.
+In Pro-
+ceedings of the 26th ACM SIGKDD international
+conference on knowledge discovery & data mining,
+pages 1006–1014.
+Kun Zhou, Yuanhang Zhou, Wayne Xin Zhao, Xiaoke
+Wang, and Ji-Rong Wen. 2020b.
+Towards topic-
+guided conversational recommender system.
+In
+Proceedings of the 28th International Conference
+on Computational Linguistics, pages 4128–4139,
+Barcelona, Spain (Online). International Committee
+on Computational Linguistics.
+Zijian Zhou, Ao Qu, Zhaoxuan Wu, Sunghwan Kim,
+Alok Prakash, Daniela Rus, Jinhua Zhao, Bryan
+Kian Hsiang Low, and Paul Pu Liang. 2025.
+Mem1: Learning to synergize memory and reason-
+ing for efficient long-horizon agents.
+Preprint,
+arXiv:2506.15841.
+Qi Zhu, Kaili Huang, Zheng Zhang, Xiaoyan Zhu, and
+Minlie Huang. 2020. CrossWOZ: A large-scale Chi-
+nese cross-domain task-oriented dialogue dataset.
+Transactions of the Association for Computational
+Linguistics, 8:281–295.
+12
+
+=== [page 13] ===
+Appendix
+A
+Benchmark Construction
+A.1
+Examples of MPT Instances
+Figure 5 illustrates the three preference modeling
+types introduced in §4.4, using a concrete example
+of a flight query from London to Paris.
+Table 6 shows examples of context-guided and
+context-free queries for two API functions. Both
+settings target the same preference-sensitive argu-
+ment, but context-guided queries add in-session
+dialogue that partially specifies other arguments.
+Figure 6 illustrates how multi-session preference
+evidence is represented and aggregated in an MPT
+instance. It shows the structured representation
+used in the dataset, where evidence is aggregated
+per preference with explicit counts and argument
+provenance, capturing latent, cross-session prefer-
+ence signals in a machine-readable form.
+A.2
+Per-Source Preprocessing
+We describe the preprocessing applied to each of
+the three adopted corpora; the selection procedure
+is deferred to Appendix B.1.
+SGD
+SGD is used relabel-only: dialogues and
+argument values are unchanged, and each dialogue
+enters our pipeline as a single session. Per-session
+calls are accumulated by merging partial argument
+states into executed calls; when merging yields
+conflicting values for the same argument, the un-
+supported values are quarantined into a drop list,
+keeping gold values unique. We keep the original
+schema definitions and apply schema normaliza-
+tion following prior work (Moghe et al., 2024),
+enabling coherent multi-session histories while re-
+maining compatible with the tool schemas. See Ap-
+pendix A.7 for the full schema. How SGD sessions
+are grouped into synthetic users, and how users
+from all three sources are composed into histories,
+is described in Appendix A.4.
+DuRecDial
+2.0
+Histories
+are
+excerpted
+from the original dialogues rather than tem-
+plated. Speaker roles, absent from the release,
+are
+restored
+deterministically
+from
+greet-
+ing
+conventions
+and
+turn
+parity.
+The
+four
+recommendation
+goal
+types
+and
+weather
+lookups are mapped to API calls (GetMovies,
+GetMusic,
+GetFood,
+GetRestaurants,
+GetWeather), reusing SGD argument names
+where
+they
+already
+exist
+(cast→starring;
+title→movie_name/song_name). Because the
+benchmark requires preferences to be latent (§3),
+we discard 469 dialogues in which an utterance
+causally states the preference or leaks a rejection,
+and 2 personas whose accept-then-reject behavior
+is inconsistent; deferrals (“another time”) are
+replaced with acceptance, and explicit rejections
+keep the exchange but contribute no call, pre-
+serving negative evidence. In re-recommendation
+chains, non-final same-function calls are kept or
+dropped according to the user’s recorded reaction
+(e.g., “I’ve watched it” drops the call; an accepted
+replay keeps it; 388 calls dropped). This yields 705
+single-celebrity personas whose preference rests
+only on accepted items’ argument values.
+HomeBench
+The eco setting is native to one ap-
+pliance, the water heater’s mode="eco", and is stan-
+dard across appliance categories, so we admit it in
+two sibling functions. HomeBench instructions are
+themselves synthesized over a hand-specified de-
+vice schema (Li et al., 2025b); our added turns are
+of the same provenance and introduce no different
+kind of text. What is inferred from them, the user’s
+standing preference, is never stated in either the
+original or the added turns.
+A.3
+Preference Realization
+The mapping in Table 2 distinguishes low_cost
+from high_cost, omitting an intermediate tier
+because the intermediate signals in SGD (e.g.,
+price_range=“moderate”) are too sparse and am-
+biguous to serve as reliable preference evidence.
+We retain solo_usage but exclude its counter-
+part group_usage: as noted in our human study
+(Appendix B.2), parties of size 2 are ambigu-
+ous between couple and group travel, making
+group_usage an unreliable preference signal. Be-
+cause each preference is defined at the level of a
+behavioral constraint rather than a specific parame-
+ter name, the mapping generalizes to APIs beyond
+SGD: any new function exposing cost- or party-
+size-related arguments realizes the same preference
+without redefinition, as verified in Appendix D.6.
+A.4
+History Composition
+Histories are composed from the preprocessed ses-
+sions of the three sources in two stages. Session
+grouping differs by source: DuRecDial 2.0 identi-
+fies the seeker across dialogues, so each seeker’s di-
+alogues form one user’s sessions, and HomeBench
+13
+
+=== [page 14] ===
+Figure 5: Illustration of the three reasoning types in MPT. Given the same query, a user booking a flight from
+London to Paris, the unspecified argument flight_class requires a different route to the gold value depending on
+the interaction history: Recall reuses a value the history repeats, Induction corroborates a single occurrence against
+the same preference expressed in other functions, and Transfer applies a preference inferred from other functions to
+an argument the history never instantiates.
+Function (target)
+Context-Guided Query (qcg)
+Context-Free Query (qcf )
+GetFlights (flight_class)
+U: Book a flight for my trip.
+A: Where from and to?
+U: London to Paris.
+U: Book a flight for my trip.
+GetRestaurants (price_range)
+U: Find a restaurant for tonight.
+A: Any cuisine preference?
+U: Korean, please.
+U: Find a restaurant for tonight.
+Table 6: Examples of context-guided and context-free queries in MPT. The argument in parentheses is the one left
+unspecified and to be inferred from the interaction history. Both settings share that argument, but context-guided
+queries provide additional in-session dialogue context that partially specifies other arguments. U = User, A = Agent.
+Category
+Measure
+Count
+Interaction
+History
+# Multi-session dialogues
+459
+# Multi-preference histories
+164
+# Sessions
+6,961
+# Turns
+95,523
+Avg. sessions / dialogue
+15.2
+Avg. turns / session
+13.7
+Instances
+# Preference Recall
+1,375
+# Preference Induction
+1,944
+# Preference Transfer
+1,376
+Total
+4,695
+from multi-preference histories
+2,432
+Query type
+Context-guided
+2,308
+Context-free
+2,387
+Table 7: Statistics of MPT, including dialogue scale and
+preference signals. A multi-preference history supports
+two or more distinct preferences.
+keeps each persona’s parsed instructions together,
+whereas SGD provides no user identifier and its
+sessions are grouped by the procedure below. Ses-
+sions from groups outside the target’s pool serve
+as competing or unrelated evidence for that target
+(§4.2 (iii)), and a history may combine supporting
+groups for several preferences, subject to the con-
+straint that the resulting history spans at least two
+functions.
+In the first stage, we form for each preference
+a pool of user groups whose preference-relevant
+arguments consistently realize that preference, and
+draw the supporting sessions of a history from a
+single pool; the persona-level filters behind each
+pool are given in Appendix A.2. In the second
+stage, for a preference with an opposing side, we
+merge in the sessions of a group drawn from the
+opposing pool, so that the history carries evidence
+for both and the agent must decide which one the
+user holds. For low_cost the opposing preference
+is high_cost and vice versa; for prefers_star it is
+a second celebrity identity. Merging follows strict
+plurality: the target side must carry strictly more
+supporting observations than the opposing side,
+and combinations in which the two sides tie are
+discarded. This yields 46 contested groups from
+SGD and 115 from DuRecDial 2.0. eco admits no
+such construction, since it registers a single value
+(eco_mode="on") and no opposing value exists in
+the schema; for solo_usage, the candidate counter-
+14
+
+=== [page 15] ===
+low_cost
+high_cost
+prefers_star
+eco
+solo_usage
+Other
+Total
+Recall
+48
+5
+463
+261
+67
+531
+1,375
+Induction
+442
+64
+1,016
+242
+130
+50
+1,944
+Transfer
+590
+44
+372
+160
+143
+67
+1,376
+Total
+1,080
+113
+1,851
+663
+340
+648
+4,695
+Table 8: Instance composition by reasoning type and the preference the target argument expresses. low_cost and
+high_cost are realized through overlapping arguments (car_type, average_star), so an instance is assigned by
+its gold value rather than by the argument alone. Other covers targets that express none of the five preferences,
+including cost-related arguments whose gold falls between the two poles.
+{
+"example_id": "...",
+"api_calls_pref": [
+{
+"value_group": "low_cost",
+"count": 3,
+"evidence": [
+{"domain": "GetFlights", "slot": "flight_class",
+"values": [{"value": "Economy", "count": 1}]},
+{"domain": "GetHotels", "slot": "average_star",
+"values": [{"value": "1", "count": 1}]},
+{"domain": "GetRentalCars", "slot": "car_type",
+"values": [{"value": "Compact", "count": 1}]}
+]
+},
+{
+"value_group": "prefers_star",
+"count": 2,
+"evidence": [
+{"domain": "GetMusic", "slot": "artist",
+"values": [{"value": "Jay Chou", "count": 2}]}
+]
+}
+]
+}
+Figure 6: Example of multi-session preference aggre-
+gation in MPT, taken from a released instance whose
+history supports two preferences. The low_cost pref-
+erence leaves evidence on different arguments across
+three functions, while prefers_star recurs on a single ar-
+gument; keys retain the implementation names domain
+and slot for function and parameter, and session dia-
+logues and per-value provenance metadata are omitted
+for brevity.
+part group_usage is excluded from the benchmark
+for the reason given in Appendix B.2.
+Groups that realize none of the preferences a his-
+tory targets are also admitted, as distractors, drawn
+only from users whose preference, if any, is a dif-
+ferent one. Distractor sessions may still touch ar-
+guments of the target preference incidentally; such
+observations are a property of the source dialogues
+rather than injected noise, and they surface as inter-
+ference (§7.1). What we verify exhaustively over
+the composed set is that no preference other than
+the intended one is supported by repeated observa-
+tions on both sides. Within a history, each group’s
+internal session order is preserved and groups are
+interleaved uniformly at random; each contested
+history is released in two arrangements, one placing
+the minority side’s sessions before the majority’s,
+and one shuffle verified not to reproduce it.
+A.5
+Gold-Standard Annotation
+Fixing the Gold Argument
+How the gold value
+is fixed follows the reasoning type. For Recall, the
+target argument itself carries a value that recurs
+in the accumulated calls, and that recurring value
+is the gold. For Induction and Transfer, the gold
+is the value that the mapping in Appendix A.3 as-
+signs to the target argument, given the preference
+the history’s cross-function evidence establishes.
+In Transfer the target argument carries no value
+anywhere in the history, so the mapping is the only
+route to a gold value.
+Because queries and histories are drawn from
+separate pools and combined afterwards, a query
+may target an argument whose preference the
+paired history never establishes. The gold then
+leaves that argument unspecified: with no behav-
+ioral evidence to generalize from, abstaining is the
+correct response and filling it is penalized. These
+instances are counted under Other in Table 8.
+Uniqueness of the Gold
+The procedure above
+returns exactly one gold for every instance. For
+Recall, arguments in which two different values
+both recur are excluded from querying, so no in-
+stance admits two candidate golds. For Induction
+and Transfer, each history supports exactly one
+preference from each opposing pair: in contested
+histories both sides recur, but strict plurality (§4.2)
+leaves one side with strictly more supporting ob-
+servations and discards ties, so the mapping still
+returns a single value for any target argument that
+preference can fill. Observations that set such an
+argument to a competing value are not removed;
+they remain in the history and are accounted for by
+the interference score (§7.1) rather than by chang-
+ing the gold, so difficulty varies without the answer
+becoming ambiguous. Instances whose gold omits
+the argument are likewise unambiguous: the paired
+15
+
+=== [page 16] ===
+Function
+Argument
+Type
+GetBanks
+recipient_account_type
+string
+GetBuses
+departure_date
+string
+departure_time
+string
+destination
+string
+group_size
+string
+origin
+string
+GetEvents
+category
+string
+city
+string
+date
+string
+event_name
+string
+event_type
+string
+number_of_tickets
+string
+GetFlights
+airlines
+string
+departure_date
+string
+destination
+string
+flight_class
+string
+origin
+string
+passengers
+string
+return_date
+string
+GetHomes
+area
+string
+number_of_baths
+string
+number_of_beds
+string
+pets_allowed
+boolean
+property_name
+string
+visit_date
+string
+GetHotels
+average_star
+string
+check_in_date
+string
+has_wifi
+boolean
+hotel_name
+string
+location
+string
+number_of_days
+string
+number_of_rooms
+string
+GetMedia
+genre
+string
+Function
+Argument
+Type
+GetMusic†
+artist
+string
+playback_device
+string
+song_name
+string
+GetRentalCars
+car_type
+string
+dropoff_date
+string
+pickup_city
+string
+pickup_date
+string
+pickup_location
+string
+pickup_time
+string
+GetRestaurants†
+category
+string
+date
+string
+number_of_seats
+string
+price_range
+string
+restaurant_name
+string
+time
+string
+GetRideSharing
+destination
+string
+number_of_seats
+string
+shared_ride
+boolean
+GetTravel
+category
+string
+free_entry
+boolean
+good_for_kids
+boolean
+location
+string
+GetWeather†
+city
+string
+date
+string
+GetMovies†
+genre
+string
+movie_name
+string
+starring
+string
+GetFood‡
+food_name
+string
+Function
+Argument
+Type
+HomeBench-derived Functions
+GetAirConditioner
+eco_mode
+string
+fan_speed
+string
+mode
+string
+temperature
+string
+GetHeating
+eco_mode
+string
+fan_speed
+string
+mode
+string
+temperature
+string
+GetWaterHeater
+eco_mode
+string
+mode
+string
+temperature
+string
+GetAirPurifiers
+fan_speed
+string
+mode
+string
+GetAromatherapy
+intensity
+string
+interval
+string
+GetCurtain
+degree
+string
+GetDehumidifiers
+intensity
+string
+mode
+string
+GetFan
+speed
+string
+swing
+string
+GetHumidifier
+intensity
+string
+mode
+string
+GetLight
+brightness
+string
+GetMediaPlayer
+volume
+string
+GetBlinds, GetGarageDoor,
+GetTrash
+—
+—
+Table 9: Full API schema for MPT, covering all functions, arguments, and value types. †Functions populated by
+both SGD and DuRecDial 2.0 sessions under a shared schema; ‡GetFood appears only in DuRecDial 2.0 sessions.
+All HomeBench-derived functions (bottom-right block) additionally take the common arguments action and
+area (string), which specify the operation and the room and are omitted from each row for brevity; GetBlinds,
+GetGarageDoor, and GetTrash take only these two.
+history establishes no preference that the argument
+could express, so no value is admissible.
+A.6
+Dataset Statistics and Instance
+Composition
+Table 7 summarizes the scale of MPT across two di-
+mensions: interaction history and reasoning types.
+Each multi-session dialogue interleaves sessions
+drawn from up to three source corpora into a single
+interaction history, with an average of 15.2 sessions
+per dialogue and 13.7 turns per session. This scale
+reflects the practical challenge of long-horizon pref-
+erence modeling: with over 95k turns across 459
+dialogues, the benchmark requires models to ag-
+gregate evidence over much longer contexts than
+typical single-session tool-calling benchmarks. His-
+tories also vary in how many preferences they sup-
+port: 164 (35.7%) support two to four distinct pref-
+erences, as in Figure 6, and yield 2,432 instances
+(51.8%); competing values of the same preference,
+such as two celebrities for prefers_star, are not
+counted as distinct.
+Table 8 breaks the 4,695 instances down by rea-
+soning type and by the preference the target ar-
+gument expresses. Every preference supports all
+three reasoning types, and Transfer is not carried
+by a single one: its largest share targets low_cost
+arguments (590), followed by prefers_star (372).
+Recall additionally targets recurring idiosyncratic
+arguments that express none of the five preferences
+(e.g., airlines, temperature), for which the re-
+curring value itself is the gold (Appendix A.5).
+A.7
+Full API Schema
+Table 9 lists all API functions, arguments, and types
+used in MPT. Preference-relevant arguments, those
+listed in Table 2, are a strict subset of these schema
+parameters.
+B
+Design Validation
+B.1
+Excluded Corpora
+Of the 23 dialogue corpora we reviewed, three
+were adopted (§4.1); Table 10 reports the full audit
+behind that selection. All judgments were made
+against the released data files rather than paper de-
+scriptions: for each candidate we downloaded the
+distributed release, enumerated its record schema,
+and computed the cited statistics directly from the
+data. Criteria are checked in the order listed, and
+16
+
+=== [page 17] ===
+L1: Source structure
+L2: Preference
+L3: Practical
+Dataset
+L1a: Sessions
+(S)
+L1b: Calls w/ args
+(A≤T )
+C1
+C2
+C3
+English
+License
+Decision
+TOD
+SGD (Rastogi et al., 2020)
+✓
+✓
+✓
+✓
+✓
+✓
+CC BY-SA 4.0
+Adopted
+MultiWOZ (Budzianowski et al., 2018)
+✓
+△
+△
+✓
+✓
+✓
+MIT
+Subsumed by SGD
+Taskmaster (Byrne et al., 2019)
+△
+△
+✗
+–
+–
+✓
+CC BY 4.0
+L1b; C1
+CrossWOZ (Zhu et al., 2020)
+–
+–
+–
+–
+–
+✗
+–
+Language
+RiSAWOZ (Quan et al., 2020)
+–
+–
+–
+–
+–
+✗
+–
+Language
+KVRET (Eric et al., 2017)
+✓
+△
+✗
+–
+✗
+✓
+None declared
+C3
+Frames (El Asri et al., 2017)
+△
+✓
+✗
+–
+✗
+✓
+△
+C1
+CRS
+DuRecDial (Liu et al., 2020)
+–
+–
+–
+–
+–
+✗
+–
+Superseded by 2.0
+DuRecDial 2.0 (Liu et al., 2021)
+✓
+✓
+✓
+✓
+✓
+✓
+CC BY-NC-SA
+Adopted
+TG-ReDial (Zhou et al., 2020b)
+✓
+✗
+✗
+–
+–
+✗
+–
+Language
+E-ConvRec (Jia et al., 2022)
+–
+–
+–
+–
+–
+✗
+–
+Language
+ReDial (Li et al., 2018)
+✓
+✗
+✗
+✗
+–
+✓
+CC BY 4.0
+L1b; C1
+INSPIRED (Hayati et al., 2020)
+△
+✗
+✗
+–
+–
+✓
+None declared
+C1
+OpenDialKG (Moon et al., 2019)
+✗
+✗
+△
+–
+–
+✓
+CC BY-NC 4.0
+L1a; L1b
+Tool
+Use
+ToolBench (Qin et al., 2024)
+✗
+✓
+–
+–
+–
+✓
+Apache-2.0
+L1a
+API-Bank (Li et al., 2023)
+✓
+✓
+✗
+–
+✗
+✓
+Apache-2.0
+C1
+BFCL (Patil et al., 2025)
+✗
+△
+–
+–
+–
+✓
+Apache-2.0
+L1a
+ToolTalk (Farn and Shin, 2023)
+△
+✓
+–
+–
+–
+✓
+MIT
+L1a
+τ-bench (Yao et al., 2025)
+✗
+△
+–
+–
+✗
+✓
+MIT
+L1a; C3
+SLU
+SNIPS (Coucke et al., 2018)
+✓
+△
+✗
+✗
+–
+✓
+CC0 1.0
+C1
+SLURP (Bastianelli et al., 2020)
+✓
+△
+✗
+–
+–
+✓
+CC BY 4.0
+C1
+CLINC150 (Larson et al., 2019)
+✗
+✗
+–
+–
+–
+✓
+CC BY 3.0
+L1b
+HomeBench (Li et al., 2025b)
+✓
+✓
+✓
+✓
+✓
+✓
+None declared
+Adopted
+Table 10: Source-selection audit of the 23 candidate corpora (✓pass, ✗fail, △partial, – not assessed once an earlier
+criterion fails). C1–C3 are the preference conditions of §3. The final column records the outcome: for a corpus
+rejected on the criteria, the first one it fails; otherwise the reason for exclusion.
+once a corpus fails one, the remaining criteria are
+not assessed. A partial mark indicates a criterion
+that is satisfiable at additional preprocessing cost
+and is not by itself disqualifying. Release terms
+are recorded for reference rather than used as a
+screening criterion. Per-user sessions may be ob-
+tained through either of two routes: grouping real
+interactions by a user identifier (verifying that the
+identifier is global rather than dialogue-local), or
+composing source units, dialogues or single com-
+mands, into synthetic histories, which presupposes
+a consistent schema and argument values recorded
+within the units. For the preference conditions we
+enumerate the complete argument inventory, clas-
+sify each argument as what- or how-type (§3), and
+test whether any single preference has how-type
+surfaces in two or more functions (C1) whose val-
+ues vary across users (C2). MultiWOZ comes clos-
+est, failing no requirement outright, and is excluded
+as strictly dominated by SGD: its functions are a
+subset of SGD’s, and its single cross-function pref-
+erence (price_range) is already covered.
+B.2
+Human Validation of Preference
+Realization
+To validate that our preference realization reflects
+broadly shared behavioral intuitions, we conducted
+a human annotation study with 19 annotators.
+Setup
+Annotators were presented with argu-
+ment values drawn from the API schemas in
+MPT, and asked to classify each value into
+one of three categories: low_cost, high_cost,
+or Neither for the cost pair, and solo_usage,
+group_usage, or Neither for the party-size pair.
+For example, given price_range=“Cheap” in
+GetRestaurants
+and
+free_entry=True
+in
+GetTravel, annotators judged whether each
+value realizes low_cost. The study covered 27
+argument values across 12 functions for the cost
+pair, and the counts 1 to 4 for the party-size pair.
+The study targets these two pairs because each
+is realized through heterogeneous arguments
+(price_range, free_entry, car_type for the
+former;
+passengers,
+number_of_tickets,
+number_of_seats
+for
+the
+latter),
+whereas
+prefers_star and eco follow from the argument
+value itself and admit no comparable judgment.
+Results
+Annotators agreed with our realization
+in 89.7% of cases for the cost pair and 97.4% for
+the party-size pair. Inter-annotator agreement, mea-
+sured by Fleiss’ κ (Fleiss, 1971), was κ = 0.701
+(substantial) for cost and κ = 0.880 (almost per-
+fect) for party size, following the interpretation
+scale of Landis and Koch (1977). All 19 anno-
+tators confirmed that the names solo_usage and
+group_usage clearly represent the intended mean-
+17
+
+=== [page 18] ===
+ing, while 16 of 19 (84%) confirmed the same for
+low_cost and high_cost.
+Discussion
+The slightly lower agreement on
+the cost pair (κ
+=
+0.701 vs. 0.880) likely
+reflects the broader semantic range of cost-
+related signals: whereas party size is unambigu-
+ous, cost-conscious behavior is realized through
+heterogeneous argument types, price_range,
+average_star, free_entry, car_type, and oth-
+ers, leaving more room for individual interpreta-
+tion. Nevertheless, substantial agreement on both
+pairs confirms that our preferences are not arbi-
+trary schema choices, but reflect intuitions broadly
+shared across annotators, supporting their use as a
+task-grounded evaluation scaffold.
+Several annotators noted that parties of 2 may
+reflect couple travel rather than group travel,
+suggesting ambiguity in the boundary between
+solo_usage and group_usage. Given this concern,
+we conservatively retain only solo_usage, exclud-
+ing group_usage from the benchmark to avoid in-
+troducing ambiguous preference evidence.
+C
+Experimental Details
+C.1
+Experimental Settings
+Table 11 summarizes the LLMs used throughout
+our experiments, along with their version or re-
+lease information. All models are evaluated on
+the same fixed set of query–history pairs with-
+out stochastic sampling or reranking. Metrics are
+computed at the query level and aggregated via
+macro-averaging across queries of the same type.
+Full-History Prompting requires no memory con-
+struction: the model receives the entire interaction
+history, and its template is given in Appendix E.
+Model
+Identifier (Reasoning Effort)
+GPT-5
+gpt-5-2025-08-07 (high)
+Claude-4.5-Haiku
+claude-haiku-4-5-20251001 (enabled)
+GPT-OSS-20B
+openai/gpt-oss-20b (high)
+Gemma4-12b-it
+google/gemma-4-12B-it (high)
+Qwen3-8B
+Qwen/Qwen3-8B (enabled)
+Table 11: Model identifiers and reasoning-effort settings
+used in our experiments.
+C.2
+RAG
+We implement an utterance-level RAG baseline:
+(i) embed every utterance in the full dialogue his-
+tory with OpenAI text-embedding-3-small and
+index them with user_id, (ii) at test time, embed
+the current query and retrieve the top-5 utterances
+by cosine similarity, (iii) append the retrieved utter-
+ances to the prompt for inference.
+C.3
+Mem0
+We use Mem0 (Chhikara et al., 2025) as an off-
+the-shelf long-term memory system for our agents.
+Mem0 maintains a persistent, user-scoped mem-
+ory store and exposes simple APIs for writing and
+retrieving memories.
+(i) Mem0 converts the interaction history into
+compact memory snippets using its memory writer
+(GPT-OSS-20B), (ii) at test time, Mem0 retrieves a
+small set of relevant memory snippets conditioned
+on the current query, (iii) we append the retrieved
+snippets to the prompt for tool-calling inference.
+Concretely,
+we
+integrate
+Mem0
+via
+its
+cloud REST API and official Python client
+(MemoryClient): we use add to log user–assistant
+dialog turns as memories keyed by user_id,
+and search to retrieve the top-5 semantically
+relevant memories for a given query, which are
+then appended to the prompt at inference time.
+C.4
+LangMem
+We use LangMem (LangChain AI, 2025) as an
+agentic memory SDK: (i) its memory writer
+(GPT-OSS-20B) generates semantic, episodic, and
+procedural memory snippets and maintains a struc-
+tured user profile, extracting and updating user in-
+formation and preferences across sessions; (ii) we
+embed the memory contents and current query with
+OpenAI text-embedding-3-small and retrieve
+the top-5 memory snippets by cosine similarity;
+(iii) we append the retrieved contents to the prompt
+for tool-calling inference.
+C.5
+A-MEM
+We use A-MEM (Xu et al., 2026) as an agentic long-
+term memory system: A-MEM (i) converts each
+user–assistant interaction into a structured note con-
+taining the original content, keywords, tags, and a
+contextual description; (ii) links semantically re-
+lated notes and selectively updates existing note
+metadata as new notes are added; and (iii) retrieves
+the top-5 notes by cosine similarity and appends
+them to the prompt for tool-calling inference.
+Concretely, we adapt the official A-MEM im-
+plementation with a separate memory store for
+each user_id. Each user–assistant turn is stored
+as an atomic memory note, with GPT-OSS-20B han-
+dling note construction, link generation, and mem-
+ory evolution. We embed each note using OpenAI
+18
+
+=== [page 19] ===
+Session
+at
+Step
+Hypothesis (Generate, Refine) / Verdict (Verify)
+s1
+a1: GetMovies(average_rating = 6);
+Generate
+User prefers moderately rated movies.
+Verify
+[REJECT] Over-specific and unsupported abstraction.
+Refine
+User prefers accessible movie content.
+Verify
+[REJECT] Insufficient evidence for future decisions.
+Refine
+User accepts modest options rather than top-tier ones.
+Verify
+[PASS] Abstract and observation-supported.
+s2
+a2: GetWeather(city = San Francisco);
+Generate
+User prefers movies while engaging with other domains.
+Verify
+[REJECT] Failed to account for weather-domain interaction.
+Refine
+User prioritizes movies but engages across domains.
+Verify
+[PASS] Cross-domain flexibility ensured.
+s3
+a3: GetRentalCars(car_type = Compact),
+Generate
+User prefers economical and simple options across domains.
+GetRestaurants(price_range = Cheap);
+Verify
+[PASS] Consistent cross-domain behavioral signal.
+s4
+a4: GetHotels(average_star = 1);
+Generate
+User prefers budget-friendly and simple interactions.
+Verify
+[PASS] Stable and memory-worthy preference.
+M4
+Budget-conscious and simple interaction style.
+[Inference Example] q: “I’d like to book a flight.” →a∗: GetFlights(flight_class = Economy)
+Table 12: Example of preference modeling with PREFINE. Within a session, the verifier rejects hypotheses that
+are over-specific or inconsistent with the accumulated record, and the refiner revises them; across sessions, the
+hypothesis is rewritten as new evidence arrives, and the finally accepted one serves as the memory M4 that fills an
+argument the history never instantiates.
+s
+💬"Find cheap restaurants"
+a
+🍽️GetRestaurants(…, price_range="cheap" )
+s
+💬"Find free attractions"
+a
+🧳GetTravel(…, free_entry="True" )
+···
+s
+💬"Rent a compact car"
+a
+🚗GetRentalCars(…, car_type="Compact" )
+PREFINE
+ℋ = all sessions ≤ 7 · generate–verify–refine, up to K=5 rounds
+PREFERENCE-AWARE TOOL CALL
+M + q (= s ) → a
+M
+💭
+Prefers budget-friendly options
++
+s
+💬"Book a flight for my trip." → ⋯ →"London to Paris."
+=
+a
+✈️
+GetFlights(origin="London", destination="Paris", flight_class="Economy" )
+preference-inferred arg via M , not from q alone
+1
+1
+2
+2
+7
+7
+7
+1 η
+Prefers compact cars
+Generate(M , s , a ) → η
+6
+7
+7
+(0)
+↳
+3 η
+Prefers budget-friendly options
+Refine(η
+, φ)
+(0)
+(1)
+⋮
+2
+✗ Reject η
+φ: over-specific
+4
+✓ Accept η
+Supported across s –s
+Verify(η, ℋ) → (α, φ)
+7
+(0)
+(1)
+1
+7
+MEMORY
+M
+Regularly explores local spots
+M
+Prefers budget-friendly options
+2
+7
+7
+8
+*
+7
+8
+*
+7
+Figure 7: The generate-verify-refine loop of PREFINE on the running example of Figure 1.
+text-embedding-3-small and append the top-5
+notes most similar to the current query to the model
+prompt at inference time.
+C.6
+PREFINE
+We implement PREFINE as a test-time memory
+method that maintains a single textual preference
+hypothesis rather than a store of retrievable entries:
+(i) after each session, a generator proposes a can-
+didate hypothesis from the previous memory, the
+session, and its executed tool calls; (ii) a verifier
+judges the candidate against the accumulated his-
+tory under the four criteria of §5.1, and a refiner
+revises it under the returned feedback for up to
+K = 5 rounds; (iii) at test time, the accepted hy-
+pothesis is appended to the prompt and inference
+is run for tool calling.
+Concretely, the generator, verifier, and refiner
+are three prompted roles served by the same mem-
+ory constructor LLM, with templates given in Ap-
+pendix E. Two implementation choices distinguish
+PREFINE from the baselines above. First, memory
+is updated once per session rather than once per
+user–assistant turn, so the verifier always scores
+a candidate against the accumulated record Ht+1
+rather than an isolated exchange. Second, the mem-
+ory holds a single hypothesis that is overwritten
+on each accepted update, so neither an embedding
+model nor a top-k retrieval step is involved; the
+entire memory is placed in the inference prompt,
+which is otherwise identical to the one shared by
+the retrieval- and memory-based methods.
+Figure 7 traces the generate-verify-refine loop of
+Algorithm 1 on the running example of Figure 1.
+At session s7, the generator proposes prefers com-
+pact cars from the memory M6 and the executed
+call a7. The verifier rejects it not because the re-
+sulting tool call fails, but because the hypothesis
+rests on a single session and restates an argument
+value rather than abstracting over it. The refined
+candidate, prefers budget-friendly options, is ac-
+cepted once it is found consistent with the calls
+19
+
+=== [page 20] ===
+executed across s1 to s7. This is where the verifi-
+cation signal in PREFINE differs from prior self-
+refinement methods (Madaan et al., 2023; Shinn
+et al., 2023), which score a candidate against task
+outcomes. Here the candidate is scored against the
+accumulated behavioral record Ht+1, so what sur-
+vives is a cross-session regularity rather than a
+locally successful edit. The memory also revises
+rather than accumulates: M2 holds regularly ex-
+plores local spots, which later evidence overwrites
+instead of appending to. At inference, M7 sup-
+plies flight_class=“Economy” for GetFlights,
+a function the history never instantiates. Table 12
+gives a longer trace over four sessions.
+D
+Evaluation Details
+D.1
+Full Result Table
+Table 13 presents the complete results underlying
+the summary reported in Table 3. It decomposes
+performance by query setting, reasoning type, and
+evaluation metric, and reports each retrieval- and
+memory-augmented method with its corresponding
+inference LLM. For PREFINE, the table addition-
+ally enumerates all combinations of three memory
+constructors and five inference LLMs.
+D.2
+Memory Constructor Sensitivity
+We examine whether the comparison depends on
+the memory constructor by fixing the inference
+model to Gemma4-12B and constructing memories
+for Mem0, LangMem, A-MEM, and PREFINE with
+either Qwen3-8B or Gemma4-12B. Table 14 shows
+that PREFINE achieves the highest scores in both
+query settings and overall under both constructors.
+Its overall F1 reaches 71.26 with Qwen3-8B and
+71.41 with Gemma4-12B, exceeding the strongest
+baseline, A-MEM, by 12.20 and 12.81 points, re-
+spectively. These results show that its advantage is
+preserved across the two tested constructors under
+a shared inference model.
+D.3
+Weight Design and Sensitivity of
+Evidence Interference
+Post-hoc Empirical Concordance.
+The order-
+ing β > 1 > γ > 0 constrains the intended rela-
+tion among evidence types but does not uniquely
+identify the reference weights adopted in §7.1. We
+therefore examine whether their qualitative order-
+ing and approximate scale are consistent with ob-
+served performance, using the descriptive regres-
+sions in Figure 8. This analysis is conducted only
+under Full-History Prompting; it is not fitted to
+PREFINE or any memory method, so the stratifica-
+tion in §7.1 concern methods held out from it.
+We report each regression coefficient on a 0.1-
+share scale. Thus, ¯bx denotes the fitted percentage-
+point difference in IMP-F1 associated with an abso-
+lute 0.1 increase in the share of component x. For
+example, ¯bC = −22.996: raising the competing-
+evidence share from 0.2 to 0.3 is associated with a
+fitted 22.996-point drop in IMP-F1.
+For each component, we first average the two
+query-setting-specific coefficients within each rea-
+soning type, producing the three thin lines in Fig-
+ure 8. The thick line is their macro average and pro-
+vides a summary coefficient for comparison with
+the reference weights.
+The resulting reference coefficients are
+¯bR = +5.884,¯bC = −22.996,¯bU = −1.443.
+Supporting evidence is positively associated with
+performance, whereas competing and unrelated ev-
+idence are negatively associated with performance.
+Normalizing the absolute magnitudes by |¯bR| gives
+|¯bC|
+|¯bR| : |¯bU|
+|¯bR| = 3.908 : 0.245,
+which is close to the reference parameterization
+β = 4, γ = 0.25 and likewise gives a ratio of
+about 16:1. Because the evidence shares are com-
+positional and modeled through separate univariate
+regressions, these coefficients capture descriptive
+associations within the observed compositions. We
+therefore read this agreement as post-hoc concor-
+dance, not as a derivation of the reference weights.
+Ranking Sensitivity.
+Our analysis uses I to rank
+instances within each reasoning type and partition
+them into quintiles. A common positive rescaling
+of (β, γ) changes the numerical values of I but
+not the induced ordering, making β/γ the relevant
+sensitivity parameter.
+Using 16:1 as the reference ratio, we recompute
+the ordering under varying ratios and compare each
+ordering with the reference using within-cell Spear-
+man correlations (Table 16).
+The ordering remains highly stable from 8:1 to
+32:1: the mean correlation is at least .967 and the
+minimum across cells is at least .952. It changes
+more substantially at extreme ratios, where compet-
+ing and unrelated evidence are weighted too simi-
+larly (2:1) or unrelated evidence is nearly ignored
+20
+
+=== [page 21] ===
+Context-Guided Query
+Context-Free Query
+Method
+Memory LLM
+Inference LLM
+Recall
+Induction
+Transfer
+Avg.
+∆Avg.
+Recall
+Induction
+Transfer
+Avg.
+∆Avg.
+FULL-HISTORY PROMPTING
+Full-History
+–
+GPT-5
+66.94
+66.50
+42.85
+58.76
+–
+52.73
+48.14
+21.17
+40.68
+–
+Claude Haiku 4.5
+77.28
+71.04
+48.90
+65.74
+–
+65.47
+52.22
+14.15
+43.95
+–
+Qwen3-8B
+52.94
+53.43
+39.40
+48.59
+–
+36.19
+31.21
+18.69
+28.70
+–
+GPT-OSS-20B
+59.25
+57.31
+44.42
+53.66
+–
+44.00
+30.10
+14.27
+29.45
+–
+Gemma4-12B
+67.86
+66.69
+57.80
+64.12
+–
+47.55
+34.16
+19.27
+33.66
+–
+RETRIEVAL- AND MEMORY-BASED METHODS
+RAG
+–
+GPT-5
+64.86
+66.55
+63.40
+64.94
++6.17
+32.18
+39.25
+17.49
+29.64
+-11.04
+Claude Haiku 4.5
+71.85
+64.69
+61.25
+65.93
++0.19
+37.59
+33.23
+13.24
+28.02
+-15.93
+Qwen3-8B
+54.73
+49.08
+42.77
+48.86
++0.27
+25.91
+24.05
+19.07
+23.01
+-5.69
+GPT-OSS-20B
+64.71
+60.03
+56.28
+60.34
++6.68
+31.98
+28.68
+13.20
+24.62
+-4.83
+Gemma4-12B
+67.59
+65.00
+61.17
+64.59
++0.47
+29.37
+26.83
+13.06
+23.09
+-10.57
+Mem0
+GPT-OSS-20B
+GPT-5
+64.24
+66.98
+62.98
+64.73
++5.97
+38.15
+45.47
+19.85
+34.49
+-6.19
+Claude Haiku 4.5
+72.67
+66.41
+61.04
+66.71
++0.97
+49.80
+42.31
+13.34
+35.15
+-8.79
+Qwen3-8B
+55.33
+50.37
+43.38
+49.69
++1.10
+40.30
+36.09
+20.11
+32.17
++3.47
+GPT-OSS-20B
+63.33
+60.57
+52.14
+58.68
++5.02
+39.35
+29.84
+12.52
+27.24
+-2.22
+Gemma4-12B
+67.72
+67.66
+61.96
+65.78
++1.66
+36.28
+32.87
+12.48
+27.21
+-6.45
+LangMEM
+GPT-OSS-20B
+GPT-5
+67.89
+68.43
+62.04
+66.12
++7.36
+47.82
+50.72
+22.33
+40.29
+-0.39
+Claude Haiku 4.5
+74.30
+70.13
+61.09
+68.51
++2.77
+52.43
+48.05
+13.81
+38.10
+-5.85
+Qwen3-8B
+54.78
+50.62
+42.79
+49.40
++0.80
+37.64
+37.81
+21.17
+32.21
++3.51
+GPT-OSS-20B
+64.35
+62.09
+51.21
+59.22
++5.56
+42.45
+38.65
+11.46
+30.85
++1.40
+Gemma4-12B
+69.64
+69.33
+60.15
+66.37
++2.26
+42.39
+39.59
+13.78
+31.92
+-1.74
+A-MEM
+GPT-OSS-20B
+GPT-5
+70.47
+68.11
+62.23
+66.94
++8.18
+61.42
+58.45
+19.58
+46.48
++5.80
+Claude Haiku 4.5
+75.86
+70.04
+60.95
+68.95
++3.21
+72.59
+63.63
+12.35
+49.52
++5.57
+Qwen3-8B
+54.68
+51.61
+48.70
+51.66
++3.07
+59.26
+51.61
+14.97
+41.95
++13.25
+GPT-OSS-20B
+63.93
+58.91
+59.80
+60.88
++7.22
+60.62
+49.43
+8.51
+39.52
++10.07
+Gemma4-12B
+74.40
+69.28
+60.71
+68.13
++4.01
+66.05
+54.80
+11.70
+44.18
++10.52
+PREFINE: Memory constructor × inference model
+PREFINE
+Qwen3-8B
+GPT-5
+85.07
+78.47
+67.54
+77.03
++18.27
+87.72
+75.85
+35.30
+66.29
++25.61
+Claude Haiku 4.5
+83.45
+77.94
+61.94
+74.44
++8.70
+81.29
+72.70
+18.22
+57.40
++13.45
+Qwen3-8B
+75.33
+69.66
+60.36
+68.45
++19.86
+77.94
+72.69
+15.90
+55.51
++26.81
+GPT-OSS-20B
+77.80
+70.00
+62.21
+70.00
++16.34
+75.66
+62.46
+18.66
+52.26
++22.81
+Gemma4-12B
+82.37
+77.39
+64.70
+74.82
++10.70
+80.49
+70.60
+34.79
+61.96
++28.30
+Gemma4-12B
+GPT-5
+86.61
+79.93
+66.41
+77.65
++18.89
+89.73
+76.86
+32.13
+66.24
++25.56
+Claude Haiku 4.5
+83.29
+78.24
+62.15
+74.56
++8.82
+82.79
+74.40
+12.07
+56.42
++12.47
+Qwen3-8B
+77.31
+71.89
+56.30
+68.50
++19.91
+83.09
+74.58
+11.31
+56.33
++27.63
+GPT-OSS-20B
+79.13
+69.34
+61.23
+69.90
++16.24
+78.34
+64.01
+11.74
+51.36
++21.91
+Gemma4-12B
+84.50
+78.70
+65.16
+76.12
++12.00
+83.55
+72.76
+31.72
+62.68
++29.02
+GPT-OSS-20B
+GPT-5
+84.04
+79.47
+67.99
+77.17
++18.40
+82.33
+76.19
+39.92
+66.15
++25.47
+Claude Haiku 4.5
+82.37
+79.00
+64.00
+75.12
++9.38
+79.76
+75.63
+29.79
+61.73
++17.78
+Qwen3-8B
+77.68
+74.16
+59.81
+70.55
++21.96
+78.36
+76.17
+27.29
+60.61
++31.91
+GPT-OSS-20B
+77.22
+70.28
+62.38
+69.96
++16.30
+71.74
+59.91
+24.67
+52.11
++22.65
+Gemma4-12B
+81.36
+77.65
+66.11
+75.04
++10.92
+76.00
+70.55
+39.89
+62.14
++28.49
+MACRO AVERAGE: Equal-weight mean over all reported configurations per method
+Full-History
+64.85
+63.00
+46.67
+58.17
+–
+49.19
+39.16
+17.51
+35.29
+–
+RAG
+64.75
+61.07
+56.98
+60.93
++2.76
+31.41
+30.41
+15.21
+25.67
+-9.61
+Mem0
+64.66
+62.40
+56.30
+61.12
++2.94
+40.78
+37.32
+15.66
+31.25
+-4.04
+LangMEM
+66.19
+64.12
+55.46
+61.92
++3.75
+44.55
+42.96
+16.51
+34.67
+-0.61
+A-MEM
+67.87
+63.59
+58.48
+63.31
++5.14
+63.99
+55.58
+13.42
+44.33
++9.04
+PREFINE
+81.17
+75.47
+63.22
+73.29
++15.12
+80.59
+71.69
+25.56
+59.28
++23.99
+Table 13: Performance comparison between Full-History Prompting, memory-augmented baselines, and PREFINE
+under context-guided and context-free query settings. PREFINE reports all combinations of three memory con-
+structors and five inference LLMs. Bold indicates the best performance, and underline indicates the second-best
+performance. Shaded cells indicate performance changes relative to the corresponding Full-History Prompting
+LLM: green denotes gains and red denotes losses. Shading intensity reflects the magnitude of change (|∆| < 5:
+light, 5 ≤|∆| < 10: moderate, 10 ≤|∆| < 20: strong, and |∆| ≥20: very strong).
+relative to competing evidence (128:1). Thus, the
+quintile-based stratification is locally stable around
+the reference ratio, although the analysis does not
+establish that 16:1 is universally optimal. Recom-
+puting Figure 3(b) at ratios of 2:1, 16:1, and 128:1
+leaves PREFINE first in all 15 reasoning-type ×
+quintile panels under each setting, although the
+exact ordering among baselines is not invariant.
+Non-monotonic Quintiles.
+On Recall, IMP-F1
+rises slightly from Q4 to Q5 for several methods
+in Figure 3(b). The bootstrap confidence interval
+of this difference includes zero, and reweighting
+21
+
+=== [page 22] ===
+ΔIMP-F1 (pp)
+0
++5
++10
+0
++0.10
+Support (R)
++6.12
++6.12
++6.12
++3.45
++3.45
++3.45
++8.08
++8.08
++8.08
++5.88
++5.88
++5.88
+0
+-20
+-40
+0
++0.10
+Competing (C)
+−34.73
+−34.73
+−34.73
+−11.41
+−11.41
+−11.41
+−22.85
+−22.85
+−22.85
+−23.00
+−23.00
+−23.00
+0
+-1
+-2
+0
++0.10
+Unrelated (U)
+−1.92
+−1.92
+−1.92
+−0.48
+−0.48
+−0.48
+−1.92
+−1.92
+−1.92
+−1.44
+−1.44
+−1.44
+Recall
+Induction
+Transfer
+Macro mean
+Figure 8: Univariate regression slopes under Full-History Prompting (macro-averaged over the five inference
+models), used to assess empirical concordance with the reference weights. Thin lines are the three reasoning types
+(each averaged over the two query settings); the thick line is their macro mean. Lines are re-centered at zero, so the
+endpoint at +0.1 is the fitted IMP-F1 change (pp) for a 0.1 increase in the share of supporting (R), competing (C),
+or unrelated (U) evidence; y-ranges are panel-specific.
+10
+100
+1,000
+Memory tokens per test instance (log)
+A-MEM
+1,082.6
+1,082.6
+1,082.6
+LangMem
+259.5
+259.5
+259.5
+Mem0
+121.5
+121.5
+121.5
+RAG
+96.9
+96.9
+96.9
+PRefine
+26.4
+26.4
+26.4
+(a) Average memory tokens per test instance.
+Managed memory tokens (log)
+10
+100
+1,000
+10,000
+1
+5
+10
+15
+20
+25
+31
+Accumulated sessions
+7,885.0
+7,885.0
+7,885.0
+3,598.5
+3,598.5
+3,598.5
+5,061.0
+5,061.0
+5,061.0
+29,274.3
+29,274.3
+29,274.3
+24.0
+24.0
+24.0
+A-MEM
+RAG
+LangMem
+Mem0
+PRefine
+(b) Managed memory tokens over accumulated sessions.
+Figure 9: Test-time memory footprint of memory-augmented methods. PREFINE keeps both the smallest inference
+context and a nearly constant memory size across sessions.
+Method
+qcg
+qcf
+Overall
+RAG (no constructor)
+64.49
+23.76
+52.28
+Constructor: Qwen3-8B
+Mem0
+65.41
+28.24
+54.17
+LangMem
+65.89
+30.64
+55.24
+A-MEM
+67.21
+41.31
+59.06
+PREFINE
+74.41
+63.51
+71.26
+Constructor: Gemma4-12B
+Mem0
+66.74
+30.32
+55.61
+LangMem
+67.00
+34.14
+57.10
+A-MEM
+67.04
+40.00
+58.60
+PREFINE
+74.91
+62.99
+71.41
+Table
+14:
+Memory
+constructor
+sensitivity,
+with
+Gemma4-12B fixed as the inference model. Scores are
+O-F1. Bold/underline denote best/second-best within
+each constructor block.
+instances by target parameter removes or reverses
+it. We therefore do not read the rise as an effect of
+interference.
+D.4
+Memory Footprint
+Figure 9(a) reports the average memory context ap-
+pended per test instance, while Figure 9(b) tracks
+the total managed memory as interaction sessions
+accumulate. Table 15 reports token consumption
+LLM Input /
+Embedding /
+Output /
+Total /
+Method
+Session
+Session
+Session
+Session
+RAG
+0.00
+237.04
+0.00
+237.04
+Mem0
+8,382.97
+520.57
+520.57
+9,424.11
+LangMem
+2,088.63
+343.94
+343.70
+2,776.27
+A-MEM
+16,354.19
+1,212.50
+9,709.97
+27,276.66
+PREFINE
+8,814.03
+0.00
+41.54
+8,855.57
+Table 15: Token consumption for memory construction,
+averaged over all 6,961 sessions. PREFINE uses the
+generate–verify–refine loop with K = 5.
+for memory construction, averaged over all 6,961
+sessions. PREFINE uses an average of only 26.36
+memory tokens per test instance, compared with
+96.88 for RAG, 121.46 for Mem0, 259.54 for
+LangMem, and 1,082.58 for A-MEM. Moreover,
+the memory stores of the baselines grow continu-
+ously with additional sessions, whereas PREFINE
+remains near two dozen tokens throughout the in-
+teraction history. This bounded footprint follows
+from revising a compact preference-level hypoth-
+esis rather than accumulating session-level utter-
+ances or memory notes, allowing PREFINE to reuse
+long-term preferences without continually expand-
+22
+
+=== [page 23] ===
+Figure 10: Interface used for manual hypothesis alignment evaluation, displaying the final hypothesis alongside
+annotated target preferences and corresponding tool-call evidence. The example also illustrates how a single
+PREFINE hypothesis jointly encodes multiple preference constraints.
+β:γ
+2:1
+4:1
+8:1
+16:1
+32:1 64:1 128:1
+Mean ρ
+.895 .932 .976 1.000 .967 .886
+.829
+Minimum ρ .823 .883 .959 1.000 .952 .791
+.682
+Table 16: Sensitivity of the instance ordering to β:γ.
+Spearman’s ρ is computed against the reference 16:1
+ordering within each reasoning type; the table reports
+the mean and minimum across cells. ρ measures ranking
+stability rather than the predictive validity of the score.
+ing its inference context.
+D.5
+Analysis of PREFINE Memories
+Verifier-Guided Refinement
+Figure 11 shows
+that initial acceptance rises from 39% to approx-
+imately 74% but then plateaus, while final accep-
+tance increases from 84% to 95% as more sessions
+accumulate. Thus, even with additional evidence,
+roughly one quarter of initial hypotheses still re-
+quire verification. Table 12 shows how the verifier
+filters weakly supported or over-specific hypothe-
+ses and revises them into reusable preference con-
+straints. A manual analysis of 10% of rejected at-
+tempts (n = 575; Figure 12) finds that insufficient
+evidence and over-specificity account for 64.4% of
+rejections. By addressing these dominant failures,
+the verifier produces more reliable and reusable
+hypotheses than unverified refinement.
+Hypothesis Alignment Evaluation
+We manu-
+ally assess the final accepted hypothesis for each of
+the 459 histories against its annotated target prefer-
+ence and definition. A hypothesis is labeled aligned
+if it semantically captures the target preference,
+allowing equivalent formulations (e.g., “prefers
+budget-friendly options” for low_cost), and con-
+tradictory if it expresses an incompatible prefer-
+ence. For histories that support multiple prefer-
+ences, a hypothesis is labeled aligned if it captures
+at least one of them. In the example of Figure 10,
+a single hypothesis covers both preferences the
+history supports, low-cost option and a favored
+celebrity. Figure 10 shows the interface used for
+this manual evaluation. It presents the final hypoth-
+esis alongside the annotated target preferences and
+their corresponding tool-call evidence for semantic
+comparison.
+Table 17 reports the history-level alignment dis-
+tribution and downstream performance in both
+query settings. We group evaluation instances by
+the alignment label of their source history and com-
+pute O-F1 separately for each inference model
+within each group and query setting. Aligned his-
+tories achieve higher mean O-F1 in both settings,
+with a larger gap on context-free queries, where
+current-session context is omitted.
+D.6
+Extension of API Schema
+Evaluation Setup
+To test whether a memory
+carries over to functions it was never built from,
+we introduce seven functions that appear in no
+MPT history:
+GetCampground,
+GetCityTour,
+GetCookingClass,
+GetFitnessClass,
+23
+
+=== [page 24] ===
+Alignment
+Histories (%)
+Context-free
+Context-guided
+N/model
+O-F1 (mean ± SD)
+N/model
+O-F1 (mean ± SD)
+Aligned
+380 (82.8)
+2,096
+62.92 ± 5.61
+2,021
+73.70 ± 4.07
+Contradictory
+79 (17.2)
+291
+52.14 ± 5.89
+287
+70.23 ± 3.47
+Total
+459 (100.0)
+2,387
+—
+2,308
+—
+∆
+—
+—
++10.78
+—
++3.47
+Table 17: History-level hypothesis alignment and downstream tool-calling performance. N denotes the number of
+evaluation instances per inference model. O-F1 is reported as mean ± SD across inference models; bold indicates
+the higher group mean. ∆denotes the difference in group means (Aligned minus Contradictory), in percentage
+points.
+Verifier acceptance (%)
+20
+60
+100
+1–3
+4–6
+7–10
+11–15
+16–20
+21+
+Construction session index
+Initial
+Initial
+Initial
+39.5
+39.5
+39.5
+74.0
+74.0
+74.0
+Final
+Final
+Final
+84.4
+84.4
+84.4
+95.2
+95.2
+95.2
+Figure 11: Verifier acceptance during PREFINE mem-
+ory construction: initial acceptance before refinement
+and final acceptance after verifier-guided refinement, by
+construction session.
+0
+100
+200
+300
+Rejected cases (N = 575)
+Insufficient
+evidence/support
+216 (37.6%)
+216 (37.6%)
+216 (37.6%)
+Over-specificity
+154 (26.8%)
+154 (26.8%)
+154 (26.8%)
+Lack of abstraction
+117 (20.3%)
+117 (20.3%)
+117 (20.3%)
+Non-actionability
+88 (15.3%)
+88 (15.3%)
+88 (15.3%)
+Figure 12: Rejection reasons on a 10% sample of
+verifier-rejected attempts (N = 575 of 5,758) during
+PREFINE memory construction.
+GetSkiPass,
+GetParkingSpot,
+and
+GetThemePark. Their parameters realize the
+same preferences as in Table 2 under different
+parameter names and argument values (e.g.,
+site_type=“Tent
+site” in GetCampground
+realizes
+low_cost,
+and
+number_of_guests=1
+realizes solo_usage). Memories are constructed
+from the original histories without modification, so
+no memory constructor observes these functions.
+The extended mappings define gold arguments
+for evaluation only and are not supplied to the
+models. Tables 18 and 19 list their parameters and
+preference realizations.
+Function
+Argument
+Type
+GetCampground
+check_in_date
+string
+location
+string
+number_of_guests
+string
+number_of_nights
+string
+site_type
+string
+GetCityTour
+city
+string
+date
+string
+number_of_people
+string
+GetCookingClass
+class_type
+string
+date
+string
+location
+string
+number_of_attendees
+string
+GetFitnessClass
+class_type
+string
+date
+string
+location
+string
+number_of_attendees
+string
+GetSkiPass
+date
+string
+number_of_passes
+string
+pass_type
+string
+resort
+string
+GetParkingSpot
+date
+string
+location
+string
+parking_type
+string
+time
+string
+GetThemePark
+date
+string
+number_of_tickets
+string
+park
+string
+ticket_type
+string
+Table 18: Parameters of the seven unseen functions in
+Appendix D.6.
+Results
+Table 5 reports O-F1 under the extended
+schema. PREFINE achieves the highest scores
+across both query settings and inference models.
+With Qwen3-8B, it exceeds the strongest baseline by
+2.71 points on context-free queries and 10.29 points
+on context-guided queries. With GPT-OSS-20B, the
+corresponding margins are 0.72 and 3.29 points.
+These results support grounding preference hy-
+potheses to previously unseen API parameters and
+arguments while retaining the same underlying
+preference semantics.
+E
+Prompt Design
+We provide the prompt templates used in our exper-
+iments. All templates are reproduced as executed
+24
+
+=== [page 25] ===
+Preference
+Function(parameter = argument)
+low_cost
+GetCampground(site_type = Tent site)
+GetCookingClass(class_type = Group class)
+GetFitnessClass(class_type = Group session)
+GetSkiPass(pass_type = Standard pass)
+GetParkingSpot(parking_type = Self-park garage)
+GetThemePark(ticket_type = General admission)
+high_cost
+GetCampground(site_type = Glamping cabin)
+GetCookingClass(class_type = Private)
+GetFitnessClass(class_type = Personal training)
+GetSkiPass(pass_type = VIP pass)
+GetParkingSpot(parking_type = Valet)
+GetThemePark(ticket_type = VIP FastPass)
+solo_usage
+GetCampground(number_of_guests = 1)
+GetCityTour(number_of_people = 1)
+GetCookingClass(number_of_attendees = 1)
+GetFitnessClass(number_of_attendees = 1)
+GetSkiPass(number_of_passes = 1)
+GetThemePark(number_of_tickets = 1)
+Table 19: Preference realization in the unseen functions,
+in the same format as Table 2. The preferences are those
+of MPT, but are expressed through parameter names and
+argument values absent from all histories.
+and retain the implementation-level names domain,
+slot, and value, corresponding to function, pa-
+rameter, and argument in our terminology.
+Figure 13 presents the PREFINE modules. The
+generator proposes a latent preference hypothe-
+sis as an abstract, decision-level constraint, and
+the refiner revises a rejected candidate under ver-
+ifier feedback. The verifier judges each candidate
+against the four criteria of §5.1, using only the ac-
+cumulated dialogue and tool calls as evidence; no
+gold argument or task outcome enters the loop.
+Figure 14 presents the inference-time prompts.
+Full-History Prompting infers the preference and
+the final API call from the dialogue history
+in a single step. The template on the right is
+shared by all retrieval- and memory-based meth-
+ods (RAG, Mem0, LangMem, A-MEM, and PRE-
+FINE), which differ only in what is placed in
+retrieved_memories.
+### Task: Refine Preference Based on Evidence Gaps
+Your previous preference abstraction was rejected.
+You must:
+-Remove any claim not directly supported by the logs.
+-Increase abstraction if details are over-specified.
+-Preserve only what consistently constrains action selection.
+Do NOT add new information.
+### Input
+Draft Preference: {previous_draft}
+Verifier Feedback: {feedback}
+### Output Format (JSON)
+{{
+"reasoning": "How unsupported details were 
+removed or abstracted",
+"implicit_pref": "The revised, evidence-tight 
+preference constraint"
+}}
+RefinePrompt
+You are a Preference Abstraction Module for 
+an agentic tool-calling system.
+Your role is NOT to summarize dialogue 
+history.
+Your role is to infer stable, latent user 
+preferences that constrain future API 
+argument selection.
+Key Principles:
+-Preference reasoning is holistic and non-
+decompositional.
+-Do NOT enumerate slots or list past actions.
+-Infer abstract constraints that explain 
+multiple past decisions.
+-A valid preference must be actionable: it 
+should rule in or rule out future API 
+arguments.
+If evidence is insufficient, state uncertainty 
+explicitly.
+### Context (Accumulated Data)
+Previous Belief: {prev_implicit}
+Dialogue History: {full_dialogue}
+API Calls: {full_api_calls}
+System Prompt
+You are a Preference Verification Module.
+Your task is to judge whether the candidate 
+preference is a valid latent constraint
+derived from the interaction logs.
+Evaluation Criteria:
+1. Evidence Support:
+-Every claim must be supported by 
+multiple or consistent signals.
+2. Abstraction Quality:
+-Reject preferences that merely restate slot 
+values or actions.
+-Prefer abstract constraints that generalize 
+across domains.
+3. Actionability:
+-The preference must constrain or bias 
+future API argument selection.
+-If it cannot affect future actions, it is invalid.
+4. Temporal Consistency:
+-If behavior changed, ensure the 
+preference reflects the latest stable 
+pattern.
+### Evidence (Logs)
+Dialogue: {full_dialogue}
+API Calls: {full_api_calls}
+### Candidate Preference to Verify
+{candidate_pref}
+### Output Format (JSON)
+{{
+"valid": true/false,
+"feedback": 
+"If false, specify 
+whether the issue is 
+over-specificity, 
+hallucination, lack of 
+abstraction, 
+or non-actionability."
+}}
+PRefine ‘Verifier’
+GeneratePrompt
+PRefine ‘Generator’
+### Task: Infer Latent Preference as an Action Constraint
+Given the accumulated interaction history, infer the user's latent 
+preference as a compact decision-level constraint.
+Guidelines:
+1. Do NOT describe individual turns or list slot values.
+2. Identify a unifying preference that explains repeated or consistent 
+choices.
+3. If multiple signals exist, abstract them into a higher-level constraint.
+4. If contradictions exist, prioritize the most recent stable pattern.
+5. If no stable preference can be inferred, explicitly say "insufficient 
+evidence".
+###Output Format (JSON)
+{{
+"reasoning": "One-paragraph explanation of the 
+inferred abstraction and its supporting evidence",
+"implicit_pref": "A single-sentence constraint 
+describing how future API arguments should be 
+biased or restricted"
+}}
+Figure 13: Prompt templates for the PREFINE generator, verifier, and refiner.
+25
+
+=== [page 26] ===
+[Instruction]
+You are a Personalized Preference Reasoning Agent.
+Your task is to generate the most appropriate Service API call for the current user 
+utterance by integrating (1) Retrieved Long-term Memories and (2) Accumulated 
+API Call History, strictly following the given schema.
+[Task Definition]
+The user may not explicitly state all information in the current turn. You must 
+deduce missing information by analyzing inferred preferences in the Retrieved 
+Memories and accumulated API call history.
+-Repetitiveness: If a user frequently chose a specific value in the past, assume this is 
+their preference.
+-Cross-domainConsistency: Identify the user’s universal behavioral patterns or 
+constraintsexhibited in previous interactions. If a direct preference is missing, 
+deducethe current slot's value by applying these established patterns.
+[Reasoning Steps]
+1. Schema Filtering:
+-Identify the target domain from the `Schema`.
+-Consider ONLY the slots defined in the schema.
+2. Relevant Memories: 
+-Infer the value by applying the user’s stable behavioral patterns
+-Map these abstract constraints to the most appropriate schema-valid value.
+3. Formulate Output:
+-Create a slot ONLY when there is reasonable support from API history or 
+memories.
+-Do NOT create empty slots
+-Do NOT hallucinate values or infer beyond the schema.
+Schema (Consider valid slots for the domain): {preference_schema}
+Relevant Memories (User Preferences & Constraints): {retrieved_memories}
+Current User Utterance: {user_utterance}
+Output Format: {{Domain}}({{slot_name}}="{{value}}", ...)
+Now produce ONLY the final Service API call:
+Memory-based(PRefine, RAG, Mem0, LangMem, A-MEM) Prompt
+[Instruction]
+You are a Personalized Preference Extraction Specialist.
+Your goal is to infer the user’s “Abstract Preferences” based 
+on their dialogue history and current utterance, strictly 
+following the provided preference schema.
+[Task Definition]
+The user may not explicitly state all information in the 
+current turn. You must deduce missing information by 
+analyzing patterns in the Dialogue History.
+-Repetitiveness: If a user frequently chose a specific value 
+in the past, assume this is their preference.
+-Cross-domainConsistency: Identify the user's universal 
+behavioral patterns or constraintsexhibited in previous 
+interactions. If a direct preference is missing, deducethe 
+current slot's value by applying these established patterns.
+[Reasoning Steps]
+1. Filter Context: Focus ONLY on the slots listed in the 
+`Target Preference Schema`. Ignore transient slots like 
+specific dates or times.
+2. Identify Patterns in History: 
+-Scan the `Dialogue History` for the target slots.
+-Determine the most likely preference value based on 
+frequency and similarity.
+3. Formulate Output:
+-Generate the final function call using the deduced 
+information.
+Target Preference Schema: {preference_schema}
+Dialogue History: {dialogue_history}
+Current User Utterance: {user_utterance}
+Output Format: 
+{{Domain}}({{slot_name}}="{{value}}", ...)
+Now produce the final Service API call:
+Base Prompting
+Figure 14: Inference prompts for Full-History Prompting (left) and for retrieval- and memory-based methods (right).
+26
