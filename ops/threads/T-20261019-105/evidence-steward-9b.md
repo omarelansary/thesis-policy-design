@@ -1,0 +1,4 @@
+# Log: evidence-steward-9b (T-20261019-105; written by the lead from the steward's final answer)
+- Wrote findings/SUM-0028-batch9b-mcpverse.md (FND-0026); EXT-0203, EXT-0204 (v1 judge statement and Table 2). No messages, no web.
+- S43: retrieve mode = text-embedding-3-large on server descriptions, the model writes the description it needs, top-5 servers mounted; judge prompt sees no retrieval; judge identity for Table 4 not stated. S45: 12 contradictions listed with lines. S40-S41: v1 vs v2 numbers and differences listed (judge, model count, shares, tool counts); cause not stated.
+- Lead second reader: rendered v2 pages 7 and 9 and read them: Table 2 Gemini Max-Scale cells equal GPT-4o Standard cells on the page; Table 4 Claude Oracle/Standard (44.8, 53.2) equal Qwen3-235B-2507's and differ from Claude's 62.3 / 62.4 (Table 2) and 62.28 / 62.36 (Table 3); the steward's text-layer reading is confirmed.

@@ -1,0 +1,4 @@
+# Log: evidence-steward-9a (T-20261019-105; written by the lead from the steward's final answer)
+- Wrote findings/SUM-0027-batch9a-scaffold-toolmenubench-cmtf.md (FND-0025); EXT-0205 (scaffolding section 4.3), EXT-0206 and EXT-0207 (ToolMenuBench setup and Table I), EXT-0208 (GIST-CMTF 330-400). No messages, no web.
+- Scaffolding: 4 scaffoldings send 44 schemas per request, Hermes 7 plus on-demand; median input tokens 70,836 vs 216,986, which the authors call confounded; internal inconsistency on failed vs completed medians. ToolMenuBench: 26,460 executions, 30 tasks per condition, menus 25/100/250; all tools 32.1%, keyword top-5 22.1%, CMTF 85.7%; authorship of tasks and contracts not stated. CMTF takes an annotated goal state; GIST-CMTF infers it among candidates (gold-goal 99.5%, GIST 97.0%, all tools 53.5%, a different suite).
+- Lead second reader: EXT-0205 medians and EXT-0207 Table I rows re-checked.
