@@ -319,7 +319,11 @@ else:
 # ---------- 8. git ----------
 try:
     g = lambda *a: subprocess.run(["git", "-C", str(WS), *a], capture_output=True, text=True).stdout.strip()
-    need(g("remote") == "", "no git remote configured", f"git remote present: {g('remote')}")
+    _remotes = g("remote").split()
+    _urls = [g("remote", "get-url", r) for r in _remotes]
+    # a remote is allowed only if its exact URL is recorded in an AUTH row of ops/AUTHORIZATIONS.md (AUTH-012)
+    _ok = all(u and ("|" in "".join(l for l in auth_text.splitlines() if u in l and re.match(r"\|\s*AUTH-\d{3}\s*\|", l))) for u in _urls)
+    need(not _remotes or (len(_remotes) == 1 and _ok), "no unauthorized git remote" + (f" (authorized remote: {_urls[0]})" if _remotes and _ok else ""), f"git remote present and not authorized by an AUTH row: {_remotes} {_urls}")
     dirty = [l for l in g("status", "--porcelain").splitlines()]
     rep("PASS" if not dirty else "WARN", "git working tree clean" if not dirty else f"{len(dirty)} uncommitted change(s)")
     print(f"INFO branch={g('rev-parse', '--abbrev-ref', 'HEAD')} head={g('rev-parse', '--short', 'HEAD')} mode={'quick' if args.quick else 'full'}")
