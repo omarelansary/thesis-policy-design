@@ -1,0 +1,8 @@
+# T-20261019-97 SUMMARY (lead; AUTH-011, literature check)
+
+- Retrieval (lead): 8 web searches and 12 stored fetches (limits 15/15), texts in `evidence/literature-20261019/` with `MANIFEST.jsonl`. Agents have no web tools.
+- Steward: three passes (pass 1: 9 sources and 8 extractions EXT-0093..0100; pass 2: stored MCP-Zero, ScaleMCP and cache-study bodies, EXT-0101..0107; pass 3: TheMCPCompany, LiveMCPBench, When2Call). Output `findings/SUM-0005-literature-check.md` (header changed by the lead to id FND-0003, type finding, status unverified-until-human-checks, because the verifier required it; content untouched).
+- Challenger: one pass on the first draft of `design/package-v4/05`: eleven records CH-0058..0068 and `reviews/RV-0006.md` (final). **The agent stopped at its 40-turn limit before delivering its hand-back message; the records and the review are complete files, so the thread is recorded as complete by files, incomplete by hand-back.** No round 2 was run on the second draft of `05` or on the edited `01`/`04`.
+- Disputed or open: whether the remaining 7 searches and 3 fetches should be spent (the challenger's query list is in CH-0067); procedural-memory literature unread; uninstructed search initiation has no measurement; cache behaviour of appended definitions has no independent measurement.
+- Lead edits after the challenger: `05` rewritten; `01` section 4 and 7 updated; `04` sections 3, 4, 6, 7 corrected.
+- No threshold, margin, thesis question or final policy selected; no experiment run; nothing approved. AUTH-011 is spent when this summary is delivered to the human.

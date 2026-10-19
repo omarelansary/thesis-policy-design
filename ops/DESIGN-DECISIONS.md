@@ -126,3 +126,10 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Correction recorded: in the stored provider documents, keeping a cache costs a write premium on Anthropic and OpenAI (1.25x / 2x) and an hourly storage price on Gemini explicit caches; the supervisor's "1/10 for an hour" is not general.
 - The student's proposed objective change (report and optimise the bill) replaces the AUTH-006 working objective; recorded here as pending the human's explicit decision; v4's brief still states tokens. No entry in AUTHORIZATIONS was created because the student asked the supervisor a question and has not decided.
 - The intermediate presentation the student gave the supervisor is not in the repository; no comparison with it was possible.
+
+## WD-022 Literature check (AUTH-011, 2026-10-19, thread T-20261019-97)
+- Decision (lead): the human agreed to a bounded literature check before any pilot; the lead ran the web access (agents have none) and stored texts with hashes; steward verified, challenger attacked. Findings in `design/package-v4/05-literature-check-summary.md` and `findings/SUM-0005`.
+- Result: caching mechanism documented by vendors but no independent measurement for appended definitions; instructed search is measured at 18,505 tools for strong models (cost premium over an oracle tool set); uninstructed initiation is not measured; cross-session tool-discovery memory in a large catalogue is not measured. The earlier claim "initiation is unmeasured" was split into instructed (measured) and uninstructed (not).
+- Corrections of the lead's own earlier errors: LOMEKWI was described with the wrong direction and object; "0.02" is oracle-tool discovery, not success; the claim "no stored source evaluates cross-session tool memory" was too strong; pilot 1 had been understated.
+- Process: the challenger reached its turn limit without a hand-back but wrote its files; the steward's note that Apple's and MemToolAgent's memory does not support "tool-only over conversation memory" was accepted.
+- The pilots remain unauthorized; this task spent 8 of 15 searches and 12 of 15 fetches.
