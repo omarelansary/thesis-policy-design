@@ -1,0 +1,7 @@
+# Thread T-20261020-108: SUMMARY (lead; AUTH-016, ledger batch 13b: the agent-memory survey)
+
+- Produced: one steward finding (FND-0032 = findings/SUM-0034); the survey (arXiv 2602.06052) fetched with tools/litfetch.py for the named row C-E02/UNREADLEADS; no EXT (the survey is a workspace literature copy, cited file:line). The steward created its file at about turn 12, not within the first 8 turns; it read about 60% of the survey and listed the ranges not read. No web beyond the one fetch, no messages, no design proposals.
+- Steward log (written by the lead from its final answer): verdicts Q1 taxonomy ANSWERED; Q2 tool-related memory, Q3 cross-session, Q4 cost, Q6 deployed scenarios PARTLY; Q5 prefix or cache interplay and Q7 anticipation NOT FOUND IN THIS TEXT. Lead second reader: lines 510-512, 1563-1568, 3382-3387 and 3992-3994 re-read; they say what the steward reports.
+- Ledger effect: C-E02/UNREADLEADS DEFERRED (survey read; the KAIST and cache-study reference lists and unread survey ranges deferred with trigger); N-6 extended (the survey adds no measurement; still not located).
+- Findings worth carrying: the survey treats user-centric and agent-centric memory as distinct but not exclusive subjects and says benchmarks rarely require both, which bears on Q-J05 without settling it; its 'cache' is model-internal KV state, not prompt caching; no measured effect of memory on cost, steps or success for tool memory.
+- Not verified: statements about cited papers are the survey's own.
