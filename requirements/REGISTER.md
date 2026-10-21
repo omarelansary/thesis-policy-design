@@ -109,5 +109,21 @@ Pointers: `INT-T-002 Lnnn` = body line nnn of `requirements/intake/2026-10-21-su
 - G.3 Q2 and Q4: answered in part (REQ-O14F-06; REQ-O02-09).
 - G.3 Q5: for the 21 October deliverable, no implementation (REQ-O14F-07); after 21 October, experiments with a minimal memory (REQ-O21-09). G.3 Q6: the 21 October deadline continues the 2 October request for a draft policy (REQ-O02-10); whether the 2 October draft was delivered is not stated.
 
+### H.3 The human's decisions after the meetings (INT-T-005, AUTH-019; class user-decision; pointers are body lines of `requirements/intake/2026-10-21-user-decisions-after-meetings.md`)
+| ID | Pointer | Decision (short; the words are in the intake file) |
+|---|---|---|
+| REQ-U21-03 | line 1 | Do not re-invent or re-test what research, large companies or widely used open-source projects have already tested; reuse what fits a point of the design, including earlier work after verification, and build on it; we are designing a policy. |
+| REQ-U21-04 | line 5 | The staged policy and memory deciding which tools are offered are combined (both). |
+| REQ-U21-05 | line 6 | The June expose does not govern; its ideas are candidates, verified against the others and kept or dropped with a stated reason. |
+| REQ-U21-06 | line 7 | Process: research and a drafted policy; proof-of-concept tests of parts in a loop (test, verify, improve; not rigorous or full); then an end-to-end study and final findings. |
+| REQ-U21-07 | line 8, line 16 | Objective: minimise the bill on average over turns and sessions while keeping accuracy nearly the same; a model-agnostic billing equation with its components (input, reasoning, output, tools, prompt caching); no margin, budget or hard threshold. Replaces the AUTH-006 working objective of 19 October. |
+| REQ-U21-08 | line 9 | Models and providers are chosen when implementing. |
+| REQ-U21-09 | line 12 | Anticipation by likelihood (who asks, in what setting) is in scope as a small part, not the focus. |
+| REQ-U21-10 | line 14 | Session patterns: one long run and returning users. |
+| REQ-U21-11 | line 16 | Success is the quality of the work (every scientific and engineering approach considered, nothing missed), not a particular result. |
+| REQ-U21-12 | line 20 | The supervisor's files-not-context and 'hello/hi' remarks are illustrations of the thesis aim, not separate claims. |
+
+Relation recorded: REQ-U21-03 allows reusing earlier work after verification, while REQ-U21-02 keeps the earlier retrieval work out so that it never contaminates this work; read together, earlier work enters only when the human places it explicitly and it is verified, which the ledger records as a decision when it happens (C-D11 reopen trigger).
+
 ## Read this before using sections B-D
 The 2026-10-02 transcript is automatic speech recognition with garbled names; two records disagree on whether "each step saves tokens" is per step or collective; the brief and the candidate records mark illustrative examples (tier sizes, 100 to 60, 27B model, 50%) as examples, not requirements. See `evidence/CAVEATS.md` rows 5, 6, 13.

@@ -1,0 +1,57 @@
+---
+id: "FND-0038"
+type: finding
+status: unverified-until-human-checks
+created_by: evidence-steward
+created_utc: "2026-10-21"
+thread: "T-20261021-112"
+evidence: ["EXT-0009", "EXT-0016", "EXT-0057", "EXT-0086", "EXT-0087", "EXT-0088", "EXT-0123", "EXT-0125", "EXT-0131", "EXT-0158", "EXT-0183"]
+---
+# FND-0038: pilot rows, which only re-test what is established (steward P2, AUTH-019)
+
+Labels: quotes are EXT text or stored-literature text [F]; readings [O]/[I]. Contamination rule respected: the student's earlier retrieval experiments are not used. Ledger text (design/ledger/export/ledger.csv, "what is known") is repo-written and unverified; where a verdict leans on it, it is said so and the numbers were not re-read at source in this thread. Principle applied: INT-T-005 (do not re-test what is established; the goal is lower bill on average with accuracy nearly the same, no margin or budget).
+
+## Evidence used (re-read in this thread)
+- [F] EXT-0057 (r4-anthropic-prompt-caching 207-212): "By default, the cache has a 5-minute lifetime. The cache is refreshed for no additional cost each time the cached content is used."
+- [F] r4-anthropic-prompt-caching 258-260 (read with --no-write, hash verified; EXT-0057 covers only 207-212): "5-minute cache write tokens are 1.25 times the base input tokens price / 1-hour cache write tokens are 2 times ... / Cache read tokens are 0.1 times the base input tokens price (see the table footnote for per-model exceptions)"; footnote: 0.025x for Fable 5.1 and Mythos 5.1, 0.05x for Opus 5.5 and Sonnet 5.5 (lines near 253-257).
+- [F] EXT-0086 (r4-openai-prompt-caching 56-60): "For GPT-5.6 and later, cache writes cost 1.25x the standard, uncached input-token rate. Subsequent reads cost 0.1x ... Both implicit and explicit caching are supported". EXT-0088 (146-153): earlier models "No additional cache-write charge", "Model-dependent cached-input rate". EXT-0087 (95-110): lifetime 30m after latest write or reuse (5.6+).
+- [F] EXT-0123 (r4-anthropic-prompt-caching 1770-1806): "On the first request, cache_creation_input_tokens reflects the token count of all tool definitions. On subsequent requests within the cache lifetime, those tokens appear under cache_read_input_tokens instead."
+- [F] EXT-0131 (r4-anthropic-tool-search 760-840, line 90 of extract): "Tool search isn't metered as a separate server tool ... the tool definitions that search loads into context count as input tokens like any other tool definition."
+- [F] EXT-0158 (extract line 70): "Deferred tools are not included in the system-prompt prefix. When the model discovers a deferred tool through tool search, the definition is appended inline as a tool_reference block in the conversation history. The prefix is untouched, so prompt caching is prese[rved]".
+- [F] EXT-0009 (r4-anthropic-tool-search 575-610, extract line 27): "You still send every tool's full definition in the tools array on every request, including the deferred ones."
+- [F] EXT-0183 (r4-anthropic-ptc 1410-1462): "Tool results from programmatic calls are not added to Claude's context - only the final code output is"; vendor evaluation: "reduced billed input tokens by roughly 38% with no change in task accuracy" on a 75-tool benchmark, but "left scores unchanged and cost roughly 8% more" on tau2-bench; "Sequential single-call workflows do not benefit."
+- [F] EXT-0016 (r3-tokennotcost 760-820), Table 8 (paper, one study, 103 tasks, 712 runs per arm): Headroom +48.4% billed cost [+42.3, +55.0] with success +1.4 pp [-0.2, +3.1]; RTK v0.44.1 -2.7% [-5.6, -0.1]. Text: "end-to-end agent cost cannot be inferred from a simple input-versus-output token decomposition".
+- [F] EXT-0125 and stored fcrobust text (evidence/literature-20261019/pdf-fcrobust-2504.00914v1.txt:326-330, 464-466): rephrased request "How will the humidity levels change over the next seven days in Miami,FL?" led the agent to "Miami, FL" "which does not match any of the (incompletely) listed options"; Table 2 caption: "Models' AST performance drop is evident when rephrasing the original query, and also when using the original query with extended toolkit".
+
+## Verdicts (one row per ledger item)
+
+| Item | Verdict | Basis and what travels with it |
+|---|---|---|
+| AS-12 | PARTLY ESTABLISHED | [O] Ledger batch 12 (13 sources, unverified SUM): signs mostly shared, sizes vary by large factors, some signs differ (MCPVerse Oracle-to-Standard 9 of 12 decline, 3 improve). So "does not transfer at all" is not supported and "transfers fully" is not either. Remainder: whether our chosen policy keeps its advantage on other models; no stored source tests that (ledger: only two-model ComplexMCP). Q-J24 defers the model list to implementation, so this is E2E-checked, not a PoC blocker. |
+| AS-14 | PARTLY ESTABLISHED | [F] Mechanism is vendor-stated: EXT-0009 (every definition sent every request) and EXT-0123 (tool definitions billed as cache_creation on first request, cache_read after). So a trivial exchange pays for the standing prefix. The "about 10,000 tokens" figure is a magnitude for a named agent setup and is not in any stored vendor text. Remainder: one usage-field reading on our setup (cheap; reads the provider's usage record, no experiment design). INT-T-005 item 9 reads it as an explanation of the idea, not a new claim. |
+| AS-06 | PARTLY ESTABLISHED | [O] Ledger batch 12 lists both: no-loss at large cuts (vendor tool search -85%; MCP-Zero Full pool) and losses at moderate-to-large cuts (MCP-Zero multi-turn -61%, ComplexMCP RAG k=60 -17 to -28 points, MCPVerse Retrieve -12 to -14, DynamicMCPBench -20). Vendor accuracy gains are performance claims, not established. Established: the universal form "50% with no loss" does not hold across methods; method matters. Remainder: which reduction works at our catalogue size; under INT-T-005 no 50% threshold is needed, so the claim need not be closed as a number. Sources as read by the earlier steward; not re-read here. |
+| AS-13 | OUR SETTING | [O] Ledger: no stored source has a 100-to-60 step with accuracy, nor names-only vs compact vs full tiers on one task set; supervisor said "This number is not rigid" (INT-T-004). A tier design is our policy component. Not found in the stated places. |
+| C-S12 | OUR SETTING | Need labels and selector recall at catalogue size we cannot run in full: an estimator problem tied to our reference and catalogue; no stored source supplies an estimator. |
+| C-S12/RA13 | PARTLY ESTABLISHED | [F] fcrobust (lines 326-330, 464-466; EXT-0125): rephrasing breaks matching and degrades all models tested, so vocabulary mismatch is a known failure source. Remainder: recall per query style for our selector and tool descriptions. |
+| C-S15 | OUR SETTING | A usage core and its transfer to held-out tasks is a property of our policy and task set (HYP-0014); ledger: no held-out evidence. Matched-token contrasts part is E2E. |
+| C-X03 | OUR SETTING | Selector recall plus need-estimator check; PoC-size, our selector. Not run, nothing stored answers it. |
+| C-X04 | E2E ONLY | Substitute-reference validity is evaluation-method validity at a size that cannot be run. [I] If the human's no-margin goal (INT-T-005 item 8) removes the reference-relative threshold, the row may dissolve; that is the lead's reading to make. |
+| N-7 | OUR SETTING | Cross-user prefix sharing is provider-specific; searched the stored OpenAI caching page lines 1-56 (only "requests share the same prompt prefix" and session text) and EXT-0142 (retention by organization policy, not sharing); no stored statement on sharing scope found. Not found in these places, not "absent". Needs the vendor page for sharing scope (a lookup, not an experiment) or the probe. |
+| C-S10 | PARTLY ESTABLISHED | [O] Ledger readings: naive retrieval narrowing cost accuracy in several independent papers (MCPVerse, ComplexMCP, DynamicMCPBench, MCP-Zero multi-turn), and fcrobust shows query-wording sensitivity. Established: retrieval can hurt, and that is a reason to keep the policy from relying on one retriever. Not isolated: which cause (query, embedder, granularity, judge). Remainder: causes in our selector. |
+| C-S10/RA3 | OUR SETTING | Appended results degrading later steps is a property of our vehicle and tasks; no stored source tests it. Failure is by design a lost task, visible in the PoC. |
+| C-S10/RA9 | PARTLY ESTABLISHED | [F] EXT-0158: discovered definitions are "appended inline as a tool_reference block in the conversation history" with the prefix untouched (Anthropic's own mechanism). Remainder: that the model still uses them later in our trajectories, and other providers (not stored here). |
+| C-S11 | OUR SETTING | Ledger: no stored source supports a system trigger; cascade vs single stage unmeasured in our combination. |
+| C-S11/CASCADE | OUR SETTING | One two-stage router result inside +/-8 of rag:32 (ledger, unverified); HYP-0002 is about our cascade. |
+| C-S11/TRIG | OUR SETTING | No stored source; trigger over runtime signals is our design (HYP-0006/0012). |
+| C-S07 | E2E ONLY | Disentangling count, tokens, overlap and position is a confirmatory-contrast design question; the published confounding is a known limit, not something a PoC loop needs. |
+| N-12 | OUR SETTING | Early-observable predictor (HYP-0001) is about our policy's self-improvement; INT-T-005 item 7 says such likelihood-style adaptation should stay a small part of the thesis. |
+| N-29 | PARTLY ESTABLISHED | [F] EXT-0183: vendor-stated mechanism, results of programmatic calls "are not added to Claude's context". Vendor's own caveat: -38% billed input tokens on one 75-tool benchmark, +8% cost on tau2-bench, "Sequential single-call workflows do not benefit". The supervisor's "80%" is a performance claim, not established. Remainder: the file-and-search variant (not code execution) and its cost and accuracy in our setting. INT-T-005 item 9 reads N-29 as the idea (not all resources to the model), not a new claim. |
+| C-S02/INVERSION | PARTLY ESTABLISHED | [F] Price mechanism is vendor-stated (write 1.25x, read 0.1x; EXT-0086; Anthropic 258-260; lifetime EXT-0057/0087), so fewer exposed tokens can cost more if the hit rate falls. [F] EXT-0016 (one paper, other domain): token-saving tools changed billed cost from -2.7% to +48.4% at success within about +/-3 pp, so token cuts do not map to bill cuts. Remainder: whether our regime shows an inversion; a computation from the price table plus a few usage records, no sweep needed for the PoC. |
+| C-S02/PREV | OUR SETTING | The formula w x gain - (1-w) x price is arithmetic; w (tasks needing non-core tools) is our population's value. INT-T-005 item 7 gives the human's prior (small); measuring w is E2E. |
+| C-S02 | PARTLY ESTABLISHED | Mechanism of cache billing established (rows above). Related-not-closure studies are in the ledger (CAPC -18.3% cache-only, scaffolding Table 4), none a matched trajectory on one provider. Remainder: a PoC paired comparison in our setting; the powered comparison is E2E. |
+| C-X05 | E2E ONLY | Repeated end-to-end sweep; power arithmetic is a final-study matter. |
+
+## Could not determine
+- [U] N-7: stored vendor text on cross-user cache sharing scope (searched OpenAI caching page 1-56, EXT-0142, EXT-0158, EXT-0123 by grep; Anthropic page not fully read, 3,253 lines).
+- [U] AS-12, AS-06, C-S10: the multi-source numbers come from the ledger's batch 12 text and were not re-read at source here.
+- [U] AS-14: the 10,000 figure for any named setup.
