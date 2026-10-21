@@ -64,5 +64,50 @@ Requirements are **inputs**. They are carried by reference to hash-verified extr
 - **Q5.** Is the "evaluation script" (REQ-O14-10) part of the 2026-10-21 deliverable, and does "implement" in REQ-O14-18 include writing it?
 - **Q6.** Does the 2026-10-21 deliverable replace the time-bound October 2 one (REQ-M1 R14)? Whether the October 2 one was delivered is not known to this workspace (brief U10). Neither is closed here.
 
+## H. Supervisor meetings of 2, 14 and 21 October 2026 (AUTH-018; route A intake INT-T-002, INT-T-003, INT-T-004; authority: supervisor, as transcribed; classification: lead, checked by two stewards in FND-0035 and FND-0036; proposed until the human accepts it)
+
+Pointers: `INT-T-002 Lnnn` = body line nnn of `requirements/intake/2026-10-21-supervisor-meeting-2026-10-21-notes-and-transcript.md` (file line nnn + 19); `INT-T-003 Lnnn` likewise for the 14 October file; `INT-T-004 Ennn` = export line nnn of the 2 October excerpts. Only transcript lines are used; the Gemini notes are machine summaries. The words stay in the intake files; the rows below carry pointers and a classification, not paraphrases that replace them. Mapping and checks: `design/ledger/notes/MEETINGS-MAPPING-20261021.md`, `findings/SUM-0037`, `findings/SUM-0038`.
+
+### H.1 Register
+| ID | Pointer | Class | Note |
+|---|---|---|---|
+| REQ-O21-01 | INT-T-002 L223-L225, L390 | supervisor-requirement | Practical scope: memory and tool calls only ("Forget about knowledge. Forget about everything else. And memory should help tool calls"; "tools and memory ... comes hand in hand"). |
+| REQ-O21-02 | INT-T-002 L146, L212-L214 | supervisor-requirement | Whether conversation memory belongs "depends on what you are building"; if the whole context management is the thesis, everything is needed; otherwise one may choose. |
+| REQ-O21-03 | INT-T-002 L245, L375-L384 | supervisor-example | Memory holds the questions and answers of tool calls and a short summary of past interaction; the relevant part is injected first and more is given when asked. |
+| REQ-O21-04 | INT-T-002 L197-L209, hedge L221 | supervisor-assertion | Explicit caching applies to memory, knowledge and tools; added information can stay cached for the whole conversation at "negligible cost". Said in the part he calls "all in theory"; the cost statement is a claim to test against the stored price evidence. |
+| REQ-O21-05 | INT-T-002 L250-L275 | supervisor-example and supervisor-assertion | Tool responses written to files and searched when needed, rather than kept in the context (the 'MCP brain without notepad' contrast); "You can save around 80% of the cost by doing this". |
+| REQ-O21-06 | INT-T-002 L190-L207 | supervisor-assertion | A trivial "hello" and "hi" can consume 10,000 tokens where 10-30 would do. |
+| REQ-O21-07 | INT-T-002 L302-L320 | supervisor-requirement | The policy may recover from failures at a higher cost on a few turns; savings in tokens and response time are judged on average over many turns. |
+| REQ-O21-08 | INT-T-002 L345-L354 | supervisor-requirement | The problem applies to any kind of agent (coding, sales, recruiting, marketing); the cost per turn is the problem. The student's narrower one-hour idle-gap proposal (L331-L345) receives no explicit yes or no in the transcript. |
+| REQ-O21-09 | INT-T-002 L426-L458 | supervisor-requirement | Validate first with a plain text or Markdown memory injected into the prompt; "don't engineer it at all" until results; publishable numbers need a very big experiment with multiple goals and settings and repeated runs to show statistical variance. |
+| REQ-O21-10 | INT-T-002 L481-L500 | supervisor-requirement | Send the thesis to Michael and Simon three or four weeks before submission; meetings can be online. The 18 February registration deadline and the 22-week limit are the student's statements (L470-L494). |
+| REQ-O14F-01 | INT-T-003 L157-L159 | supervisor-requirement | The research question in full: "which method is the most optimal way to reduce the count of tools while keeping the accuracy as high as possible", "We don't need to change it" (completes the fragment REQ-O14-01). |
+| REQ-O14F-02 | INT-T-003 L363-L365 | supervisor-requirement | A negative or not very novel result is still a thesis; a paper needs a systematic study. |
+| REQ-O14F-03 | INT-T-003 L214, L227-L233, L404 | supervisor-assertion | Nothing here is groundbreaking; the novelty is combining approaches and showing what works and what does not, to be "sold" as novelty; the staged graph "is your novelty". |
+| REQ-O14F-04 | INT-T-003 L261-L265 | supervisor-example | Stage one filters by who invokes the agent (the AI-salesman example). |
+| REQ-O14F-05 | INT-T-003 L266-L318 | supervisor-example | A later stage is Executor-style capability listing or semantic narrowing ("which one is better ... You have to figure it out"); narrowing in several steps (1,000 to 800, 500, 200, 10). |
+| REQ-O14F-06 | INT-T-003 L386-L404 | supervisor-requirement | The policy is a staged graph: one question per stage, the number of stages open, a tool filtered out may be added again at a later stage. |
+| REQ-O14F-07 | INT-T-003 L429-L447 | supervisor-requirement (time-bound, date passed) | Deliver the policy by Wednesday 21 October 11:00, without implementation. |
+| REQ-O02-01 | INT-T-004 E202-E206 | supervisor-requirement | A baseline with all tools; match its accuracy with fewer tools. |
+| REQ-O02-02 | INT-T-004 E228-E232 | supervisor-requirement | Filtering must not cost more tokens than it saves ("if you use many many more token to filter out the tools then there is no value"). |
+| REQ-O02-03 | INT-T-004 E524-E542 | supervisor-requirement | The aim is saving tokens while maintaining accuracy, not filtering tools as such. |
+| REQ-O02-04 | INT-T-004 E550-E570 | supervisor-example | Partial information: drop the clearly irrelevant tools (100 to 60), then tiers (full description; known to exist; name only); "not saying this is the best way", the numbers "not rigid". |
+| REQ-O02-05 | INT-T-004 E593, E605-E607 | supervisor-assertion | The partial-information idea comes from someone else's documentation; Executor "is doing the same thing" (A9). |
+| REQ-O02-06 | INT-T-004 E626 | supervisor-requirement | Executor is a baseline; several baselines are needed. |
+| REQ-O02-07 | INT-T-004 E689 | supervisor-requirement | Keep the earlier work as it is in a new branch and start by analysing what is available. |
+| REQ-O02-08 | INT-T-004 E697 | supervisor-requirement | "we will not drop the cost" (the cost constraint stays when using a helper model). |
+| REQ-O02-09 | INT-T-004 E774-E790 | supervisor-requirement | Each step is there to save tokens; give the model a way to query the tools held back in case the filtering was wrong; the saving is judged over a number of turns, one dearer turn does not matter. |
+| REQ-O02-10 | INT-T-004 E749, E804 | supervisor-example (time-bound) | Start experiments small (about 20 samples); for that week, a draft policy without implementation. |
+| REQ-U21-01 | ops/AUTHORIZATIONS.md (AUTH-018 section) | user-decision | "executor doesnot have to be locked i am using an API free from my university and it offer bunch of different AI models." |
+| REQ-U21-02 | ops/AUTHORIZATIONS.md (AUTH-018 section) | user-decision | The earlier retrieval work (27 methods) is kept but must never contaminate this work; whether it will be needed is not known. |
+
+### H.2 Relations to earlier requirements (recorded, not resolved)
+- REQ-O21-01 (scope: memory and tool calls) and REQ-O14F-06 (staged tool-filtering graph): the 21 October meeting does not say whether the graph remains the form of the policy under the narrowed scope (ledger N-28).
+- REQ-O14F-01 (count of tools) and REQ-O02-03 / REQ-O02-09 (save tokens, judged over turns): he states both; on 14 October he equates narrowing from 100 to 10 tools with "reducing 90% of token" (INT-T-003 L377). The ledger reads tokens as the objective and the tool count as the means (Q-J02).
+- REQ-O21-04 (caching at negligible cost for the whole conversation) and the stored provider pages (cache writes 1.25x or 2x the input price, reads 0.1x, lifetimes of 5 minutes or 1 hour on Anthropic; storage charged per hour for Gemini explicit caches): a claim to test, not a contradiction resolved here (ledger AS-15).
+- G.3 Q1 and Q3: the full research-question sentence is now available (REQ-O14F-01); entering it in `THESIS_QUESTION.md` stays the human's decision.
+- G.3 Q2 and Q4: answered in part (REQ-O14F-06; REQ-O02-09).
+- G.3 Q5: for the 21 October deliverable, no implementation (REQ-O14F-07); after 21 October, experiments with a minimal memory (REQ-O21-09). G.3 Q6: the 21 October deadline continues the 2 October request for a draft policy (REQ-O02-10); whether the 2 October draft was delivered is not stated.
+
 ## Read this before using sections B-D
 The 2026-10-02 transcript is automatic speech recognition with garbled names; two records disagree on whether "each step saves tokens" is per step or collective; the brief and the candidate records mark illustrative examples (tier sizes, 100 to 60, 27B model, 50%) as examples, not requirements. See `evidence/CAVEATS.md` rows 5, 6, 13.
