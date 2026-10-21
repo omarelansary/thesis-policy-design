@@ -1,0 +1,364 @@
+
+
+  Mid-conversation tool/MCP list changes silently invalidate prompt cache, causing repeated full-price rewrites within minutes · Issue #92033 · anthropics/claude-code · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+Appearance settings
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Mid-conversation tool/MCP list changes silently invalidate prompt cache, causing repeated full-price rewrites within minutes #92033
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+Mid-conversation tool/MCP list changes silently invalidate prompt cache, causing repeated full-price rewrites within minutes#92033
+
+Copy link
+
+Labels
+
+area:corearea:costbugSomething isn't workingSomething isn't working
+
+Description
+
+sanansm
+opened on Sep 4, 2026
+
+Issue body actions
+
+Summary
+
+In a single long-running Claude Code session (resumed intermittently over ~36 hours on the 5x Max plan), the prompt cache was repeatedly and fully invalidated by mid-conversation changes to the tool/MCP/agent list — not by idle/TTL expiry. This caused multiple full-price cache rewrites (each ~780K-860K tokens, billed at the 2x cache-write rate) within minutes of each other, including one pair only 1 minute apart, burning what looked like an entire 5-hour session budget in under 10 minutes.
+
+Evidence
+
+Transcript excerpt (timestamps UTC) from one session, cw = cache_creation_input_tokens, cr = cache_read_input_tokens:
+
+Time
+cache write
+cache read
+Notes
+
+07:47:37
+857,710
+39,062
+full rewrite (expensive)
+
+07:47:50
+3,032
+896,772
+cache working correctly
+
+07:48:20
+3,331
+899,804
+cache working correctly
+
+07:48:34
+1,168
+903,135
+cache working correctly
+
+07:48:32
+—
+—
+deferred_tools_delta, agent_listing_delta, mcp_instructions_delta, 6× edited_text_file events fire in the transcript
+
+07:48:49
+782,873
+10,138
+full rewrite again, ~15s after the delta events and only 1 minute after the previous cheap turn
+
+07:48:55
+996
+793,011
+cache working correctly again
+
+The cache was demonstrably working correctly for three consecutive turns (reads climbing 897K → 900K → 903K, writes near-zero). It was then invalidated specifically at the moment new tool/agent/MCP-server definitions were loaded into the session (visible in the transcript as deferred_tools_delta, agent_listing_delta, and mcp_instructions_delta attachment events), forcing the very next turn to eat a full-price, 2x-weighted rewrite of the entire accumulated context (~800K+ tokens) — despite that context having just been cached a minute prior.
+
+This is distinct from (and in addition to) cache expiry after idle gaps, which also repeatedly hit the same session across resumes spanning Sep 2–4, each time re-billing an ever-larger context (300K tokens growing to 860K+ tokens over the session's lifetime) at full 2x cache-write cost.
+
+Impact
+
+No warning is surfaced to the user before an action (e.g., a background ToolSearch call, a new MCP server connecting) triggers a full cache invalidation.
+
+No setting exists to prevent tool/MCP-list changes from invalidating the cache prefix mid-conversation.
+
+No setting exists to cap or warn on an unusually large single-turn cache-write.
+
+Combined with no context-compaction/summarization that persists in the cache, a single long-lived session (common in real usage, e.g., a standing project thread resumed over days) can silently accumulate an ever-growing context that gets fully, repeatedly rebilled at 2x cost every time anything touches the tool/instruction prefix — even seconds after the last rebuild.
+
+Concretely: this pattern consumed what appeared to be an entire 5-hour Max-plan session budget in under 10 minutes of actual interaction.
+
+Requested
+
+Avoid invalidating the prompt cache prefix when only the available tool/agent/MCP list changes (e.g., via deferred tool loading) — ideally by structuring the system prompt so tool/instruction deltas don't sit ahead of the cached conversation history in the prefix.
+
+Surface a warning (or at least a /context-visible flag) when an action is about to force a full cache rewrite, especially when the rewrite size is large relative to recent turns.
+
+Expose a setting to control or defer tool/MCP-list changes mid-session so they don't retroactively invalidate an expensive, already-paid-for cache.
+
+Consider a persisted, compacted-context mechanism so resuming a long session doesn't require re-paying full price for the entire accumulated history every time the cache is invalidated.
+
+Environment
+
+Claude Code desktop app, version 2.1.255
+
+Plan: Claude Max 5x
+
+Reactions are currently unavailable
+
+Activity
+
+github-actionsadded 
+bugSomething isn't workingSomething isn't working 
+area:cost 
+area:core on Sep 4, 2026
+
+sanansm commented on Sep 4, 2026 
+
+sanansm
+on Sep 4, 2026
+
+Author
+More actions
+
+Follow-up correction: I initially believed a promptCacheTtl / subagentPromptCacheTtl setting existed to at least partially mitigate this. That was wrong. I checked the actual installed claude-code-settings.schema.json directly — there is no cache-TTL setting, and no setting anywhere that prevents mid-session tool/MCP-list changes from invalidating the prompt cache.
+
+The closest related settings are autoCompactEnabled/autoCompactWindow (size-based compaction when context fills, unrelated to the mid-conversation cache-busting behavior described above) and awaySummaryEnabled (cosmetic recap only, no cost impact).
+
+So to be precise about the ask: there is currently no user-facing mitigation at all for the tool/MCP-list cache invalidation described in this issue — not a hidden setting, not a flag. This strengthens request #3 in the original report (expose a setting to defer mid-session tool-list changes) since right now there is nothing to reach for.
+
+sanansm commented on Sep 4, 2026 
+
+sanansm
+on Sep 4, 2026
+
+Author
+More actions
+
+Related reports of the same underlying mechanism (mid-session tool/plugin/skill-list changes invalidating the prompt cache), for anyone triaging this:
+
+[BUG] Warm prompt cache fully re-written (cache_read collapses to system+tools floor) seconds after ToolSearch / Skill / tool_result on v2.1.258 — 4 events with request IDs; plus pre-2.1.257 screenshot size-cap data #91514 — warm cache rewritten after ToolSearch / Skill / tool results (752K warm cache collapses to ~33K, rewrites 726K tokens)
+
+[Bug] Prompt cache invalidation: tools array mutation and TTL downgrade during session #81967 — tools-array mutation invalidates prompt cache (instrumented 1,821 API requests; mid-session tool-array changes cause invalidations sometimes larger than TTL expiration)
+
+Prompt cache dropped every ~40s in large sessions: full ~950k context re-written at 2x cost (v2.1.222) #85326 — ~950K context repeatedly rewritten at 2x cost, seconds apart — same mechanism at larger scale than this report
+
+[BUG] Prompt Cache Invalidation on Session Resume: Tool-Use Content Not Cached, Plugin State Changes Cause Full User Content Rewrite #27048 — plugin state changes cause full cache rewrite (older report, same root cause)
+
+Given four independent reports converging on "mid-session tool/plugin/skill list changes invalidate the prompt cache prefix, forcing a full 2x-priced rewrite regardless of how recently the cache was warm," this looks like a systemic caching/prompt-construction issue rather than an edge case worth separate investigation per-report.
+
+u2giants commented on Sep 4, 2026 
+
+u2giants
+on Sep 4, 2026
+
+More actions
+
+Independent aggregate evidence from 506 local Claude Code session logs (~3.2 GB corpus) confirms this is systemic rather than isolated:
+
+2,766 cache-bust events re-billed 224.4 million input tokens
+
+approximately 81,000 tokens re-billed per bust
+
+1,399 mid-session tool/skill/MCP-list mutations
+
+mutations occurred across 191 of 506 sessions (38%)
+
+measured impact: 13.5% of total Claude spend in the corpus
+
+Method: counts came from Anthropic's own message.usage fields (cache_creation_input_tokens / cache_read_input_tokens) and the transcript attachment/delta events, not character-based token estimates. The ~81K average delta is substantially larger than the instruction and skill manifests alone and is consistent with MCP tool schemas entering after the first request. Relocating rarely used MCP servers reduces exposure but does not fix the client behavior; there is no local setting that makes startup tool discovery stable before the first request or prevents the resulting full-prefix rewrite.
+
+Environment observed: Claude Code 2.1.260 on Windows 11, including sessions launched by Claude Desktop.
+
+nikolai-vysotskyi commented on Sep 7, 2026 
+
+nikolai-vysotskyi
+on Sep 7, 2026
+
+More actions
+
+Some measured structure on this, from two captured request bodies of consecutive
+
+claude -p runs in the same project (137 tools, 223,322 chars of tools).
+
+The good news first: the layout is already cache-friendly. Tools from one
+
+source sit in a contiguous run — 7 runs for 7 sources, no interleaving — and
+
+the order is byte-identical between the two sessions:
+
+source
+tools
+chars
+share of tools
+
+built-in
+32
+105,749
+47.4 %
+
+Gmail
+29
+56,630
+25.4 %
+
+chrome-devtools
+29
+25,429
+11.4 %
+
+trace-mcp
+27
+13,568
+6.1 %
+
+Google Drive
+11
+13,304
+6.0 %
+
+context7
+2
+4,421
+2.0 %
+
+shadcn-vue
+7
+4,221
+1.9 %
+
+The problem is the sort key. Built-in comes first, then the MCP servers in what
+
+looks like alphabetical order by name. So when a server's tools change, everything
+
+after it in the list is invalidated too:
+
+server changes
+tools invalidated
+tokens
+at 1,441 tok/s
+
+Gmail
+52.6 %
+~29,400
+~20 s
+
+Google Drive
+27.3 %
+~15,200
+~11 s
+
+context7
+21.3 %
+~11,900
+~8 s
+
+chrome-devtools
+19.4 %
+~10,800
+~7 s
+
+trace-mcp
+6.1 %
+~3,400
+~2 s
+
+Averaged over one server changing: ~12,500 tokens, ~8.7 s on this machine, on
+
+top of the messages block that follows and is invalidated regardless.
+
+The sharp edge is adding a new server. Under an alphabetical sort, a server
+
+whose name starts early — say airtable — inserts right after the built-ins and
+
+invalidates 52 %+ of the tool block even though nothing else changed. The
+
+damage is a function of the new server's name, which is not a property anyone
+
+would expect to matter for performance.
+
+Suggested fix, cheapest first:
+
+Order MCP servers by first-seen / registration order, appending new ones at
+
+the end, rather than sorting by name. A newly added server then costs only
+
+its own definitions. On this config that turns an average change from ~12,500
+
+tokens into ~4,900.
+
+Register every configured server before issuing the first request, so the
+
+list cannot change between turn 1 and turn 2 — which is the original report
+
+here.
+
+If a stable order is impossible, emit the largest and most stable sources
+
+first (built-ins, then long-lived servers) so that whatever does churn sits
+
+in the tail.
+
+None of this needs block-level KV surgery — the runs are already contiguous, so
+
+plain prefix caching captures nearly all of it once the order stops moving.
+
+Measured on Claude Code 2.1.260 against a local model, where usage.input_tokens
+
+is directly observable. The same prefix layout goes to the hosted path, so the
+
+ordering effect should be identical there; I just cannot see the cache to confirm.
+
+Related: I filed #92524 for the other cross-session invalidator — the per-session
+
+scratchpad UUID sitting in the system prompt, ahead of this whole tool block.
+
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+Labels
+
+area:corearea:costbugSomething isn't workingSomething isn't working
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

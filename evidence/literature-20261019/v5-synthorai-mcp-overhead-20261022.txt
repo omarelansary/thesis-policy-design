@@ -1,0 +1,259 @@
+
+
+    MCP Tool Overhead, Measured: 26 Tools, $0.03 Every Call - DEV Community
+
+  Skip to content
+
+                Powered by Algolia
+
+              Log in
+
+            Create account
+
+DEV Community
+
+        Add reaction
+
+      Like
+
+      Unicorn
+
+      Exploding Head
+
+      Raised Hands
+
+      Fire
+
+      Jump to Comments
+
+      Save
+
+      Boost
+
+Pick as gem
+
+              Copy link
+
+Copied to Clipboard
+
+              Share to X
+
+              Share to LinkedIn
+
+              Share to Facebook
+
+              Share to Mastodon
+
+            Share Post via...
+
+          Report Abuse
+
+                    synthorai
+
+                        Posted on Jul 31
+
+                        •
+                        Originally published at synthorai.io 
+
+                MCP Tool Overhead, Measured: 26 Tools, $0.03 Every Call
+
+                      #mcp
+                      #ai
+                      #pricing
+                      #caching
+
+Connecting one MCP server to your agent adds a per-call tax before anything happens: the GitHub server's 26 tools cost $0.0302 on every single Claude Opus 4.8 call, whether or not a tool is used. The mechanism is invisible until you read the meter, the size depends more on which model you run than on how many tools you connect, and most of it is recoverable. We measured the whole chain: five model families, five real MCP servers, synthetic ladders from 0 to 40 tools, and the caching and slimming levers that shrink the bill.
+
+TL;DR
+
+Tool definitions are re-billed as input tokens on every API call; one small tool measured 401 tokens on Claude Opus 4.8.
+
+The same toolset costs 2.7x more tokens on Claude than on GPT-5.6 (173 vs 64 per tool measured).
+
+The real GitHub MCP server (26 tools) bills $0.0302 per call on Opus 4.8 vs $0.0029 on Gemini 3.6 Flash, a 10x spread.
+
+Explicit caching cuts the carried block to a tenth, but sub-floor toolsets cannot cache, and changing one tool re-bills the whole block.
+
+  How does an MCP server turn into input tokens?
+
+Through a three-stage chain, and only the last stage costs money, but it repeats on every call. One scoping note first: MCP servers expose three primitives, tools, resources, and prompts, and tools are the only one with a standing bill, because the API has a tools parameter that must carry every schema on every request. Resources and prompts have no API field of their own; they cost tokens only when their content is actually pulled into the conversation. Stage 1 is the MCP protocol itself: your agent client asks the server tools/list over JSON-RPC and gets back schemas; this happens once per session and touches no model. Stage 2 is the client converting those schemas into the API's tools parameter, dropping MCP-only fields like annotations and outputSchema; still free. Stage 3 is the provider rendering those schemas into hidden prompt text on every request, because the API is stateless and the model cannot remember what tools exist. That rendered text bills at the full input rate, every call, used or not.
+
+The smallest possible demonstration: a request whose user message is just "Reply OK" costs 11 prompt tokens on Opus 4.8. Add one modest get_weather tool, two parameters, one-line description, and the same request costs 412 tokens. That single tool is a 401-token, $0.002 rider on every call it travels with. Note the asymmetry with what you sent: the tool's JSON is only about 130 tokens of text; the provider's rendering nearly tripled it.
+
+  What does one tool cost on each model?
+
+It depends on the model far more than most teams expect. We sent identical synthetic toolsets (three parameters, one-line descriptions) at ladder sizes from 0 to 40 tools through five families and read the billed deltas:
+
+Model
+Fixed overhead (tools on)
+Marginal per tool
+40 identical tools
+
+Claude Opus 4.8
+290
+173
+7,210
+
+GLM 5.2
+96
+120
+4,896
+
+Kimi K3
+37
+99
+3,997
+
+Gemini 3.6 Flash
+≈0
+72
+2,871
+
+GPT-5.6 Terra
+98
+64
+2,658
+
+Same tools, 2.7x spread: Claude renders the most verbose tool harness in the group, GPT-5.6 the tersest. The relationship to the JSON you send also cuts both ways: Claude bills about 1.36x a naive bytes-over-four estimate of the wire payload, while GPT-5.6 and Gemini bill roughly half of it. Token counts for tool blocks are not portable across families, so budget per model, not per schema.
+
+  What do real MCP servers cost per call?
+
+Here is the table for five real, unmodified servers from the official MCP repository, converted with the standard field mapping and measured as carried overhead per call:
+
+MCP server (tools)
+Opus 4.8
+GPT-5.6 Terra
+Gemini 3.6 Flash
+Kimi K3
+GLM 5.2
+
+GitHub (26)
+6,043 tok / $0.0302
+
+2,076 / $0.0052
+1,931 / $0.0029
+3,152 / $0.0095
+4,077 / $0.0022
+
+Filesystem (14)
+2,785 / $0.0139
+1,254 / $0.0031
+1,200 / $0.0018
+1,574 / $0.0047
+1,772 / $0.0010
+
+Everything (13)
+1,942 / $0.0097
+798 / $0.0020
+663 / $0.0010
+970 / $0.0029
+1,176 / $0.0006
+
+Memory (9)
+1,670 / $0.0083
+554 / $0.0014
+491 / $0.0007
+815 / $0.0024
+1,057 / $0.0006
+
+Sequential-thinking (1)
+1,764 / $0.0088
+912 / $0.0023
+815 / $0.0012
+870 / $0.0026
+1,015 / $0.0006
+
+Two lessons hide in the last row. Sequential-thinking exposes a single tool and still costs more than Memory's nine on four of the five families, because its one description runs enormous: tool count is not the metric, rendered size is. And the top row is the one that surprises agent builders: carrying GitHub's toolset through a 10-call agent episode is $0.30 on Opus 4.8 and $0.03 on Gemini, a full order of magnitude, before any real work happens. Note that GLM 5.2 lands lower still in dollars while billing more than twice Gemini's tokens; a cheap list rate outweighs a verbose renderer, so budget tokens and dollars separately.
+
+  How much of the toolset do agents actually use?
+
+A small fraction per call, which is what makes the tax feel unfair. In our agent suite's tooling scenario, an 8-tool set rides all three calls of a typical episode while each call invokes at most one tool: every call pays for eight schemas to use one. At Opus 4.8's measured rates that 8-tool block is about 1,674 tokens per call, roughly 5,000 tokens per episode of pure schema carriage. The tool-loop scenario is the favorable case, three tools with near-every-call usage, and even there the block re-ships on all four to five calls of the loop. The general rule from the records: utilization per call rarely exceeds one tool, so the per-call cost of your toolset scales with what you connected, not what the agent does.
+
+  Can caching absorb the tool tax?
+
+Mostly yes on the right models, with three sharp edges we measured. On Claude Opus 4.8, the tool block is a first-class cacheable prefix: marking the last tool with cache_control wrote our 20-tool block once (3,682 tokens at the 1.25x write premium) and every subsequent call read it back at 0.1x, cutting the effective carry by 90%. Kimi K3's automatic caching did even better with zero configuration: 2,048 of the block's 2,112 tokens, 97%, came from cache on the second call, in its familiar 256-token blocks. GPT-5.6's explicit breakpoints price the same shape, 1.25x writes against 0.1x reads, in our day-one measurements of that family. Gemini's implicit cache, consistent with everything else we have measured about it, produced zero hits in three primed probes over the tool block; treat any discount there as a rebate, not a plan.
+
+The edges. First, the floor trap: a 2-tool block is about 655 tokens on Claude, below the 1,024-token cache minimum, so small toolsets cannot cache at all even when explicitly marked; the per-model floors decide whether this lever exists for you. Second, volatility: the tool block sits at the very top of the prompt, so changing the tool list busts everything after it. We measured the penalty directly: adding one tool to a cached 20-tool set on Claude Opus 5 re-wrote the entire 4,082-token block at the write premium. Keep the tool list frozen for the session, or pay the re-write on every change. Third, that freeze requirement is exactly what Anthropic's mid-conversation tool changes beta (documented for Opus 5) is built to relax, letting tools change between turns without invalidating the cache; it is the feature to watch for tool-heavy agents.
+
+  How do you shrink the tool block itself?
+
+Cut parameters before prose. On our 20-tool block, trimming descriptions to a terse single clause saved 10%; cutting each tool from three parameters to one saved 34%; both together saved 44% (3,768 tokens down to 2,128). Parameter schemas (names, types, nested descriptions) are where the tokens live, which inverts the usual instinct to polish descriptions and let schemas sprawl.
+
+The bigger lever is not connecting what you will not use. Every MCP server you attach adds its full block to every call; a second config line can double the tax. Registering a subset of a server's tools, where your client supports filtering, shrinks the rider roughly in proportion: keep five of the GitHub server's 26 and Opus 4.8's $0.0302 falls to an estimated $0.007 at the server's average tool size. And if you run models from more than one family, remember the 2.7x spread above: the same agent, moved from Gemini to Claude without re-budgeting, nearly triples its tool carriage in tokens.
+
+  FAQ
+
+Does MCP itself add token cost?
+
+No. The MCP protocol, discovery, JSON-RPC, tool invocation plumbing, never touches the model and bills nothing. The cost appears when your client forwards the server's schemas into the API's tools parameter, which the provider re-renders into billed prompt text on every call. MCP's contribution is scale: it made attaching 26 tools a one-line decision, and 26 schemas ride every call thereafter.
+
+Do unused tools cost anything?
+
+Yes, exactly as much as used ones. The model must read every schema on every call to know what it could invoke; our agent-suite records show at most one tool invoked per call while the full set is billed each time. An attached-but-idle server is pure carrying cost, which caching can discount but only slimming or disconnecting removes.
+
+Do MCP resources and prompts cost tokens like tools do?
+
+No. Tools are unique in having a per-call carriage cost, because the tools parameter re-ships every schema on every request. Resources bill only when the client reads one and inserts its content into the conversation, at which point it is ordinary input, priced like any retrieved document, and the same layering discipline applies: volatile resource content belongs after the cache breakpoints. Prompt templates likewise bill only when invoked, as the rendered text they produce. A connected server's unused resources and prompts cost nothing, which makes tools the number to audit when an MCP integration shows up on the bill.
+
+Does changing the tool list invalidate the prompt cache?
+
+Yes, entirely. The tool block renders at the top of the prompt, so any change re-writes it and everything cached behind it; we measured a one-tool addition re-billing a 4,082-token block at the 1.25x premium. Freeze the tool list per session, batch tool-list changes together, and watch Anthropic's mid-conversation tool changes beta, which is designed to remove exactly this penalty on Opus 5.
+
+Measured 2026-07-31 through the Synthorai gateway: synthetic tool ladders (0-40 tools, n=2) and five real MCP-server toolsets (schemas captured live from the official servers via JSON-RPC tools/list) across five model families; caching probes with salted prefixes and per-call cache itemization; agent utilization from the suite records behind our agent cost studies. GPT-5.6 caching multipliers cite our day-one cost guide measurements. Dollar figures are billed-cost deltas read from the gateway meter, which prices at list input rates. Rates and rendering behavior may change; verify against your own usage records.
+
+          Top comments (0)
+
+          Subscribe
+
+        Personal
+        Trusted User
+
+        Create template
+
+Templates let you quickly answer FAQs or store snippets for re-use.
+
+      Submit
+      Preview
+      Dismiss
+
+        Are you sure you want to hide this comment? It will become hidden in your post, but will still be visible via the comment's permalink.
+
+Hide child comments as well
+
+          Confirm
+
+For further actions, you may consider blocking this person and/or reporting abuse
+
+      synthorai
+
+  Follow
+
+    synthorai.ai
+
+Unified LLM Infra
+
+          Joined
+
+          May 27, 2026
+
+            More from synthorai
+
+              DeepSeek V4.1 Flash 1017: Thinking Off Fixed 30/30 Small Coding Tasks
+
+                  #deepseek
+                  #ai
+                  #pricing
+                  #llm
+
+              LLM Agent Observability: Traces and Sessions, 10 Problems Reproduced
+
+                  #observability
+                  #devops
+                  #ai
+
+          We're a place where coders share, stay up-to-date and grow their careers.
+
+        Log in
+
+        Create account
+

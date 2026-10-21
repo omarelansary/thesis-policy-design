@@ -1,0 +1,3 @@
+# Thread T-20261022-115: SUMMARY (lead)
+
+Three evidence-stewards checked `design/package-v5/03-reuse-map.md` sections 1-9 in disjoint batches; no messages. Findings: `findings/SUM-0042-v5-reuse-caching.md` (FND-0040), `SUM-0043-v5-reuse-search-staging.md` (FND-0041), `SUM-0044-v5-reuse-memory-eval.md` (FND-0042), all unverified until a human checks. Their corrections are listed in `03` section 11 and were not yet applied at the 2026-10-22 checkpoint. Main ones: the caching study's strategy ranking is about latency, not cost; the 74.7% harness base covers system prompt and tool definitions together; several scout-reported rows have no stored text; MemToolAgent does report tokens and cost.
