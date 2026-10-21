@@ -85,7 +85,7 @@ try:
     for needle in ["RemoteTrigger", "PushNotification", "CronCreate", "ScheduleWakeup", "mcp__claude_ai_Gmail", "mcp__claude_ai_Google_Calendar", "Bash(*settings.local*)", "Edit(.claude/settings.local.json)"]:
         need(needle in deny, f"deny rule present: {needle}", f"deny rule missing: {needle}")
     expected_allow = {"Bash(python tools/origin_extract.py *)", "Bash(python tools/verify_workspace.py*)", "Bash(git status*)",
-                      "Bash(git diff*)", "Bash(git log*)", "Bash(git show*)", "Bash(git add *)", "Bash(python tools/litfetch.py *)", "WebSearch", "WebFetch"}  # WebSearch/WebFetch moved from ask to allow (AUTH-014); litfetch.py is the pinned fetch helper (AUTH-015)
+                      "Bash(git diff*)", "Bash(git log*)", "Bash(git show*)", "Bash(git add *)", "Bash(python tools/litfetch.py *)", "WebSearch", "WebFetch", "Bash(git commit*)", "Bash(git push origin v5-audit)", "Bash(git push -u origin v5-audit)", "Bash(git branch --show-current*)", "Bash(git rev-parse*)", "Agent", "Bash(python design/package-v5/calc/*)", "Bash(python design/package-v5/tools/*)", "Bash(python ops/tests/guard_cases.py*)", "Bash(python design/ledger/export_ledger.py*)"}  # AUTH-020 added commit, the v5-audit push, branch checks, Agent and the V5 scripts; WebSearch/WebFetch moved from ask to allow (AUTH-014); litfetch.py is the pinned fetch helper (AUTH-015)
     got_allow = set(st.get("permissions", {}).get("allow", []))
     need(got_allow == expected_allow, "allow list is exactly the reviewed set", f"allow list differs from the reviewed set: extra={sorted(got_allow - expected_allow)} missing={sorted(expected_allow - got_allow)}")
     hooks = json.dumps(st.get("hooks", {}))

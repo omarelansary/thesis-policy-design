@@ -1,6 +1,6 @@
 """Fetch one public page or paper and store it as text with hashes in evidence/literature-20261019/ (AUTH-011/013).
 
-Usage: python tools/litfetch.py ID URL KIND        KIND = pdf | html | raw
+Usage: python tools/litfetch.py ID URL KIND AUTH   KIND = pdf | html | raw; AUTH = an id recorded in ops/AUTHORIZATIONS.md
   ID    file stem, letters digits . _ - only (the file is ID.txt, or ID.<ext> for raw)
   URL   http(s) only
 Writes the converted text, appends one line to MANIFEST.jsonl (URL, HTTP status, retrieval time, SHA-256 of the raw bytes and of
@@ -26,7 +26,9 @@ class Strip(HTMLParser):
         if not s.skip: s.o.append(d)
 
 
-def main(sid, url, kind):
+def main(sid, url, kind, auth):
+    if not re.fullmatch(r"AUTH-\d{3}", auth) or f"| {auth} |" not in open(os.path.join(WS, "ops", "AUTHORIZATIONS.md"), encoding="utf-8").read():
+        sys.exit("AUTH must be an authorization id recorded in ops/AUTHORIZATIONS.md")
     if not re.fullmatch(r"[A-Za-z0-9._-]{1,120}", sid):
         sys.exit("bad ID")
     if not re.match(r"https?://", url):
@@ -58,12 +60,12 @@ def main(sid, url, kind):
              "retrieved_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
              "raw_sha256": hashlib.sha256(data).hexdigest(), "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
              "text_lines": text.count("\n") + 1,
-             "method": "curl + " + {"pdf": "pymupdf text", "html": "html tag strip", "raw": "stored as served"}[kind], "auth": "AUTH-013"}
+             "method": "curl + " + {"pdf": "pymupdf text", "html": "html tag strip", "raw": "stored as served"}[kind], "auth": auth}
     open(os.path.join(OUT, "MANIFEST.jsonl"), "a", encoding="utf-8", newline="\n").write(json.dumps(entry) + "\n")
     print(sid, code, entry["text_lines"], "lines", entry["text_sha256"][:12])
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         sys.exit(__doc__)
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:5])

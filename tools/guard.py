@@ -13,6 +13,8 @@ Enforces, as far as a hook can:
   5. SendMessage: recipients are limited to subagent ids (a + 16 hex) and "main"; and every message of a thread is
      counted in ops/threads/<thread>/messages.log against the cap in config/limits.json. With no active thread
      (ops/threads/ACTIVE.json written by the lead from a TASK.md) messaging is refused.
+  6. git push (AUTH-020): a command that runs git push is refused unless it is exactly `git push origin v5-audit`
+     or `git push -u origin v5-audit`; force, delete, mirror, all, main and every other branch are refused.
 Limits (see ops/SAFEGUARDS.md): Bash/PowerShell command text is matched by pattern, so an obfuscated command, an
 interpreter one-liner or an unusual wildcard can still evade rule 1; rule 3 does not cover writes made through Bash;
 whether a foreign agent id resolves to another session is untested. verify_workspace.py detects some tampering afterwards.
@@ -144,10 +146,20 @@ def thread_gate():
         f.write(f"{datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')}\t{agent or 'lead'}\t->\t{to}\t{n + 1}/{cap}\n")
 
 
+PUSH = re.compile(r"(^|[;&|(]\s*)git\b[^;&|\n]*\bpush\b")
+PUSH_OK = re.compile(r"\s*git push( -u)? origin v5-audit\s*")
+
+
+def check_push(cmd):
+    if PUSH.search(cmd) and not PUSH_OK.fullmatch(cmd):
+        block("git push is allowed only as `git push origin v5-audit` or `git push -u origin v5-audit`, on its own (AUTH-020).")
+
+
 if tool == "SendMessage":
     thread_gate()
 elif tool in ("Bash", "PowerShell"):
     check_text("this command", ti.get("command", ""))
+    check_push(ti.get("command", ""))
 elif tool in ("Read", "Grep", "Glob"):
     for k in ("file_path", "path"):
         v = ti.get(k)
