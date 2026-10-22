@@ -41,7 +41,7 @@ Status: provisional, lead, 2026-10-22. Rule (plan section A row 7): rows the reg
 | Tool memory as the memory scope (the draft reply recorded in V4 `04` section 6) | **Keep, widened**: the supervisor's answer includes tool question-answer pairs and a short summary (REQ-O21-03); V5-R carries both | REQ-O21-03 |
 | A one-hour idle-gap rule (INT-T-002 L331-L345, no yes or no from the supervisor) | **Revise**: becomes the cache-lifetime choice per deployment by expected gap (DPR-0006 gap cost; `04` section 7 keeps it a decision) | DPR-0006 section 3 |
 | Bill, not tokens; model-agnostic equation (INT-T-005) | A decision, not graded; implemented as DPR-0006 | REQ-U21-07 |
-| Staged and memory combined (INT-T-005) | A decision; implemented as M2 after the shared prefix, switched on only where `05` P1 shows it pays (D-02 gives the threshold; the arithmetic does not settle it) | REQ-U21-04 |
+| Staged and memory combined (INT-T-005) | A decision; implemented as M2 after the shared prefix, in the tested policy for returning users and tested in `05` P1 (REQ-J22-01); D-02 gives the threshold for reading the result | REQ-U21-04 |
 | The June exposé ideas | Deferred by the human until V5 is finished (AUTH-020) | — |
 | The 21 Oct briefing (eleven ideas, reuse hypothesis, seed map) | Not available in the workspace; not assessed (plan row 20) | — |
 

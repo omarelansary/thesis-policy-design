@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API State</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <span class="logo"></span>
+    <div class="container" id="main-container">
+                    <header>
+                        <h1 id="page-title">Model Health Checker</h1>
+                        <div class="last-checked" id="last-checked">
+                            Last checked: Never (have you switched javascript on?)
+                        </div>
+                    </header>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><td class="model-group">Group</td><td class="model-name">Model</td><td>State</td><td>Last response time</td><td>Max Tokens</td><td>Thinking?</td><td>Vision?</td><td>Tools?</td></tr>
+                            </thead>
+                            <tbody id="models-container">
+                            </tbody>
+                        </table>
+                        <h2>Explanation of Symbols</h2>
+                        <table>
+                            <thead>
+                                <tr><td class="symbol">Symbol</td><td>Meaning</td></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="symbol">✅</td><td>Feature enabled/supported</td></tr>
+                                <tr><td class="symbol">❌</td><td>Feature disabled/unsupported</td></tr>
+                                <tr><td class="symbol">-</td><td>Feature unavailable<br/>For aliases: Feature unreliable (or status unknown)<br/>For example, <code>alias-vision</code> should only be used for vision requests. Using it to call tools would be wrong, because it is not meant for this purpose and would depend on the actual model behind the alias.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+    </div>
+
+    <script>
+        let checkInterval;
+
+        const fetchModels = async () => {
+            const response = await fetch("state.json");
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json() || {};
+        };
+
+        const updatePageTitleColor = (status) => {
+            const titleElement = document.getElementById('page-title');
+            const titleTab = document.title;
+
+            switch(status) {
+                case 'up':
+                    titleElement.className = 'title-good';
+                    titleElement.textContent = "All models are doing fine :)";
+                    document.title = `✅ ${titleTab.replace(/^.\s/, '')}`;
+                    break;
+                case 'down':
+                    titleElement.className = 'title-bad';
+                    titleElement.textContent = "There is a problem!";
+                    document.title = `❌ ${titleTab.replace(/^.\s/, '')}`;
+                    break;
+            }
+        };
+
+        const boolean_to_display_value = (bool_value) => {
+            // three values possible: null, true, false
+            let displayValue = "-";
+            if(bool_value === true){
+                displayValue = "✅";
+            }else if(bool_value === false){
+                displayValue = "❌";
+            }
+            return displayValue;
+        };
+
+        const checkAllModels = async () => {
+            const container = document.getElementById('models-container');
+            const lastCheckedElement = document.getElementById('last-checked');
+            try {
+                const modelData = await fetchModels();
+                const options = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" };
+                const lastCheckedTime = new Date(modelData.timestamp).toLocaleString([], options);
+                lastCheckedElement.innerHTML = `
+                    Last checked: ${lastCheckedTime}
+                `;
+
+                const modelsByGroup = modelData.models;
+                const groups = Object.keys(modelsByGroup).sort();
+                container.innerHTML = '';
+
+                groups.forEach(groupName => {
+                    const childCount = modelsByGroup[groupName].length;
+                    modelsByGroup[groupName].forEach((model, modelindex) => {
+                        const row = document.createElement('tr');
+                        if(modelindex == 0){
+                            row.classList.add("first-element-of-group");
+                        }
+                        row.setAttribute('data-model-id', model.name);
+                        const modelState = model.state;
+                        const modelName = (model.name == model.real_name)? model.name : model.name + " (" + model.real_name + ")";
+                        const timeTaken = (modelState == "down")? "-" : model.time_taken+"s";
+                        const timeClass = modelState === 'up' ? 'time-success' : 'time-error';
+                        const groupCell = (modelindex == 0)? `<td class="model-group" rowspan="${childCount}">${groupName}</td>` : "";
+                        const maxTokens = (model.max_tokens == 0)? "-" : model.max_tokens;
+                        const supportsReasoning = boolean_to_display_value(model.supports_reasoning);
+                        const supportsVision = boolean_to_display_value(model.supports_vision);
+                        const supportsTools = boolean_to_display_value(model.supports_tools);
+                        row.innerHTML = `
+                            ${groupCell}
+                            <td class="model-name">${modelName}</td>
+                            <td>
+                                <div class="status-cell">
+                                    <div class="status-indicator status-${modelState}"></div>
+                                    <span class="status-text">${modelState.toUpperCase()}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="time-cell">
+                                    <span class="time-value ${timeClass}">${timeTaken}</span>
+                                </div>
+                            </td>
+                            <td class="model-max-tokens">${maxTokens}</td>
+                            <td class="model-reasoning">${supportsReasoning}</td>
+                            <td class="model-vision">${supportsVision}</td>
+                            <td class="model-tools">${supportsTools}</td>
+                        `;
+                        container.appendChild(row);
+                    });
+                });
+
+                // Determine overall status
+                const overall = modelData.all_up? "up" : "down";
+                updatePageTitleColor(overall);
+            } catch (error) {
+                console.error('Error in checkAllModels:', error);
+                container.innerHTML = '';
+                lastCheckedElement.innerHTML = `
+                    <div style="padding: 20px; color: #dc2626;">
+                        Error checking models: ${error.message}
+                    </div>
+                `;
+                updatePageTitleColor('down');
+            }
+        };
+
+        // Initialization
+        const init = async () => {
+            if (checkInterval) clearInterval(checkInterval);
+            checkInterval = setInterval(() => {
+                checkAllModels();
+            }, 60 * 1000);
+            checkAllModels();
+        };
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+    <footer>
+        <p id="copyright" class="copyright">
+            Copyright 2026 &copy;, Source: <a href="https://gitlab.hrz.tu-chemnitz.de/scads-ai-llm/scads-ai-llm-components/api-state-overview">https://gitlab.hrz.tu-chemnitz.de/scads-ai-llm/scads-ai-llm-components/api-state-overview</a>
+        </p>
+    </footer>
+</body>
+</html>

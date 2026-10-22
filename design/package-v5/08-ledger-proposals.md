@@ -35,3 +35,6 @@ Status: proposals, lead, 2026-10-22. The workbook `design/ledger/PROJECT_A_OPEN_
 
 ## 3. New questions proposed
 Supervisor: Q-J31, Q-J32, Q-J33 (`05` section 3). Human: Q-U28 to Q-U32 (`05` section 4).
+
+## 4. Applied (2026-10-22, the human's acceptance Q-U31, INT-T-006 line 8)
+Applied by `design/package-v5/tools/apply_ledger_20261022.py` (in place; Change log rows appended above the append-only note) and exported with `design/ledger/export_ledger.py`: 17 rows changed as in section 1, updated with the P0 part-1 reading of the university API (vendor deferral and offering mechanisms not available there); 6 new rows N-31..N-36 (N-31 starts PARTLY ANSWERED from the status page); 9 questions Q-J31..Q-J33 and Q-U28..Q-U33 with the answers of INT-T-006 (Q-J31, Q-J32 answered by the student on the supervisor's behalf; Q-J33 reworded and open; Q-U30 explained and open; Q-U33 new); 7 links; 95 Change log rows. The Overview sheet's formulas need a recalculation in a spreadsheet program (the export does not need it). The frontier page was not regenerated.

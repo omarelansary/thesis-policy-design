@@ -125,5 +125,19 @@ Pointers: `INT-T-002 Lnnn` = body line nnn of `requirements/intake/2026-10-21-su
 
 Relation recorded: REQ-U21-03 allows reusing earlier work after verification, while REQ-U21-02 keeps the earlier retrieval work out so that it never contaminates this work; read together, earlier work enters only when the human places it explicitly and it is verified, which the ledger records as a decision when it happens (C-D11 reopen trigger).
 
+### H.4 The human's answers after the V5 audit (INT-T-006, 2026-10-22; pointers are body lines of `requirements/intake/2026-10-22-user-answers-after-v5.md`)
+| ID | Pointer | Class | Decision (short; the words are in the intake file) |
+|---|---|---|---|
+| REQ-U22-01 | line 2 | user-decision | Q-U28: the university API's public status page may be fetched to see which models the key offers (done: `evidence/literature-20261019/v5-scads-llm-state-20261022.json`). No API request with the key is authorised by these words. |
+| REQ-U22-02 | line 4 | user-decision | Q-U29: DPR-0007 is the working draft. Not an approval (no DES record). |
+| REQ-U22-03 | line 6 | unclear | Q-U30: the human asks whether lowering each session's bill per turn lowers the total bill per turn; no choice of the primary averaging yet. |
+| REQ-U22-04 | line 8 | user-decision | Q-U31: the ledger changes proposed in `design/package-v5/08-ledger-proposals.md` are accepted. |
+| REQ-U22-05 | line 10 | user-decision | Q-U32: check the exposé's ideas only, "nothing more nothing less", as ordinary candidate ideas that predate V1 and were never checked for reuse; two files outside the workspace are named (lines 12-20). |
+| REQ-J22-01 | line 23 | user-decision on the supervisor's behalf | Q-J31: the staged approach is a starting point, the staged form was an example and may change; memory must not stay switched off, it must be tested properly in the right place. |
+| REQ-J22-02 | line 25 | user-decision on the supervisor's behalf | Q-J32: "reduce the count of tools" was an example of what could lower the bill; focus on the goal (the bill). |
+| REQ-J22-03 | line 27 | unclear | Q-J33: the question about the Executor arm was not understood. |
+
+Relations recorded: REQ-J22-02 settles H.2's count-versus-tokens relation for this work in favour of the bill (with REQ-U21-07); REQ-J22-01 replaces V5-R's "memory-informed offering off by default" with "memory-informed offering in the tested policy"; REQ-J22-01 and REQ-J22-02 are the student's answers for the supervisor, so the supervisor's own confirmation remains possible.
+
 ## Read this before using sections B-D
 The 2026-10-02 transcript is automatic speech recognition with garbled names; two records disagree on whether "each step saves tokens" is per step or collective; the brief and the candidate records mark illustrative examples (tier sizes, 100 to 60, 27B model, 50%) as examples, not requirements. See `evidence/CAVEATS.md` rows 5, 6, 13.
