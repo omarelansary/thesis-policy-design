@@ -137,6 +137,10 @@ Relation recorded: REQ-U21-03 allows reusing earlier work after verification, wh
 | REQ-J22-02 | line 25 | user-decision on the supervisor's behalf | Q-J32: "reduce the count of tools" was an example of what could lower the bill; focus on the goal (the bill). |
 | REQ-J22-03 | line 27 | unclear | Q-J33: the question about the Executor arm was not understood. |
 
+| REQ-J22-04 | INT-T-007 line 1 | user-decision on the supervisor's behalf (reported second-hand) | Q-J33 answered: Executor (the GitHub project) could be a baseline but need not be taken as one or forced; learn from it and reuse it in parts, understanding how it works, its parts, its strengths and weaknesses. Narrows REQ-O02-06 for this work: Executor is a source of reusable parts and an optional baseline. |
+| REQ-U22-06 | INT-T-007 line 3 | unclear | Q-U30 still unclear to the human; the lead re-explains. The human also asks the lead to give itself access to the two outside paths of INT-T-006 (not done: changing the guard is the human's, see WD-045). |
+| REQ-U22-07 | INT-T-007 line 6 | user-decision (method question) | The human has the API key and URL and asks how they should be checked; answered with a script the human runs (`design/package-v5/tools/p0_api_probe.py`), so the key never enters the workspace or the transcript. |
+
 Relations recorded: REQ-J22-02 settles H.2's count-versus-tokens relation for this work in favour of the bill (with REQ-U21-07); REQ-J22-01 replaces V5-R's "memory-informed offering off by default" with "memory-informed offering in the tested policy"; REQ-J22-01 and REQ-J22-02 are the student's answers for the supervisor, so the supervisor's own confirmation remains possible.
 
 ## Read this before using sections B-D
