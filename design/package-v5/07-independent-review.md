@@ -48,4 +48,19 @@ Status: provisional, lead, 2026-10-22. Two design-challenger instances reviewed 
 None between the lead and the two challengers after these dispositions; the rebuttal check below may add some. The lead notes one point where the evidence leaves the matter open rather than settled: whether the staged form with three tool-deciding stages satisfies the supervisor (Q-J31) is his decision, not V5's.
 
 ## 4. Rebuttal check (RV-0023)
-Pending.
+A third design-challenger instance checked the dispositions against the files (`reviews/RV-0023.md`). It found 21 carried out and 8 carried out only in part (CH-0075, 0080, 0083, 0084, 0087, 0088, 0090, 0097), recomputed all 24 cells of the memory table and spot cells of the regime tables by hand (they matched), and checked the new sources' line ranges. It retained nine points; the lead's response to each:
+
+| Point | Severity | Retained objection | Lead's response | What changed |
+|---|---|---|---|---|
+| R1 | should-fix | D-02 omits the K = 3 matches a search appends, so the "narrow band, never pays" claim depends on K = 1 | **Conceded** | `calc/memory_seed.py` revision 3 (K = 1 and 3); h* now about 0.16-0.51 with K = 3 and 0.23-"never" with K = 1, matching the hand figures; `04` sentence 3, README, DPR-0007, HYP-0017 say the arithmetic does not settle M2 |
+| R2 | should-fix | three different quantities called the hit rate | **Conceded** | one definition everywhere: precision of the seed set (share of seeded non-core tools called); recall reported beside it (`05` P1, HYP-0017, DPR-0007) |
+| R3 | should-fix | the 10-170 range holds for d = 250 only; short definitions make the core uncached; stale "10-25" text | **Conceded** | D-01 table C by definition length and core caching; range now about 10-230 in `00`, `01`, `02`, `04`, `08` |
+| R4 | should-fix | "NONE FOUND" survives in several rows; Tool-to-Agent Retrieval is not multi-step | **Conceded** | remaining rows reworded to "not found in a limited search" or "not re-searched"; Tool-to-Agent described as a single-pass retriever; only AnyTool supports the multi-level overturn |
+| R5 | should-fix | "embedding routing adds no model request" attributed to EXT-0228, which does not say it; embedding cost has no DPR-0006 term | **Conceded** | marked [I] in `02`, `04`, `06`; V5-R07 notes the embedding call as a cost to add to DPR-0006 as a per-call tool charge; Copilot figures no longer cited as the basis |
+| R6 | should-fix | Q-J31 counts M2 as a stage though it is off by default and R-small has no D | **Conceded** | `04` section 3, `05` Q-J31 and the supervisor's question sheet state that by default two stages act (one in R-small) |
+| R7 | note | an unpaired difference at 20 tasks has a standard error near 16 points; no end-to-end rule for "nearly the same" | **Accepted** | `05` section 1; the end-to-end rule stays undecided because the human set no margin (REQ-U21-07); the reading is argued per result |
+| R8 | note | the return-case pointer is L211, not L213; L219 ("just by saying hi") is in tension with session-start seeding | **Conceded** | pointer fixed in `02`; seeding moved to the first user turn that names a task (`04` section 3, DPR-0007) |
+| R9 | note | server-side billing unknown; the uncached-core variant is pessimistic | **Accepted** | both variants labelled one-sided (`04` section 2; D-01 table C) |
+| smaller | note | HYP-0016 stale pointer and wording; ATRBench range is the abstract; search log omits the six new sources | **Accepted in part** | ATRBench pointer split into design and cost lines; search log lists the six sources; HYP-0016 belongs to the proposer and is flagged here, not edited |
+
+After this round no disagreement is retained by the lead against the reviewers. One matter is left open by the evidence rather than by disagreement: whether memory-informed offering pays, which only `05` P1 can show.

@@ -28,5 +28,7 @@ The scouts' queries above are their own report, several truncated with "..." as 
 | Skills progressive disclosure measured (slot 4, CH-0092 item 3) | "Anthropic Agent Skills progressive disclosure token cost measured evaluation" | standard | Scientific Agent Skills (2609.00065, stored); SwirlAI, DZone, aiweekly, plainenglish, codemyspec, agentman, onhelix pages (not stored; counts unverified) | One library's measured resident cost stored; no vendor evaluation found |
 Not re-searched by the lead: a recommended cap on discovery calls (slot 7); uninstructed search initiation (an origin ledger negative, FND-0037). Their rows say so.
 
+Pages stored by the lead after section 2 (pdf): v5-asknowuselater-2605.28108, v5-perstoolmem-2607.19739, v5-memcondtool-2607.09822, v5-anytool-2402.04253, v5-tool2agent-2511.01854, v5-sciagentskills-2609.00065.
+
 ## Named by scouts, not stored (leads only)
 MCPTox (arXiv 2508.14925), Mem0 paper (2504.19413), Letta and Zep benchmark posts, OpenClaw caching docs, OpenRouter tool search, Gemini function-calling page, Vercel AI SDK loop control, Spring AI blog (stored earlier in the origin as r4-spring-tool-search-blog), Twilio MCP test, claudeissues.com mirrors.

@@ -57,6 +57,6 @@ Labels as in CLAUDE.md. "Lead" = read by the lead at the cited lines in this ses
 | Criterion: input tokens, the bill recorded separately | Replaced by the human's bill objective (REQ-U21-07); tokens remain components of DPR-0006 |
 | Memory and sessions omitted (V4 `04` section 1 records the omission) | Required now (REQ-U21-04, REQ-U21-10); `04` adds them |
 | Append-only default for added tools rests on vendor statements, not a measurement (V4 `04` section 3) | Still a vendor statement, now from two providers (C2, C3) and with a by-reference offering mechanism (C5); the effect in our setting is still OURS |
-| "Show everything" may win at small catalogues | Supported in bill terms below a break-even size between about 10 and 170 tools, depending on searches per session, definition length and whether the small core caches (`calc/regime_bill.stdout.txt`, revision 2), and only where the tool block caches (C9) |
+| "Show everything" may win at small catalogues | Supported in bill terms below a break-even size between about 10 and 230 tools, depending on searches per session, definition length and whether the small core caches (`calc/regime_bill.stdout.txt`, revision 2), and only where the tool block caches (C9) |
 | The staged form's content is an output of a study | Kept: stages are kept only where `05` shows they pay |
 | No novelty claim | Kept |

@@ -1,0 +1,2 @@
+# Thread T-20261022-116: SUMMARY (lead; AUTH-020, simplest rival)
+One design-proposer instance wrote `design/proposals/DPR-0008.md` (S-min) and `hypotheses/HYP-0015.md`, `HYP-0016.md` from 01, 03, the calculations and DPR-0006, without access to the lead's design file 04 or to 02. No messages. HYP-0016 quotes the first, uncorrected memory break-even range (see `design/package-v5/07`, CH-0075); it was not edited by the lead.

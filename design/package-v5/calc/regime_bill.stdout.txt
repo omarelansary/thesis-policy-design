@@ -25,10 +25,24 @@ B. Break-even catalogue size n* (deferral cheaper above it), d = 250
  0.025   10           12           23           59           12           21           55           52           71          136
  0.025   30           11           20           50           11           19           47          102          117          168
 
-C. Break-even n* by definition length, client mode, cached core, r = 0.1, T = 10
-  d=100   D=1: 17  D=3: 34  D=10: 95
-  d=250   D=1: 12  D=3: 22  D=10: 57
-  d=1000  D=1: 9  D=3: 16  D=10: 38
+C. Break-even n* by definition length, client mode, T = 10 (after RV-0023 R3: with d = 100 the core of 5 tools
+   plus the search tool is about 800 tokens, below every quoted cache minimum, so the uncached rows are the
+   realistic case for short definitions unless the system prompt lifts the prefix above the minimum)
+  r=0.1    cached core   d=100   D=1: 17  D=3: 34  D=10: 95
+  r=0.1    cached core   d=250   D=1: 12  D=3: 22  D=10: 57
+  r=0.1    cached core   d=1000  D=1: 9  D=3: 16  D=10: 38
+  r=0.1    uncached core d=100   D=1: 50  D=3: 74  D=10: 157
+  r=0.1    uncached core d=250   D=1: 37  D=3: 52  D=10: 106
+  r=0.1    uncached core d=1000  D=1: 31  D=3: 42  D=10: 80
+  r=0.025  cached core   d=100   D=1: 17  D=3: 35  D=10: 97
+  r=0.025  cached core   d=250   D=1: 12  D=3: 23  D=10: 59
+  r=0.025  cached core   d=1000  D=1: 9  D=3: 16  D=10: 41
+  r=0.025  uncached core d=100   D=1: 69  D=3: 97  D=10: 196
+  r=0.025  uncached core d=250   D=1: 52  D=3: 71  D=10: 136
+  r=0.025  uncached core d=1000  D=1: 43  D=3: 57  D=10: 106
+   Labels: the uncached-core variant prices the appended definitions as cached and the core as fresh, which is
+   pessimistic for deferral; the 'server' mode assumes server-side search adds only output tokens, which is
+   optimistic for deferral (how server-side search iterations are billed is not stated in the stored pages).
 
 D. Window: tool block n*d against 200,000 and 1,000,000 tokens (expose-all infeasible above)
   d=100   max tools in 200k:   2000   in 1M:  10000

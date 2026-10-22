@@ -18,8 +18,8 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 
 ## 2. Thesis sufficiency against the recorded criteria only
 - A negative or not very novel result is still a thesis; a paper needs a systematic study (REQ-O14F-02): V5's admissible outcomes include dropping every new part.
-- The novelty is combining approaches and showing what works and what does not (REQ-O14F-03): the only new part is the combination M2-M3 (per-user seeding from a large catalogue after a shared prefix, with the bill as criterion); it is falsifiable in `05` P1 and, on present arithmetic, pays only in a narrow band (D-02).
-- Success is the quality of the work, nothing missed (REQ-U21-11): the reuse map lists every slot with its sources and its limits; gaps are stated as NONE FOUND with the places searched.
+- The novelty is combining approaches and showing what works and what does not (REQ-O14F-03): the only new part is the combination M2-M3 (per-user seeding from a large catalogue after a shared prefix, with the bill as criterion); it is falsifiable in `05` P1; the arithmetic gives its threshold but does not settle whether it pays (D-02 revision 3).
+- Success is the quality of the work, nothing missed (REQ-U21-11): the reuse map lists every slot with its sources and its limits; gaps are stated as "not found in a limited search" with the queries logged (`inputs/search-log-20261022.md` section 2), or as not re-searched where that is the case.
 
 ## 3. Register of recommendations and derivations
 | Id | Pointer |
@@ -30,7 +30,7 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R04 | L/v5-anthropic-tool-use-caching-20261022.md:49; L/v5-openai-tool-search-20261022.md:5 |
 | V5-R05 | REQ-O21-09; L/v5-anthropic-memory-tool-20261022.md:29 |
 | V5-R06 | L/v5-anthropic-midconv-sysmsg-20261022.md:27, :452; L/v5-openai-prompt-caching-20261022.md:441; HYP-0017 |
-| V5-R07 | EXT-0228 (a group expansion costs a cache miss and a round trip; embedding routing adds no model request); `03` section 7 (no source for a system trigger) |
+| V5-R07 | EXT-0228 (a group expansion costs a cache miss and a round trip; an embedding ranker costs an embedding call rather than a model request [I], not stated in EXT-0228); `03` section 7 (no source for a system trigger) |
 | V5-R08 | L/v5-complexitytrap-2508.21433.txt:23-25; L/v5-anthropic-context-editing-20261022.md:71; L/pdf-tokennotcost-2607.12161v5.txt:200-224; HYP-0021 |
 | V5-R09 | `05` section 1 |
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |

@@ -56,9 +56,16 @@ for r in (0.1, 0.025):
         cells = [nstar(250, t, r, x, m, c) for m, c in (('client', True), ('server', True), ('client', False)) for x in (1, 3, 10)]
         print(f"{r:>6} {t:>4} " + " ".join(f"{str(v):>12}" for v in cells))
 
-print("\nC. Break-even n* by definition length, client mode, cached core, r = 0.1, T = 10")
-for d in (100, 250, 1000):
-    print(f"  d={d:<5} " + "  ".join(f"D={x}: {nstar(d, 10, 0.1, x, 'client', True)}" for x in (1, 3, 10)))
+print("\nC. Break-even n* by definition length, client mode, T = 10 (after RV-0023 R3: with d = 100 the core of 5 tools")
+print("   plus the search tool is about 800 tokens, below every quoted cache minimum, so the uncached rows are the")
+print("   realistic case for short definitions unless the system prompt lifts the prefix above the minimum)")
+for r in (0.1, 0.025):
+    for core_cached in (True, False):
+        for d in (100, 250, 1000):
+            print(f"  r={r:<6} {'cached core  ' if core_cached else 'uncached core'} d={d:<5} " + "  ".join(f"D={x}: {nstar(d, 10, r, x, 'client', core_cached)}" for x in (1, 3, 10)))
+print("   Labels: the uncached-core variant prices the appended definitions as cached and the core as fresh, which is")
+print("   pessimistic for deferral; the 'server' mode assumes server-side search adds only output tokens, which is")
+print("   optimistic for deferral (how server-side search iterations are billed is not stated in the stored pages).")
 
 print("\nD. Window: tool block n*d against 200,000 and 1,000,000 tokens (expose-all infeasible above)")
 for d in (100, 250, 1000):

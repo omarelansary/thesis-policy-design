@@ -1,0 +1,2 @@
+# Thread T-20261022-114: SUMMARY (lead; AUTH-020, open-source scouts)
+Four general-purpose Sonnet 5.5 instances, prompts `design/package-v5/inputs/scout-prompts-20261022.md`, one per slot group, WebSearch and WebFetch, no writes. Their reports are discovery only and are not cited; the lead fetched and read every page relied on (`tools/litfetch.py ... AUTH-020`). Queries and limits in `design/package-v5/inputs/search-log-20261022.md` section 1.
