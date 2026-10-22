@@ -52,7 +52,7 @@ Stage questions and answerers (the supervisor's "one question per stage", REQ-O1
 | S1 | Which tools may this deployment or invoker ever use? | rule (deployment configuration) | static allow-lists (`03` section 4) | its saving in our setting |
 | S2 | Does the declared block cache and is it small? | rule (minimum length per model, D-01) | provider minimums, DPR-0006 | the regime boundary for our catalogue |
 | M2 | Which declared tools did this user or role need before? | rule over the memory file | memory carrier (`03` section 5); offering at a fixed prefix (`03` section 2) | **hit rate h against h* (D-02)**; accuracy effect of seeded tools |
-| D | Which tool do I need now? | model plus the provider's or a client ranker | vendor tool search (`03` section 3) | uninstructed initiation; recall on our catalogue |
+| D | Which tool do I need now? | model plus the provider's or a client ranker | vendor tool search (`03` section 3); Copilot's usage-based core and embedding routing as the shipped analogue (EXT-0228) | uninstructed initiation; recall on our catalogue |
 | H | Is the old history worth clearing now? | rule (`clear_at_least` logic) | observation masking, context editing (`03` section 6) | the cache interaction on our provider |
 | W | What should the next session know? | rule or one cheap call | plain Markdown memory (REQ-O21-09), memory tool (`03` section 5) | what to keep |
 
@@ -61,7 +61,7 @@ How the requirements are met: a filtered tool comes back through D (REQ-O14F-06,
 ## 4. Candidates compared (same criteria)
 | Candidate | Parts | Bill (relative, from D-01 and D-02) | Accuracy risk | Evidence status |
 |---|---|---|---|---|
-| K0 expose-all with caching and a summary | all tools cached; summary memory | lowest in R-small; 2-30x the tool-block cost of deferral in R-mid; infeasible in R-large; pays the full prefix on every return | none from exposure itself; selection among many tools degrades with size on some models (`03` section 3, vendor 30-50 tools note, scout-reported) | all parts established |
+| K0 expose-all with caching and a summary | all tools cached; summary memory | lowest in R-small; 2-30x the tool-block cost of deferral in R-mid; infeasible in R-large; pays the full prefix on every return | none from hiding tools; but a large visible toolset itself cost 2-5 points of resolution rate in Copilot's benchmarks (EXT-0228, vendor's own) | all parts established |
 | K1 vendor deferral (core plus native search), no memory | P0b, D | low in R-mid and R-large; every session rediscovers its tools (D searches) | search misses; uninstructed initiation unknown | mechanism established; performance not |
 | V4 unchanged | P0, optional request selector P1, discovery P2, system trigger P3, token criterion | P1 and P3 each add requests; no session terms | no source supports P3; P1 recall unlabelled at size | V4 `01` section 6 |
 | **V5-R (recommended)** | S1, S2, P0a/P0b, M1-M3, D, H, W | as K1 minus the searches memory avoids, plus the seeded definitions carried (D-02) | as K1, plus wrong or stale memory (`03` section 5: memory frameworks fail at grounding parameters) | mechanisms established; M2 effect OURS |
