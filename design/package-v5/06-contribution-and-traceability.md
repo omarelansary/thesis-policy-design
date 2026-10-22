@@ -10,15 +10,15 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | Deferral and search, append-only | Reused (vendor mechanism); uninstructed use needs validation (HYP-0019) | `03` section 3 |
 | Usage-based core, groups, routing | Reused (Copilot's shipped design, EXT-0228) | `03` section 4 |
 | Deployment filter (S1) | Reused mechanism (static allow-lists) | `03` section 4 |
-| Regime switch (S2) by D-01 | **New as a rule** (derived arithmetic over vendor prices and minimums); needs a reading (P5) | scout groups 1-2; blind A and B |
-| Memory-informed offering after the shared prefix (M2-M3) | **New**; needs validation (HYP-0017) | scout group 3; blind A and B; V4 `04` section 4; steward C |
+| Regime switch (S2) by D-01 | **Reused**: Claude Code ships a threshold that loads MCP tools upfront below 10% of the window (`03` section 3); DPR-0008 proposes the same switch independently; V5 adds only the bill arithmetic for where to set it (D-01), which needs a reading (P5) (corrected after CH-0081) | `03` section 3; DPR-0008 |
+| Memory-informed offering after the shared prefix (M2-M3) | **New as a combination** (personalized tool memory over small tool sets exists, `03` section 5); gated; needs validation (HYP-0017); not established | scout group 3; blind A and B; V4 `04` section 4; steward C; targeted searches (search log section 2) |
 | Markdown memory file (M1, W) | Reused (the supervisor's prescription; Anthropic memory tool as carrier) | `03` section 5 |
-| Observation masking (H) | Reused result (one study); transfer needs validation (HYP-0021) | `03` section 6 |
+| Observation masking (H) | Reused result (one study); not in the default; an option for deployments with large tool results (HYP-0021) | `03` section 6 |
 | Bill criterion | Reused (DPR-0006) | — |
 
 ## 2. Thesis sufficiency against the recorded criteria only
 - A negative or not very novel result is still a thesis; a paper needs a systematic study (REQ-O14F-02): V5's admissible outcomes include dropping every new part.
-- The novelty is combining approaches and showing what works and what does not (REQ-O14F-03): the new parts are the combination (M2-M3 with S2); each is falsifiable in `05`.
+- The novelty is combining approaches and showing what works and what does not (REQ-O14F-03): the only new part is the combination M2-M3 (per-user seeding from a large catalogue after a shared prefix, with the bill as criterion); it is falsifiable in `05` P1 and, on present arithmetic, pays only in a narrow band (D-02).
 - Success is the quality of the work, nothing missed (REQ-U21-11): the reuse map lists every slot with its sources and its limits; gaps are stated as NONE FOUND with the places searched.
 
 ## 3. Register of recommendations and derivations
@@ -30,8 +30,8 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R04 | L/v5-anthropic-tool-use-caching-20261022.md:49; L/v5-openai-tool-search-20261022.md:5 |
 | V5-R05 | REQ-O21-09; L/v5-anthropic-memory-tool-20261022.md:29 |
 | V5-R06 | L/v5-anthropic-midconv-sysmsg-20261022.md:27, :452; L/v5-openai-prompt-caching-20261022.md:441; HYP-0017 |
-| V5-R07 | EXT-0228 (a group expansion costs a cache miss and a round trip); `03` section 4 (multi-step narrowing NONE FOUND) |
-| V5-R08 | L/v5-complexitytrap-2508.21433.txt:23-25; L/v5-anthropic-context-editing-20261022.md:71; HYP-0021 |
+| V5-R07 | EXT-0228 (a group expansion costs a cache miss and a round trip; embedding routing adds no model request); `03` section 7 (no source for a system trigger) |
+| V5-R08 | L/v5-complexitytrap-2508.21433.txt:23-25; L/v5-anthropic-context-editing-20261022.md:71; L/pdf-tokennotcost-2607.12161v5.txt:200-224; HYP-0021 |
 | V5-R09 | `05` section 1 |
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |

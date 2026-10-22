@@ -1,99 +1,104 @@
 # 04. Design: the combined staged-and-memory policy, built from established parts (V5, AUTH-020)
 
-Status: provisional, lead, 2026-10-22; the simplest rival is written separately by the design-proposer (DPR-0008, `design/proposals/`); both are challenged in `07`. **Nothing here is validated, approved, selected or final. No parameter is given a value.** Every mechanism below is taken from `03`; what is untested in our setting is marked OURS and goes to `05`.
+Status: provisional, lead, revision 2 of 2026-10-22 after the independent review (RV-0021, RV-0022; adjudication in `07`). The simplest rival was written separately by the design-proposer (DPR-0008). **Nothing here is validated, approved, selected or final. No parameter is given a value.** Every mechanism is taken from `03`; what is untested in our setting is marked OURS and goes to `05`.
 
 ## 1. What V5 concludes, in five sentences
-1. In bill terms the decision is mostly settled by arithmetic, not by experiment: with the stored prices, deferring tools and searching beats exposing every tool from about 10 to 75 tools upward, whatever the cache read price (D-01), so above a few dozen tools the open question is **accuracy**, not cost.
-2. Two providers now let a policy change what is **offered** per turn without touching the cached definitions (`03` section 2: Anthropic mid-conversation tool changes, beta; OpenAI `allowed_tools`), so the supervisor's stages can act at session start and per turn without the cache breaks that sank per-step tool swapping.
-3. The established parts (cached prefix, vendor deferral and search, append-only discovery, observation masking, a plain Markdown memory file) are adopted as they are; V5 adds only what the requirements demand and no source has measured: **memory deciding which tools are offered to a returning user** (REQ-U21-04) and the **session-gap economics** of returning users.
-4. Against V4 the verdict is **V4 substantially revised**: the criterion becomes the bill (DPR-0006), memory and sessions enter, the request-level system selector and the system trigger leave the default (no evidence for either, and each costs a request), and the staged form is kept as two session-level stages plus on-demand discovery.
-5. The strongest rival is the vendor's own design (a small core plus native tool search, no memory); V5-R beats it only if memory-informed offering reaches the break-even hit rate of D-02 on returning users, which is the first thing `05` tests.
+1. In bill terms, deferral with a small core and search is cheaper than exposing every tool above a break-even catalogue size that lies between about 10 and 170 tools under the stored prices, depending mainly on how often the model must search per session, on definition length and on whether the small core prefix itself caches (D-01, `calc/regime_bill.stdout.txt` tables A-C); **above a few hundred tools deferral is cheaper under every variant computed**, so there the open question is accuracy, not cost.
+2. Two providers document ways to change what is **offered** per turn without touching the cached definitions (Anthropic mid-conversation tool changes, beta, listed models; OpenAI `allowed_tools` and the developer-role `additional_tools` item, `03` section 2), so session-level stages can act without the cache breaks that sank per-step tool swapping, **where the student's API passes these mechanisms through** (unknown; `05` P0).
+3. Memory-informed offering (REQ-U21-04) pays in bill terms only in a narrow band: a seeded tool must be needed again in about a third to a half of returning sessions when sessions are short, more as they lengthen, and in long sessions at a 0.1 read price it never pays (D-02, `calc/memory_seed.stdout.txt`); it is therefore kept as the required combined stage but **switched on only where `05` P1 measures a hit rate above that break-even**.
+4. The **recommended default is the rival's core** (DPR-0008: the regime switch, a small core plus vendor deferral and search, a short memory file, recovery by search), with the deployment filter and the gated memory-informed offering on top; against V4 the verdict is **V4 substantially revised** (bill criterion, memory and sessions in, request-level system selector and system trigger out of the default).
+5. On present evidence the V5-specific addition (memory-informed offering) is **not established**; "no improvement established over DPR-0008" is the honest current reading for it, and `05` P1 is the test that can change that.
 
-## 2. Regimes (derived, D-01; `calc/regime_bill.stdout.txt`)
+## 2. Regimes (derived, D-01; inputs and assumptions in the script header)
 | Regime | Condition | Cheapest in bill terms | Accuracy question |
 |---|---|---|---|
-| R-small | Tool block below the model's minimum cacheable length (512-4,096 tokens, `03` section 1), or fewer than about 10-25 tools | Expose all (the block is small; deferral's extra request costs more than it saves) | None beyond the baseline |
-| R-mid | Tool block caches and fits the window; roughly 25 to a few hundred tools | Deferral with a small core, by a factor of about 2-30 (D-01 table, T = 10) | Does search find the tool? Vendor results not established (`03` section 3); first-stage retrieval is weak (ToolRet) |
-| R-large | Tool block exceeds the window (about 200 to 10,000 tools by definition length, V4 `01` section 1) | Deferral is the only option | Same, more so |
-| R-return | Any size, gap between sessions longer than the cache lifetime | Every session pays the prefix write again: expose-all pays P_all·(w − r) per return (115,000 fresh-token equivalents at 400 tools, d = 250), deferral pays only its core | Does memory shorten the first turns? (D-02) |
+| R-small | Below the break-even n* (about 10-60 tools with a cached core and few searches per session; up to about 170 when the core prefix falls below the cache minimum or searches are frequent) | Expose all | None beyond the baseline |
+| R-mid | Above n*, tool block within the window (window limits: 200-2,000 tools at 200k tokens and 1,000-10,000 at 1M, by definition length, table D) | Deferral; the margin grows with size (table A) and shrinks with frequent searches (at D = 10, 100 tools, d = 250 the ratio is 0.45-0.57, not 0.1) | Does search find the tool (ToolRet: first-stage retrieval is weak; HYP-0019)? |
+| R-large | Tool block exceeds the window | Deferral is the only option | Same, more so |
 
-Break-even barely moves with the read price because both designs pay the same read rate on what they keep (D-01). It moves with the number of discoveries per session D (n* = 10-13 at D = 1, 40-74 at D = 10): **the more often the model must search, the larger the catalogue at which deferral starts to pay.** Memory acts on exactly that term.
+**Cold and warm starts.** Every session in D-01 starts with a write. Whether a session's first request is warm depends on whether another request of the same deployment wrote the identical prefix within the lifetime: **the request rate across users, not the gap of one user, decides it** (DPR-0006 section 3; table E gives the saving of a warm start as a difference, never to be added to the rows). A shared prefix (V5-R06) is what makes warm starts across users possible; per-user content inside the prefix would prevent it.
+
+**Discovery mode matters.** A client-side search adds a request; Anthropic's server-side tool search runs inside one request (L/v5-anthropic-tool-search-20261022.md:601-652; DPR-0006 section 1). Both are computed; the break-even moves by a few tools, not by an order of magnitude.
 
 ## 3. The policy V5-R (run-time graph)
 
 ```mermaid
 flowchart TD
-  S([Session start or return]) --> S1["S1 Deployment filter (rule, once per deployment)<br/>Which tools may this deployment or invoker ever use?<br/>Declare only those in tools; never change tools in the session"]
-  S1 --> S2{"S2 Regime (rule)<br/>Does the declared block cache and is it small?"}
+  S([Session start or return]) --> S1["S1 Deployment configuration (rule, set per deployment, not per request)<br/>Which tools may this deployment or invoker ever use? Declare only those;<br/>never change the tools array within a session"]
+  S1 --> S2{"S2 Regime (rule, per deployment, from D-01)<br/>Below the break-even size, or no caching on this API?"}
   S2 -->|"R-small"| P0a["Prefix: all declared tools, cached"]
   S2 -->|"R-mid, R-large"| P0b["Prefix: small core non-deferred + search tool;<br/>the rest deferred; one-line category index in system"]
   P0a --> M1
-  P0b --> M1["M1 Memory read (rule)<br/>Load the user's Markdown memory: short summary,<br/>tool question-answer pairs, tools used before"]
-  M1 --> M2{"M2 Memory-informed offering (rule)<br/>Which declared tools did this user or role need before?"}
+  P0b --> M1["M1 Memory read (rule)<br/>Short summary and an index of past tool question-answer pairs;<br/>full entries only when the model asks (memory tool view)"]
+  M1 --> G{"G Memory-informed offering switched on for this deployment?<br/>(only if 05 P1 measured h above h*)"}
+  G -->|"off (default)"| A
+  G -->|"on"| M2{"M2 Which declared tools did this user or role need before?"}
   M2 -->|"none or new user"| A
-  M2 -->|"seed set"| M3["Offer the seed set AFTER the shared prefix<br/>Anthropic: tool_addition by reference; OpenAI: allowed_tools or preloaded search output<br/>(never by editing tools)"]
+  M2 -->|"seed set"| M3["Offer the seed set AFTER the shared prefix<br/>Anthropic: tool_addition by reference (beta); OpenAI: additional_tools item (no cache breakpoint on it);<br/>neither: append the seed definitions to the first user turn<br/>(never by editing tools)"]
   M3 --> A
   A{"A Agent step (model)<br/>request, history, offered tools, memory"}
   A -->|"calls an offered tool"| R["Result enters history"]
-  R --> H{"H History rule (rule)<br/>Long run: mask observations older than the window,<br/>only when the cleared tokens pay the cache rewrite"}
-  H --> A
-  A -->|"calls the search tool"| D["D Discover (vendor search or client search)<br/>append matches inline; they stay for the session"]
+  R --> A
+  A -->|"calls the search tool"| D["D Discover (vendor search, or a client ranker such as embedding routing)<br/>append matches inline; they stay for the session"]
   D -->|"matches"| A
-  D -->|"no match: empty result"| A
-  A -->|"answers / ends turn"| E{"E Session end?"}
+  D -->|"empty result"| A
+  A -->|"ends turn"| E{"E Session end?"}
   E -->|"no: next user turn"| A
-  E -->|"yes"| W["W Memory write (rule or one cheap call)<br/>summary of 3-4 lines, tool question-answer pairs, tools used"]
+  E -->|"yes"| W["W Memory write (rule or one cheap call)<br/>short summary, tool question-answer pairs, tools used"]
   W --> Z([End])
 ```
 
-Stage questions and answerers (the supervisor's "one question per stage", REQ-O14F-06):
-| Stage | Question | Answerer | Established part | What is OURS |
-|---|---|---|---|---|
-| S1 | Which tools may this deployment or invoker ever use? | rule (deployment configuration) | static allow-lists (`03` section 4) | its saving in our setting |
-| S2 | Does the declared block cache and is it small? | rule (minimum length per model, D-01) | provider minimums, DPR-0006 | the regime boundary for our catalogue |
-| M2 | Which declared tools did this user or role need before? | rule over the memory file | memory carrier (`03` section 5); offering at a fixed prefix (`03` section 2) | **hit rate h against h* (D-02)**; accuracy effect of seeded tools |
-| D | Which tool do I need now? | model plus the provider's or a client ranker | vendor tool search (`03` section 3); Copilot's usage-based core and embedding routing as the shipped analogue (EXT-0228) | uninstructed initiation; recall on our catalogue |
-| H | Is the old history worth clearing now? | rule (`clear_at_least` logic) | observation masking, context editing (`03` section 6) | the cache interaction on our provider |
-| W | What should the next session know? | rule or one cheap call | plain Markdown memory (REQ-O21-09), memory tool (`03` section 5) | what to keep |
+Stage questions and answerers (REQ-O14F-06):
+| Stage | Kind | Question | Answerer | Established part | What is OURS |
+|---|---|---|---|---|---|
+| S1 | deployment configuration | Which tools may this deployment or invoker ever use? | rule | static allow-lists, Copilot's usage-based core (EXT-0228) | its effect in our setting |
+| S2 | deployment configuration | Below the break-even size, or no caching? | rule | provider minimums and prices; Claude Code ships an equivalent threshold (`03` section 3) | where n* lies for our catalogue (`05` P5) |
+| M2 | run-time, session start, gated | Which declared tools did this user or role need before? | rule over the memory file | memory carrier (`03` section 5); offering mechanisms (`03` section 2) | **hit rate h against h* (`05` P1)** |
+| D | run-time, each request | Which tool do I need now? | model plus vendor search or a client ranker | vendor tool search; embedding routing (EXT-0228, vendor figures); hierarchical retrieval in research (AnyTool, Tool-to-Agent Retrieval, `03` section 4) | uninstructed initiation (HYP-0019); recall on our catalogue |
+| W | run-time, session end | What should the next session know? | rule or one cheap call | plain Markdown memory (REQ-O21-09), memory tool | what to keep |
 
-How the requirements are met: a filtered tool comes back through D (REQ-O14F-06, REQ-O02-09); the number of stages is open and each is kept only if `05` shows it pays (REQ-O14F-06); every stage's own cost is in the bill (REQ-O02-02); memory is in service of tool calls (REQ-O21-01); staged offering and memory are one policy (REQ-U21-04); likelihood of who asks enters only through S1 and M2 (REQ-U21-09). Withdrawing tools per turn (`tool_removal`) is **not** in the default: at a fixed prefix it saves no tokens (the definitions are still read at the cache price) and its accuracy benefit is untested; it is an arm in `05`.
+Only S1, M2 and D decide which tools the model sees; S2 chooses a prefix layout and W writes memory. **REQ-O14F-06 is met in reduced form**: one question per stage, the number of stages open, and a tool held back by M2 or by deferral comes back through D; a tool excluded by S1 does not come back, because S1 is the deployment's permission set (that is its purpose). Multi-step narrowing (1,000 to 800 to 500 to 10, REQ-O14F-05) is not in the default: hierarchical retrieval exists in research (`03` section 4), but in our setting each extra model-answered level is a request and, without the offering mechanisms, a cache break; it is a candidate for D's ranker, not a separate stage.
+
+**History management for long single runs** (observation masking with the `clear_at_least` rule, `03` section 6) is **not in the default**: its evidence is one coding-agent study, tool outputs were a small share of cost in coding agents, clearing invalidates the cached prefix, and context editing is beta; it is a `05` arm (P4) for deployments with large tool results.
 
 ## 4. Candidates compared (same criteria)
-| Candidate | Parts | Bill (relative, from D-01 and D-02) | Accuracy risk | Evidence status |
+| Candidate | Parts | Bill (relative, D-01 and D-02) | Accuracy risk | Evidence status |
 |---|---|---|---|---|
-| K0 expose-all with caching and a summary | all tools cached; summary memory | lowest in R-small; 2-30x the tool-block cost of deferral in R-mid; infeasible in R-large; pays the full prefix on every return | none from hiding tools; but a large visible toolset itself cost 2-5 points of resolution rate in Copilot's benchmarks (EXT-0228, vendor's own) | all parts established |
-| K1 vendor deferral (core plus native search), no memory | P0b, D | low in R-mid and R-large; every session rediscovers its tools (D searches) | search misses; uninstructed initiation unknown | mechanism established; performance not |
-| V4 unchanged | P0, optional request selector P1, discovery P2, system trigger P3, token criterion | P1 and P3 each add requests; no session terms | no source supports P3; P1 recall unlabelled at size | V4 `01` section 6 |
-| **V5-R (recommended)** | S1, S2, P0a/P0b, M1-M3, D, H, W | as K1 minus the searches memory avoids, plus the seeded definitions carried (D-02) | as K1, plus wrong or stale memory (`03` section 5: memory frameworks fail at grounding parameters) | mechanisms established; M2 effect OURS |
-| DPR-0008 simplest rival (proposer) | see `design/proposals/DPR-0008.md` | | | written independently of the lead |
-| Executor baseline (REQ-O02-06) | one shared catalogue with intent search and per-tool policy (`03` section 4) | to be read from its own MCP surface before the arm is defined | | required baseline |
+| K0 expose-all with caching and a summary | all tools cached; summary memory | lowest below n*; above n* the ratio deferral/expose-all falls from about 0.5-0.9 near n* to below 0.1 at 400+ tools (table A); infeasible above the window | none from hiding tools; a large visible toolset may lower accuracy (Copilot reports 2-5 points, vendor benchmark, not relied on) | all parts established |
+| DPR-0008 S-min (proposer) | byte-stable prefix, regime switch, core plus deferral and search, capped discovery, summary memory | as K1 | as K1 | written independently of the lead; parts established |
+| K1 vendor deferral, no memory | core plus native search | as DPR-0008 without the regime switch (pays more below n*) | search misses; uninstructed initiation unknown | mechanism established, performance not |
+| V4 unchanged | prefix, optional request selector P1, discovery P2, system trigger P3, token criterion | P1 (if model-answered) and P3 each add requests; no session terms | no source supports P3 | V4 `01` section 6 |
+| **V5-R (recommended, = DPR-0008 + S1 + gated M2)** | `04` section 3 | DPR-0008's, plus or minus the M2 term: a saving only above h* (0.23-0.99 or never, D-02) | as DPR-0008, plus stale or wrong memory | M2 not established (NONE FOUND for large catalogues with a bill; personalized tool memory exists over small tool sets, `03` section 5) |
+| DPR-0009 blind alternative | static core plus native search, role filter, summary memory | as DPR-0008 | as DPR-0008 | model output recorded as a candidate |
+| Executor baseline (REQ-O02-06) | one shared catalogue with intent search and per-tool policy | not computed: its MCP surface must be read first (`05` P0) | — | required baseline; the arm is defined after P0 |
 
 ## 5. When each part fails, is unnecessary, or is dominated
 | Part | Fails when | Unnecessary when | Dominated by |
 |---|---|---|---|
-| S1 deployment filter | the invoker crosses roles in one session (D recovers only if the tool is declared) | the catalogue is small or every role needs everything | K0 in R-small |
-| S2 regime switch | the minimum or window is misread for the model | one regime covers all deployments | a fixed choice |
-| P0b deferral | search misses; the model never searches uninstructed; the provider lacks deferral (then a client search must keep the prefix and append, `03` section 3) | R-small | K0 in R-small |
-| M2 memory-informed offering | hit rate below h* (D-02: about 0.22-0.30 for 3-10 requests, up to 0.69 for 100); stale tools; per-user seeds placed inside the prefix would split a shared cache (placed after it here) | single long runs; new users | K1 when returning users rarely reuse tools |
-| D discovery | ranker recall is poor (ToolRet); injected tool documents (ToolHijacker) | R-small | K0 in R-small |
-| H masking | the cleared tokens do not pay the rewrite (context editing's own warning, `03` section 6); a masked observation was needed later | short runs | no clearing |
-| W memory write | the summary drops what the next task needs (Mem2ActBench, blind B) | no returning users | no memory |
+| S1 | the invoker crosses roles in one session | small catalogue or every role needs everything | K0 in R-small |
+| S2 | the minimum or window is misread; n* is mis-set because searches per session (D) are unknown | one regime covers all deployments | a fixed choice |
+| P0b deferral | search misses; the model never searches uninstructed; the provider lacks deferral (then a client search must keep the prefix and append); **deferred definitions are re-read on every request in some clients (one user report, L/lit-ccissue-59650-deferred-cache-reads.txt:21-41; the vendor says deferred tools are stripped from the prefix, `03` section 3) [U]** | R-small | K0 in R-small |
+| M2 | h below h*; stale tools; memory biasing tool parameters (Mem2ActBench; a memory-induced tool-drift paper is stored, L/arxiv-2605.24941.txt, not read here) | single long runs; new users; long sessions at a 0.1 read price (D-02 "never") | DPR-0008 |
+| D | ranker recall is poor (ToolRet); injected tool documents (ToolHijacker, EXT-0227) | R-small | K0 in R-small |
+| W | the summary drops what the next task needs | no returning users | no memory |
+
+**Provider routes (CH-0086).** If the student's API passes Anthropic's offering mechanism, M3 uses `tool_addition`; if it is OpenAI-compatible with tool search, `additional_tools`; if it passes neither, M3 appends seed definitions to the first user turn (cache-safe, but a write on every session); if it applies no caching, S2 chooses deferral at every size where the core is smaller than the catalogue, and M2's carry cost becomes a fresh-token cost (h* rises). P0 decides which route applies.
 
 ## 6. Recommendations (V5-Rnn) and derivations (D-nn)
-- **V5-R01.** Use DPR-0006 as the only cost criterion and report its components; do not add a token criterion beside it.
-- **V5-R02.** Never change the `tools` array within a session; change what is offered only through the providers' offering mechanisms (`03` section 2) or appended discoveries (`03` section 3).
-- **V5-R03.** Choose expose-all or deferral per deployment by D-01 (minimum cacheable length, window, catalogue size), not per request.
-- **V5-R04.** Adopt vendor tool search where the model supports it; where it does not, a client search that returns definitions appended at the end, never inserted.
-- **V5-R05.** Keep memory a plain Markdown file in the first loop (REQ-O21-09): summary, tool question-answer pairs, tools used.
-- **V5-R06.** Seed memory-chosen tools after the shared prefix, never inside it, so users with the same deployment share one cached prefix.
-- **V5-R07.** Drop the request-level system selector and the system trigger from the default; keep them as `05` arms only if the loop shows a reason.
-- **V5-R08.** For long single runs, mask old observations by the established rule and clear only when it pays the rewrite.
-- **V5-R09.** Measure first what is OURS (`05`), in the order: university API cache fields; memory hit rate against h*; offering accuracy at a fixed prefix; uninstructed recovery.
-- **D-01.** Tool-block bill, deferral against expose-all: `calc/regime_bill.py` and its stdout (inputs cited in the script header).
-- **D-02.** Break-even hit rate of memory-seeded tools, and the cost of keeping tokens cached: `calc/memory_seed.py` and its stdout.
+- **V5-R01.** Use DPR-0006 as the only cost criterion and report its components.
+- **V5-R02.** Never change the `tools` array within a session; change what is offered only through the providers' offering mechanisms or appended discoveries.
+- **V5-R03.** Choose expose-all or deferral per deployment by D-01, using the measured searches per session and checking that the chosen prefix caches; not per request.
+- **V5-R04.** Adopt vendor tool search where the model and API support it; otherwise a client search (an embedding ranker adds no model request) that appends definitions at the end.
+- **V5-R05.** Keep memory a plain Markdown file in the first loop (REQ-O21-09): a short summary, an index of tool question-answer pairs (full entries on request), tools used.
+- **V5-R06.** Keep the prefix identical across users of a deployment; put anything per user after it.
+- **V5-R07.** Leave the system trigger out of the default (no source supports it) and use embedding or vendor routing for D rather than a model-answered selector stage (Copilot's figures, vendor; each model-answered stage adds a request). Memory-informed offering is held to the same standard: it is in the policy because REQ-U21-04 requires the combination, and it is switched on only where `05` P1 shows it pays.
+- **V5-R08.** Use observation masking only as a `05` arm for deployments with large tool results.
+- **V5-R09.** Measure first what is OURS, in this order: P0 (university API: cache fields and which mechanisms pass through; Executor's MCP surface), P5 (where n* lies, and whether deferred definitions are billed), P3 (uninstructed recovery), P1 (memory hit rate), P2 (offering accuracy), P4 (masking, only if needed).
+- **D-01.** Tool-block bill, deferral against expose-all, in two discovery modes and with an uncached-core variant: `calc/regime_bill.py` (revision 2) and its stdout.
+- **D-02.** Break-even hit rate of memory-seeded tools (revision 2: needed seeds carry their longer read; both discovery modes), and the cost of keeping tokens cached: `calc/memory_seed.py` and its stdout.
 
 ## 7. Symbols left as decisions (never valued here)
-The core size; the search width; the memory seed size m; the masking window; `clear_at_least`; the cache lifetime per deployment; the call cap; the primary averaging (ratio of sums against mean of per-session ratios, DPR-0006 section 4); the price table and provider (REQ-U21-08).
+Core size; search width; memory seed size m; the gate for M2 (h against h*); searches per session D (to be measured); cache lifetime per deployment; call cap; the length of the memory summary; the primary averaging of the bill (DPR-0006 section 4); price table and provider (REQ-U21-08).
 
 ## 8. What is not claimed
-No saving is claimed for any candidate; D-01 and D-02 are first-order arithmetic under stated assumptions, not results. No novelty is claimed (REQ-O14F-03 frames the novelty as the combination; V5 found no source measuring this combination, which is a bounded negative). Vendor performance numbers are not relied on. The mid-conversation offering mechanism is beta and provider-specific.
+No saving is claimed for any candidate; D-01 and D-02 are first-order arithmetic under stated assumptions, with no empirical source for D, H, q or the core size. No novelty is claimed (REQ-O14F-03 frames the novelty as the combination; personalized tool memory exists in research over small tool sets, and no source measuring memory-informed offering over a large catalogue with a bill was found in the targeted searches logged in `inputs/search-log-20261022.md` section 2). Vendor performance numbers are not relied on for any decision. Beta features: Anthropic mid-conversation tool changes and context editing.
