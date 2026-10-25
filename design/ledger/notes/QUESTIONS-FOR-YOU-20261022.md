@@ -8,3 +8,12 @@ Source: `design/package-v5/05-poc-loop-and-e2e.md` section 5 and `08-ledger-prop
 4. **Q-U31.** Apply the ledger changes proposed in `design/package-v5/08-ledger-proposals.md`?
 5. **Q-U32.** Once V5 is accepted, supply the June exposé so its ideas can be tested against V5's result.
 6. **Pushes.** The lead's `git push` is refused by the auto-mode classifier; push `v5-audit` yourself, or change that setting if you want the lead to push.
+
+## Status (2026-10-22, after INT-T-006 and INT-T-007)
+- Q-U28: answered in part (the status page was read). Next step is Q-U33.
+- Q-U29: answered. DPR-0007 is the working draft.
+- Q-U30: **open.** Choose the headline average: A (all money divided by all turns), B (the average of each session's cost per turn), or both shown equally. The lead recommends A, with B beside it.
+- Q-U31: answered. The ledger changes are applied.
+- Q-U32: answered. **Waiting on you:** copy the exposé into `design/package-v5/inputs/expose/` (commands in the session). Copy the experiment brief only if it holds ideas and no earlier results.
+- Q-U33: **open.** Run `design/package-v5/tools/p0_api_probe.py` with your key in your own terminal, and save the output to `design/package-v5/inputs/p0-api-probe-output.txt`.
+- Pushes: `git push origin v5-audit`.
