@@ -1,0 +1,39 @@
+Ratio deferral / expose-all for the tool block; appended entries at FRACTION of the full size (core stays full)
+ FRACTION  tools   D    mode   ratio
+      1.0    100   3  client   0.214
+      1.0    100   3  server   0.177
+      1.0    100  10  client   0.568
+      1.0    100  10  server   0.446
+      1.0    400   3  client   0.053
+      1.0    400   3  server   0.044
+      1.0    400  10  client   0.142
+      1.0    400  10  server   0.111
+      0.7    100   3  client   0.192
+      0.7    100   3  server   0.155
+      0.7    100  10  client   0.494
+      0.7    100  10  server   0.372
+      0.7    400   3  client   0.048
+      0.7    400   3  server   0.039
+      0.7    400  10  client   0.124
+      0.7    400  10  server   0.093
+      0.4    100   3  client   0.170
+      0.4    100   3  server   0.133
+      0.4    100  10  client   0.421
+      0.4    100  10  server   0.299
+      0.4    400   3  client   0.042
+      0.4    400   3  server   0.033
+      0.4    400  10  client   0.105
+      0.4    400  10  server   0.075
+      0.2    100   3  client   0.155
+      0.2    100   3  server   0.119
+      0.2    100  10  client   0.372
+      0.2    100  10  server   0.250
+      0.2    400   3  client   0.039
+      0.2    400   3  server   0.030
+      0.2    400  10  client   0.093
+      0.2    400  10  server   0.063
+
+Reading: with K = 3 matches per search, the appended definitions are about half of the per-discovery cost,
+so tiering them cuts the deferral bill of the tool block by roughly a fifth to a third at FRACTION 0.4; the saving
+grows with searches per session D and with K. It does not change which regime is cheapest. Whether tiered entries keep
+accuracy (the model may need the full schema to call correctly) is not shown here (05 P2/P3).

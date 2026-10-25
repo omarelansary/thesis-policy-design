@@ -12,8 +12,8 @@ Source: `design/package-v5/05-poc-loop-and-e2e.md` section 5 and `08-ledger-prop
 ## Status (2026-10-22, after INT-T-006 and INT-T-007)
 - Q-U28: answered in part (the status page was read). Next step is Q-U33.
 - Q-U29: answered. DPR-0007 is the working draft.
-- Q-U30: **open.** Choose the headline average: A (all money divided by all turns), B (the average of each session's cost per turn), or both shown equally. The lead recommends A, with B beside it.
+- Q-U30: answered 2026-10-25: A (all money divided by all turns) is the headline, with B (the average of each session's cost per turn) beside it.
 - Q-U31: answered. The ledger changes are applied.
-- Q-U32: answered. **Waiting on you:** copy the exposé into `design/package-v5/inputs/expose/` (commands in the session). Copy the experiment brief only if it holds ideas and no earlier results.
-- Q-U33: **open.** Run `design/package-v5/tools/p0_api_probe.py` with your key in your own terminal, and save the output to `design/package-v5/inputs/p0-api-probe-output.txt`.
+- Q-U32: answered and done 2026-10-25: the two files were checked, ideas only (`design/package-v5/09-expose-ideas-checked.md`).
+- Q-U33: **open, deferred by you on 2026-10-25** (cannot run it now; nothing else waits on it). Run `design/package-v5/tools/p0_api_probe.py` with your key in your own terminal when able and save the output to `design/package-v5/inputs/p0-api-probe-output.txt`.
 - Pushes: `git push origin v5-audit`.

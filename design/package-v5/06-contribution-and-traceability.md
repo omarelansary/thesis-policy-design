@@ -33,5 +33,8 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R07 | EXT-0228 (a group expansion costs a cache miss and a round trip; an embedding ranker costs an embedding call rather than a model request [I], not stated in EXT-0228); `03` section 7 (no source for a system trigger) |
 | V5-R08 | L/v5-complexitytrap-2508.21433.txt:23-25; L/v5-anthropic-context-editing-20261022.md:71; L/pdf-tokennotcost-2607.12161v5.txt:200-224; HYP-0021 |
 | V5-R09 | `05` section 1 |
+| V5-R10 | `09` EX-2; L/v5-openai-tool-search-20261022.md:22; L/v5-executor-docs-mcp-20261022.md:28-31; L/v5-sciagentskills-2609.00065.txt:131-136; D-03 |
+| V5-R11 | `09` EX-9, BR-8, BR-1; L/v5-anthropic-tool-use-caching-20261022.md:57-63 |
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
+| D-03 | `calc/compact_tiers.py`, `calc/compact_tiers.stdout.txt` |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |
