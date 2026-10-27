@@ -9,7 +9,7 @@
 - **Working draft V5-R (DPR-0007, chosen by the student, REQ-U22-02) = the rival's core plus a deployment filter plus memory-informed offering for returning users** (`04`). The rival (DPR-0008, written independently by the proposer agent) is at least as good on present evidence; memory-informed offering is in the tested policy because REQ-U21-04 requires the combination and the answer for the supervisor (REQ-J22-01) asks for it to be tested properly with returning users (`05` P1).
 - **Whether memory-informed offering pays is not settled by arithmetic.** The share of seeded tools a returning user must actually call for seeding to pay ranges from about a fifth to a half, and up to "never" in long sessions when a search returns a single match (`calc/memory_seed.py`, revision 3 after two review rounds); the proof-of-concept loop has to measure it. Personalized tool memory exists in research over small tool sets; per-user seeding from a large catalogue with the bill measured was not found in a limited search.
 - **First things to measure** (`05`): the university API's cache fields and mechanisms (P0); where the break-even lies on that route (P5); whether models search unprompted (P3); how often returning users need the same tools (P1).
-- **Decided so far (2026-10-22 to 25):** DPR-0007 is the working draft; memory is tested with returning users; Executor is a source of parts; the headline average is total bill over total turns with the mean of session rates beside it. **Still open:** the university API probe (the human runs it when able, Q-U33); the supervisor may confirm Q-J31..Q-J33 in his own words.
+- **Decided so far (2026-10-22 to 25):** DPR-0007 is the working draft; memory is tested with returning users; Executor is a source of parts; the headline average is total bill over total turns with the mean of session rates beside it. **Done 2026-10-27:** the university API probe, first round (`10-p0-university-api-reading.md`): cache terms are reported, appends keep the cache, `allowed_tools` is rejected. **Still open:** the second probe (tool calling and a changed tools array; the human runs `p0_api_probe_v2.py`); the supervisor may confirm Q-J31..Q-J33 in his own words.
 - **Not verified by anyone:** the human has spot-checked no V5 row; steward, scout, blind and challenger work is model work checked by model work.
 
 ## File map
@@ -21,6 +21,7 @@
 | `04-design.md` | Regimes, the V5-R graph, candidates compared, failure conditions, recommendations V5-R01..R09 |
 | `05-poc-loop-and-e2e.md` | Proof-of-concept items in dependency order with a decision rule; end-to-end outline; questions |
 | `06-contribution-and-traceability.md` | New versus reused; register of recommendations; `tools/trace_check.py` (0 misses: pointers and ids exist; wording checked by stewards and challengers, not by the script) |
+| `10-p0-university-api-reading.md` | What the university API reports and honours, from the human's probe of six models (cache counters, appended turn, `allowed_tools`, rate limit) |
 | `09-expose-ideas-checked.md` | The exposé's and the experiment brief's ideas, each kept, revised, parked or dropped against the stored evidence (Q-U32) |
 | `07-independent-review.md` | 30 challenges and their dispositions; rebuttal check RV-0023 |
 | `08-ledger-proposals.md` | Proposed ledger changes (not applied) |
