@@ -1,0 +1,231 @@
+GLM-5.3-Flash pricing 2026: every rate, promo, and real cost | eesel AI
+
+All posts
+
+Blog / Trending
+GLM-5.3-Flash pricing: every rate, the promo cliff, and the real cost
+
+Written by
+Rama Adi
+
+Reviewed by
+Katelin Teen
+
+Last edited August 29, 2026
+Expert Verified
+
+TL;DR
+
+GLM-5.3-Flash is Z.ai's cheapest GLM-5 model, and the price is the headline. On a 50% launch promo it runs $0.075 per million input tokens and $0.25 per million output tokens, with cached input at $0.015. The billable unit is plain tokens, so no per-resolution or per-seat surprises. Two things trip people up: the promo ends September 9, 2026, after which every rate doubles to the $0.15/$0.50 list, and GLM-5.3-Flash is not the flagship. The text-only GLM-5.3 flagship is a separate model at $1.40/$4.40, about ten times the price.
+
+If you'd rather subscribe than meter tokens, the GLM Coding Plan starts at $18/mo (Lite) and runs up to $168/mo (Max) for use inside Claude Code, Cursor, and similar tools.
+
+One catch that isn't on the sticker: on Z.ai's own API the model is slow (~49 tokens/sec). Third-party hosts like Databricks serve the same weights at 273 tokens/sec, so where you run it changes your real cost as much as the rate card does. And remember a rate card buys you tokens, not a working system. If you want an AI that actually answers tickets or writes blog posts inside your own tools, that's the teammate layer eesel sits at, on top of models like this one.
+
+The rest of this post walks the full rate card, the promo cliff, the coding plans, and a couple of worked examples so you can see what a real workload costs.
+
+GLM-5.3-Flash landed in August 2026 as the first natively multimodal model in Z.ai's (Zhipu AI's) GLM-5 line, and the reaction online was mostly about one thing: disbelief at the cost. Artificial Analysis pegged it at roughly $0.045 per task, and Reddit threads kept comparing it favorably to models several times its price. So let's do the thing the launch posts didn't and lay out exactly what you pay, where the gotchas are, and what the number really buys you.
+
+Here's the actual rate card as it appears on Z.ai's pricing docs.
+
+Z.ai's API pricing docs page listing per-million-token rates for the GLM model family, as taken from Z.ai
+
+GLM-5.3-Flash pricing at a glance
+
+The model is billed pay-as-you-go per million tokens, split into input, cached input, and output. Here's the full picture, promo rates first with list prices in brackets.
+
+ItemPromo rateList rateNotes
+Input$0.075 / M$0.15 / MStandard prompt tokens
+Cached input$0.015 / M$0.03 / M~80% off standard input
+Cached input storageFreeFree"Limited-time free"
+Output$0.25 / M$0.50 / MIncludes reasoning tokens
+Web search$0.01 / use$0.01 / useBuilt-in tool add-on
+
+Source: the Z.ai API pricing docs.
+
+A few things worth pulling out. Output tokens cost roughly 3.3x more than input, and because GLM-5.3-Flash is a thinking-only model (you can't turn reasoning off), every request spends output tokens on its internal reasoning before it answers you. That's normal for a reasoning model, but it means output, not input, is where your bill actually lives. Budget around the output rate, not the headline input rate.
+
+The other detail is what GLM-5.3-Flash is: a 320B-total / 18B-active mixture-of-experts model with a 1M-token context window and native vision. For a model that reads images and holds a million tokens of context, a quarter of a dollar per million output tokens is strikingly low.
+
+Flash is not the flagship (and the price gap is huge)
+
+This is the single most common mix-up, so it's worth being blunt about it. GLM-5.3 and GLM-5.3-Flash are two different models that happen to share a version number.
+
+GLM-5.3-Flash is the cheap, multimodal, high-throughput sibling. It's the one at $0.075/$0.25.
+
+GLM-5.3 (the flagship) is a text-only coding and cyber model, and it's priced at $1.40 input / $4.40 output per million.
+
+That's roughly a tenfold difference. If you copy a "GLM-5.3" price from one place and a token estimate from another, you can be off by an order of magnitude. Cloudflare's framing of Flash is the clean summary: it "outperforms GLM-5.2 across benchmarks and real-world workloads at one-tenth the price."
+
+Two price cards contrasting GLM-5.3-Flash at $0.075 input and $0.25 output with the GLM-5.3 flagship at $1.40 input and $4.40 output, about one-tenth the price
+
+So when you're pricing a workload, the first question isn't "how many tokens?" It's "which GLM-5.3 am I actually calling?" For most non-coding jobs (chat, extraction, vision, summarization), Flash is the one you want, and the one this post is about. If you're doing frontier coding or security research, the flagship exists, but you're paying flagship rates.
+
+The promo cliff: prices double on September 9
+
+The $0.075/$0.25 numbers are a 50% launch discount, not the standing price. Per Z.ai's pricing docs, the promotion ends at 24:00 on September 9, 2026 (UTC+8, Singapore time). After that, the rate card reverts to the $0.15 input / $0.50 output list.
+
+A before-and-after timeline showing GLM-5.3-Flash pricing going from the promo $0.075 input and $0.25 output to the $0.15 and $0.50 list price after September 9, 2026
+
+Doubling still leaves GLM-5.3-Flash cheap by any reasonable standard, so this isn't a reason to panic. But if you're building a cost model for a product that ships after September, use the list prices, not the promo ones. A budget built on $0.075 that quietly needs $0.15 is the kind of thing that looks fine in a spreadsheet and stings on the first post-promo invoice.
+
+Cached input and the web search add-on
+
+Two smaller levers change your effective rate.
+
+Cached input is the big one. If your prompts share a large, stable prefix (a system prompt, a knowledge base, a long document you ask many questions about), the repeated part is billed at the cached rate of $0.015/M during the promo, about 80% below the standard input rate. On workloads with heavy prompt reuse, that's the difference between a fine bill and a great one. Cached-input storage is also free for now.
+
+Web search is a built-in tool billed separately at $0.01 per use. It's cheap, but it's metered per call, so an agent that searches on every turn adds up in a way the token rates won't show you. Worth watching if you wire it into a loop.
+
+The GLM Coding Plan: a subscription instead of metering
+
+If you're mainly using GLM inside a coding tool, Z.ai sells a flat subscription that sidesteps token metering entirely. The GLM Coding Plan runs GLM-5.3 and GLM-5.3-Flash inside Claude Code, Cline, OpenCode, Cursor, Roo Code, Kilo Code, and 20-plus other agent tools.
+
+Z.ai's GLM Coding Plan subscribe page showing the Lite, Pro, and Max tiers with weekly credit allowances, as taken from Z.ai
+
+Here are the individual tiers, with the effective monthly rate if you pay annually.
+
+PlanMonthlyYearly (effective /mo)Weekly creditsRelative usage
+Lite$18/mo$12.60/mo10,0001x
+Pro$80/mo$56.00/mo~60,0006x Lite
+Max$168/mo$117.60/mo~140,00014x Lite
+
+There are two team tiers as well: a Standard Seat at $88/seat/mo (66,000 weekly credits) and a Premium Seat at $188/seat/mo (155,000 weekly credits, plus early model access), per the Z.ai subscribe page.
+
+The mechanics reward patience. Credits are spent via a per-model multiplier (GLM-5.3-Flash costs far less per token than the flagship), and usage during off-peak hours is charged at 50% of the standard credit rate. Peak is only Monday to Friday, 14:00-18:00 Singapore time, so most of the week is off-peak. Z.ai claims that leaning on off-peak can save up to 92% versus pay-as-you-go flagship API calls. That's a vendor number, so treat it as a ceiling, not a promise, but the direction is real: the subscription is aimed squarely at heavy, daily coding use.
+
+The coding plans are what most people mean when they picture GLM in action: a model chewing through refactors and migrations inside an agent.
+
+Z.ai illustration of a coding agent planning and building a Chrome extension across planning, implementation, and build stages, as taken from Z.ai
+
+The hidden cost: which host you pick
+
+Here's the part the rate card won't tell you. GLM-5.3-Flash has open weights, so you can run it in a lot of places, and throughput varies wildly between them. On Z.ai's own first-party API, output runs around 49 tokens per second, which one Reddit thread called "one of the slowest models AA has ever" benchmarked. Third-party hosts are a different story.
+
+A gauge comparison showing token throughput of 49 tokens per second on Z.ai first-party, 86 on Together AI, and 273 on Databricks for the same GLM-5.3-Flash weights
+
+Per Artificial Analysis, across eleven API providers Databricks serves GLM-5.3-Flash at 272.9 tokens/sec with the lowest latency (8 seconds to first token), while the cheapest sticker prices come from GMI and Bitdeer at about $0.05. The point isn't that any one host is best. It's that "GLM-5.3-Flash pricing" is really a matrix of price and speed, and for anything user-facing, throughput is a cost too. A model that's half the price but a fifth of the speed can end up more expensive once you count the latency your users (or your agents) sit through.
+
+If you want the pure price floor, first-party or GMI. If you want speed at a reasonable rate, a host like Databricks. Match the host to whether your bottleneck is dollars or seconds.
+
+What the low price actually buys you
+
+Cheap is only good if the output is usable, so it's worth grounding the number in what the model can do. On the Artificial Analysis Intelligence Index, GLM-5.3-Flash scores 57, versus 60 for the full GLM-5.3, which pushes it right onto the price-to-intelligence frontier. Testers backed that up in specific ways.
+
+"We benchmarked the new GLM-5.3 Flash on VulnPR-100. It found 34/100 vulnerabilities at a total model-review cost of just $4.21. That makes it the strongest sub-$10 model we've tested."
+Zaddyzaddy, X
+
+On its new vision capability, one tester ran 1,500 samples and reported 81% accuracy, calling it reasonable for a first multimodal release. And the price-versus-peers reaction was the loudest theme of all.
+
+"Noticeably cheaper even than Gemini Flash 3.7, while being only slightly worse performing. That's actually really impressive."
+r/singularity thread, Reddit
+
+For a fuller capability read, our GLM-5.3-Flash overview goes deeper on the architecture and benchmarks, and if you're shortlisting on cost it's worth reading it beside our DeepSeek pricing and Kimi K2.5 pricing breakdowns. But for pricing purposes, the takeaway is simple: the model isn't cheap because it's weak. It's cheap because Z.ai priced an 18B-active MoE aggressively and is subsidizing launch on top of that.
+
+A worked example: what a real workload costs
+
+Rates per million tokens are hard to feel, so plug in your own numbers. This calculator uses the promo rates ($0.075 input, $0.25 output); flip the toggle to see the post-September list price.
+
+To put those defaults in context: a mid-size assistant handling 500M input and 150M output tokens a month lands near $75/month on promo rates, or about $150/month once the list price kicks in. Even at list, that's a rounding error next to per-seat AI tooling, which is exactly why the model made noise. The thing to internalize is that your output volume, driven up by thinking-only reasoning, is the dial that actually moves the number. If your goal is content rather than raw tokens, our take on the best LLM for blog writing weighs quality against cost the same way.
+
+Try eesel: the model is the engine, eesel is the teammate
+
+Here's the honest framing. GLM-5.3-Flash is fantastic infrastructure. But a rate card of $0.075 per million tokens isn't an answer to a support ticket or a finished blog post, any more than a barrel of oil is a road trip. Raw model access still leaves you to build the retrieval, the guardrails, the integrations, the testing, and the "what happens when it's wrong" plumbing.
+
+eesel sits one layer up. Instead of tokens, you hire ready-to-work AI teammates: an AI helpdesk teammate that joins your existing Zendesk, Freshdesk, or Gorgias queue and drafts or sends replies, and an AI blog writer that researches and writes SEO posts end to end. Each one arrives already knowing your help center and past tickets, and goes live in minutes rather than a sprint of glue code.
+
+eesel AI homepage showing autonomous AI teammates working across support queues and shared inboxes, as taken from eesel
+
+The differentiator that matters most for anyone nervous about handing tickets to an AI: eesel lets you simulate a teammate against your real historical tickets before it ever touches a live customer, so you see the resolution rate and the answers up front instead of flipping a switch and hoping. Models like GLM-5.3-Flash make the tokens cheap; eesel is what turns them into a teammate you can actually trust in the queue. It's free to try, no credit card and no sales call to start.
+Frequently Asked Questions
+How much does GLM-5.3-Flash cost per token?
+
+During the launch promo, GLM-5.3-Flash pricing is $0.075 per million input tokens and $0.25 per million output tokens, with cached input at $0.015. Those are half the list prices of $0.15 and $0.50, and the promo ends at 24:00 on September 9, 2026 (Singapore time). See the Z.ai pricing docs for the live rate card.Is GLM-5.3-Flash free?
+
+No. GLM-5.3-Flash itself is a paid model, though it is the cheapest paid model in the GLM-5 series. Z.ai does offer fully free tiers on older models like GLM-4.7-Flash and GLM-4.5-Flash, and you can test GLM-5.3-Flash for free in the Cloudflare Workers AI playground. If you want an AI that works out of the box rather than raw tokens, eesel has a free trial.What is the difference between GLM-5.3-Flash and GLM-5.3?
+
+GLM-5.3-Flash is the cheap, natively multimodal, high-throughput model at $0.075/$0.25 promo. GLM-5.3 is the text-only flagship built for coding and cyber work at $1.40/$4.40, roughly ten times the price. They share a name but sit at very different points on the price and capability curve, which is covered in our GLM-5.3-Flash overview.How does GLM-5.3-Flash pricing compare to Gemini and DeepSeek?
+
+Community testers found GLM-5.3-Flash noticeably cheaper than Gemini Flash 3.7 while scoring close on intelligence, and it sits in the same budget bracket as DeepSeek Flash. If you are picking a model on cost, it is worth reading our Gemini 3 pricing and Qwen pricing breakdowns alongside this one.What is the GLM Coding Plan and how much is it?
+
+The GLM Coding Plan is a subscription that runs GLM-5.3 and GLM-5.3-Flash inside tools like Claude Code, Cline, and Cursor. Individual plans are Lite at $18/mo, Pro at $80/mo, and Max at $168/mo, each with weekly credit allowances and a 50% off-peak discount. For teams building support automation on top of a model, an AI customer service platform is usually the faster path than wiring a coding plan into production.
+
+The model is the engine. eesel is the teammate.
+GLM-5.3-Flash is cheap tokens. eesel turns a model into an AI teammate that answers tickets and drafts blogs inside your own tools.
+Book a demoTry for free
+
+Share this article
+
+Article by
+Rama Adi
+Rama is a software engineer at eesel AI with two years of experience writing about B2B SaaS, AI tools, and customer support technology. Based in Bali, Indonesia, he brings a developer's perspective to product comparisons — cutting through marketing copy to what the integrations and APIs actually do.
+
+Related PostsAll posts →
+
+Trending
+Gemini 3.8 Flash pricing: every rate, the hidden cost, and the catch
+
+Gemini 3.8 Flash costs $0.75/$3.75 per 1M tokens, exactly what 3.7 Flash costs. But the sticker price hides a verbosity tax, and both numbers double on 1 January 2027.
+
+Kurnia Kharisma·Sep 8, 2026
+
+Trending
+LongCat 2.0 review: a real workhorse with one hard blocker
+
+I graded LongCat 2.0 on seven things a buyer actually cares about, using Meituan's own files and the people who ran billions of tokens through it. It scores well on six.
+
+Kira·Aug 4, 2026
+
+Trending
+DeepSeek V4 Flash pricing: what you'll actually be billed
+
+DeepSeek V4 Flash lists at $0.14 in and $0.28 out per million tokens. Real users have posted blended rates under a cent. Here is what decides which one you get.
+
+Kira·Aug 4, 2026
+
+Trending
+DeepSeek V4 Flash: specs, pricing, and what it's really for
+
+DeepSeek V4 Flash costs $0.14 in and $0.28 out per million tokens, and it outscores DeepSeek's own expensive tier. Here's what the price card doesn't tell you.
+
+Rama Adi·Aug 4, 2026
+
+Trending
+DeepSeek V4 Flash vs GPT-5.6: which one do you build on?
+
+DeepSeek V4 Flash vs GPT-5.6 on August 2026 numbers. The real fight is Flash against Luna, intelligence is a tie, and the deciding factors are speed, vision and data.
+
+Rama Adi·Aug 4, 2026
+
+Trending
+DeepSeek V4 Flash vs V4 Pro: which tier should you use?
+
+DeepSeek's cheap tier now scores higher than its expensive one on the independent board. Here is exactly where that holds, and the two places it does not.
+
+Rama Adi·Aug 3, 2026
+
+Trending
+GLM-5.3 Flash review: frontier scores at flash cost
+
+A hands-on GLM-5.3 Flash review: the benchmarks it actually posts, what its 4.5-cent-a-task price hides, where it breaks, and who should run it.
+
+Kurnia Kharisma·Aug 29, 2026
+
+Trending
+LongCat 2.0: inside Meituan's 1.6T open-weight model
+
+LongCat 2.0 is Meituan's MIT-licensed 1.6T MoE model, priced at $0.30 per million input tokens. I read every primary source to see what actually ships.
+
+Rama Adi·Aug 4, 2026
+
+Trending
+Mistral Large 4 pricing: API rates, service tiers, and the real cost per task
+
+Mistral Large 4 pricing is $0.68 in and $2.09 out per 1M tokens on sale. Regional and Priority tiers are priced off the $1.36 / $4.18 list price, not the sale.
+
+Rama Adi·Oct 8, 2026
+
+Ready to hire your AI teammate?
+
+Set up in minutes. No credit card required.Get started free
+

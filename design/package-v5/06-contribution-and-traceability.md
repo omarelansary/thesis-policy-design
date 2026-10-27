@@ -37,4 +37,5 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R11 | `09` EX-9, BR-8, BR-1; L/v5-anthropic-tool-use-caching-20261022.md:57-63 |
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
 | D-03 | `calc/compact_tiers.py`, `calc/compact_tiers.stdout.txt` |
+| D-04 | `calc/price_sensitivity.py`, `calc/price_sensitivity.stdout.txt`; `11` |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |

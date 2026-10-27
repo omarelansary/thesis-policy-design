@@ -1,0 +1,395 @@
+
+
+    MiniMax API Pricing: Full Breakdown of Costs (Jun 2026)
+
+Ship a Full-Stack App with One Prompt
+
+Copy this prompt into your AI coding agent, or open it in one below.
+
+                            Give this
+                            to your AI
+
+                    Create a to-do list app using Puter.js
+
+                    Try in
+
+Coding manually? see the guide
+
+On this page
+How much does the MiniMax API cost?How MiniMax API pricing worksWhat makes your bill higher than expectedHow to reduce MiniMax API costsCan you use the MiniMax API for free?Real-world cost examplesComplete MiniMax API pricing tableConclusionRelated
+
+Tutorials
+
+MiniMax API Pricing: Full Breakdown of Costs (Jun 2026)
+
+Reynaldi Chernando
+
+                                        Updated: June 19, 2026
+
+                    On this page
+How much does the MiniMax API cost?How MiniMax API pricing worksWhat makes your bill higher than expectedHow to reduce MiniMax API costsCan you use the MiniMax API for free?Real-world cost examplesComplete MiniMax API pricing tableConclusionRelated
+
+This guide covers what the MiniMax API costs across its text, speech, video, music, and image models, with the free options at the end (see also our free MiniMax API tutorial).
+
+How much does the MiniMax API cost?
+
+The MiniMax API costs $0.30 per million input tokens and $1.20 per million output tokens for MiniMax-M3, the flagship text model, on the standard tier with inputs up to 512k tokens. The cheapest text option is the same $0.30/$1.20: every model in the M-series, from the original M2 up to M3, shares that rate at the standard tier. The version number changes the model's capability, not its price.
+
+Model
+Input (per 1M)
+Output (per 1M)
+Cache read (per 1M)
+
+MiniMax-M3 (≤512k input)
+$0.30
+$1.20
+$0.06
+
+MiniMax-M3 (>512k input)
+$0.60
+$2.40
+$0.12
+
+MiniMax-M2.7
+$0.30
+$1.20
+$0.06
+
+MiniMax-M2.7-highspeed
+$0.60
+$2.40
+$0.06
+
+MiniMax-M2.5 (legacy)
+$0.30
+$1.20
+$0.03
+
+Three caveats before you budget against these numbers. The M3 rate is a promotional price: the docs list it at $0.60/$2.40 with a "Permanent 50% off" applied to reach $0.30/$1.20. The >512k input tier is gated at the moment (limited quantity, contact sales), with broader availability listed as coming soon. And the table above is text only. MiniMax also sells speech, video, music, and image APIs that bill on entirely different meters, covered in the full table below.
+
+How MiniMax API pricing works
+
+"MiniMax API" covers several products, and they do not all bill the same way. The text models (the M-series) bill per token and are the focus of most of this guide. The speech, video, music, and image APIs bill on their own meters, covered in the subheading below.
+
+MiniMax text models bill per token. You pay one rate for the tokens you send (input) and a higher rate for the tokens the model generates (output). A token is a chunk of text, roughly 750 English words per 1,000 tokens.
+
+Output costs four times input across the M-series ($1.20 vs $0.30 at the standard tier), so responses drive most of the bill on generation-heavy workloads.
+
+Standard, Priority, and highspeed tiers
+
+MiniMax has two separate ways to pay for faster responses, and they cost different amounts. M3 offers a Priority service tier: set service_tier to priority and you pay 1.5x the standard rate ($0.45/$1.80 at ≤512k input) for priority admission and more reliable latency. M2.7 instead ships a separate -highspeed model variant that runs faster and costs 2x ($0.60/$2.40). Same weights, different routing. Check which mechanism your model uses before you enable it.
+
+Prompt caching
+
+Caching cuts the cost of input you send repeatedly. Take M2.7, which has the full set of published rates: a cache read costs $0.06 per million tokens instead of the $0.30 standard input rate, while writing to the cache costs $0.375 per million. The first request that populates the cache costs more than plain input, and every later read off it costs a fraction of the standard rate. The legacy models (M2.5 and earlier) read from cache at $0.03 and write at the same $0.375. M3 reads from cache at $0.06 per million, doubling to $0.12 on inputs above 512k.
+
+Pay-as-you-go versus Token Plan
+
+MiniMax runs two billing systems with separate keys. Pay-as-you-go uses standard API keys and draws down your account balance by actual usage, at the per-token rates above. The Subscription Plans path (Token Plan) is a monthly subscription that gives you a fixed quota through a separate subscription key. Token Plan quota is controlled by 5-hour rolling and weekly windows, and unused quota does not carry over to the next cycle.
+
+Non-text models (speech, video, music, image)
+
+The token rates above apply only to the text models. The other APIs bill on different meters: Speech (T2A) bills per character of input text, Video (Hailuo) bills per generated clip priced by resolution and duration, Music bills per track, and Image bills per image. Token math does not transfer to these, so price each one on its own meter. The per-character and per-clip rates are in the full table. Separately, MiniMax Agent and the Hailuo apps are consumer products with their own credit subscriptions, distinct from the developer API and its keys.
+
+What makes your bill higher than expected
+
+The 512k input cliff
+
+M3 advertises a 1M-token context window, but the price is not flat across it. Inputs up to 512k tokens bill at $0.30/$1.20. Above 512k, the rate doubles to $0.60/$2.40, and cache reads double to $0.12. That upper tier is also access-limited right now. If you feed M3 very long contexts, half your token volume can land in the higher band.
+
+Highspeed and Priority multipliers
+
+Both faster tiers are easy to turn on and raise your rate by 1.5x (M3 Priority) or 2x (M2.7-highspeed). On a workload that does not need the lower latency, that is a straight markup.
+
+Cache write costs
+
+Caching saves money on reads, but the write side has a cost too. On M2.7 and the legacy models, populating the cache costs $0.375 per million tokens, more than the $0.30 standard input rate. If a cached prefix is not read back enough times, that write cost can exceed what the cheaper reads save.
+
+Non-text meters
+
+Speech bills per character and video bills per clip, so token math does not transfer. A speech-heavy app priced as if it were a text app will be off by a wide margin. Price each modality on its own meter.
+
+Promotional pricing
+
+The M3 headline rate is a 50% discount on the listed price. Promotions can change, so build with the list rate ($0.60/$2.40) in mind if you are forecasting far out.
+
+How to reduce MiniMax API costs
+
+1. Pick the right model and tier
+
+This is the largest lever for most workloads. Stay on the standard tier unless you have a latency requirement, since Priority and highspeed cost 1.5x to 2x for the same output quality. Because the whole M-series shares the $0.30/$1.20 standard rate, you can run the flagship M3 without paying more than a legacy model.
+
+2. Cache repeated context
+
+If your prompts share a long fixed prefix (a system prompt, a document, a tool schema), caching reads it back at $0.06 per million instead of $0.30. The saving grows with how often the prefix is reused. On M2.7 and the legacy models, make sure each cached prefix is read enough times to clear the $0.375 write cost.
+
+3. Keep inputs under 512k tokens
+
+Below 512k, M3 bills at the standard rate. Splitting or trimming long contexts so each request stays under that line keeps every token in the cheaper band.
+
+4. Use a Token Plan for steady volume
+
+If your usage is predictable and continuous, the monthly Token Plan can cost less per token than pay-as-you-go. It fits steady traffic better than spiky workloads, since quota resets on rolling windows and does not roll over.
+
+5. Control output length
+
+Output is billed at four times the input rate. Setting max_tokens to what you actually need, and prompting for concise responses, cuts the most expensive part of the bill.
+
+Can you use the MiniMax API for free?
+
+Puter.js: the User-Pays model
+
+Puter.js is a JavaScript library that lets you add MiniMax models to your app with no API key, no backend, and no bill to you as the developer. It works on the User-Pays model: each user of your app covers their own AI usage through their Puter account, so your costs stay at zero no matter how many users you have.
+
+<html>
+<body>
+  <script src="https://js.puter.com/v2/"></script>
+  <script>
+    puter.ai.chat("Explain quantum computing in simple terms", {
+      model: "minimax/minimax-m3"
+    }).then(response => {
+      document.body.innerHTML = response.message.content;
+    });
+  </script>
+</body>
+</html>
+
+We ran the same workload we use across our pricing guides: 500 monthly users sending 30 messages each, averaging 1,000 input and 300 output tokens per message, for 15M input and 4.5M output tokens a month. On MiniMax-M3 through the API, our calculation puts that at $4.50 for input and $5.40 for output, about $9.90 a month, growing linearly with your user base. Through Puter.js the same app costs you $0 at any scale, because each user carries their own usage. The dollar saving is modest at MiniMax's rates, but it also removes API key and billing management, and it stays at zero as you grow.
+
+Self-hosted open weights
+
+MiniMax publishes downloadable weights for its recent text models. Running them yourself is free for personal and non-commercial use, with infrastructure as your only cost. Commercial production use still requires the paid API or a separate license, so check the current license terms before you ship.
+
+Platform trial credits
+
+New accounts on the MiniMax platform receive trial credits at signup, tied to phone or email verification. The exact amount shifts with promotions, so check your dashboard after activating the account. This is the quickest way to test the paid API without spending.
+
+Limited-free models
+
+Music-2.6 and Lyrics Generation currently run at a "Limited Free" promotional rate ($0.15 per track and $0.01 per song at list). The free status is promotional and can end.
+
+OpenRouter
+
+If you would rather not register a MiniMax account, OpenRouter exposes the M-series through one endpoint. OpenRouter usually carries a few free models marked with a :free suffix, though that free access is limited and rate-capped. It lets you reach the models without a direct MiniMax key.
+
+Real-world cost examples
+
+Customer support chatbot
+
+We modeled a support bot handling 50,000 messages a month, each averaging 1,000 input and 300 output tokens, for 50M input and 15M output tokens.
+
+Tier
+Input cost
+Output cost
+Monthly total
+
+M3 standard
+$15.00
+$18.00
+$33.00
+
+M3 Priority (1.5x)
+$22.50
+$27.00
+$49.50
+
+M2.7-highspeed (2x)
+$30.00
+$36.00
+$66.00
+
+On the standard tier the bot runs about $33 a month. The faster tiers cost 1.5x and 2x for the same output, so they only make sense if latency is a hard requirement.
+
+Summarizing 100 PDFs
+
+We calculated a batch of 100 documents averaging 30,000 input tokens each, summarized to about 800 tokens apiece: 3M input and 80k output tokens. On M3 standard that is $0.90 for input and about $0.10 for output, roughly $1.00 for the batch. The one thing to watch: if you concatenate documents into a single request that crosses 512k input tokens, those tokens bill at the higher long-context rate. Keeping each document in its own request stays in the cheaper band.
+
+Daily content generation
+
+We modeled a content workflow producing 20 pieces a day, each with a 500-token prompt and a 1,500-token output, across 30 days: 300k input and 900k output tokens. On M3 standard that comes to about $0.09 for input and $1.08 for output, roughly $1.17 a month. Output dominates here, so trimming length is the main lever.
+
+Complete MiniMax API pricing table
+
+Text models, pay-as-you-go. The full legacy list (M2.1, M2, and their highspeed variants, all at the standard $0.30/$1.20) is on the official pricing page.
+
+Model
+Input (per 1M)
+Output (per 1M)
+Cache read (per 1M)
+Cache write (per 1M)
+
+MiniMax-M3 (≤512k)
+$0.30
+$1.20
+$0.06
+—
+
+MiniMax-M3 (>512k)
+$0.60
+$2.40
+$0.12
+—
+
+MiniMax-M3 Priority (≤512k)
+$0.45
+$1.80
+$0.09
+—
+
+MiniMax-M2.7
+$0.30
+$1.20
+$0.06
+$0.375
+
+MiniMax-M2.7-highspeed
+$0.60
+$2.40
+$0.06
+$0.375
+
+MiniMax-M2.5 (legacy)
+$0.30
+$1.20
+$0.03
+$0.375
+
+A — in the cache-write column means MiniMax does not publish a separate write rate for that model, not that writes are free.
+
+Speech (T2A), billed per character of input text:
+
+API
+Model
+Price
+
+T2A
+speech-2.8-turbo
+$60 / 1M characters
+
+T2A
+speech-2.8-hd
+$100 / 1M characters
+
+Voice cloning
+All models
+$1.50 / voice
+
+Voice design
+All models
+$3.00 / voice
+
+Video (Hailuo), billed per generated clip:
+
+Model
+Resolution / length
+Price
+
+MiniMax-Hailuo-2.3-Fast
+768P, 6s
+$0.19
+
+MiniMax-Hailuo-2.3-Fast
+768P, 10s
+$0.32
+
+MiniMax-Hailuo-2.3-Fast
+1080P, 6s
+$0.33
+
+MiniMax-Hailuo-2.3
+768P, 6s
+$0.28
+
+MiniMax-Hailuo-2.3
+768P, 10s
+$0.56
+
+MiniMax-Hailuo-2.3
+1080P, 6s
+$0.49
+
+Music, image, and vision:
+
+API
+Model
+Price
+
+Music
+Music-2.6
+$0.15 / up to 5 min (Limited Free)
+
+Lyrics
+Lyrics Generation
+$0.01 / song (Limited Free)
+
+Image
+image-01
+$0.0035 / image
+
+MCP vision
+API-vlm
+$0.06 / request
+
+One honest limitation worth flagging: MiniMax is a Chinese provider, and data residency differs between its international platform and its mainland China endpoint. If data location matters for your compliance, confirm which endpoint your account uses before sending production data.
+
+Conclusion
+
+MiniMax-M3 costs $0.30 per million input tokens and $1.20 per million output tokens on the standard tier, the same rate as every other model in the M-series.
+
+The main cost levers:
+
+Stay on the standard tier; Priority and highspeed cost 1.5x to 2x.
+
+Cache repeated context to read input back at $0.06 instead of $0.30.
+
+Keep inputs under 512k tokens to avoid the higher long-context rate.
+
+Control output length, since output bills at four times input.
+
+Prices here were verified against the official MiniMax pricing page.
+
+Related
+
+Free, Unlimited MiniMax API
+
+How to Get a MiniMax API Key
+
+Access MiniMax Using OpenAI-Compatible API
+
+How to Use MiniMax with the Vercel AI SDK
+
+OpenAI API Pricing
+
+Claude API Pricing
+
+Gemini API Pricing
+
+Grok API Pricing
+
+DeepSeek API Pricing
+
+Qwen API Pricing
+
+Mistral API Pricing
+
+Perplexity API Pricing
+
+Kimi API Pricing
+
+Z.ai GLM API Pricing
+
+Free, Unlimited AI API
+
+Free LLM API
+
+Ship a Full-Stack App with One Prompt
+
+                                Give this
+                                to your AI
+
+                        Build an AI chat app using Puter.js
+
+                    Try in
+
+Coding manually? see the guide
+

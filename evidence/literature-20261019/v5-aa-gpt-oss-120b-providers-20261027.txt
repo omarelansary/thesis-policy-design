@@ -1,0 +1,494 @@
+gpt-oss-120b (high): API Provider Performance Benchmarking & Price Analysis | Artificial Analysis
+
+Artificial Analysis
+K
+
+OpenAI•
+gpt-oss-120bhigh•
+Open weights model•
+Released August 2025
+gpt-oss-120b (High) API Provider Benchmarking & AnalysisModel Comparison 
+
+This analysis is intended to support you in choosing the best API provider of gpt-oss-120b (High) for your use-case.
+
+Fastest
+
+#1
+Cerebras1,796.2 t/s
+#2
+SambaNova705.9 t/s
+#3
+Groq473.8 t/s
+#4
+Crusoe404.7 t/s
+#5
+Azure380.0 t/s
+
+Output speed
+Total 16 providers
+
+Lowest Latency
+
+#1
+Cerebras1.48 s
+#2
+SambaNova4.02 s
+#3
+Groq4.84 s
+#4
+Crusoe5.40 s
+#5
+Azure5.91 s
+
+Time to first answer token
+Total 16 providers
+
+Lowest Price
+
+#1
+CoreWeave$0.04
+#2
+DeepInfra$0.05
+#3
+Novita$0.07
+#4
+Crusoe$0.07
+#5
+Google Vertex$0.12
+
+Blended price (per 1M tokens)
+Total 16 providers
+
+gpt-oss-120b (high) is available through 16 API providers, each offering different performance characteristics and pricing. Below is a comparison of the key metrics across providers.
+For output speed, the top providers are Cerebras (1,796.2 t/s), SambaNova (705.9 t/s), and Groq (473.8 t/s). Speed varies significantly across providers, with a 3594% difference between the fastest and slowest.
+For latency, Cerebras (1.48s), SambaNova (4.02s), and Groq (4.84s) offer the lowest time to first answer token.
+For pricing, CoreWeave (0.04), DeepInfra (0.05), and Novita (0.07) offer the lowest blended prices per 1M tokens. Prices vary up to 8.9x across providers.
+Cerebras offers the best performance with both the highest speed and lowest latency. For cost optimization, CoreWeave provides the most competitive pricing.
+
+Speed
+Output tokens per second · Higher is better
+
+Latency
+Seconds to first answer token received · Lower is better
+
+Price
+USD per 1M tokens (blended) · Lower is better
+
+Prompt Options
+
+Update: Default performance benchmarking workload has updated to 10k input tokens to better reflect production use cases. You can still select different workloads above.
+
+Endpoint Accuracy
+
+Endpoint Accuracy IndexAccuracy by EvalOutput Tokens per TaskOutput Tokens per Task by EvalAccuracy vs. Tokens per TaskAccuracy vs. Output SpeedAccuracy vs. Price
+
+Endpoint Accuracy Index: gpt-oss-120b (High)
+v1.0 · Composite of BFCL v4-500, HLE-250 and AA-LCR-25 run against each provider endpoint · Percentage of the reference endpoint, with 95% confidence interval · Higher is better
+
+16 of 16 providers
+
+Reference (100%)Within referenceBelow reference
+
+Endpoint Accuracy Index
+
+Composite measure of how much of a model's accuracy a given provider endpoint preserves, from re-running BFCL v4-500, HLE-250 and AA-LCR-25 against that endpoint. Where a self-hosted reference endpoint exists, scores are expressed as a percentage of that reference (100 = matches reference); lower scores indicate accuracy lost to quantisation, sampling defaults, or other endpoint-side configuration. Scores are point-in-time snapshots. Methodology.
+
+Pricing
+
+Cache Hit, Input & Output PricingBlended PriceCache Discount
+
+Pricing: Cache Hit, Input, and Output: gpt-oss-120b (high) Providers
+Price (USD per M Tokens) · Lower is better · 10,000 input tokens
+
+16 of 16 providers
+
+Cache HitInputOutput
+
+Cache Hit
+
+Price per token for cached prompts (previously processed), typically offering a significant discount compared to regular input price, represented as USD per million tokens. The values shown here are the cache hit price; cache write and cache storage are billed separately and vary by provider — see "Cache pricing by provider" for detail. 3 more notes
+
+Cost per Intelligence Index Task: gpt-oss-120b (high) Providers
+Weighted average cost (USD) per Intelligence Index task · Segmented by token type · Lower is better
+
+16 of 16 providers
+
+AnswerReasoningCache WriteCache HitInput
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight.
+
+Output Speed vs. PriceOutput Speed vs. Cost per Task
+
+Output Speed vs. Price: gpt-oss-120b (high) Providers
+Blended at 7:2:1 (cache-input-output) · Output speed: output tokens per second · USD per 1M tokens (blended)
+
+7:2:1General agentic (recommended)
+
+16 of 16 providers
+
+Most attractive quadrant
+Pareto line
+
+GroqScalewayCoreWeaveNovitaDeepInfra (Turbo)AzureDeepInfraCerebrasGoogle VertexTogether AICrusoeBasetenSambaNovaParasailNebius (Base)Amazon
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming). 4 more notes
+
+Speed
+Measured by Output Speed (tokens per second)
+
+Output SpeedOutput Speed by Prompt TypeOutput Speed VarianceOutput Speed Over Time
+
+Output Speed: gpt-oss-120b (High)
+Output speed: output tokens per second · 10,000 input tokens
+
+16 of 16 providers
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming).
+
+Model Performance Representation
+
+Figures represent performance of the model's first-party API or the median across providers where a first-party API is not available.
+
+Time per Intelligence Index Task: gpt-oss-120b (high) Providers
+Weighted average decode time (minutes) per Intelligence Index task · Excludes TTFT and overhead time · Lower is better
+
+16 of 16 providers
+
+Time per Intelligence Index Task
+
+The weighted average time (seconds) per Artificial Analysis Intelligence Index task. This is calculated by dividing output tokens per task by output speed, weighted by the relative weights of each benchmark in the Intelligence Index.
+
+Cost per Task vs. Time per TaskLatency vs. Output Speed
+
+Cost per Task vs. Time per Task: gpt-oss-120b (high) Providers
+Weighted average cost (USD) per Intelligence Index task · Weighted average decode time (minutes) per Intelligence Index task
+
+16 of 16 providers
+
+Most attractive quadrant
+Pareto line
+
+GroqScalewayCoreWeaveNovitaDeepInfra (Turbo)AzureDeepInfraCerebrasGoogle VertexTogether AICrusoeBasetenSambaNovaParasailNebius (Base)Amazon
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+Latency
+Measured by Time (seconds) to First Token
+
+Time to First Answer TokenTime to First TokenLatency by Prompt TypeLatency VarianceTime to First Token Over TimeTime to First Answer Token Over Time
+
+Time to First Answer Token: gpt-oss-120b (high) Providers
+Seconds to first token received · Lower is better · 10,000 input tokens
+
+16 of 16 providers
+
+'Thinking' time (reasoning models, where applicable)Input processing time
+
+Time to First Answer Token
+
+Time to first answer token received, in seconds, after API request sent. For reasoning models, this includes the 'thinking' time of the model before providing an answer. For models which do not support streaming, this represents time to receive the completion.
+
+Median
+
+Figures represent median (P50) measurement over the past 72 hours to reflect sustained changes in performance.
+
+Cache Behaviour
+
+Cache Hit RateCache Hit Rate Over Time
+
+Cache Hit Rate: gpt-oss-120b (high) Providers
+Share of cacheable input tokens served from cache · Median of the last four weeks, updated Oct 26, 2026
+
+16 of 16 providers
+
+What Cache Hit Rate Shows
+
+The share of cacheable input tokens served from the provider's prompt cache, measured during multi-turn agentic coding sessions. We regularly measure each endpoint and report a representative rate based on recent measurements. Higher values mean more of the input is billed at the cheaper cache-hit price, where the provider offers one, which lowers the effective cost of agentic workloads. For further details, see our methodology page.
+
+Cost per Task vs. Cache Hit Rate: gpt-oss-120b (high) Providers
+Weighted average cost (USD) per Intelligence Index task · Cache hit rate: median of the last four weeks, updated Oct 26, 2026
+
+16 of 16 providers
+
+Most attractive quadrant
+Pareto line
+
+GroqCoreWeaveNovitaCerebrasGoogle VertexTogether AICrusoeBasetenParasailNebius (Base)
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+End-to-End Response Time
+Seconds to output 500 tokens, calculated based on time to first token, 'thinking' time for reasoning models, and output speed
+
+End-to-End Response TimeEnd-to-End Response Time vs. PriceEnd-to-End Response Time by Prompt TypeEnd-to-End Response Time Over Time
+
+End-to-End Response Time: gpt-oss-120b (high) Providers
+Seconds to output 500 tokens, including reasoning model 'thinking' time · Lower is better · 10,000 input tokens
+
+16 of 16 providers
+
+Outputting time'Thinking' time (reasoning models)Input processing time
+
+End-to-End Response Time
+
+Seconds to receive a 500 token response. Key components:
+Input time: Time to receive the first response token
+Thinking time (only for reasoning models): Time reasoning models spend outputting tokens to reason prior to providing an answer. Amount of tokens based on the average reasoning tokens across a diverse set of 60 prompts (methodology details).
+Answer time: Time to generate 500 output tokens, based on output speed 2 more notes
+
+Key Comparison Metrics & API Features
+
+Expand Columns
+
+FeaturesPriceSpeedLatencyEnd-to-End Response Time
+API ProviderEndpoint Accuracy IndexContext WindowFunction CallingJSON ModeLicenseCost per TaskUSDMedianTokens/sMedianFirst Chunk (s)TotalResponse (s)ReasoningTime (s)
+
+Amazon Bedrock
+101%
+131k
+
+Open
+$0.11
+101
+0.98
+25.74
+19.81
+
+Baseten
+n/a
+128k
+
+Open
+$0.07
+217
+0.17
+11.71
+9.23
+
+Cerebras
+87%
+131k
+
+Open
+$0.23
+1,694
+0.38
+1.85
+1.18
+
+CoreWeave
+98%
+131k
+
+Open
+$0.02
+97
+1.40
+27.05
+20.52
+
+Crusoe
+n/a
+131k
+
+Open
+$0.04
+417
+0.45
+6.45
+4.79
+
+DeepInfra
+84%
+131k
+
+Open
+$0.11
+52
+0.63
+48.46
+38.27
+
+DeepInfra
+97%
+131k
+
+Open
+$0.03
+54
+0.66
+47.18
+37.21
+
+Google
+72%
+131k
+
+Open
+$0.06
+181
+0.72
+14.56
+11.07
+
+Groq
+86%
+131k
+
+Open
+$0.10
+472
+0.62
+5.91
+4.24
+
+Microsoft Azure
+93%
+131k
+
+Open
+$0.11
+380
+0.65
+7.23
+5.26
+
+Nebius
+97%
+128k
+
+Open
+$0.11
+358
+0.90
+7.88
+5.59
+
+Novita
+91%
+131k
+
+Open
+$0.04
+253
+0.92
+10.79
+7.90
+
+Parasail
+98%
+131k
+
+Open
+$0.06
+320
+0.72
+8.52
+6.24
+
+SambaNova
+98%
+131k
+
+Open
+$0.15
+703
+1.18
+4.73
+2.84
+
+Scaleway
+97%
+128k
+
+Open
+$0.12
+156
+1.27
+17.29
+12.82
+
+Together AI
+77%
+131k
+
+Open
+$0.11
+151
+0.48
+17.06
+13.27
+
+Frequently Asked Questions
+Common questions about gpt-oss-120b (High) providers
+
+Where can I access gpt-oss-120b (High)?
+
+gpt-oss-120b (High) is available through 16 API providers: Groq, Scaleway, CoreWeave, Novita, DeepInfra (Turbo), Azure, DeepInfra, Cerebras, Google Vertex, Together AI, Crusoe, Baseten, SambaNova, Parasail, Nebius (Base), and Amazon. Each provider offers different performance characteristics and pricing.
+
+How many API providers offer gpt-oss-120b (High)?
+
+gpt-oss-120b (High) is currently available through 16 API providers that we benchmark and track.
+
+Which provider is fastest for gpt-oss-120b (High)?
+
+The fastest providers for gpt-oss-120b (High) by output speed are Cerebras (1,796.2 t/s), SambaNova (705.9 t/s), and Groq (473.8 t/s). Output speed measures how quickly tokens are generated after the model starts responding.
+
+Which provider has the lowest latency for gpt-oss-120b (High)?
+
+The providers with the lowest time to first answer token for gpt-oss-120b (High) are Cerebras (1.48s), SambaNova (4.02s), and Groq (4.84s). Lower latency means faster initial response time.
+
+Which provider is cheapest for gpt-oss-120b (High)?
+
+The most affordable providers for gpt-oss-120b (High) by blended price are CoreWeave ($0.04 per 1M tokens), DeepInfra ($0.05 per 1M tokens), and Novita ($0.07 per 1M tokens). Blended price uses a 7:2:1 cache hit/input/output token ratio.
+
+Which provider has the lowest input price for gpt-oss-120b (High)?
+
+The providers with the lowest input token pricing for gpt-oss-120b (High) are CoreWeave ($0.03 per 1M input tokens), DeepInfra ($0.04 per 1M input tokens), and Novita ($0.05 per 1M input tokens).
+
+Which provider has the lowest output price for gpt-oss-120b (High)?
+
+The providers with the lowest output token pricing for gpt-oss-120b (High) are CoreWeave ($0.17 per 1M output tokens), DeepInfra ($0.17 per 1M output tokens), and Novita ($0.25 per 1M output tokens).
+
+How much do prices vary across gpt-oss-120b (High) providers?
+
+Prices for gpt-oss-120b (High) vary up to 8.9x across providers. The most affordable is CoreWeave at $0.04 per 1M tokens, while Cerebras charges $0.39 per 1M tokens.
+
+How much does speed vary across gpt-oss-120b (High) providers?
+
+Output speed for gpt-oss-120b (High) varies significantly across providers. Cerebras is the fastest at 1,796.2 t/s, which is 36.9x faster than DeepInfra (Turbo) at 48.6 t/s.
+
+Which gpt-oss-120b (High) providers support JSON mode?
+
+All 16 providers of gpt-oss-120b (High) support JSON mode for structured output.
+
+Which gpt-oss-120b (High) providers support function calling?
+
+All 16 providers of gpt-oss-120b (High) support function calling (tool use).
+
+Which is the best provider for gpt-oss-120b (High)?
+
+For gpt-oss-120b (High), Cerebras offers the best performance with highest speed and lowest latency. For cost optimization, CoreWeave provides the most competitive pricing.
+
+How do I choose a provider for gpt-oss-120b (High)?
+
+When choosing a provider for gpt-oss-120b (High), consider: output speed (for throughput-intensive tasks), latency (for interactive applications requiring quick first responses), pricing (for cost-sensitive workloads), and API features like JSON mode or function calling.
+
+Does provider performance for gpt-oss-120b (High) change over time?
+
+Yes, provider performance can vary over time due to infrastructure changes, load balancing, and updates. We continuously benchmark all providers and display historical performance trends in the "Over Time" charts.
+
+What are the overall capabilities of gpt-oss-120b (High)?
+
+For information about gpt-oss-120b (High)'s intelligence, capabilities, modalities, and how it compares to other models, see the model overview page. View model overview
+

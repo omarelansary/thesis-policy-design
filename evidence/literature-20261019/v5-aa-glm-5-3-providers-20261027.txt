@@ -1,0 +1,603 @@
+GLM-5.3 (max): API Provider Performance Benchmarking & Price Analysis | Artificial Analysis
+
+Artificial Analysis
+K
+
+Z AI•
+GLM-5.3max•
+Open weights model•
+Released August 2026
+GLM-5.3 (Max) API Provider Benchmarking & AnalysisModel Comparison 
+
+This analysis is intended to support you in choosing the best API provider of GLM-5.3 (Max) for your use-case.
+
+Fastest
+
+#1
+LithosAI (FP4 ULTRA CHAT)718.7 t/s
+#2
+Inco (FAST)673.4 t/s
+#3
+Supernova (FP4, FAST)596.9 t/s
+#4
+LithosAI (FP4)440.0 t/s
+#5
+Baseten (FAST)293.7 t/s
+
+Output speed
+Total 26 providers
+
+Lowest Latency
+
+#1
+Inco (FAST)3.74 s
+#2
+Supernova (FP4, FAST)4.78 s
+#3
+LithosAI (FP4)5.45 s
+#4
+Baseten (FAST)7.59 s
+#5
+Parasail8.77 s
+
+Time to first answer token
+Total 26 providers
+
+Lowest Price
+
+#1
+Multiverse Computing$0.12
+#2
+Supernova (FP4)$0.41
+#3
+Bitdeer AI$0.41
+#4
+DeepInfra$0.45
+#5
+GMI$0.45
+
+Blended price (per 1M tokens)
+Total 26 providers
+
+GLM-5.3 (max) is available through 26 API providers, each offering different performance characteristics and pricing. Below is a comparison of the key metrics across providers.
+For output speed, the top providers are LithosAI (FP4 ULTRA CHAT) (718.7 t/s), Inco (FAST) (673.4 t/s), and Supernova (FP4, FAST) (596.9 t/s). Speed varies significantly across providers, with a 1097% difference between the fastest and slowest.
+For latency, Inco (FAST) (3.74s), Supernova (FP4, FAST) (4.78s), and LithosAI (FP4) (5.45s) offer the lowest time to first answer token.
+For pricing, Multiverse Computing (0.12), Supernova (FP4) (0.41), and Bitdeer AI (0.41) offer the lowest blended prices per 1M tokens. Prices vary up to 21.6x across providers.
+
+Speed
+Output tokens per second · Higher is better
+
+Latency
+Seconds to first answer token received · Lower is better
+
+Price
+USD per 1M tokens (blended) · Lower is better
+
+Prompt Options
+
+Update: Default performance benchmarking workload has updated to 10k input tokens to better reflect production use cases. You can still select different workloads above.
+
+Endpoint Accuracy
+
+Endpoint Accuracy IndexAccuracy by EvalOutput Tokens per TaskOutput Tokens per Task by EvalAccuracy vs. Tokens per TaskAccuracy vs. Output SpeedAccuracy vs. Price
+
+Endpoint Accuracy Index: GLM-5.3 (Max)
+v1.0 · Composite of BFCL v4-500, HLE-250 and AA-LCR-25 run against each provider endpoint · Percentage of the reference endpoint, with 95% confidence interval · Higher is better
+
+26 of 26 providers
+
+Reference (100%)Within referenceBelow reference
+
+Endpoint Accuracy Index
+
+Composite measure of how much of a model's accuracy a given provider endpoint preserves, from re-running BFCL v4-500, HLE-250 and AA-LCR-25 against that endpoint. Where a self-hosted reference endpoint exists, scores are expressed as a percentage of that reference (100 = matches reference); lower scores indicate accuracy lost to quantisation, sampling defaults, or other endpoint-side configuration. Scores are point-in-time snapshots. Methodology.
+
+Pricing
+
+Cache Hit, Input & Output PricingBlended PriceCache Discount
+
+Pricing: Cache Hit, Input, and Output: GLM-5.3 (max) Providers
+Price (USD per M Tokens) · Lower is better · 10,000 input tokens
+
+26 of 26 providers
+
+Cache HitInputOutput
+
+Cache Hit
+
+Price per token for cached prompts (previously processed), typically offering a significant discount compared to regular input price, represented as USD per million tokens. The values shown here are the cache hit price; cache write and cache storage are billed separately and vary by provider — see "Cache pricing by provider" for detail. 3 more notes
+
+Cost per Intelligence Index Task: GLM-5.3 (max) Providers
+Weighted average cost (USD) per Intelligence Index task · Segmented by token type · Lower is better
+
+26 of 26 providers
+
+AnswerReasoningCache WriteCache HitInput
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight.
+
+Output Speed vs. PriceOutput Speed vs. Cost per Task
+
+Output Speed vs. Price: GLM-5.3 (max) Providers
+Blended at 7:2:1 (cache-input-output) · Output speed: output tokens per second · USD per 1M tokens (blended)
+
+7:2:1General agentic (recommended)
+
+26 of 26 providers
+
+Most attractive quadrant
+Pareto line
+
+ModalZaiTogether AIParasailDeepInfraModularInco (FAST)NovitaBasetenDigitalOceanMakoraDatabricksWaferBaseten (FAST)LithosAI (FP4)LithosAI (FP4 ULTRA CHAT)IncoCrusoe (FP4)Supernova (FP4)FriendliAISupernova (FP4, FAST)Nebius (FP4)GMIBitdeer AIMultiverse ComputingScaleway
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming). 4 more notes
+
+Speed
+Measured by Output Speed (tokens per second)
+
+Output SpeedOutput Speed by Prompt TypeOutput Speed VarianceOutput Speed Over Time
+
+Output Speed: GLM-5.3 (Max)
+Output speed: output tokens per second · 10,000 input tokens
+
+26 of 26 providers
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming).
+
+Model Performance Representation
+
+Figures represent performance of the model's first-party API or the median across providers where a first-party API is not available.
+
+Time per Intelligence Index Task: GLM-5.3 (max) Providers
+Weighted average decode time (minutes) per Intelligence Index task · Excludes TTFT and overhead time · Lower is better
+
+26 of 26 providers
+
+Time per Intelligence Index Task
+
+The weighted average time (seconds) per Artificial Analysis Intelligence Index task. This is calculated by dividing output tokens per task by output speed, weighted by the relative weights of each benchmark in the Intelligence Index.
+
+Cost per Task vs. Time per TaskLatency vs. Output Speed
+
+Cost per Task vs. Time per Task: GLM-5.3 (max) Providers
+Weighted average cost (USD) per Intelligence Index task · Weighted average decode time (minutes) per Intelligence Index task
+
+26 of 26 providers
+
+Most attractive quadrant
+Pareto line
+
+ModalZaiTogether AIParasailDeepInfraModularInco (FAST)NovitaBasetenDigitalOceanMakoraDatabricksWaferBaseten (FAST)LithosAI (FP4)LithosAI (FP4 ULTRA CHAT)IncoCrusoe (FP4)Supernova (FP4)FriendliAISupernova (FP4, FAST)Nebius (FP4)GMIBitdeer AIMultiverse ComputingScaleway
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+Latency
+Measured by Time (seconds) to First Token
+
+Time to First Answer TokenTime to First TokenLatency by Prompt TypeLatency VarianceTime to First Token Over TimeTime to First Answer Token Over Time
+
+Time to First Answer Token: GLM-5.3 (max) Providers
+Seconds to first token received · Lower is better · 10,000 input tokens
+
+26 of 26 providers
+
+'Thinking' time (reasoning models, where applicable)Input processing time
+
+Time to First Answer Token
+
+Time to first answer token received, in seconds, after API request sent. For reasoning models, this includes the 'thinking' time of the model before providing an answer. For models which do not support streaming, this represents time to receive the completion.
+
+Median
+
+Figures represent median (P50) measurement over the past 72 hours to reflect sustained changes in performance.
+
+Cache Behaviour
+
+Cache Hit RateCache Hit Rate Over Time
+
+Cache Hit Rate: GLM-5.3 (max) Providers
+Share of cacheable input tokens served from cache · Median of the last four weeks, updated Oct 26, 2026
+
+26 of 26 providers
+
+What Cache Hit Rate Shows
+
+The share of cacheable input tokens served from the provider's prompt cache, measured during multi-turn agentic coding sessions. We regularly measure each endpoint and report a representative rate based on recent measurements. Higher values mean more of the input is billed at the cheaper cache-hit price, where the provider offers one, which lowers the effective cost of agentic workloads. For further details, see our methodology page.
+
+Cost per Task vs. Cache Hit Rate: GLM-5.3 (max) Providers
+Weighted average cost (USD) per Intelligence Index task · Cache hit rate: median of the last four weeks, updated Oct 26, 2026
+
+26 of 26 providers
+
+Most attractive quadrant
+Pareto line
+
+ModalZaiTogether AIParasailDeepInfraModularInco (FAST)NovitaBasetenDigitalOceanMakoraDatabricksWaferBaseten (FAST)LithosAI (FP4)LithosAI (FP4 ULTRA CHAT)IncoCrusoe (FP4)Supernova (FP4)FriendliAISupernova (FP4, FAST)Nebius (FP4)GMIBitdeer AIMultiverse ComputingScaleway
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+End-to-End Response Time
+Seconds to output 500 tokens, calculated based on time to first token, 'thinking' time for reasoning models, and output speed
+
+End-to-End Response TimeEnd-to-End Response Time vs. PriceEnd-to-End Response Time by Prompt TypeEnd-to-End Response Time Over Time
+
+End-to-End Response Time: GLM-5.3 (max) Providers
+Seconds to output 500 tokens, including reasoning model 'thinking' time · Lower is better · 10,000 input tokens
+
+26 of 26 providers
+
+Outputting time'Thinking' time (reasoning models)Input processing time
+
+End-to-End Response Time
+
+Seconds to receive a 500 token response. Key components:
+Input time: Time to receive the first response token
+Thinking time (only for reasoning models): Time reasoning models spend outputting tokens to reason prior to providing an answer. Amount of tokens based on the average reasoning tokens across a diverse set of 60 prompts (methodology details).
+Answer time: Time to generate 500 output tokens, based on output speed 2 more notes
+
+Key Comparison Metrics & API Features
+
+Expand Columns
+
+FeaturesPriceSpeedLatencyEnd-to-End Response Time
+API ProviderEndpoint Accuracy IndexContext WindowFunction CallingJSON ModeLicenseCost per TaskUSDMedianTokens/sMedianFirst Chunk (s)TotalResponse (s)ReasoningTime (s)
+
+Baseten
+96%
+1.05M
+
+Open
+$1.43
+163
+0.95
+16.31
+12.29
+
+Baseten
+94%
+1M
+
+Open
+$3.75
+294
+0.78
+9.30
+6.81
+
+Bitdeer AI
+99%
+1M
+
+Open
+$1.40
+148
+1.61
+18.52
+13.52
+
+Crusoe
+97%
+786k
+
+Open
+$2.04
+228
+0.73
+11.71
+8.79
+
+Databricks
+96%
+1M
+
+Open
+$1.97
+232
+0.83
+11.59
+8.60
+
+DeepInfra
+99%
+1.05M
+
+Open
+$0.97
+108
+0.90
+24.01
+18.49
+
+DigitalOcean
+99%
+1.05M
+
+Open
+$1.97
+59
+0.83
+43.05
+33.78
+
+FriendliAI
+n/a
+1M
+
+Open
+$1.81
+155
+0.93
+17.12
+12.94
+
+GMI
+97%
+1M
+
+Open
+$1.01
+133
+2.12
+20.94
+15.06
+
+Inco
+n/a
+1M
+
+Open
+$4.08
+687
+0.76
+4.40
+2.91
+
+Inco
+n/a
+164k
+
+Open
+$3.43
+76
+2.73
+35.74
+26.41
+
+LithosAI
+97%
+1.05M
+
+Open
+$1.48
+448
+0.90
+6.49
+4.47
+
+LithosAI
+n/a
+1.05M
+
+Open
+$2.96
+709
+66.01
+69.54
+2.82
+
+Makora
+99%
+1.05M
+
+Open
+$0.92
+225
+1.12
+12.22
+8.88
+
+Modal
+100%
+1M
+
+Open
+$1.97
+136
+0.73
+19.06
+14.66
+
+Modular
+97%
+1.05M
+
+Open
+$2.04
+182
+0.65
+14.36
+10.97
+
+Multiverse Computing
+99%
+1M
+
+Open
+$0.57
+171
+3.74
+18.33
+11.68
+
+Nebius
+100%
+1M
+
+Open
+$1.97
+217
+1.45
+12.97
+9.22
+
+Novita
+96%
+1M
+
+Open
+$2.00
+115
+2.34
+24.11
+17.42
+
+Parasail
+98%
+1M
+
+Open
+$1.97
+250
+1.09
+11.09
+8.00
+
+Scaleway
+n/a
+262k
+
+Open
+$12.94
+251
+1.32
+11.28
+7.96
+
+Supernova
+100%
+1M
+
+Open
+$0.89
+230
+1.84
+12.70
+8.68
+
+Supernova
+100%
+1M
+
+Open
+$5.29
+597
+1.44
+5.62
+3.35
+
+Together AI
+96%
+1.05M
+
+Open
+$1.97
+171
+0.66
+15.27
+11.69
+
+Wafer
+95%
+1M
+
+Open
+$2.04
+148
+0.77
+17.71
+13.55
+
+Zai
+99%
+1M
+
+Open
+$2.01
+82
+2.66
+33.16
+24.40
+
+Frequently Asked Questions
+Common questions about GLM-5.3 (Max) providers
+
+Where can I access GLM-5.3 (Max)?
+
+GLM-5.3 (Max) is available through 26 API providers: Modal, Zai, Together AI, Parasail, DeepInfra, Modular, Inco (FAST), Novita, Baseten, DigitalOcean, Makora, Databricks, Wafer, Baseten (FAST), LithosAI (FP4), LithosAI (FP4 ULTRA CHAT), Inco, Crusoe (FP4), Supernova (FP4), FriendliAI, Supernova (FP4, FAST), Nebius (FP4), GMI, Bitdeer AI, Multiverse Computing, and Scaleway. Each provider offers different performance characteristics and pricing.
+
+How many API providers offer GLM-5.3 (Max)?
+
+GLM-5.3 (Max) is currently available through 26 API providers that we benchmark and track.
+
+Which provider is fastest for GLM-5.3 (Max)?
+
+The fastest providers for GLM-5.3 (Max) by output speed are LithosAI (FP4 ULTRA CHAT) (718.7 t/s), Inco (FAST) (673.4 t/s), and Supernova (FP4, FAST) (596.9 t/s). Output speed measures how quickly tokens are generated after the model starts responding.
+
+Which provider has the lowest latency for GLM-5.3 (Max)?
+
+The providers with the lowest time to first answer token for GLM-5.3 (Max) are Inco (FAST) (3.74s), Supernova (FP4, FAST) (4.78s), and LithosAI (FP4) (5.45s). Lower latency means faster initial response time.
+
+Which provider is cheapest for GLM-5.3 (Max)?
+
+The most affordable providers for GLM-5.3 (Max) by blended price are Multiverse Computing ($0.12 per 1M tokens), Supernova (FP4) ($0.41 per 1M tokens), and Bitdeer AI ($0.41 per 1M tokens). Blended price uses a 7:2:1 cache hit/input/output token ratio.
+
+Which provider has the lowest input price for GLM-5.3 (Max)?
+
+The providers with the lowest input token pricing for GLM-5.3 (Max) are Makora ($0.14 per 1M input tokens), Multiverse Computing ($0.20 per 1M input tokens), and DeepInfra ($0.56 per 1M input tokens).
+
+Which provider has the lowest output price for GLM-5.3 (Max)?
+
+The providers with the lowest output token pricing for GLM-5.3 (Max) are Multiverse Computing ($0.64 per 1M output tokens), Supernova (FP4) ($1.98 per 1M output tokens), and Bitdeer AI ($1.98 per 1M output tokens).
+
+How much do prices vary across GLM-5.3 (Max) providers?
+
+Prices for GLM-5.3 (Max) vary up to 21.6x across providers. The most affordable is Multiverse Computing at $0.12 per 1M tokens, while Scaleway charges $2.52 per 1M tokens.
+
+How much does speed vary across GLM-5.3 (Max) providers?
+
+Output speed for GLM-5.3 (Max) varies significantly across providers. LithosAI (FP4 ULTRA CHAT) is the fastest at 718.7 t/s, which is 12.0x faster than DigitalOcean at 60.1 t/s.
+
+Which GLM-5.3 (Max) providers support JSON mode?
+
+All 26 providers of GLM-5.3 (Max) support JSON mode for structured output.
+
+Which GLM-5.3 (Max) providers support function calling?
+
+All 26 providers of GLM-5.3 (Max) support function calling (tool use).
+
+Which is the best provider for GLM-5.3 (Max)?
+
+The best provider for GLM-5.3 (Max) depends on your priorities: LithosAI (FP4 ULTRA CHAT) offers the highest output speed, Inco (FAST) has the lowest latency, and Multiverse Computing provides the most competitive pricing.
+
+How do I choose a provider for GLM-5.3 (Max)?
+
+When choosing a provider for GLM-5.3 (Max), consider: output speed (for throughput-intensive tasks), latency (for interactive applications requiring quick first responses), pricing (for cost-sensitive workloads), and API features like JSON mode or function calling.
+
+Does provider performance for GLM-5.3 (Max) change over time?
+
+Yes, provider performance can vary over time due to infrastructure changes, load balancing, and updates. We continuously benchmark all providers and display historical performance trends in the "Over Time" charts.
+
+What are the overall capabilities of GLM-5.3 (Max)?
+
+For information about GLM-5.3 (Max)'s intelligence, capabilities, modalities, and how it compares to other models, see the model overview page. View model overview
+

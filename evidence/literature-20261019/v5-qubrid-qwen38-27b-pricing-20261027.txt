@@ -1,0 +1,200 @@
+Qwen3.8-27B Pricing: API Cost per 1M Tokens | Qubrid AI Platform
+
+Sign In
+
+Blog & News
+
+Last updated Aug 31, 2026.
+Qwen3.8-27B Pricing: API Cost per 1M Tokens
+8 minutes read
+
+Qubrid Team
+
+Table of contents
+
+Qwen3.8 27B pricingQwen3.8 27B priceQwen3.8 27B API pricingQwen3.8 27B costQwen3.8 27B cost per tokenQwen3.8 27B API costQwen3.8 27B hardware requirements
+
+Table of contents
+
+Qwen3.8 27B pricingQwen3.8 27B priceQwen3.8 27B API pricingQwen3.8 27B costQwen3.8 27B cost per tokenQwen3.8 27B API costQwen3.8 27B hardware requirements
+
+Qwen3.8-27B costs $0.58 per 1M input tokens and $3.45 per 1M output tokens on Qubrid AI, with implicit cached input at $0.11 per 1M tokens. Reasoning tokens bill as output tokens, so the reasoning_effort setting affects your bill more than anything else you configure.
+Qwen3.8-27B rate card
+Pay-as-you-go, no minimum commitment, no reserved capacity requirement.
+
+Token type
+List price
+Qubrid price
+Savings
+
+Input
+$0.72 / 1M tokens
+$0.58 / 1M tokens
+20%
+
+Output
+$4.31 / 1M tokens
+$3.45 / 1M tokens
+20%
+
+Implicit cache (input)
+$0.14 / 1M tokens
+$0.11 / 1M tokens
+20%
+Model string: Qwen/Qwen3.8-27B. Endpoint: https://platform.qubrid.com/v1.
+Output is priced at roughly 6x input. On a model this verbose, that ratio is the whole story.
+Why reasoning effort is your largest cost lever
+Qwen3.8-27B defaults reasoning_effort to xhigh. Reasoning traces bill as output tokens. Those two facts together mean the default configuration is expensive.
+Artificial Analysis evaluated each reasoning setting as a separate model, which lets you read the cost-versus-quality curve directly:
+
+Setting
+Intelligence Index
+Output tokens across the index
+Peer median
+
+xhigh
+52
+160M
+48M
+
+medium
+44
+75M
+45M
+
+Non-reasoning
+35
+26M
+17M
+Going from medium to xhigh buys 8 index points for slightly more than double the output tokens. At $3.45 per 1M output tokens, that is real money for a flattening return curve.
+Artificial Analysis flags the model as very verbose at xhigh, generating roughly 3.3x the peer median. This is not a criticism of the model. It is a configuration instruction.
+As Simon Willison documented in hands-on testing, the extreme case is stark: a request to draw an SVG of a pelican riding a bicycle consumed 22,276 reasoning tokens to produce 3,223 tokens of output. Priced at output rates, the reasoning alone would cost roughly seven times the answer. Developer and investor Tomasz Tunguz reached the same conclusion from a different direction, reporting that his agent stack ran about 4.5x more expensive with reasoning enabled across a nine-task comparison, while cautioning that nine tasks is not a verdict.
+What to set
+
+Workload
+Setting
+Effect on cost
+
+Classification, extraction, routing, summarisation
+enable_thinking: false
+Lowest output spend, no measurable quality loss on structured tasks
+
+Chat, RAG answering, code completion
+reasoning_effort: "low"
+Bounded reasoning, most of the quality
+
+Multi-step agents, debugging, repo-level changes
+reasoning_effort: "medium"
+Best cost-per-index-point on the curve above
+
+Hard one-shot problems, research, planning
+reasoning_effort: "xhigh"
+Reserve for a fraction of traffic, with a token budget
+One counterintuitive note from the Qwen model card, which we agree with: in multi-turn agentic tasks, lower reasoning effort does not always reduce total cost. Insufficient analysis produces more failures and retries, and retries are billable too. Measure cost per completed task, not cost per request.
+How implicit caching changes your real bill
+Cached input is billed at $0.11 per 1M tokens instead of $0.58, a roughly 5x reduction.
+This matters more on Qwen3.8-27B than on most models, for a specific architectural reason. The model enables preserve_thinking by default, which retains reasoning blocks from historical messages across a conversation. As the Qwen team notes, this maintains a complete reasoning trace for decision consistency in agent scenarios and improves KV cache utilisation. In practice it means a large, identical, growing prefix on every subsequent call - exactly what implicit caching is built to catch.
+Worked example
+A coding agent runs a 12-turn session with a 40,000-token system prompt and tool schema that never changes:
+
+Without cache hits: 12 × 40,000 × $0.58 / 1,000,000 = $0.278
+
+With cache hits after turn one: (40,000 × $0.58 + 440,000 × $0.11) / 1,000,000 = $0.072
+A 74% reduction on the static portion of input spend, before counting the actual conversation.
+How to earn cache hits
+Put invariant content first: system prompt, tool schemas, few-shot examples, then retrieved documents that persist across turns, then the variable conversation. A single changed token near the start of your prompt invalidates everything after it. This is the cheapest optimisation available to you and it costs one refactor.
+Monthly cost estimates
+Assuming no cache hits, so treat these as ceilings:
+
+Monthly volume
+Input cost
+Output cost
+Total
+
+5M in / 1M out
+$2.90
+$3.45
+$6.35
+
+50M in / 10M out
+$29.00
+$34.50
+$63.50
+
+250M in / 50M out
+$145.00
+$172.50
+$317.50
+
+1B in / 200M out
+$580.00
+$690.00
+$1,270.00
+Two adjustments for your own estimate. Cache hits pull the input column down substantially on agentic and RAG workloads. And leaving reasoning_effort at xhigh can push the output column up by a multiple.
+API versus self-hosting: where break-even sits
+Qwen3.8-27B is Apache 2.0, so self-hosting is a real option rather than a theoretical one. Here is the arithmetic.
+Hardware you would need
+
+Precision
+Approximate weight footprint
+
+BF16 (official weights)
+~55.6 GB
+
+FP8 (official checkpoint)
+~30.9 GB
+
+NVFP4
+~24.6 GiB
+
+Q4_K_M (community GGUF)
+~16 GB
+Weight footprint is not VRAM requirement. Runtime buffers, the vision projector, KV cache, batch size and context length all add on top. Unsloth's deployment guide publishes a full hardware table by quant tier.
+Hidden costs the rate card does not show
+The vLLM Recipes project documents operational friction that turns directly into engineering hours:
+
+On a single 32GB consumer card, only about 31.4 GiB is usable, and NVFP4 fits only with --enforce-eager. Adjusting --gpu-memory-utilization does not fix the resulting OOM, because CUDA graph capture allocates outside that budget.
+
+--reasoning-parser qwen3 is effectively mandatory. Without it, the entire reasoning block lands in message.content and can consume a 2048-token budget before the answer starts.
+
+MXFP4 does not currently load correctly on NVIDIA devices in vLLM.
+
+Two NVFP4 builds of the same model behave very differently on KV cache headroom and draft acceptance. They are not interchangeable on 32GB cards.
+Throughput matters to the math
+Dense models are memory-bandwidth bound. Willison measured roughly 15 to 30 tokens per second on an M5 Max MacBook Pro and a DGX Spark using a Q4_K_M quantization, and identified performance as the thing keeping the model from being his daily driver. Artificial Analysis measured hosted deployments in the low-50s. A GPU you have paid for but cannot saturate is the most expensive configuration available.
+The break-even
+A workload at 50M input and 10M output per month costs about $63.50 on the API. A single always-on GPU capable of serving this model at production quality costs considerably more than that before engineering time.
+Self-host when you have data residency or air-gap requirements, steady high-volume traffic that amortises reserved GPU cost, or custom fine-tunes in the serving path.
+Use the API when traffic is spiky or growing, you are still evaluating fit, or your GPU budget is better spent on training than on inference babysitting.
+If self-hosting is right for you, Qubrid also provides on-demand GPU compute and on-premises AI appliances, so that decision does not require changing vendors and stays reversible.
+Qwen3.8-27B versus Qwen3.8-Max on cost
+Both run behind the same Qubrid endpoint, so routing between them is a model string change rather than an integration project.
+The pattern that works: route volume to the 27B, escalate the hard tail to Max. Run the 27B at low or medium reasoning for the bulk of traffic, escalate on confidence thresholds or explicit failure, and you get most of the frontier quality at a fraction of aggregate spend.
+Frequently asked questions
+How much does Qwen3.8-27B cost per 1M tokens? $0.58 per 1M input tokens and $3.45 per 1M output tokens on Qubrid AI, with implicit cached input at $0.11 per 1M tokens.
+Are reasoning tokens billed separately? No. They bill at the output rate of $3.45 per 1M tokens. Since the model defaults to xhigh reasoning effort and Artificial Analysis measured it generating roughly 3.3x the peer median in output tokens, tuning reasoning_effort is the highest-leverage cost control available.
+Is there a free tier for Qwen3.8-27B? Qubrid is pay-as-you-go with no minimum commitment, so you can evaluate at whatever volume your test needs. The weights are also Apache 2.0 if you prefer to run it locally at hardware cost only.
+How much does cached input cost? $0.11 per 1M tokens, roughly 5x cheaper than uncached input. On multi-turn agent workloads with a stable prefix, this typically removes around three quarters of input spend.
+Is Qwen3.8-27B cheaper than running it myself? Below roughly the volume where you would saturate a dedicated GPU, yes, once you count hardware, engineering time and idle capacity. Above it, self-hosting wins.
+What hardware do I need to run Qwen3.8-27B locally? Roughly 56GB of GPU memory at BF16, about 31GB at FP8, around 25GiB at NVFP4, and about 16GB at Q4_K_M, before KV cache and runtime buffers. A 24GB-class card is a plausible target at 4-bit.
+Does the price change with context length? No. The rate is flat across the 262,144-token native context window. Longer prompts cost more because they contain more tokens, not because of a tier change.
+What does it cost to run an agent loop on Qwen3.8-27B? Depends almost entirely on reasoning effort and cache hit rate. A 12-turn session with a 40,000-token stable prefix costs about $0.072 in prefix input with caching, against $0.278 without. Output cost then scales with your reasoning setting.
+Start building
+Qwen/Qwen3.8-27B is live on Qubrid AI at $0.58 per 1M input tokens.
+
+Generate an API key at platform.qubrid.com
+
+Point your OpenAI SDK at https://platform.qubrid.com/v1
+
+Set model="Qwen/Qwen3.8-27B"
+
+Set reasoning_effort before you scale
+Qubrid AI serves 60+ open-source models behind one OpenAI-compatible API, alongside on-demand GPU compute and on-premises appliances.
+
+Related postsView all posts
+
+August 31, 2026
+Qwen3.8-27B API: Benchmarks,  Pricing, and the Complete Developer Guide
+Complete Qwen3.8-27B guide: official and independent benchmarks, API pricing at $0.58/1M input tokens, architecture, hardware requirements, and production code
+
+Qubrid Team

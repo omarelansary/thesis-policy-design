@@ -1,0 +1,421 @@
+MiniMax-M3: API Provider Performance Benchmarking & Price Analysis | Artificial Analysis
+
+Artificial Analysis
+K
+
+MiniMax•
+Open weights model•
+Released June 2026
+MiniMax-M3 API Provider Benchmarking & AnalysisModel Comparison 
+
+This analysis is intended to support you in choosing the best API provider of MiniMax-M3 for your use-case.
+
+Fastest
+
+#1
+Nebius (FP8)361.6 t/s
+#2
+CoreWeave (NVFP4)310.7 t/s
+#3
+SambaNova199.5 t/s
+#4
+Fireworks196.8 t/s
+#5
+Parasail (MXFP8)166.6 t/s
+
+Output speed
+Total 12 providers
+
+Lowest Latency
+
+#1
+Nebius (FP8)6.98 s
+#2
+CoreWeave (NVFP4)7.63 s
+#3
+Fireworks10.93 s
+#4
+SambaNova12.20 s
+#5
+Parasail (MXFP8)13.03 s
+
+Time to first answer token
+Total 12 providers
+
+Lowest Price
+
+#1
+CoreWeave (NVFP4)$0.18
+#2
+GMI$0.18
+#3
+DeepInfra$0.21
+#4
+Parasail (MXFP8)$0.22
+#5
+Together AI$0.22
+
+Blended price (per 1M tokens)
+Total 12 providers
+
+MiniMax-M3 is available through 12 API providers, each offering different performance characteristics and pricing. Below is a comparison of the key metrics across providers.
+For output speed, the top providers are Nebius (FP8) (361.6 t/s), CoreWeave (NVFP4) (310.7 t/s), and SambaNova (199.5 t/s). Speed varies significantly across providers, with a 1366% difference between the fastest and slowest.
+For latency, Nebius (FP8) (6.98s), CoreWeave (NVFP4) (7.63s), and Fireworks (10.93s) offer the lowest time to first answer token.
+For pricing, CoreWeave (NVFP4) (0.18), GMI (0.18), and DeepInfra (0.21) offer the lowest blended prices per 1M tokens. Prices vary up to 4.4x across providers.
+Nebius (FP8) offers the best performance with both the highest speed and lowest latency. For cost optimization, CoreWeave (NVFP4) provides the most competitive pricing.
+
+Speed
+Output tokens per second · Higher is better
+
+Latency
+Seconds to first answer token received · Lower is better
+
+Price
+USD per 1M tokens (blended) · Lower is better
+
+Prompt Options
+
+Update: Default performance benchmarking workload has updated to 10k input tokens to better reflect production use cases. You can still select different workloads above.
+
+Pricing
+
+Cache Hit, Input & Output PricingBlended PriceCache Discount
+
+Pricing: Cache Hit, Input, and Output: MiniMax-M3 Providers
+Price (USD per M Tokens) · Lower is better · 10,000 input tokens
+
+12 of 12 providers
+
+Cache HitInputOutput
+
+Cache Hit
+
+Price per token for cached prompts (previously processed), typically offering a significant discount compared to regular input price, represented as USD per million tokens. The values shown here are the cache hit price; cache write and cache storage are billed separately and vary by provider — see "Cache pricing by provider" for detail. 3 more notes
+
+Cost per Intelligence Index Task: MiniMax-M3 Providers
+Weighted average cost (USD) per Intelligence Index task · Segmented by token type · Lower is better
+
+12 of 12 providers
+
+AnswerReasoningCache WriteCache HitInput
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight.
+
+Output Speed vs. PriceOutput Speed vs. Cost per Task
+
+Output Speed vs. Price: MiniMax-M3 Providers
+Blended at 7:2:1 (cache-input-output) · Output speed: output tokens per second · USD per 1M tokens (blended)
+
+7:2:1General agentic (recommended)
+
+12 of 12 providers
+
+Most attractive quadrant
+Pareto line
+
+Parasail (MXFP8)CoreWeave (NVFP4)Together AINovitaModularNebius (FP8)SiliconFlow (FP8)MiniMaxDeepInfraGMISambaNovaFireworks
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming). 4 more notes
+
+Speed
+Measured by Output Speed (tokens per second)
+
+Output SpeedOutput Speed by Prompt TypeOutput Speed VarianceOutput Speed Over Time
+
+Output Speed: MiniMax-M3
+Output speed: output tokens per second · 10,000 input tokens
+
+12 of 12 providers
+
+Output Speed
+
+Tokens per second received while the model is generating tokens (ie. after first chunk has been received from the API for models which support streaming).
+
+Model Performance Representation
+
+Figures represent performance of the model's first-party API or the median across providers where a first-party API is not available.
+
+Time per Intelligence Index Task: MiniMax-M3 Providers
+Weighted average decode time (minutes) per Intelligence Index task · Excludes TTFT and overhead time · Lower is better
+
+12 of 12 providers
+
+Time per Intelligence Index Task
+
+The weighted average time (seconds) per Artificial Analysis Intelligence Index task. This is calculated by dividing output tokens per task by output speed, weighted by the relative weights of each benchmark in the Intelligence Index.
+
+Cost per Task vs. Time per TaskLatency vs. Output Speed
+
+Cost per Task vs. Time per Task: MiniMax-M3 Providers
+Weighted average cost (USD) per Intelligence Index task · Weighted average decode time (minutes) per Intelligence Index task
+
+12 of 12 providers
+
+Most attractive quadrant
+Pareto line
+
+Parasail (MXFP8)CoreWeave (NVFP4)Together AINovitaModularNebius (FP8)SiliconFlow (FP8)MiniMaxDeepInfraGMISambaNovaFireworks
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+Latency
+Measured by Time (seconds) to First Token
+
+Time to First Answer TokenTime to First TokenLatency by Prompt TypeLatency VarianceTime to First Token Over TimeTime to First Answer Token Over Time
+
+Time to First Answer Token: MiniMax-M3 Providers
+Seconds to first token received · Lower is better · 10,000 input tokens
+
+12 of 12 providers
+
+'Thinking' time (reasoning models, where applicable)Input processing time
+
+Time to First Answer Token
+
+Time to first answer token received, in seconds, after API request sent. For reasoning models, this includes the 'thinking' time of the model before providing an answer. For models which do not support streaming, this represents time to receive the completion.
+
+Median
+
+Figures represent median (P50) measurement over the past 72 hours to reflect sustained changes in performance.
+
+Cache Behaviour
+
+Cache Hit RateCache Hit Rate Over Time
+
+Cache Hit Rate: MiniMax-M3 Providers
+Share of cacheable input tokens served from cache · Median of the last four weeks, updated Oct 26, 2026
+
+12 of 12 providers
+
+What Cache Hit Rate Shows
+
+The share of cacheable input tokens served from the provider's prompt cache, measured during multi-turn agentic coding sessions. We regularly measure each endpoint and report a representative rate based on recent measurements. Higher values mean more of the input is billed at the cheaper cache-hit price, where the provider offers one, which lowers the effective cost of agentic workloads. For further details, see our methodology page.
+
+Cost per Task vs. Cache Hit Rate: MiniMax-M3 Providers
+Weighted average cost (USD) per Intelligence Index task · Cache hit rate: median of the last four weeks, updated Oct 26, 2026
+
+12 of 12 providers
+
+Most attractive quadrant
+
+Parasail (MXFP8)CoreWeave (NVFP4)Together AINovitaModularNebius (FP8)SiliconFlow (FP8)MiniMaxDeepInfraGMISambaNovaFireworks
+
+Cost per Intelligence Index Task
+
+Weighted average cost per Intelligence Index task. Each evaluation’s cost is calculated from input, cache hit, cache write, reasoning, and answer token prices, divided by task count, and weighted by its Intelligence Index weight. 2 more notes
+
+End-to-End Response Time
+Seconds to output 500 tokens, calculated based on time to first token, 'thinking' time for reasoning models, and output speed
+
+End-to-End Response TimeEnd-to-End Response Time vs. PriceEnd-to-End Response Time by Prompt TypeEnd-to-End Response Time Over Time
+
+End-to-End Response Time: MiniMax-M3 Providers
+Seconds to output 500 tokens, including reasoning model 'thinking' time · Lower is better · 10,000 input tokens
+
+12 of 12 providers
+
+Outputting time'Thinking' time (reasoning models)Input processing time
+
+End-to-End Response Time
+
+Seconds to receive a 500 token response. Key components:
+Input time: Time to receive the first response token
+Thinking time (only for reasoning models): Time reasoning models spend outputting tokens to reason prior to providing an answer. Amount of tokens based on the average reasoning tokens across a diverse set of 60 prompts (methodology details).
+Answer time: Time to generate 500 output tokens, based on output speed 2 more notes
+
+Key Comparison Metrics & API Features
+
+Expand Columns
+
+FeaturesPriceSpeedLatencyEnd-to-End Response Time
+API ProviderContext WindowFunction CallingJSON ModeLicenseCost per TaskUSDMedianTokens/sMedianFirst Chunk (s)TotalResponse (s)ReasoningTime (s)
+
+CoreWeave
+262k
+
+Open
+$0.57
+273
+1.30
+10.45
+7.32
+
+DeepInfra
+524k
+
+Open
+$0.44
+25
+0.94
+102.31
+81.10
+
+Fireworks
+524k
+
+Open
+$0.50
+193
+0.77
+13.69
+10.34
+
+GMI
+1.05M
+
+Open
+$0.36
+117
+1.33
+22.69
+17.08
+
+MiniMax
+512k
+
+Open
+$0.51
+110
+1.06
+23.74
+18.14
+
+Modular
+1M
+
+Open
+$0.46
+162
+1.40
+16.81
+12.32
+
+Nebius
+1.05M
+
+Open
+$0.51
+362
+1.45
+8.36
+5.53
+
+Novita
+1M
+
+Open
+$0.46
+94
+1.50
+28.21
+21.37
+
+Parasail
+1M
+
+Open
+$0.46
+168
+1.02
+15.90
+11.91
+
+SambaNova
+1.05M
+
+Open
+$3.83
+202
+2.18
+14.54
+9.89
+
+SiliconFlow
+1M
+
+Open
+$0.45
+110
+1.77
+24.43
+18.13
+
+Together AI
+1M
+
+Open
+$0.58
+123
+0.72
+21.04
+16.26
+
+Frequently Asked Questions
+Common questions about MiniMax-M3 providers
+
+Where can I access MiniMax-M3?
+
+MiniMax-M3 is available through 12 API providers: Parasail (MXFP8), CoreWeave (NVFP4), Together AI, Novita, Modular, Nebius (FP8), SiliconFlow (FP8), MiniMax, DeepInfra, GMI, SambaNova, and Fireworks. Each provider offers different performance characteristics and pricing.
+
+How many API providers offer MiniMax-M3?
+
+MiniMax-M3 is currently available through 12 API providers that we benchmark and track.
+
+Which provider is fastest for MiniMax-M3?
+
+The fastest providers for MiniMax-M3 by output speed are Nebius (FP8) (361.6 t/s), CoreWeave (NVFP4) (310.7 t/s), and SambaNova (199.5 t/s). Output speed measures how quickly tokens are generated after the model starts responding.
+
+Which provider has the lowest latency for MiniMax-M3?
+
+The providers with the lowest time to first answer token for MiniMax-M3 are Nebius (FP8) (6.98s), CoreWeave (NVFP4) (7.63s), and Fireworks (10.93s). Lower latency means faster initial response time.
+
+Which provider is cheapest for MiniMax-M3?
+
+The most affordable providers for MiniMax-M3 by blended price are CoreWeave (NVFP4) ($0.18 per 1M tokens), GMI ($0.18 per 1M tokens), and DeepInfra ($0.21 per 1M tokens). Blended price uses a 7:2:1 cache hit/input/output token ratio.
+
+Which provider has the lowest input price for MiniMax-M3?
+
+The providers with the lowest input token pricing for MiniMax-M3 are CoreWeave (NVFP4) ($0.23 per 1M input tokens), GMI ($0.24 per 1M input tokens), and DeepInfra ($0.28 per 1M input tokens).
+
+Which provider has the lowest output price for MiniMax-M3?
+
+The providers with the lowest output token pricing for MiniMax-M3 are CoreWeave (NVFP4) ($0.96 per 1M output tokens), GMI ($0.96 per 1M output tokens), and DeepInfra ($1.10 per 1M output tokens).
+
+How much do prices vary across MiniMax-M3 providers?
+
+Prices for MiniMax-M3 vary up to 4.4x across providers. The most affordable is CoreWeave (NVFP4) at $0.18 per 1M tokens, while SambaNova charges $0.78 per 1M tokens.
+
+How much does speed vary across MiniMax-M3 providers?
+
+Output speed for MiniMax-M3 varies significantly across providers. Nebius (FP8) is the fastest at 361.6 t/s, which is 14.7x faster than DeepInfra at 24.7 t/s.
+
+Which MiniMax-M3 providers support JSON mode?
+
+All 12 providers of MiniMax-M3 support JSON mode for structured output.
+
+Which MiniMax-M3 providers support function calling?
+
+All 12 providers of MiniMax-M3 support function calling (tool use).
+
+Which is the best provider for MiniMax-M3?
+
+For MiniMax-M3, Nebius (FP8) offers the best performance with highest speed and lowest latency. For cost optimization, CoreWeave (NVFP4) provides the most competitive pricing.
+
+How do I choose a provider for MiniMax-M3?
+
+When choosing a provider for MiniMax-M3, consider: output speed (for throughput-intensive tasks), latency (for interactive applications requiring quick first responses), pricing (for cost-sensitive workloads), and API features like JSON mode or function calling.
+
+Does provider performance for MiniMax-M3 change over time?
+
+Yes, provider performance can vary over time due to infrastructure changes, load balancing, and updates. We continuously benchmark all providers and display historical performance trends in the "Over Time" charts.
+
+What are the overall capabilities of MiniMax-M3?
+
+For information about MiniMax-M3's intelligence, capabilities, modalities, and how it compares to other models, see the model overview page. View model overview
+
