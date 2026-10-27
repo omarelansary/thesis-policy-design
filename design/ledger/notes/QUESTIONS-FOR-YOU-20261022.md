@@ -15,5 +15,5 @@ Source: `design/package-v5/05-poc-loop-and-e2e.md` section 5 and `08-ledger-prop
 - Q-U30: answered 2026-10-25: A (all money divided by all turns) is the headline, with B (the average of each session's cost per turn) beside it.
 - Q-U31: answered. The ledger changes are applied.
 - Q-U32: answered and done 2026-10-25: the two files were checked, ideas only (`design/package-v5/09-expose-ideas-checked.md`).
-- Q-U33: first round **done 2026-10-27** (six models; `design/package-v5/10-p0-university-api-reading.md`). **Open:** the second probe `design/package-v5/tools/p0_api_probe_v2.py` (tool calling and a changed tools array; command in its docstring).
+- Q-U33: first and second rounds **done 2026-10-27** (`design/package-v5/10-p0-university-api-reading.md`). **Open:** the third probe `design/package-v5/tools/p0_api_probe_v3.py` (nonce-marked tools changes and cache lifetime; commands in its docstring). **New decisions for you:** which models (N-38; you lean away from gpt-oss) and a named price table (N-39).
 - Pushes: `git push origin v5-audit`.

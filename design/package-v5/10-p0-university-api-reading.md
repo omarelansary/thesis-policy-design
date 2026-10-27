@@ -48,11 +48,37 @@ Every successful response carries `prompt_tokens_details.cached_tokens` and `cre
 | Route of `04` section 5 | client-side route assumed | **Confirmed**: appends keep the cache; vendor offering mechanisms are not available; `allowed_tools` is rejected |
 | HYP-0018, offering fewer tools at a fixed prefix | tested by `allowed_tools` or `tool_addition` | **Cannot be tested by `allowed_tools` here.** Left on this route: declare only the allowed tools (S1), append discovered or seeded tools, or restrict by instruction text with no enforcement; the instruction route is untested |
 | The regime arithmetic (D-01) | read price assumed at 0.1 | The API reports reads and writes but states no prices; the cached share is 59-99.7% of a prefix, not 100%, so D-01's cached-prefix rows are best-case for the two partial-cache models |
-| V5-R02, never change `tools` in a session | vendor documentation | **Not yet measured on this route**: the probe appended a turn but did not change the tools array; `p0_api_probe_v2.py` does (C3, C4) |
-| Tool calling on these models | assumed | **Unshown**; the next probe tests it with `max_tokens` 400 |
+| V5-R02, never change `tools` in a session | vendor documentation | **Measured on one of three models** (section 7): on GLM-5.3 one added tool at the end of the list rewrote 65% of the prompt and an edit of the first tool rewrote 99%; gpt-oss and MiniMax-M3 kept almost all of their cache, which is unexplained until the third probe |
+| Tool calling on these models | assumed | **Shown on gpt-oss-120b, MiniMax-M3 and GLM-5.3** (section 7): `auto`, `required` and a named tool all produced the right call; the models need no MCP server, only function definitions in the request |
 
 ## 5. What this reading does not show
 Single runs, one prompt shape, one prefix length, one repeat, 16-token outputs. The cache behaviour of a returning user after a gap longer than the cache lifetime was not tested, and the lifetime is not known. Whether `cached_tokens` also appears for requests from other users with the same prefix (the 80 cached tokens on gpt-oss's first request hint at some shared prefix, which could also come from an earlier run) was not tested [U]. No accuracy was measured.
 
-## 6. Next: the second probe
-`design/package-v5/tools/p0_api_probe_v2.py` (the human runs it; output as UTF-8 JSON via `--out`): `max_tokens` 400; a changed tools array (one extra tool at the end, and an edited first tool) to see whether the cache survives; direct tool-call tests with `tool_choice` auto, required and named; a request for a tool that does not exist; a retry after a 429 and `--pause`. About ten requests per model. GLM-5.3 needs `--pause 35`.
+## 6. The second probe
+`design/package-v5/tools/p0_api_probe_v2.py` was run by the human on 2026-10-27 (section 7).
+
+## 7. The second probe: tool calling and a changed tools array (run 2026-10-27, 11:35-11:37 UTC)
+Files (UTF-8 JSON, `max_tokens` 400, no key material, scanned): `inputs/p0-api-probe2-output.json` (gpt-oss-120b and MiniMax-M3, SHA-256 `a9934bea563b0dbc658d6ea9b1e4362fa6c67c639cda39baa1cd8352c5a0730a`) and `inputs/p0-api-probe2-glm-output.json` (GLM-5.3, `eb0a7fe2b2c2f4c34157bad8c3f2278aa0b6bf345ded228a2fa9fd8d187c1019`). Single runs at temperature 0. The script retries a rate-limited request after 65 s without recording the retry, so GLM-5.3 may have waited unseen.
+
+**Tool calling works [O].** On all three models, asking "Call tool_07 now with note 'x'" produced a call to `tool_07` with the argument `{"note": "x"}` under `tool_choice` auto, `required` and a named function (nine of nine). The models need no MCP server: the request carries function definitions and our harness would be the client that runs them (the human's remark is right, and V5 does not depend on MCP).
+
+**A request for a tool that does not exist [O], one run each:** gpt-oss-120b made no call and said the tool does not exist; MiniMax-M3 made no call, said so and listed the available tools; **GLM-5.3 called `tool_09`**, a wrong tool with a similar name, with the argument `{"note": "x"}`. This is the wrong-tool failure the earlier papers describe (FND-0016 and KAIST arXiv 2406.12307 in V4 `01` section 4), seen once; it is not a ranking of the models.
+
+**The cache after the tools array changed [O]:**
+
+| Model | Base prompt | Extra tool at the end of the list | First tool edited | Original request again |
+|---|---|---|---|---|
+| GLM-5.3 | 5,027 (4,928 cached) | **1,728 of 5,116 cached, 3,328 created** | **0 of 5,033 cached, 4,992 created** | 4,928 cached again |
+| gpt-oss-120b | 4,479 (4,464 cached) | 4,528 of 4,541 cached | 4,480 of 4,485 cached | 4,464 cached |
+| MiniMax-M3 | 5,359 (5,120 cached, 128 created) | 5,248 of 5,453 cached | 5,120 of 5,365 cached | 5,120 cached |
+
+- **GLM-5.3 behaves like a plain prefix cache [O].** Its tools sit at the start of the prompt: the unchanged first 1,728 tokens (the 20 tools) were reused when a tool was added at the end of the list, and everything after was rewritten (3,328 tokens, 65% of the prompt); an edit of the first tool rewrote the whole prompt (99%). The original prompt was still cached afterwards. **This supports V5-R02 on this route: never change the tools array in a session.**
+- **gpt-oss-120b and MiniMax-M3 are not explained [U].** After the same changes they reported 95-100% of the prompt cached. For gpt-oss, 4,528 cached tokens is **more than the 4,479 tokens of the original prompt**, which a plain prefix cache could only report if that exact variant had been sent before. Two explanations stand: (a) an earlier, unrecorded run of the same probe primed those variants (the transcript shows two runs but does not say whether the probe was run before); (b) these two deployments do not cache as a plain prefix. The third probe separates them (nonce-marked variants and edit positions). Until then, V5-R02 is measured on one model of three.
+- **The first request of the run was already cached on all three models [O]**, about 75 minutes after the first probe sent the same prefix (4,464, 5,120 and 4,928 tokens). If no other run intervened, **the cache lived at least about 75 minutes** on this route. The lifetime mode of the third probe tests longer gaps.
+- **MiniMax-M3 re-creates a 128-token block on every request** (created 128 on all nine requests of the run, identical ones included). If a write carries a premium on this service, which it does not state, this model would pay it on every request.
+
+## 8. What the two probes still do not show
+No prices; no accuracy; one prompt shape; single runs; temperature 0. The returning-user gap beyond about 75 minutes was not tested. Whether MiniMax-M3.1-Flash honours `tool_choice` required (it did not in the first probe, at 16 tokens) was not re-tested. Which model to use is open: the data shows no model to exclude. The human prefers models other than gpt-oss-120b (REQ-U22-13), which the lead records as a lean, not a finding.
+
+## 9. Next: the third probe
+`design/package-v5/tools/p0_api_probe_v3.py` (human-run): eight requests per model with a fresh random marker in each changed variant (an added tool, an edit at the first, middle and last tool, a change at the head and at the tail of the system prompt) and a repeat of the base request; and a one-request lifetime mode to run again after 2 hours, 6 hours and a day. GLM-5.3 needs `--pause 35`.

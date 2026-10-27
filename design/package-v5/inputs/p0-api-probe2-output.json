@@ -1,0 +1,386 @@
+{
+ "script": "p0_api_probe_v2",
+ "base": "https://llm.scads.ai/v1",
+ "time_utc": "2026-10-27T11:35:50Z",
+ "max_tokens": 400,
+ "models_endpoint": {
+  "http": 200,
+  "count": 26
+ },
+ "openai/gpt-oss-120b": {
+  "C1_prime": {
+   "http": 200,
+   "seconds": 0.52,
+   "usage": {
+    "completion_tokens": 36,
+    "prompt_tokens": 4479,
+    "total_tokens": 4515,
+    "completion_tokens_details": {
+     "reasoning_tokens": 25
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4464,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C2_identical": {
+   "http": 200,
+   "seconds": 0.55,
+   "usage": {
+    "completion_tokens": 36,
+    "prompt_tokens": 4479,
+    "total_tokens": 4515,
+    "completion_tokens_details": {
+     "reasoning_tokens": 25
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4464,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C3_extra_tool_at_end": {
+   "http": 200,
+   "seconds": 0.86,
+   "usage": {
+    "completion_tokens": 36,
+    "prompt_tokens": 4541,
+    "total_tokens": 4577,
+    "completion_tokens_details": {
+     "reasoning_tokens": 25
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4528,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C4_first_tool_edited": {
+   "http": 200,
+   "seconds": 0.53,
+   "usage": {
+    "completion_tokens": 36,
+    "prompt_tokens": 4485,
+    "total_tokens": 4521,
+    "completion_tokens_details": {
+     "reasoning_tokens": 25
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4480,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C5_original_again": {
+   "http": 200,
+   "seconds": 0.96,
+   "usage": {
+    "completion_tokens": 36,
+    "prompt_tokens": 4479,
+    "total_tokens": 4515,
+    "completion_tokens_details": {
+     "reasoning_tokens": 25
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4464,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "T1_auto_call_tool_07": {
+   "http": 200,
+   "seconds": 0.77,
+   "usage": {
+    "completion_tokens": 71,
+    "prompt_tokens": 4481,
+    "total_tokens": 4552,
+    "completion_tokens_details": {
+     "reasoning_tokens": 51
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4480,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T2_required_call_tool_07": {
+   "http": 200,
+   "seconds": 1.03,
+   "usage": {
+    "completion_tokens": 71,
+    "prompt_tokens": 4481,
+    "total_tokens": 4552,
+    "completion_tokens_details": {
+     "reasoning_tokens": 51
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4480,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T3_named_tool_07": {
+   "http": 200,
+   "seconds": 0.8,
+   "usage": {
+    "completion_tokens": 71,
+    "prompt_tokens": 4481,
+    "total_tokens": 4552,
+    "completion_tokens_details": {
+     "reasoning_tokens": 51
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4480,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T4_absent_tool_99": {
+   "http": 200,
+   "seconds": 1.03,
+   "usage": {
+    "completion_tokens": 86,
+    "prompt_tokens": 4481,
+    "total_tokens": 4567,
+    "completion_tokens_details": {
+     "reasoning_tokens": 59
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 4480,
+     "created_cache_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "I can’t call a tool named tool_99 because it doesn’t exist."
+  }
+ },
+ "MiniMaxAI/MiniMax-M3": {
+  "C1_prime": {
+   "http": 200,
+   "seconds": 0.77,
+   "usage": {
+    "completion_tokens": 43,
+    "prompt_tokens": 5359,
+    "total_tokens": 5402,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C2_identical": {
+   "http": 200,
+   "seconds": 1.05,
+   "usage": {
+    "completion_tokens": 39,
+    "prompt_tokens": 5359,
+    "total_tokens": 5398,
+    "completion_tokens_details": {
+     "reasoning_tokens": 36
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C3_extra_tool_at_end": {
+   "http": 200,
+   "seconds": 0.69,
+   "usage": {
+    "completion_tokens": 39,
+    "prompt_tokens": 5453,
+    "total_tokens": 5492,
+    "completion_tokens_details": {
+     "reasoning_tokens": 36
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5248,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C4_first_tool_edited": {
+   "http": 200,
+   "seconds": 0.61,
+   "usage": {
+    "completion_tokens": 42,
+    "prompt_tokens": 5365,
+    "total_tokens": 5407,
+    "completion_tokens_details": {
+     "reasoning_tokens": 39
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "C5_original_again": {
+   "http": 200,
+   "seconds": 1.46,
+   "usage": {
+    "completion_tokens": 39,
+    "prompt_tokens": 5359,
+    "total_tokens": 5398,
+    "completion_tokens_details": {
+     "reasoning_tokens": 36
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "ready"
+  },
+  "T1_auto_call_tool_07": {
+   "http": 200,
+   "seconds": 0.82,
+   "usage": {
+    "completion_tokens": 56,
+    "prompt_tokens": 5361,
+    "total_tokens": 5417,
+    "completion_tokens_details": {
+     "reasoning_tokens": 28
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T2_required_call_tool_07": {
+   "http": 200,
+   "seconds": 0.79,
+   "usage": {
+    "completion_tokens": 56,
+    "prompt_tokens": 5361,
+    "total_tokens": 5417,
+    "completion_tokens_details": {
+     "reasoning_tokens": 28
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T3_named_tool_07": {
+   "http": 200,
+   "seconds": 2.14,
+   "usage": {
+    "completion_tokens": 56,
+    "prompt_tokens": 5361,
+    "total_tokens": 5417,
+    "completion_tokens_details": {
+     "reasoning_tokens": 28
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "tool_calls",
+   "tool_calls": [
+    {
+     "name": "tool_07",
+     "arguments": "{\"note\": \"x\"}"
+    }
+   ],
+   "text": ""
+  },
+  "T4_absent_tool_99": {
+   "http": 200,
+   "seconds": 1.02,
+   "usage": {
+    "completion_tokens": 84,
+    "prompt_tokens": 5361,
+    "total_tokens": 5445,
+    "completion_tokens_details": {
+     "reasoning_tokens": 48
+    },
+    "prompt_tokens_details": {
+     "cached_tokens": 5120,
+     "created_cache_tokens": 128
+    }
+   },
+   "finish_reason": "stop",
+   "tool_calls": [],
+   "text": "I can't call tool_99 — it doesn't exist. The available tools are tool_01 through tool_20. Let me know if you'd like one "
+  }
+ }
+}
