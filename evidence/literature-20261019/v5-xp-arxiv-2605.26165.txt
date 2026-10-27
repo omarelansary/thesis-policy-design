@@ -1,0 +1,1566 @@
+
+=== [page 1] ===
+Tool-Schema Compression Enables Agentic RAG Under Constrained
+Context Budgets
+Furkan Sakizli
+Independent Researcher
+furkan@sakizli.ai
+Abstract
+Agentic RAG systems that equip language mod-
+els with dozens to hundreds of tool definitions
+face a critical resource conflict: tool schemas
+consume the same context window needed for
+retrieval-augmented generation. We present
+the first systematic study of this tool–context
+trade-off, evaluating 14 models spanning 1.5B–
+32B local models plus one frontier API model
+across 6,566 controlled API calls at three con-
+text budgets (8K, 16K, 32K) with 28 tool def-
+initions. Applying TSCG conservative-profile
+compression (44–50% schema token savings),
+we observe a binary enablement effect: at
+8K tokens, JSON-schema tool definitions over-
+flow the context window entirely, yielding
+near-zero EM (2.6% average), while com-
+pressed schemas restore RAG functionality
+with +20.5 pp average exact-match lift across
+all eight models (+24.7 pp among the six ex-
+hibiting full enablement).
+At 32K—where
+both formats fit—four of five tested models
+show ∆≤1 pp, confirming the effect is
+purely budget-driven. External validation on
+HotpotQA (50 multi-hop questions) shows
++48 pp EM under the same overflow scenario.
+Frontier scaling tests demonstrate that JSON
+schemas overflow at ∼494 tools while com-
+pressed schemas remain operational beyond
+800 tools. Our results establish tool-schema
+compression as a necessary infrastructure layer
+for agentic RAG in constrained-context deploy-
+ments. All code, data, and checkpoints are
+publicly available.1
+1
+Introduction
+The convergence of tool-augmented language mod-
+els (Schick et al., 2024; Patil et al., 2024) and
+retrieval-augmented generation (RAG; Lewis et al.,
+2020; Gao et al., 2024) has produced a new class
+of agentic RAG systems: agents that select tools,
+issue queries, and synthesize retrieved evidence
+1https://github.com/SKZL-AI/tscg
+within a single context window. Production deploy-
+ments routinely expose 20–100+ tools through pro-
+tocols such as the Model Context Protocol (MCP;
+Anthropic, 2024), while simultaneously requiring
+space for system prompts, retrieval chunks, conver-
+sation history, and output generation.
+This creates a fundamental resource conflict.
+Tool schemas—typically represented as verbose
+JSON Schema objects—can consume 300–500 to-
+kens per tool. At 28 tools, the JSON-schema block
+alone requires ∼11,000 tokens, which exceeds an
+8K context window and substantially constrains re-
+trieval at 16K (leaving room for only 6–11 chunks
+vs. 25–28 with compressed schemas). Yet the vast
+majority of research on prompt compression (Jiang
+et al., 2023; Pan et al., 2024; Li et al., 2023) tar-
+gets natural-language prompts, not the structured,
+machine-readable tool definitions that dominate
+agentic workloads.
+We address this blind spot with the first con-
+trolled study of how tool-schema compression af-
+fects agentic RAG performance across model sizes
+and context budgets. Our contributions are:
+1. Binary Enablement Discovery. At 8K con-
+text with 28 tools, uncompressed JSON schemas
+overflow the context window, yielding near-zero
+EM (2.6% average). Applying TSCG compres-
+sion (∼50% token savings) restores RAG func-
+tionality, producing +20.5 pp average EM lift
+across all eight models (+24.7 pp among the six
+exhibiting full enablement). At 32K, four of five
+models show ∆≤1 pp, confirming the effect is
+purely budget-driven (Section 4).
+2. Large-Scale Controlled Evaluation. We evalu-
+ate 14 models spanning 1.5B–32B local models
+plus one frontier API model across 6,566 API
+calls, three context budgets, and a purpose-built
+NovaTech-28 agentic RAG benchmark with
+100 questions in five categories. All experiments
+use paired designs with Wilcoxon signed-rank
+arXiv:2605.26165v1  [cs.SE]  24 May 2026
+
+=== [page 2] ===
+tests and bootstrap confidence intervals (Sec-
+tion 3).
+3. External Validation and Frontier Scaling.
+On HotpotQA (Yang et al., 2018), the enable-
+ment effect is even stronger (+48 pp EM).
+Frontier tests show JSON schemas overflow at
+∼494 tools while compressed schemas remain
+operational beyond 800 tools, extending the op-
+erational range by 63% (Section 4).
+4. Analysis of Failure Modes. We fit a descriptive
+context utilization model C(k) = Cmax(1 −
+e−λk) + C0, identify a distractor dilution ef-
+fect where additional chunks reduce accuracy
+in small models (≤8B), and document a com-
+pound interaction between format and budget
+(Section 5).
+Our findings reframe tool-schema compression
+from an optional optimization to a necessary in-
+frastructure layer for agentic RAG, particularly at
+the constrained context budgets where most local-
+model deployments operate.
+2
+Related Work
+Agentic RAG.
+Retrieval-augmented generation
+(Lewis et al., 2020) has evolved from single-
+retrieval pipelines to multi-step agentic workflows
+where models iteratively retrieve, reason, and act
+(Asai et al., 2024; Yao et al., 2023; Izacard et al.,
+2023). Recent surveys (Gao et al., 2024; Wang
+et al., 2024) document the rapid adoption of RAG
+in production systems with 20–100+ tool defini-
+tions exposed through protocols such as MCP (An-
+thropic, 2024). However, existing RAG evaluations
+uniformly assume that tool schemas fit within the
+context window—an assumption we show fails at
+surprisingly modest tool counts (≥28 tools at 8K).
+Prompt and Context Compression.
+A sub-
+stantial body of work addresses natural-language
+prompt compression: LLMLingua (Jiang et al.,
+2023) and its successors (Pan et al., 2024; Jiang
+et al., 2024) use perplexity-guided token pruning,
+while Li et al. (2023) explore context distillation.
+These approaches target free-form text and do not
+preserve the structural invariants (JSON Schema
+syntax, parameter types, enum values) that tool
+definitions require. On tool schemas specifically,
+structure-aware compression achieves 74.8% sav-
+ings vs. LLMLingua-2’s 50.8% at equivalent accu-
+racy, confirming that general-purpose approaches
+underperform on structured inputs. To our knowl-
+edge, no prior work evaluates prompt compression
+specifically in the tool–RAG interaction regime
+where schema tokens and retrieval chunks compete
+for the same budget.
+Tool-Augmented
+Language
+Models.
+Tool-
+former
+(Schick
+et
+al.,
+2024)
+demonstrated
+self-taught tool use; Gorilla (Patil et al., 2024)
+scaled to massive API sets; and ToolLLM (Qin
+et al., 2024) enabled 16,000+ real-world APIs.
+The Berkeley Function Calling Leaderboard
+(BFCL; Patil et al., 2025) provides standardized
+evaluation of tool selection and parameter accuracy.
+All of these assume full-fidelity tool schemas
+in the prompt.
+An orthogonal strategy is tool
+selection:
+TinyAgent (Erdogan et al., 2024)
+reduces prompt size by loading only query-relevant
+tools, sacrificing awareness of unselected tools;
+TSCG compresses all tool schemas, preserving
+complete tool awareness. The two approaches are
+complementary. We study what happens when
+schemas must be compressed to make room for
+retrieval context.
+Tool-Schema
+Compression.
+TSCG
+(Sakizli,
+2026) introduced deterministic, rule-based com-
+pression of JSON Schema tool definitions, achiev-
+ing 44–68% token savings without accuracy degra-
+dation on BFCL and the Tool-Augmented Bench-
+mark (TAB). Concurrent industry systems such as
+Atlassian Labs’ MCP-Compressor (Atlassian Labs,
+2026) demonstrate practical demand for reducing
+MCP tool-schema overhead. That work evaluated
+compression in isolation (tool-calling accuracy on
+pre-defined schemas); we evaluate it in context
+(agentic RAG with retrieval chunks competing for
+the same budget).
+Lost in the Middle.
+Liu et al. (2024) showed that
+language models struggle to use information placed
+in the middle of long contexts. Our distractor dilu-
+tion analysis (Section 5) extends this finding to the
+tool–RAG setting: small models (≤8B) show neg-
+ative accuracy effects when TSCG provides more
+chunks, suggesting that additional context can over-
+whelm limited attention capacity.
+3
+Methodology
+3.1
+Context Budget Model
+We formalize the context budget as a zero-sum
+allocation problem.
+Given a total context win-
+
+=== [page 3] ===
+dow of B tokens, the available budget for retrieval-
+augmented generation is:
+BRAG = B −Bsys −Bschema(f, n) −Bhist −Bout
+(1)
+where Bsys ≈350 tokens is the system prompt,
+Bschema(f, n) is the total schema cost for n tools
+under format f ∈{json, tscg}, Bhist = 1,500
+tokens is reserved for conversation history, and
+Bout = 512 tokens for output generation. The num-
+ber of RAG chunks that fit is then k = ⌊BRAG/¯c⌋,
+where ¯c is the mean chunk size in tokens.
+With
+28
+tools
+and
+JSON
+schemas,
+Bschema(json, 28)
+≈
+11,000 tokens.
+At
+B
+=
+8,192, this exceeds the entire context
+window, leaving BRAG < 0 (context overflow,
+k = 0). TSCG conservative compression reduces
+Bschema(tscg, 28) ≈5,500 tokens (50% savings),
+yielding BRAG
+≈265–330 tokens depending
+on query length. While ¯c = 350 tokens is the
+corpus mean, the system includes shorter chunks
+(policy summaries, structured records) and uses
+adaptive truncation to fit at least one chunk when
+BRAG > 0, yielding k ≥1 in practice.
+3.2
+NovaTech-28 Benchmark
+We construct a purpose-built agentic RAG bench-
+mark simulating a mid-size technology company
+(“NovaTech”) with:
+Tools.
+28
+tool
+definitions
+spanning
+database
+queries
+(query employees,
+financial report),
+document
+retrieval
+(search knowledge base),
+computation
+(calculate metrics), and communication
+APIs. Each tool has 3–8 parameters with typed
+JSON Schema definitions. Tool schemas average
+∼393 tokens (JSON) and ∼197 tokens (TSCG).
+RAG Corpus.
+40 retrieval chunks (350 tokens
+each, 14,000 tokens total) across four categories:
+company policies, financial reports, organizational
+structure, and product documentation.
+Chunks
+are tagged with relevance labels; each question
+requires 1–3 specific gold chunks.
+Questions.
+100 questions in five categories de-
+signed to test different retrieval and tool-use capa-
+bilities:
+• Single-hop document (25): answerable from
+one RAG chunk
+• Single-hop database (25): require one tool call
+• Multi-hop (20): require combining chunks or
+chunk + tool
+• Tool-requiring (20): require specific tool selec-
+tion and parameterization
+• Unanswerable (10): no relevant chunk or tool
+exists
+3.3
+Agent Architecture
+We implement a ReAct-style (Yao et al., 2023)
+agent loop with up to 3 iterations. At each step,
+the agent receives the system prompt, tool schemas,
+RAG chunks (stuffed into context up to BRAG), and
+conversation history. The agent either (a) selects
+a tool and provides arguments, or (b) produces a
+final answer. Tool results are appended to history
+for the next iteration.
+All models receive identical prompts per
+condition;
+the
+only
+variable
+across
+con-
+ditions
+is
+the
+schema
+format
+(json
+vs.
+tscg conservative)
+and
+the
+resulting
+context budget allocation. This paired design en-
+sures that performance differences are attributable
+to the budget mechanism, not prompt variation.
+3.4
+Models
+We evaluate 14 models spanning three tiers:
+• Tier A (4 models): Phi-4 14B, Llama 3.1:8B,
+Gemma3:12B,
+Qwen3:14B
+—
+local,
+8K/16K/32K
+• Tier B (3 models): Mistral-Small 24B, Qwen2.5-
+Coder:32B, Gemma4:26B — local, 8K/16K
+(some 32K)
+• Tier C (6 models): 1.5B–7B parameter mod-
+els (Qwen2:1.5B, Gemma3:4B, Qwen3:4B,
+Gemma4:e2b, Gemma4:e4b, Mistral:7B) — lo-
+cal, 16K only
+• API
+(1
+model):
+Claude
+Sonnet
+4
+—
+8K/16K/32K/200K
+Local models run on 2× RTX 5070 Ti via Ol-
+lama. Total compute: ∼10h GPU, $107 API cost,
+6,566 calls, 0% error rate.
+3.5
+Evaluation Metrics
+Primary metrics.
+Exact Match (EM): binary, 1
+iff the model’s final answer exactly matches a gold
+answer or alias after normalization. Token F1 (F1):
+harmonic mean of token-level precision and recall
+between the predicted and gold answers.
+
+=== [page 4] ===
+Secondary metrics.
+Tool Selection Accuracy:
+correct tool was called (binary). RAG Coverage:
+fraction of gold chunks present in context. Context
+Overflow: binary, whether Bschema > B.
+Statistical tests.
+All comparisons use paired de-
+signs (same question, same model). We report
+Wilcoxon signed-rank tests (Wilcoxon, 1945)
+with p-values, Cohen’s d (Cohen, 1988) for effect
+sizes, and 95% bootstrap confidence intervals
+(10,000 resamples, seeded PRNG for reproducibil-
+ity).
+3.6
+External Validation
+To validate beyond our synthetic benchmark,
+we test on HotpotQA (Yang et al., 2018):
+50 medium/hard multi-hop questions from the dev-
+distractor split, evaluated with Phi-4 at 8K context
+using the same 28-tool setup. This tests whether
+the enablement effect generalizes to independently
+constructed questions and gold passages.
+3.7
+Frontier Scaling
+To test scaling beyond 28 tools, we generate syn-
+thetic tool sets at 50, 100, 200, 300, 500, and 800
+tools using templated schemas with realistic param-
+eter distributions. These are evaluated with Claude
+Sonnet 4 at 200K context to identify the overflow
+threshold—the tool count where JSON schemas
+exceed the context window while TSCG schemas
+still fit.
+4
+Results
+4.1
+Binary Enablement at 8K
+Table 1 presents the central finding: at 8,192 tokens
+with 28 tools, JSON schemas (∼11,000 tokens) ex-
+ceed the context window, producing 100% over-
+flow and near-zero EM across all models. TSCG
+conservative compression (∼5,500 tokens) restores
+operational status, enabling 1–2 RAG chunks and
+substantial accuracy gains.
+Six of eight models tested at 8K exhibit com-
+plete binary enablement: JSON yields 0–4% EM
+(context overflow), while TSCG yields 12–36%
+EM (functional RAG). The average EM gain is
++20.5 pp across all eight models, with top perform-
+ers (Llama 3.1, Phi-4, Mistral-Small, Sonnet 4) ex-
+ceeding +26 pp. All deltas for the top six models
+are significant at p < 0.01 (Wilcoxon signed-rank,
+paired by question).
+The mechanism is straightforward: TSCG com-
+pression frees ∼5,500 tokens, converting a context
+Table 1: Binary enablement at 8K context.
+JSON
+schemas overflow the context window; TSCG compres-
+sion restores agentic RAG. Bold deltas significant at
+p < 0.01 (Wilcoxon signed-rank).
+Model
+Tier
+JSON
+TSCG
+∆
+Llama 3.1:8B
+A
+1
+34
++33
+Phi-4 14B
+A
+2
+33
++31
+Mistral-Sm. 24B
+B
+4
+33
++29
+Sonnet 4
+API
+10
+36
++26
+Qwen2.5-Cod.
+B
+3
+18
++15
+Gemma3:12B
+A
+1
+15
++14
+Qwen3:14B
+A
+0
+12
++12
+Gemma4:26B†
+B
+0
+4
++4
+Average
+2.6
+23.1
++20.5
+†Persistent output-parsing failures; at 16K reaches 26–28%.
+Llama
+Phi-4
+Mistral
+Sonnet
+Qwen2.5
+Gemma3
+Qwen3
+Gemma4
+0
+10
+20
+30
+40
+EM (%)
+JSON
+TSCG
+Figure 1: Binary enablement at 8K context with 28 tools.
+JSON schemas overflow the context window (red, near-
+zero); TSCG compression restores functional RAG
+(blue).
+overflow (BRAG < 0) into a minimal but functional
+retrieval budget (BRAG ≈265–330 tokens, k ≥1
+chunk). This single chunk provides sufficient evi-
+dence for document-based and unanswerable ques-
+tions, accounting for the majority of the accuracy
+gain (Section 5).
+4.2
+16K: Chunk Liberation Without
+Accuracy Gain
+At 16,384 tokens, both formats avoid overflow, but
+TSCG frees substantially more budget for retrieval.
+Table 2 summarizes the budget allocation: JSON
+delivers 6–11 chunks per query; TSCG delivers
+25–28 chunks (+17–19 additional chunks).
+Despite this 3× increase in retrieval context, the
+EM delta across 14 models is near-zero (median
+∆EM = −1 pp, range −8 to +2 pp). The full
+model×budget matrix (Section A) shows that 12
+of 14 models exhibit |∆EM| ≤3 pp, with no cell
+reaching p < 0.05 except Qwen3:4B (∆EM =
+−8 pp, p = 0.019), which we attribute to distractor
+dilution (Section 5.3).
+This null result is informative: it shows that the
+
+=== [page 5] ===
+Table 2: Budget allocation at 16K. TSCG triples the
+available retrieval context, but accuracy differences are
+not significant.
+Format
+Schema
+BRAG
+k
+JSON
+11,295
+2,832
+9
+TSCG cons.
+5,670
+8,457
+26
+Table 3: HotpotQA external validation (Phi-4, 8K, 28
+tools). TSCG enables +48 pp EM on independently
+constructed questions.
+Format
+Schema
+BRAG
+k
+EM
+F1
+JSON
+10,998
+0
+0
+0.0
+.000
+TSCG
+5,520
+421
+3.4
+48.0
+.645
+NovaTech-28 benchmark saturates at ∼9 chunks
+for most models. Beyond this point, additional
+retrieval context does not improve accuracy and
+may introduce distractors. The 16K condition thus
+serves as a control that isolates the budget mecha-
+nism: TSCG’s advantage operates through context
+reallocation, not through any intrinsic accuracy ef-
+fect of the compressed format.
+4.3
+32K: Ceiling Control
+At 32,768 tokens, both formats comfortably fit all
+40 available chunks. Four of five models tested at
+this budget show ∆EM ∈{−1, 0, +1} pp, with no
+significant differences. The exception is Qwen2.5-
+Coder:32B (+12 pp, p < 0.001), which we at-
+tribute to a format-translation benefit independent
+of the budget mechanism, consistent with model-
+specific operator sensitivity observed in prior TSCG
+evaluations (Sakizli, 2026). Excluding this outlier,
+the ceiling condition confirms that the 8K enable-
+ment effect is entirely attributable to the budget
+mechanism (Equation (1)): when BRAG is equal-
+ized, JSON and TSCG produce identical accuracy.
+4.4
+External Validation: HotpotQA
+To validate beyond our synthetic benchmark, we
+test on HotpotQA (Yang et al., 2018) using
+50 medium/hard multi-hop questions from the
+dev-distractor split, with Phi-4 at 8K context and
+28 tools (Section 3.6). Each question includes
+2 gold and 8 distractor Wikipedia paragraphs.
+The enablement effect is stronger on HotpotQA
+than on NovaTech-28 (+48 pp vs. +31 pp EM for
+the same model).
+JSON produces 100% over-
+flow and zero answers; TSCG fits 2–5 chunks
+per question (mean 3.4) within the ∼421-token
+Table 4: Frontier scaling with Sonnet 4 at 200K. JSON
+schemas overflow at ∼494 tools; TSCG remains opera-
+tional beyond 800 tools.
+Tools JSON
+EM
+TSCG
+EM
+∆JSON
+k
+TSCG
+k
+50
+76.7
+76.7
+0
+500
+500
+100
+80.0
+76.7
+−3
+470
+500
+200
+83.3
+76.7
+−7
+363
+481
+300
+76.7
+76.7
+0
+229
+402
+500
+0
+90
++90
+0
+268
+800
+0
+100 +100
+0
+107
+200
+400
+600
+800
+0
+25
+50
+75
+100
+Tool count
+EM (%)
+JSON
+TSCG
+Figure 2: Frontier scaling with Sonnet 4 at 200K context.
+JSON overflows at ∼494 tools (dashed line); TSCG
+remains operational beyond 800 tools.
+RAG budget, achieving 48% EM and 0.645 F1.
+The higher absolute accuracy reflects HotpotQA’s
+shorter, more information-dense gold paragraphs
+(∼150–250 tokens vs. our 350-token NovaTech
+chunks).
+This result confirms that the binary enablement
+finding generalizes to independently constructed
+questions, gold passages, and evaluation criteria.
+4.5
+Frontier Scaling
+We test scaling beyond 28 tools with synthetic tool
+sets at 50, 100, 200, 300, 500, and 800 tools, evalu-
+ated with Claude Sonnet 4 at 200K context.
+The frontier results reveal three regimes:
+Sub-overflow parity (50–300 tools).
+Both for-
+mats fit within 200K. Accuracy is comparable
+(∼77% EM), with small fluctuations (|∆|
+≤
+6.7 pp)
+that
+are
+not
+statistically
+significant
+(Wilcoxon p > 0.10 for each cell; see Sec-
+tion C). At 200 tools, JSON retains 363 chunks—
+already sufficient for Sonnet 4—so the additional
+118 chunks freed by TSCG provide no measurable
+benefit, and the observed −6.7 pp fluctuation falls
+within question-level variance. This confirms that
+TSCG compression does not degrade tool-calling
+accuracy, consistent with prior BFCL evaluations
+of TSCG (Sakizli, 2026).
+
+=== [page 6] ===
+JSON overflow threshold (∼494 tools).
+Fine-
+grained threshold sweeps identify the JSON over-
+flow point at ∼494 tools, where schema tokens
+exceed the 200K context window. Beyond this
+point, JSON produces 0% EM (total failure).
+TSCG extended range (>803 tools).
+TSCG
+schemas remain within budget up to at least
+803 tools, extending the operational range by 63%.
+At 500 tools, TSCG achieves 90% EM; at 800 tools,
+100% EM. The TSCG overflow threshold was not
+reached within our test range.
+The frontier analysis demonstrates that the bi-
+nary enablement discovered at 28 tools / 8K con-
+text is not an edge case—it recurs at scale as tool
+counts grow into the hundreds. Any sufficiently
+tool-dense deployment will eventually cross the
+overflow threshold, making schema compression a
+practical necessity.
+5
+Analysis
+The results in Section 4 establish that TSCG en-
+ables agentic RAG at 8K and has no effect at
+32K. This section examines the underlying mech-
+anisms through a descriptive context utilization
+model (Section 5.1), a compound format–budget
+interaction (Section 5.2), and a distractor dilution
+effect in small models (Section 5.3).
+5.1
+Context Utilization Model
+We use a simple descriptive model to capture the
+relationship between offered RAG chunks k and
+downstream accuracy as an exponential saturation
+function:
+C(k) = Cmax
+ 1 −e−λk
++ C0
+(2)
+where C0 is the zero-context baseline, Cmax is the
+maximum gain achievable through retrieval, and λ
+controls the saturation rate.
+Fitting Equation (2) to all 4,700 (k, F 1) pairs
+(14 models × 2 formats × multiple budgets) via
+grid search yields Cmax = 0.18, λ = 25.9, and
+C0 = 0.095 (R2 = 0.011). While R2 = 0.011 re-
+flects the inherently binary nature of EM scoring—
+which cannot be meaningfully fit by a continu-
+ous function—the structural insight is robust: the
+marginal gain from the first chunk is by far the
+largest (∆F 1 = +0.18 from k=0 to k=1), with
+diminishing returns thereafter (λ ≫1 implies near-
+saturation by k=2).
+This has a direct implication for schema com-
+pression: at 8K, TSCG converts k=0 (overflow) to
+k ≥1, capturing the steepest portion of the C(k)
+curve and explaining why even a single chunk pro-
+duces large accuracy gains. At 16K, both formats
+already operate on the saturation plateau (k ≥6),
+so the additional chunks freed by TSCG produce
+negligible gains. Per-model fit parameters are re-
+ported in Section E.
+5.2
+Compound Format–Budget Interaction
+An unexpected finding is that Sonnet 4 at 8K with
+TSCG (F1 = 0.406, k=2 chunks) outperforms
+Sonnet 4 at 16K with JSON (F1 = 0.369, k=11
+chunks)—a +0.037 F1 advantage despite having
+5.5× fewer retrieval chunks.
+Per-question analysis reveals that the advantage
+concentrates in unanswerable and single-hop docu-
+ment questions, where a compact, focused context
+(2 chunks) elicits more precise answers than a di-
+luted context (11 chunks) containing distractors.
+On multi-hop and tool-requiring questions, 16K
+JSON performs comparably or better.
+This compound effect arises from the interaction
+of two factors: (1) compressed schemas free budget
+for RAG chunks, and (2) fewer total tokens reduce
+attention dilution, yielding higher-quality retrieval
+utilization. The difference is not statistically signif-
+icant (Wilcoxon p = 0.12, Cohen’s d = 0.17), and
+we present it as an exploratory observation warrant-
+ing further investigation rather than a confirmed
+finding.
+5.3
+Distractor Dilution
+At 16K, TSCG delivers +17–19 additional chunks
+compared to JSON, yet most models show no accu-
+racy improvement and several show decreases. We
+term this distractor dilution: additional retrieval
+chunks include irrelevant material that overwhelms
+the model’s ability to identify gold evidence.
+Across 14 models at 16K, the correlation be-
+tween chunk delta and EM delta is negative (r =
+−0.50, n = 14), and 10 of 14 models show
+∆F1 ≤0 despite receiving more context. The
+effect is most pronounced in small models (≤8B):
+Qwen3:4B shows ∆EM = −8 pp (p = 0.019) and
+Mistral:7B shows ∆F1 = −4.3 pp despite +18
+extra chunks.
+This finding connects to the “lost in the middle”
+phenomenon (Liu et al., 2024): small models have
+limited attention capacity, and stuffing more chunks
+into context can be counterproductive when the
+signal-to-noise ratio drops. For practitioners, this
+implies that TSCG’s value at ample budgets is not
+
+=== [page 7] ===
+in delivering more chunks but in preserving budget
+for other uses (longer conversation histories, larger
+output windows, or simply lower inference cost
+through shorter prompts).
+6
+Discussion
+Schema compression as infrastructure.
+Our re-
+sults demonstrate that tool-schema compression
+occupies a distinct niche from natural-language
+prompt compression. While LLMLingua (Jiang
+et al., 2023) and related approaches target free-
+form text, they cannot be applied to structured tool
+definitions without risking syntactic corruption of
+JSON Schema constraints. TSCG’s deterministic,
+structure-preserving compression fills this gap: it
+operates at the schema level, maintains type and
+parameter fidelity, and integrates transparently with
+existing tool-calling pipelines.
+The categorical nature of enablement.
+The
+8K binary enablement is not a marginal improve-
+ment but a categorical difference: from near-zero,
+overflow-dominated operation (2.6% average EM,
+no reliable retrieval budget) to functional agentic
+RAG. This distinction is critical for practitioners
+deploying local models with limited context win-
+dows. A system that produces zero answers is
+fundamentally different from one that produces
+imperfect answers—the latter can be iteratively
+improved through prompt engineering, retrieval
+tuning, or multi-turn interaction, while the former
+cannot function at all.
+When not to compress.
+Our 32K ceiling con-
+trol and frontier sub-overflow results consistently
+show that schema compression provides no accu-
+racy benefit when the context budget is sufficient.
+At 32K with 28 tools, JSON and TSCG produce
+identical accuracy. This is a feature, not a limita-
+tion: it confirms that TSCG compression is lossless
+in practice and that its benefits are purely opera-
+tional (enabling RAG, reducing cost) rather than
+introducing accuracy artefacts.
+Implications for tool scaling.
+The frontier analy-
+sis (Section 4.5) has immediate practical relevance.
+Production MCP deployments with 100+ tools are
+increasingly common (Anthropic, 2024), and our
+results show that even 200K context windows over-
+flow at ∼494 tools with JSON schemas. Schema
+compression extends this threshold to >803 tools,
+but the fundamental scaling problem remains: at
+some tool count, any fixed context window will
+overflow. TSCG’s scaling behavior is consistent
+with the independently evaluated TAB Scenario C
+(25–100 tools), which demonstrated stable com-
+pression rates across different schema catalogs
+(Sakizli, 2026).
+The BFCL external validation
+(108–181% accuracy retention rate across three
+frontier models) further confirms that compression
+fidelity holds at scale—the RAG enablement we ob-
+serve here builds on a compression layer whose ac-
+curacy has been independently validated. Dynamic
+tool selection (routing queries to relevant tool sub-
+sets) and schema compression are complementary
+strategies that should be deployed together.
+7
+Conclusion
+We present the first controlled study of tool-schema
+compression in agentic RAG, evaluating 14 models
+across 6,566 API calls at three context budgets. Our
+central finding is binary enablement: at 8K con-
+text with 28 tools, uncompressed JSON schemas
+overflow the context window, producing near-zero,
+overflow-dominated performance (2.6% average
+EM), while TSCG compression restores functional
+RAG with an average +20.5 pp EM gain. At 32K,
+four of five tested models show |∆| ≤1 pp; the re-
+maining Qwen2.5-Coder outlier exhibits a format-
+translation benefit independent of the budget mech-
+anism. Excluding this outlier, the effect disappears,
+supporting the budget-driven interpretation.
+External validation on HotpotQA (+48 pp EM)
+and frontier scaling to 800 tools confirm general-
+izability. A descriptive context utilization model
+confirms that the first retrieval chunk provides the
+largest marginal gain, explaining why even min-
+imal budget recovery yields substantial accuracy
+improvements. We also identify distractor dilution
+as a failure mode where additional chunks reduce
+accuracy in small models.
+These findings reframe tool-schema compres-
+sion from a cost optimization to a necessary en-
+ablement layer for agentic RAG under constrained
+context budgets.
+8
+Limitations
+Synthetic
+benchmark.
+NovaTech-28
+is
+a
+purpose-built benchmark with synthetic tool defi-
+nitions and curated questions. While we validate
+on HotpotQA and frontier scaling, real-world
+agentic RAG deployments involve more complex
+tool interactions, multi-turn conversations, and
+heterogeneous retrieval corpora.
+
+=== [page 8] ===
+Single primary compression profile.
+Our main
+evaluation uses only the TSCG conservative pro-
+file (∼50% savings, descriptions preserved). A
+controlled ablation (Section F) confirms that the
+balanced profile (∼53% savings, descriptions
+stripped) produces equivalent accuracy (∆EM =
++0.8 pp, n = 400), but was tested on only two
+models at two budgets. Other compression strate-
+gies (e.g., natural-language prompt compression,
+learned compression) may produce different trade-
+offs.
+Model coverage.
+Our Tier C models (≤7B) were
+only tested at 16K due to the high overhead of
+their verbose output patterns at 8K and 32K. The
+distractor dilution finding (Section 5.3) may not
+generalize to all small models.
+Frontier limitations.
+Frontier scaling was tested
+with a single model (Sonnet 4) at a single context
+budget (200K) using synthetic distractor tools. The
+overflow thresholds may differ for other models or
+real-world tool distributions with varying schema
+complexity.
+Static context allocation.
+Our experiments use
+a fixed context-stuffing strategy. Dynamic retrieval
+approaches (iterative retrieval, adaptive chunk se-
+lection) may interact differently with schema com-
+pression, potentially amplifying or diminishing the
+observed effects.
+References
+Anthropic. 2024. Introducing the Model Context Proto-
+col.
+https://www.anthropic.com/news/
+model-context-protocol.
+Open standard
+for connecting AI assistants to data sources. Ac-
+cessed: 2026-04-28.
+Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and
+Hannaneh Hajishirzi. 2024. Self-RAG: Learning to
+retrieve, generate, and critique through self-reflection.
+In The Twelfth International Conference on Learning
+Representations (ICLR). ArXiv:2310.11511.
+Atlassian
+Labs.
+2026.
+mcp-compressor:
+An
+MCP server wrapper for reducing tokens con-
+sumed by MCP tools. https://github.com/
+atlassian-labs/mcp-compressor.
+Ac-
+cessed: 2026-04-28.
+Jacob Cohen. 1988. Statistical Power Analysis for the
+Behavioral Sciences, 2nd edition. Lawrence Erlbaum
+Associates, Hillsdale, NJ.
+Lutfi Eren Erdogan, Nicholas Lee, Siddharth Jha, Se-
+hoon Kim, Ryan Tabrizi, Suhong Moon, Coleman
+Richard Charles Hooper, Gopala Anumanchipalli,
+Kurt Keutzer, and Amir Gholami. 2024.
+TinyA-
+gent: Function calling at the edge. In Proceedings of
+the 2024 Conference on Empirical Methods in Nat-
+ural Language Processing: System Demonstrations,
+pages 80–88, Miami, Florida, USA. Association for
+Computational Linguistics.
+Yunfan Gao, Yun Xiong, Xinyu Gao, Kangxiang Jia,
+Jinliu Pan, Yuxi Bi, Yi Dai, Jiawei Sun, Qianyu Guo,
+Meng Wang, and Haofen Wang. 2024. Retrieval-
+augmented generation for large language models: A
+survey. arXiv preprint arXiv:2312.10997. V2, com-
+prehensive RAG survey.
+Gautier Izacard, Patrick Lewis, Maria Lomeli, Lucas
+Hosseini, Fabio Petroni, Timo Schick, Jane Dwivedi-
+Yu, Armand Joulin, Sebastian Riedel, and Edouard
+Grave. 2023. Atlas: Few-shot learning with retrieval
+augmented language models.
+In Journal of Ma-
+chine Learning Research, volume 24, pages 1–43.
+ArXiv:2208.03299.
+Huiqiang Jiang, Qianhui Wu, Chin-Yew Lin, Yuqing
+Yang, and Lili Qiu. 2023. LLMLingua: Compressing
+prompts for accelerated inference of large language
+models.
+In Proceedings of EMNLP 2023, pages
+13358–13376. Association for Computational Lin-
+guistics. ArXiv:2310.05736.
+Huiqiang Jiang, Qianhui Wu, Xufang Luo, Dong-
+sheng Li, Chin-Yew Lin, Yuqing Yang, and Lili Qiu.
+2024. LongLLMLingua: Accelerating and enhanc-
+ing LLMs in long context scenarios via prompt com-
+pression. In Proceedings of ACL 2024, pages 1658–
+1677. ArXiv:2310.06839.
+Patrick Lewis,
+Ethan Perez,
+Aleksandra Piktus,
+Fabio Petroni, Vladimir Karpukhin, Naman Goyal,
+Heinrich K¨uttler,
+Mike Lewis,
+Wen tau Yih,
+Tim Rockt¨aschel, Sebastian Riedel, and Douwe
+Kiela. 2020.
+Retrieval-augmented generation for
+knowledge-intensive NLP tasks.
+In Advances in
+Neural Information Processing Systems, volume 33,
+pages 9459–9474. ArXiv:2005.11401.
+Yucheng Li, Bo Dong, Frank Guerin, and Chenghua Lin.
+2023. Compressing context to enhance inference ef-
+ficiency of large language models. In Proceedings
+of the 2023 Conference on Empirical Methods in
+Natural Language Processing, pages 6342–6353. As-
+sociation for Computational Linguistics.
+Nelson F. Liu, Kevin Lin, John Hewitt, Ashwin Paran-
+jape, Michele Bevilacqua, Fabio Petroni, and Percy
+Liang. 2024. Lost in the middle: How language
+models use long contexts. Transactions of the ACL,
+12:157–173. ArXiv:2307.03172.
+Zhuoshi Pan, Qianhui Wu, Huiqiang Jiang, Menglin
+Xia, Xufang Luo, Jue Zhang, Qingwei Lin, Victor
+R¨uhle, Yuqing Yang, Chin-Yew Lin, H. Vicky Zhao,
+Lili Qiu, and Dongmei Zhang. 2024. LLMLingua-
+2: Data distillation for efficient and faithful task-
+agnostic prompt compression. In Findings of ACL
+2024, pages 963–981. ArXiv:2403.12968.
+
+=== [page 9] ===
+Shishir G. Patil, Huanzhi Mao, Fanjia Yan, Char-
+lie Cheng-Jie Ji, Vishnu Suresh, Ion Stoica, and
+Joseph E. Gonzalez. 2025. The Berkeley Function
+Calling Leaderboard (BFCL): From tool use to agen-
+tic evaluation of large language models. In Proceed-
+ings of the 42nd International Conference on Ma-
+chine Learning (ICML), volume 267 of Proceedings
+of Machine Learning Research, pages 48371–48392.
+PMLR.
+Shishir G. Patil, Tianjun Zhang, Xin Wang, and
+Joseph E. Gonzalez. 2024. Gorilla: Large language
+model connected with massive APIs. In Advances in
+Neural Information Processing Systems, volume 37.
+ArXiv:2305.15334.
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu,
+Lan Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru
+Tang, Bill Qian, Sihan Zhao, Lauren Hong, Runchu
+Tian, Ruobing Xie, Jie Zhou, Mark Gerstein, Dahai
+Li, Zhiyuan Liu, and Maosong Sun. 2024. Tool-
+LLM: Facilitating large language models to mas-
+ter 16000+ real-world APIs. In The Twelfth Inter-
+national Conference on Learning Representations
+(ICLR). ArXiv:2307.16789.
+Furkan Sakizli. 2026.
+TSCG: Deterministic tool-
+schema compilation for agentic LLM deployments.
+arXiv preprint arXiv:2605.04107. Companion paper
+(Paper 1).
+Timo Schick, Jane Dwivedi-Yu, Roberto Dess`ı, Roberta
+Raileanu, Maria Lomeli, Eric Hambro, Luke Zettle-
+moyer, Nicola Cancedda, and Thomas Scialom. 2024.
+Toolformer: Language models can teach themselves
+to use tools. Advances in Neural Information Pro-
+cessing Systems, 36. ArXiv:2302.04761.
+Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao
+Yang, Jingsen Zhang, Zhiyuan Chen, Jiakai Tang,
+Xu Chen, Yankai Lin, Wayne Xin Zhao, Zhewei Wei,
+and Ji-Rong Wen. 2024. A survey on large language
+model based autonomous agents. Frontiers of Com-
+puter Science, 18(6):186345. ArXiv:2308.11432.
+Frank Wilcoxon. 1945. Individual comparisons by rank-
+ing methods. Biometrics Bulletin, 1(6):80–83.
+Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Ben-
+gio, William W. Cohen, Ruslan Salakhutdinov, and
+Christopher D. Manning. 2018. HotpotQA: A dataset
+for diverse, explainable multi-hop question answer-
+ing. In Proceedings of the 2018 Conference on Em-
+pirical Methods in Natural Language Processing,
+pages 2369–2380.
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak
+Shafran,
+Karthik Narasimhan,
+and Yuan Cao.
+2023.
+ReAct: Synergizing reasoning and acting
+in language models.
+The Eleventh International
+Conference on Learning Representations (ICLR).
+ArXiv:2210.03629.
+
+=== [page 10] ===
+A
+Full Result Tables
+Table 5 presents the complete model×budget ma-
+trix for all 14 models across three context windows.
+Entries marked “–” indicate conditions not tested
+for that model (Tier C models were only evalu-
+ated at 16K). Significance stars: ∗∗∗p < 0.001,
+∗∗p < 0.01, ∗p < 0.05 (Wilcoxon signed-rank,
+paired by question).
+B
+Tool Accuracy by Question Type
+Table 6 breaks down accuracy by question type.
+The benchmark contains 50 questions requiring
+tools (single-hop-db + tool-requiring) and 50 that
+do not (single-hop-doc + unanswerable), plus
+20 multi-hop questions requiring both. Apparent
+low overall tool accuracy (∼20%) reflects that 50%
+of questions do not require tool calls; per-type ac-
+curacy is higher.
+The
+largest
+TSCG
+advantage
+appears
+on
+single-hop-doc (+13.7 pp EM) and unanswerable
+(+14.6 pp) questions—both categories where a sin-
+gle gold chunk suffices and the 8K enablement
+effect dominates. Tool-requiring questions show
+modest improvement (+0.9 pp EM) since tool se-
+lection depends on schema comprehension rather
+than retrieval volume.
+C
+Frontier Scaling Details
+Significance tests.
+At the 200K context level
+with 133 paired observations, the overall TSCG
+advantage is significant (Wilcoxon p < 0.001 for
+EM, p < 0.001 for F1; Cohen’s d = 0.54 for EM,
+d = 0.33 for F1). However, this aggregate result is
+driven entirely by the 500+ tool cells where JSON
+overflows. Sub-overflow cells (50–300 tools) show
+no significant pairwise differences (p > 0.10).
+Overflow thresholds.
+Fine-grained sweeps at 1-
+tool granularity identify:
+• First chunk loss: JSON at 82 tools, TSCG at
+164 tools (2× headroom before RAG degradation
+begins)
+• Complete overflow: JSON at ∼494 tools, TSCG
+at >803 tools (+63% operational range)
+Per-tool token costs.
+Schema tokens scale lin-
+early: JSON averages 380–473 tokens/tool, TSCG
+averages 205–261 tokens/tool, yielding consistent
+44.7–46.4% savings from 50 to 800 tools.
+D
+HotpotQA External Validation
+Setup.
+50 medium/hard multi-hop questions
+from HotpotQA (Yang et al., 2018) dev-distractor
+split, sampled with seed=42. Each question uses its
+native Wikipedia context: 2 gold paragraphs and
+8 distractor paragraphs (∼150–250 tokens each).
+Model: Phi-4 14B. Context: 8,192 tokens. Tools:
+28 (identical to NovaTech-28 setup).
+Results.
+JSON: 100% overflow on all 50 ques-
+tions (Bschema = 10,998 > 8,192). Zero answers
+produced.
+TSCG: Bschema = 5,520, leaving ∼421 tokens
+for RAG. Mean 3.4 chunks per question (range 2–
+5). Results: 48% EM, 0.645 F1, 74% substring
+match. 24 of 50 questions answered with exact
+match.
+Comparison to NovaTech-28.
+The stronger Hot-
+potQA result (+48 pp vs. +31 pp EM for the same
+model) reflects shorter gold paragraphs that fit more
+efficiently into the tight RAG budget, and well-
+curated questions with clear gold answers.
+E
+Context Utilization Model
+The context utilization model (Equation (2)) was fit
+via grid search over Cmax ∈[0, 2], λ ∈[0.005, 31],
+and C0 ∈[0, 0.5] (step sizes 0.005–0.005) with lo-
+cal refinement. The objective was minimum resid-
+ual MSE against all (k, F 1) pairs.
+Aggregated fit.
+Cmax = 0.18, λ = 25.9, C0 =
+0.095, R2 = 0.011, n = 4,700. The high λ in-
+dicates near-step-function behavior: almost all re-
+trieval gain is captured by the first chunk.
+Per-model variation.
+R2 values range from
+0.000 to 0.138 across individual model×format
+fits, reflecting high per-question variance. Models
+with the highest R2 (Gemma4:26B TSCG: 0.138,
+Gemma3:12B TSCG: 0.058) show the clearest sat-
+uration curves. The complete parameter table is
+available in the supplementary materials.
+Interpretation.
+The low aggregate R2 does not
+invalidate the model—it reflects that EM/F1 are
+inherently noisy per-question metrics. The key
+structural insight (first-chunk dominance) is robust
+across all fits and is independently confirmed by
+the 8K enablement results.
+
+=== [page 11] ===
+Table 5: Complete results: EM (%) and F1 for all 14 models at 8K, 16K, and 32K with 28 tools. Bold deltas indicate
+p < 0.05 (Wilcoxon signed-rank).
+EM (%)
+F1
+Model
+Budget
+JSON
+TSCG
+∆
+JSON
+TSCG
+∆
+Tier A: 8–14B models
+Phi-4 14B
+8K
+2
+33
++31∗∗∗
+.029
+.313
++.284∗∗∗
+16K
+35
+34
+−1
+.232
+.257
++.024
+32K
+11
+11
+0
+.087
+.072
+−.015
+Llama 3.1:8B
+8K
+1
+34
++33∗∗∗
+.032
+.269
++.237∗∗∗
+16K
+33
+30
+−3
+.325
+.281
+−.044
+32K
+30
+29
+−1
+.250
+.238
+−.012
+Gemma3:12B
+8K
+1
+15
++14∗∗
+.037
+.167
++.129
+16K
+33
+33
+0
+.367
+.356
+−.011
+32K
+33
+34
++1
+.398
+.380
+−.018
+Qwen3:14B
+8K
+0
+12
++12∗∗
+.036
+.112
++.076
+16K
+36
+33
+−3
+.305
+.310
++.005
+32K
+33
+34
++1
+.303
+.279
+−.024
+Tier B: 24–32B models
+Mistral-Sm. 24B
+8K
+4
+33
++29∗∗∗
+.029
+.259
++.229∗∗∗
+16K
+33
+33
+0
+.299
+.315
++.016
+Qwen2.5-Cod. 32B
+8K
+3
+18
++15∗∗
+.023
+.152
++.129∗∗∗
+16K
+39
+36
+−3
+.290
+.298
++.009
+32K
+12
+24
++12∗∗∗
+.092
+.176
++.084∗∗∗
+Gemma4:26B
+8K
+0
+4
++4
+.036
+.026
+−.010
+16K
+26
+28
++2
+.266
+.259
+−.007
+Tier C: ≤7B models (16K only)
+Gemma3:4B
+16K
+33
+31
+−2
+.267
+.255
+−.011
+Gemma4:e2b
+16K
+29
+29
+0
+.208
+.196
+−.012
+Gemma4:e4b
+16K
+30
+28
+−2
+.186
+.189
++.003
+Qwen3:4B
+16K
+32
+24
+−8∗
+.336
+.258
+−.078∗∗
+Mistral:7B
+16K
+32
+30
+−2
+.262
+.219
+−.043
+Qwen2:1.5B
+16K
+25
+26
++1
+.154
+.152
+−.002
+API model
+Sonnet 4
+8K
+10
+36
++26∗∗∗
+.112
+.406
++.294∗∗∗
+16K
+36
+34
+−2
+.369
+.389
++.020
+32K
+32
+31
+−1
+.373
+.374
++.002
+Table 6: Accuracy by question type, aggregated across
+all models and budgets. TSCG improves accuracy on all
+five categories.
+Question Type
+Format
+n
+EM
+F1
+single-hop-doc
+JSON
+750
+56.8
+0.342
+TSCG
+750
+70.5
+0.420
+single-hop-db
+JSON
+750
+8.1
+0.027
+TSCG
+750
+11.6
+0.041
+multi-hop
+JSON
+600
+0.0
+0.273
+TSCG
+600
+0.0
+0.317
+tool-requiring
+JSON
+600
+1.3
+0.042
+TSCG
+600
+2.2
+0.054
+unanswerable
+JSON
+300
+50.7
+0.410
+TSCG
+300
+65.3
+0.542
+F
+Ablation: Conservative vs. Balanced
+The TSCG balanced profile offers ∼53% compres-
+sion (vs. ∼50% conservative) by removing descrip-
+tion text and additional schema metadata. We eval-
+uate both profiles on Phi-4 14B and Llama 3.1:8B
+at 8K and 16K context windows (400 calls total).
+Table 7: Conservative vs. balanced profile ablation. Bal-
+anced saves an additional 395 tokens (∼1 extra chunk
+at 8K) but produces no significant accuracy difference.
+Model
+Budget
+Cons EM
+Bal EM
+∆
+Phi-4 14B
+8K
+33
+34
++1
+16K
+34
+35
++1
+Llama 3.1:8B
+8K
+34
+34
+0
+16K
+30
+31
++1
+Average
+32.8
+33.5
++0.8
+Table 7 shows that balanced compression pro-
+duces virtually identical accuracy to conservative
+(∆EM = +0.8 pp, range 0–1 pp, no cell significant
+at p < 0.05). The additional 395 tokens freed by
+balanced translate to ∼1 extra chunk at 8K (2 vs.
+1) and ∼1 extra chunk at 16K (27 vs. 26), but this
+marginal retrieval gain falls in the saturation region
+of the C(k) curve where additional chunks yield
+diminishing returns.
+
+=== [page 12] ===
+This result confirms that the enablement effect is
+robust across compression profiles: even aggressive
+description stripping does not degrade agentic RAG
+accuracy, consistent with the finding that models
+primarily rely on parameter names and types for
+schema comprehension rather than verbose descrip-
+tions.
+G
+Statistical Details
+Wilcoxon signed-rank test.
+All significance
+tests use the paired Wilcoxon signed-rank test
+(Wilcoxon, 1945), which does not assume normal-
+ity. Pairs are formed by matching the same question
+under both formats at the same model and context
+budget.
+Cohen’s d.
+Effect sizes are computed as the mean
+paired difference divided by the standard deviation
+of paired differences. Values are interpreted as
+small (d = 0.2), medium (d = 0.5), and large
+(d = 0.8) following Cohen (1988).
+Bootstrap confidence intervals.
+95% confi-
+dence intervals are computed via 10,000 bootstrap
+resamples of the paired differences, using a seeded
+PRNG (seed=42) for reproducibility.
+Multiple comparisons.
+We do not apply Bonfer-
+roni or similar corrections because our primary
+claims are based on the 8K enablement effect,
+which shows p < 0.001 across multiple models—
+far below any reasonable corrected threshold. The
+16K and 32K conditions serve as controls (expected
+null results) rather than independent hypothesis
+tests.

@@ -1,0 +1,2 @@
+# Thread T-20261027-122: TASK (lead; AUTH-020 second amendment of 2026-10-27, evidence stewards)
+Three evidence-stewards check the scouts' claims (T-20261027-121) against the pages the lead stored in `evidence/literature-20261019/` (ids prefixed `v5-xp-`), one claim batch each; no messaging threads. Output: `findings/SUM-*` records (summaries, unverified until checked against extracts) written by the stewards, one file each.

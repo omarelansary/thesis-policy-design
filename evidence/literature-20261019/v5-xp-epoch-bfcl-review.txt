@@ -1,0 +1,216 @@
+Berkeley Function Calling Leaderboard (BFCL) v4 – Benchmark review | Epoch AI
+
+Back to Benchmarks
+
+Benchmark Review
+Berkeley Function Calling Leaderboard (BFCL) v4
+
+Reviewed: Sep. 10, 2026
+Benchmark creator: Huanzhi Mao, Raymond Tsao, Jingzhuo Zhou, Shishir G. Patil, Joseph E. Gonzalez
+Verdict: 
+Flawed
+
+How we review benchmarks
+
+BFCL v4 is a function-calling benchmark that tests whether a model can call the right tool with correct arguments in a variety of single-call, multi-turn, and agentic tasks. The benchmark scores model outputs by matching them against a fixed answer key of acceptable function calls, which was meant to give a precise and easily gradable signal of tool-use ability. However, in a random sample of 50 tasks, we found defects that could affect accuracy in 24 (48%) of them.
+
+Methodology
+We performed a quality audit of 50 randomly selected questions from the 5,088 scored items in the Berkeley Function Calling Leaderboard, stratified by each category’s weight in the final benchmark score (10% non-live single-turn, 10% live single-turn, 10% irrelevance detection, 30% multi-turn, 40% agentic). This resulted in 5 randomly sampled questions each from the non-live AST, live AST, and irrelevance categories, 10 questions each from the memory and web-search (agentic) categories, and 15 questions from the multi-turn category. Category-specific defect rates ranged from 20% (non-live AST) to 70% (memory), and overall, almost half of the sampled questions had at least one defect.
+A question is considered to have a defect when a fully correct, instruction-following response could be marked wrong (false negative), or where a clearly incorrect response could be marked correct (false positive).
+
+Representative Errors
+Below are some representative errors we surfaced, in rough order of increasing (subjective) severity:
+
+The task is incorrectly specified: In multi_turn_miss_param_143, the user asks to add Zeta Corp to their stock watchlist, but ZETA is already in the watchlist. If a model checks the watchlist first and ends up making no tool call, it will fail the turn entirely.
+
+Ground truth is explicitly wrong due to passage of time: The web_search_54 task asks, “Who is the current headmaster of the secondary school attended by the president of the country that is home to the world’s largest building shaped like a chicken, according to the 2024 Guinness World Records?” The chain of questions resolves to the Philippines, President Marcos Jr., and Worth School in England. The recorded golden answer is Stuart McPherson, its headmaster at the time of the question’s creation. However, McPherson left Worth School in December 2025 to lead Sydney Grammar School, and the school is now under an interim head. A model that answers the question properly (retrieving the current headmaster) would get it wrong.
+
+The obviously correct answer is scored as wrong: The irrelevance_228 task is “What is the current time in Sydney, Australia?”, where the model is given a function get_local_time(location), with the description of “Retrieve the local time for a specific city.” The task is labeled irrelevant, meaning a model passes only by refusing to call any function. If a model makes the correct tool call of get_local_time(location=“Sydney, Australia”), it scores a zero on that task. Two of our five irrelevance samples were inverted in a similar way.
+
+We include some dubious or brittle questions in our error count as well. For instance, in live_multiple_209-91-3, the user tersely asks for “the details” of a project. The correct function is detail_project, described as “Retrieve and provide details about the specific project that Adriel was working on, including its name, status, and start date.” Unfortunately, in the tool call, setting include_status=true is rejected, with only false or omitting the flag entirely accepted as correct. While it is certainly possible for the model to get this question right, the answer key is clearly unreliable.
+
+Errors
+
+TaskCategoryError Type
+irrelevance_228IrrelevanceFalse negative
+live_irrelevance_558-171-0IrrelevanceFalse negative
+live_multiple_209-91-3Live ASTFalse negative
+live_simple_125-81-0Live ASTFalse positive
+memory_23-customer-23MemoryFalse negative, False positive
+memory_86-student-6MemoryFalse negative, False positive
+memory_39-healthcare-9MemoryFalse negative
+memory_71-finance-16MemoryFalse negative
+memory_87-student-7MemoryFalse negative
+memory_91-student-11MemoryFalse negative
+memory_97-student-17MemoryFalse negative
+multi_turn_base_23Multi-turnFalse negative
+multi_turn_miss_func_55Multi-turnFalse negative
+multi_turn_miss_func_129Multi-turnFalse negative
+multi_turn_miss_func_154Multi-turnFalse negative
+multi_turn_miss_param_6Multi-turnFalse negative
+multi_turn_miss_param_143Multi-turnFalse negative
+multi_turn_miss_param_183Multi-turnFalse negative
+multi_turn_long_context_139Multi-turnFalse negative
+parallel_189Non-live ASTFalse negative
+web_search_20Web searchFalse negative, False positive
+web_search_57Web searchFalse negative, False positive
+web_search_54Web searchFalse negative
+web_search_35Web searchFalse positive
+The answer keys of the other 26 sampled tasks were found to be correct, with task IDs as follows: simple_python_327, simple_java_14, multiple_6, parallel_multiple_70, live_multiple_285-129-0, live_multiple_457-145-8, live_parallel_multiple_21-18-0, irrelevance_189, live_irrelevance_89-2-77, live_irrelevance_604-193-6, multi_turn_base_7, multi_turn_base_8, multi_turn_base_108, multi_turn_miss_func_59, multi_turn_miss_param_50, multi_turn_long_context_166, multi_turn_long_context_179, web_search_0, web_search_28, web_search_53, web_search_75, web_search_89, web_search_97, memory_24-customer-24, memory_26-customer-26 and memory_55-finance-0.
+
+Rubric
+
+1. Reviewability
+
+LevelMeaningStatus
+FullAll tasks and scoring logic inspectable,1 and harness/API settings used for each model (reasoning effort, token/time limits, tool access, system prompts) are fully disclosed
+[proceed to 2]
+PartialA representative sample of tasks and scoring logic inspectable, with full harness/API settings disclosed
+[proceed to 2]
+InadequateLimited, biased, or no inspectable tasks or scoring logic, harness/API settings undisclosed
+[stop → NEI]
+2. Scoring
+This is the minimum standard required to be Verified; failing any of these items results in a Flawed verdict.
+
+Scoring
+Examples
+Essentially impossible to correctly answer as written (e.g., underspecified task, hidden requirement, missing file/tool)
+False Negative (e.g., overly strict scorer, stale/incorrect ground truth, dependent on live external state that can drift, sandbox failure independent of the agent)
+False Positive (e.g., lax scorer, reward-hackable environment, stated skill can be bypassed via a shortcut such as exploiting an error in the scoring logic or retrieving the answer from the harness/web)
+Task egregiously doesn’t measure the claimed capability
+Default threshold for FlawedEither errors affect ≥20%2 of the total score in the inspected sample,3 or there is an issue that corrupts grading at scale
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Benchmark Consistency
+Examples
+Scorer, instructions, or ground truth changed without a version bump
+Default threshold for FlawedLeaderboard has incomparable results from different versions
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Elicitation
+Examples
+Model elicitation is extremely constraining and is not the focus of the benchmark:
+Under-resourced relative to task size (token/turn/time limit, sandbox resources)
+Poor context management
+Lack of agentic environment where one would be natural to provide
+Excessive non-voluntary termination for agentic benchmarks
+Default threshold for FlawedSubstantially reduced performance compared to reasonable alternatives for the tasks
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Bias in Evaluation Setup
+Examples
+Uneven compute/token budgets
+Unfair scaffold choice (e.g., only a subset of models optimized)
+Default threshold for FlawedMaterial model-specific advantage found
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+3. Evaluation Quality
+This is the standard we would like all benchmarks to meet, but it is not necessarily disqualifying to omit or fail these items.
+
+QuestionStatusNotes
+Elicitation and resource adequacy: Are the resources given to models (reasoning token/turn budget, tool access, etc.) sufficient for them to perform near their ceiling?
+
+Sufficient
+Constraining
+Unreasonably constraining
+Unknown
+Not reviewed—
+Scaffold fairness: What scaffold does the leaderboard report?
+
+Shared common scaffold
+Mix of model-specific and common scaffolds
+Model-specific scaffolds
+Not reviewed—
+Is there evidence/risk of contamination?
+
+Not reviewed—
+Has human completability been assessed?
+
+All tasks
+Representative set of tasks
+Poor implementation (Unrepresentative set of tasks, unreasonable set of participants)
+Not established
+Not reviewed—
+Score range (if possible to estimate)
+— floor, — ceiling
+Not reviewed—
+Statistical adequacy: how many runs/model (≥ 5 recommended for error bars)
+— runs/model
+Unknown
+Not reviewed—
+Construct validity
+
+Measures stated capabilities
+Partially measures stated capabilities
+Does not measure stated capabilities
+Not reviewed—
+
+Disclaimer
+This is a partial review. We stopped inspecting once we discovered errors that exceeded our published threshold for a flawed benchmark.
+We attempted to reach out to the benchmark developer prior to launch, and if they write a response to this review we will link it here. If you’re the benchmark developer, please email us at reviews@epoch.ai with a link to your response if you would like us to include it here.
+
+Notes
+
+Either publicly or privately to reviewers under an NDA.
+
+A benchmark is rated Flawed if scoring defects could affect ≥20% of the benchmark’s full score. For benchmarks with equally weighted all-or-nothing tasks, our threshold corresponds to ≥20% of tasks having defects. For benchmarks with partial scoring or unequal task weights, our threshold corresponds to ≥20% of the total possible score affected by defects. For single task benchmarks, our threshold is the reported score having defects that could affect it by ≥20%.
+
+For benchmarks with >50 available tasks, we will sample a random set of 50 (stratified by category, when present). If the observed error rate is 15–25%, we will expand the sample to 100. For benchmarks with ≤50 available tasks, all available tasks will be assessed.
+
+About Benchmark Reviews
+Epoch AI’s Benchmark Reviews are independent reviews of external AI benchmarks. Our documentation describes the rubric behind this verdict, how we choose which benchmarks to review, and answers frequently asked questions.
+Go to sourceRead the documentation and FAQs
+
+Cite
+
+Epoch AI’s work is free to use, distribute, and reproduce provided the source and authors are credited under the Creative Commons Attribution license.
+
+Citation
+
+Epoch AI (2026), "Berkeley Function Calling Leaderboard (BFCL) v4". Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/berkeley-function-calling-leaderboard/review' [online resource]. Accessed 27 Oct 2026.
+
+BibTeX Citation
+
+@misc{epoch2026berkeleyfunctioncallingleaderboard,
+title={Berkeley Function Calling Leaderboard (BFCL) v4},
+author={{Epoch AI}},
+year={2026},
+url={https://epoch.ai/benchmarks/berkeley-function-calling-leaderboard/review},
+note={Accessed: 2026-10-27}}
+
+Feedback
+
+Feedback
+
+Have a question? Noticed something wrong? Let us know.
+Message
+
+If you would like a reply, please include your name and email address.
+
+Name
+
+Email address
+
+CancelSubmit
+
+Berkeley Function Calling Leaderboard (BFCL) v4
+BFCL v4 is a function-calling benchmark that tests whether a model can call the right tool with correct arguments in single-call, multi-turn and agentic tasks. In a random sample of 50 tasks, we found defects that could affect accuracy in 24 (48%) of them.

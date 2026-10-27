@@ -1,0 +1,568 @@
+
+=== [page 1] ===
+Dynamic ReAct: Scalable Tool Selection for
+Large-Scale MCP Environments
+Nishant Gaurav
+nishant@agentr.dev
+Adit Akarsh
+adit@agentr.dev
+Ankit Ranjan
+ankit@agentr.dev
+Manoj Bajaj
+manoj@agentr.dev
+Abstract
+We present Dynamic ReAct, a novel approach for enabling ReAct agents to ef-
+ficiently operate with extensive Model Control Protocol (MCP)[3] tool sets that
+exceed the contextual memory limitations of large language models. Our approach
+addresses the fundamental challenge of tool selection in environments containing
+hundreds or thousands of available tools, where loading all tools simultaneously is
+computationally infeasible. We propose and evaluate five distinct architectures that
+progressively refine the tool selection process, culminating in a search-and-load
+mechanism that achieves intelligent tool selection with minimal computational
+overhead. Our experimental results demonstrate that the proposed approach reduces
+tool loading by up to 50% while maintaining task completion accuracy, advancing
+the path towards truly general-purpose AI agents capable of dynamically adapting
+to diverse task environments.
+1
+Introduction
+Large-scale LLM-based agents increasingly rely on external tool integrations to transcend context
+limits and improve performance [5, 6]. Model Context Protocols (MCP) are emerging as a unifying
+standard for managing diverse tool sets in these agents [3, 1]. The proliferation of tools and APIs
+available to LLM-based agents presents a fundamental challenge: while the breadth of available tools
+continues to expand, the contextual memory of LLMs remains finite. Traditional approaches that
+load all available tools into an agent’s context become impractical as tool registries grow beyond
+hundreds or thousands of entries. Recent surveys highlight key challenges facing LLM-based agents
+as tool registries expand, motivating scalable dynamic selection approaches [5, 7]. These limitations
+necessitate a dynamic approach to tool management that can intelligently select and load only the
+relevant subset of tools for a given task.
+We propose a Dynamic MCP ReAct Agent architecture that addresses this challenge through system-
+atic tool retrieval and loading. Our approach leverages meta-tools—tools specifically designed to
+manage other tools—combined with semantic search capabilities to create an AutoAgent that adapts
+its tool set based on user requirements. The need for robust retrieval and scalable tool management is
+further underscored in recent work on dynamic model control protocols [7, 2]. This paper presents
+multiple architectural designs, evaluates their effectiveness, and identifies optimal configurations for
+production deployment.
+Preprint.
+arXiv:2509.20386v1  [cs.SE]  22 Sep 2025
+
+=== [page 2] ===
+2
+System Architecture
+2.1
+Core Components
+The Dynamic MCP ReAct Agent environment consists of four primary components that work in
+concert to enable intelligent tool selection and execution:
+• LLM Client: The central reasoning engine equipped with a lightweight system prompt
+that describes the operational framework without overwhelming the model with excessive
+instructions. This design choice ensures consistent instruction following while maintaining
+compatibility with third-party MCP clients.
+• Meta Tools: A fixed set of tools permanently available to the LLM that facilitate the
+discovery, selection, and loading of task-specific MCP tools. These tools are characterized
+by their names, parameters, descriptions, and output formats, serving as the primary control
+mechanism for dynamic tool management.
+• Tool Registry: A comprehensive repository containing all available MCP tools across
+various applications and domains. Each tool entry includes detailed descriptions optimized
+for semantic search and retrieval. While our experiments utilize a proprietary registry, the
+architecture supports integration with third-party tool repositories.
+• Vector Database: A semantic search system that indexes tool names and descriptions,
+enabling rapid retrieval of relevant tools based on natural language queries. The database
+returns the top-k semantically similar tools for any given query, forming the foundation of
+our dynamic loading mechanism.
+From these components, we identify seven distinct levers that govern the behavior of the system:
+• LLM Client (1 lever): System Prompt
+• Meta Tools (4 levers): Names, Parameters, Descriptions, Output Format
+• Tool Registry (1 lever): Tool Descriptions
+• Vector DB (1 lever): Retrieval design that determines how effectively relevant tools are
+surfaced
+2.2
+Design Principles
+Our design is guided by practical constraints and scalability considerations:
+• System Prompt: We keep the system prompt lightweight because LLMs often stop fol-
+lowing instructions when overloaded. Furthermore, minimizing reliance on the prompt
+allows seamless integration with third-party MCP clients that typically do not permit system
+prompt modification.
+• Tool Registry: The registry may originate from third parties. For this study, we employ our
+own tool registry, enabling us to experiment with and provide insights into writing richer
+tool descriptions that improve retrieval performance.
+• Control Assumptions: In practice, the LLM Client and Tool Registry are often outside
+of our control. Consequently, our architectural exploration begins with Meta Tools as the
+primary lever for AutoAgent design. The Vector Database forms the second major lever
+under our control, where we evaluate multiple design strategies for retrieval accuracy and
+efficiency.
+3
+Architectural Evolution
+3.1
+Baseline Architecture: Direct Semantic Search
+Design. In our initial design, the environment contains only three components:
+• The LLM client
+2
+
+=== [page 3] ===
+• The full MCP tool set
+• A vector database indexing the tool registry
+When a user sends a message, it is passed directly to the vector database as a query. The database
+retrieves the top-k semantically similar tools, which are then bound to the LLM to form a ReAct
+agent. The agent is finally invoked with the original user message. Such baseline approaches relying
+purely on semantic vector search have been shown to suffer from retrieval imprecision and context
+saturation in large-scale environments [8, 2], but we have the results below for completeness.
+Advantages.
+• No additional tool calls are needed before loading MCP tools.
+• The pipeline remains simple: User query →Vector search →Tool binding →Execution.
+Issues with Semantic Search.
+Lack of specificity. Even with a well-phrased query, the most relevant tool may not rank at the top. To
+avoid missing it, a large k must be used, which floods the LLM’s context with unnecessary tools.
+Example: Query →“Create a list of unsubscribe links for mails from my inbox”
+Table 1: Retrieved tools for unsubscribe query under baseline semantic search.
+Retrieved Tools (subset)
+Description
+mailchimp__reports_list..
+Retrieves a list of unsubscribed members for a
+specified campaign.
+braze__list_unsubscribes
+Query list of unsubscribed email addresses.
+mailchimp__reports_list..
+Retrieves a list of subscribers who clicked a spe-
+cific link in a campaign.
+mailchimp__reports_get..
+Retrieves information about an unsubscribed mem-
+ber in a campaign report.
+mailchimp__lists_get_all..
+Retrieves all abuse reports for a specific list.
+outlook__list_user_messages
+Retrieves messages from a user’s mailbox with
+filtering and search.
+Problem: While some tools mention “unsubscribe,” none directly solve the intended task of extracting
+unsubscribe links from emails. The results are noisy, drawn from different providers, and require a
+large k to catch even tangentially relevant tools.
+Mixed results for complex queries. When queries require multiple coordinated actions across appli-
+cations, the system often retrieves only tools from a single domain, missing the multi-application
+requirement.
+Example: Query →“Monitor my Twitter mentions and DMs from the past 48 hours and create a
+response priority list in Google Sheets.”
+Table 2: Retrieved tools for multi-step Twitter →Google Sheets query.
+Retrieved Tools (subset)
+Description
+twitter__get_user_mentions
+Retrieve mentions of a Twitter user.
+twitter__get_tweets_firehose_stream Retrieve tweets in real-time from the Twitter fire-
+hose.
+twitter__get_user_tweet_timeline
+Retrieve tweets posted by a specific Twitter user.
+twitter__get_list_tweets
+Retrieve tweets from a Twitter list.
+twitter__get_usage_tweets
+Retrieve usage statistics of tweets.
+3
+
+=== [page 4] ===
+Problem: The retrieved set is entirely Twitter-focused, with no tools for Google Sheets. As a result,
+the system cannot complete the multi-step workflow (monitor + prioritize + log in Sheets).
+While this design offers simplicity and low overhead, its reliance on raw semantic search leads
+to overloaded or incomplete tool sets. These issues motivate the need for meta-tools and query
+refinement strategies in subsequent architectures.
+3.2
+Meta-Tool for Intelligent Search Query Construction
+Design. In this design, the vector search is exposed to the LLM as a meta tool. Instead of directly
+sending the user’s message as a query, the LLM first constructs the search queries. Each such query
+is atomic (i.e., focused on performing a single action), which results in more relevant tool retrieval.
+The results of this search are then loaded into the LLM, forming a ReAct agent that proceeds to act
+on the user’s original message.
+Advantages.
+• Intelligent Queries: Since the LLM constructs the search queries, they are more targeted
+and specific. The decomposition into atomic queries improves retrieval quality compared to
+the raw message approach.
+Example. User Query: “Create a list of unsubscribe links for mails from my inbox.” (Note: The user
+has connected only Gmail, among Gmail, Outlook, and other mail aggregator applications. Hence
+the constructed query focuses specifically on Gmail.)
+Constructed search query: “search Gmail emails by date and filter promotional emails.”
+Table 3: Retrieved tools using intelligent query construction.
+Retrieved Tools
+Description
+google-mail__create_filters
+Set up new Gmail filters with criteria and automa-
+tion rules.
+google-mail__delete_filters
+Remove Gmail filters and their automation rules.
+google-mail__list_filters
+Retrieve all Gmail filters and their automation set-
+tings.
+google-mail__get_filters
+Fetch Gmail filter configurations by filter ID.
+google-mail__list_drafts
+Retrieve and format a list of email drafts from
+Gmail.
+google-calendar__list_events
+Retrieve events from the user’s calendar.
+hubspot__list_marketing_emails
+Retrieve all marketing emails in HubSpot.
+google-mail__list_messages
+List messages from the user’s Gmail mailbox.
+Disadvantages.
+• Extra Overhead: An additional LLM call is required for constructing the search query
+whenever an MCP tool has to be executed.
+• High Tool Count: The number of tools retrieved remains large, since vector search is still
+imprecise. The k must be set high (at least 10 in our examples) to avoid missing relevant
+tools.
+3.3
+Search and Load Architecture: Deliberate Tool Selection
+Design. In this design, two meta tools are bound to the LLM:
+• search_tools: Takes in a list of string queries and performs a two-level search.
+– For every query, it retrieves k1 = 20 candidate tools.
+4
+
+=== [page 5] ===
+– Repetitions are removed, and the number of tools per application is capped at k2 = 5.
+– The final deduplicated list of tools is returned.
+• load_tools: After parsing the search results, the LLM selects specific tools and calls
+load_tools with their IDs. This binds the selected tools to the LLM before invoking it
+with the user query.
+Advantages
+• Intelligent Queries: Queries are constructed by the LLM and remain atomic, leading to
+better retrieval quality.
+• Multi-Query Design: Multiple queries can be executed in a single search, reducing the
+number of LLM calls.
+• Deliberate Loading of Tools: The LLM carefully selects tools from the retrieved results,
+typically loading fewer than 5. This contrasts with vector search–based designs, which
+require a high k (10 or more) and load all results indiscriminately.
+Example
+User Query: “Monitor my Twitter mentions and DMs from the past 48 hours and create a response
+priority list in Google Sheets.”
+Constructed queries:
+• “retrieve Twitter mentions and direct messages”
+• “create Google Sheets spreadsheet with data”
+Table 4: Loaded tools for Twitter + Google Sheets workflow.
+Retrieved Tools
+Description
+twitter__get_user_mentions
+Retrieve mentions of a Twitter user
+twitter__get_dm..
+Retrieve direct message events by participant ID
+google_sheet__create_spreadsheet
+Create a new spreadsheet in Google Sheets
+google_sheet__write_values_to_sheet Write values into a Google Sheets spreadsheet
+Disadvantages
+• Overhead: A minimum of two extra calls (search + load) are required whenever the LLM
+needs to execute an MCP tool.
+• Irrelevant Application Results: Applications that match semantically but are not useful
+may still appear. Example: Query “search Gmail emails by date and filter promotional
+emails” included tools from google_mail, resend, mailchimp, unipile, klaviyo, and
+scraper.
+3.4
+Application-Aware Architecture: Hierarchical Search
+Design. In this design, the LLM has access to three meta tools:
+• search_apps – Retrieves applications relevant to a query.
+• search_tools – Searches for tools relevant to the query, optionally filtered by application.
+• load_tools – Loads the selected tools into the LLM before acting on the user’s request.
+This allows the LLM to first identify available apps, then narrow the search to tools within the most
+relevant applications.
+Advantages
+5
+
+=== [page 6] ===
+• Application Awareness: search_apps enables the LLM to check available applications
+before searching for tools.
+• Focused Tool Retrieval: By filtering searches to specific apps, irrelevant matches are
+reduced, improving tool selection accuracy.
+Example User Query: “Create a list of unsubscribe links for mails from my inbox.”
+App search results: Resend, Mailchimp, Unipile, Klaviyo, LinkedIn Scraper, Firecrawl, Braze,
+SendGrid, Calendly, Google Mail, Microsoft Outlook, Apollo, Spotify, HTTP Tools, Fireflies.
+Tool search results (with k = 5 per app):
+Table 5: Example tool search results with app filtering.
+Retrieved Tools
+Description
+google_mail__list_messages
+Retrieve messages from Gmail
+google_mail__get_all_filters
+Retrieve all Gmail filters
+google_mail__list_labels
+List all Gmail labels
+google_mail__list_drafts
+Retrieve Gmail drafts
+google_mail__delete_filter
+Delete a Gmail filter
+outlook__user_delete_message
+Permanently delete a message from Outlook
+outlook__list_user_messages
+Retrieve a list of messages from Outlook
+outlook__list_message_attachments
+Retrieve attachments from an Outlook message
+outlook__get_next_page
+Retrieve the next page of Outlook messages
+outlook__get_current_user_profile
+Retrieve the current Outlook user’s profile
+Disadvantages
+• Extra Overhead: The search_apps step introduces an additional call without significantly
+improving accuracy.
+• Redundant Functionality: Similar precision can be achieved by integrating application
+filtering directly inside search_tools, reducing calls.
+3.5
+Fixed Tool Set Architecture: Consistent Context
+Design. In this approach, the LLM operates with a fixed set of four meta tools. Retrieved MCP tools
+are not bound directly; instead, functionality is accessed dynamically.
+Available meta tools:
+• search_app – Retrieve applications relevant to a query.
+• search_tool – Search for tools, optionally filtering by application.
+• get_tool_info – Takes in tool IDs and returns their docstring, input schema, and output
+schema.
+• call_tool – Executes a tool with a given ID and arguments, returning its output schema.
+Advantages
+• Caching Efficiency: Since the bound tool set does not change, caching can be applied
+effectively, leading to cost savings.
+Disadvantages
+• Performance Degradation: LLMs are optimized for directly bound tools; longer conversa-
+tions suffer as the LLM fails to use get_tool_info and call_tool efficiently.
+6
+
+=== [page 7] ===
+• Indirection Overhead: Tool usage requires multiple steps (retrieving schema + invoking),
+adding friction compared to directly loaded tools.
+4
+Implementation Optimizations
+4.1
+Search Function Design
+We experimented with multiple designs of the search_tools meta tool, focusing on both input
+parameterization and the underlying retrieval strategy.
+4.1.1
+App-Filtered vs. Query-Only Search
+We implemented two variants of the search_tools function:
+• App-filtered search: Accepts a list of {query, app_id} pairs, where the app_id field is
+optional. This design allows the LLM to restrict retrieval to a specific application when such
+context is available.
+• Query-only search: Accepts a list of queries (strings) without requiring an explicit applica-
+tion filter.
+In practice, we observed that the query-only variant was preferred by the LLM in most cases, even
+when the app-filtered version was available. Interestingly, when the LLM did provide an app filter,
+the unfiltered search often retrieved the same tools by including the app name directly in the query
+string. This suggests that app-level filtering does not significantly improve retrieval performance, as
+the semantic vector search captures app context effectively when named explicitly in queries.
+4.1.2
+LLM-Based Search Approach
+In addition to vector retrieval, we also implemented an LLM-based search method. In this design, a
+lightweight secondary LLM is initialized with a cached system prompt containing all tool descriptions.
+Since the system prompt remains fixed, caching lowers costs, while keeping this LLM separate
+preserves the contextual memory of the main agent.
+This approach demonstrated strong accuracy for small tool sets but failed to scale for large registries.
+The main challenges were:
+• Context limitations: The fixed prompt quickly exceeded token limits when handling more
+than a few hundred tools.
+• Computational overhead: Maintaining and querying this secondary LLM introduced
+significant latency and cost.
+These scaling issues are consistent with prior findings [4]. As a result, we adopted vector-based
+retrieval as our production strategy, which scales efficiently to thousands of tools while maintaining
+competitive accuracy.
+4.2
+Output Formatting and Guidance
+Several refinements to output formatting significantly improved reliability:
+• Reminder to load tools: Adding an explicit reminder at the end of search_tools output
+prevents premature execution attempts by the LLM on tools that have not yet been bound.
+• User-specific app connections: Many applications overlap in functionality (e.g., Gmail
+vs. Outlook vs. Resend for sending emails). To resolve ambiguity, search results include
+information on which apps the user has connected. The LLM is instructed to prefer connected
+applications when breaking ties, avoiding unnecessary user queries.
+• System prompt variants: We tested prompts with explicit lists of app names versus prompts
+without them. Including app names biased the agent towards loading tools from those apps
+unnecessarily. In our final implementation, we omitted explicit app lists to minimize this
+bias.
+7
+
+=== [page 8] ===
+Example:
+• Query: Generate a comparison table of SaaS tools for project management, including
+pricing, features, and user ratings
+• Observed Behavior: The agent loaded tools such as airtable__create_record,
+coda__list_tables, and serpapi__search to build a comparison table. However,
+the user had not specified exporting results into a particular app. The redundant loading
+of Airtable and Coda illustrates the importance of controlling tool bias via prompt and
+formatting strategies.
+4.3
+Default Tools Integration
+We observed that the agent frequently attempted to search for specialized tools to perform generic
+tasks (e.g., creating tables, conducting web searches). These futile searches often failed, despite the
+existence of common reusable functionality.
+To mitigate this, we introduced default tools that are always available alongside meta tools:
+• create_table – for tabular data generation
+• web_search – for general-purpose web queries
+These defaults prevent wasted searches and improve performance on broad queries.
+Example:
+• User Query: Find and summarize the key takeaways from the latest earnings calls of
+FAANG companies
+• Search Queries Generated:
+– earnings calls financial data
+– company financial reports
+– stock market earnings information
+– financial market data stock prices
+– SEC filings company reports
+– news financial earnings
+After adding the web_search tool, instead of searching for multiple financial APIs, the
+agent leveraged the default web_search tool to efficiently answer the query.
+5
+Vector Retrieval Optimization
+Recent studies find that context-enriched embeddings substantially improve retrieval accuracy over
+baseline vector models [7, 8]. Hence, in addition to the above structural changes to the agent setup,
+we also perform experiments and modifications to the vector database.
+5.1
+Experimental Setup
+We conducted extensive experiments to optimize our vector retrieval pipeline. The evaluation focused
+on precision (Top-5 accuracy) and recall (Top-10 accuracy) using a diverse test suite of tool-related
+queries.
+5.2
+Embedding Model Performance
+Our baseline used OpenAI’s text-embedding-3-large model, achieving 40% Top-5 and 64%
+Top-10 accuracy. We then tested Voyage AI models:
+• voyage-context-3: 48% Top-5, 68% Top-10
+• voyage-3-large: 56% Top-5, 68% Top-10
+8
+
+=== [page 9] ===
+5.3
+Context Enrichment Strategy
+The most significant improvement came from programmatically enriching tool descriptions be-
+fore embedding. Using Anthropic’s Sonnet 4, we generated additional context describing implicit
+functionalities and use cases not explicitly stated in the tool documentation.
+• voyage-context-3 + Sonnet context enrichment: 60% Top-5, 68% Top-10
+This represented a 50% relative improvement in Top-5 accuracy over the baseline.
+5.4
+Hybrid Search Evaluation
+We also explored a hybrid search combining semantic search (vector-based) with BM25 keyword
+retrieval.
+• voyage-context-3 + Sonnet context + BM25: 56% Top-5, 72% Top-10
+While recall improved, precision degraded slightly. BM25 occasionally promoted tools with keyword
+overlap but weak semantic relevance (e.g., including Google Maps Search in results for a general
+web search). This confirmed our decision to prioritize vector-only methods for production, where
+precision is paramount.
+5.5
+Comparative Analysis of Queries
+Query: “send email”
+• Baseline (OpenAI embeddings):
+Results dominated by unrelated Braze tools.
+resend__send_email ranked #4,
+google_mail__send_email ranked #6,
+and
+outlook__send_mail was absent from the Top-10.
+• Optimized (Voyage + Context): All three expected tools appeared in the Top-5:
+– outlook__send_mail (#1)
+– google_mail__send_email (#2)
+– resend__send_email (#4)
+Query: “web search general information”
+• Optimized (Voyage + Context): Perfect Top-5 retrieval of expected tools:
+– serpapi__web_search, firecrawl__search, tavily__search_and_summarize,
+perplexity__answer_with_search, exa__search_with_filters
+• Hybrid
+(Voyage
++
+Context
++
+BM25):
+One
+irrelevant
+tool,
+serpapi__google_maps_search, entered the Top-5 due to keyword overlap (“search”),
+replacing the semantically correct exa__search_with_filters.
+5.6
+Embedding Model Comparison
+6
+Discussion
+6.1
+Architecture Selection
+Our experiments reveal trade-offs between the architectural patterns explored.
+• Search and Load architecture: Emerges as the optimal balance between precision and
+efficiency, requiring only two additional LLM calls while achieving high tool selection
+accuracy.
+• Fixed Tool Set architecture: Shows promise for cost optimization through caching, but
+suffers performance degradation in longer conversations where agents tend to rely on direct
+tool calls.
+9
+
+=== [page 10] ===
+Table 6: Comparison of embedding models and retrieval strategies.
+Embedding Model
+Top-5 (%)
+Top-10 (%)
+OpenAI (text-embedding-3-large)
+40
+64
+voyage-context-3
+48
+68
+voyage-context-3 + Sonnet context enrichment
+60
+68
+voyage-context-3 + Sonnet context + BM25
+56
+72
+voyage-3-large
+56
+68
+voyage-3-large + Sonnet context
+56
+68
+6.2
+Scalability Considerations
+The Dynamic MCP ReAct Agent demonstrates strong scalability by loading only the tools necessary
+for a given query. This ensures constant memory usage regardless of registry size. Since our vector
+database supports efficient approximate nearest neighbor search, retrieval scales logarithmically with
+registry growth, making the system robust to thousands (or eventually millions) of tools.
+6.3
+Limitations and Future Work
+Several open challenges remain:
+• Tool documentation quality: Current performance relies heavily on high-quality tool
+descriptions. Poorly documented tools significantly reduce retrieval accuracy. Automating
+the generation and validation of enriched descriptions could mitigate this issue.
+• Multi-tenant environments: Our current architecture assumes a single user with a unified
+tool registry. Supporting multiple tenants with user-specific permissions and application
+connections requires additional architectural considerations.
+• Adaptive search parameters: Dynamically adjusting k values (number of results retrieved)
+based on query complexity could improve efficiency by avoiding over-retrieval for simple
+tasks while maintaining robustness for complex ones.
+• Learning from execution success: Incorporating reinforcement learning from tool execu-
+tion outcomes could enable the agent to improve its retrieval and selection strategies over
+time.
+Many open issues, including multi-tenant support, adaptive retrieval, and leveraging execution
+feedback for learning, remain active areas of research [5, 8].
+7
+Conclusion
+This paper presents a comprehensive solution to the challenge of managing extensive tool registries
+in LLM-based agents through dynamic tool selection and loading. Our Dynamic MCP ReAct Agent
+architecture, combining intelligent meta-tools with optimized vector retrieval, achieves significant
+improvements in both efficiency and accuracy compared to static tool loading approaches.
+The key contributions of this work include:
+1. A systematic evaluation of five different architectural patterns for dynamic tool management.
+2. Demonstration that context-enriched embeddings improve tool retrieval accuracy by 50%.
+3. Practical implementation strategies that balance performance with computational efficiency.
+Our Search and Load architecture with voyage-context-3 embeddings and Sonnet-generated
+context enrichment provides a production-ready solution that scales to thousands of tools while
+maintaining high accuracy in tool selection.
+10
+
+=== [page 11] ===
+As the ecosystem of available tools and APIs continues to expand, dynamic tool management becomes
+increasingly critical for practical agent deployment. The architectures and optimizations presented in
+this paper provide a foundation for building scalable, efficient agents capable of adapting to diverse
+user requirements without overwhelming system resources. The modular design ensures compatibility
+with existing MCP infrastructure while enabling continuous improvements in retrieval accuracy and
+execution efficiency.
+References
+[1] Anthropic. Introducing the model context protocol. https://www.anthropic.com/news/
+model-context-protocol, 2024.
+[2] Anonymous Authors. Mcp-zero: Active tool discovery for autonomous llm agents. In NeurIPS
+2025, 2025. URL https://arxiv.org/html/2506.01056v3.
+[3] MCP Community.
+What is the model context protocol (mcp)?
+https://
+modelcontextprotocol.io, 2023-2025. Community & Official Overviews.
+[4] Tiantian Gan and Qiyao Sun. Rag-mcp: Mitigating prompt bloat in llm tool selection via
+retrieval-augmented generation. arXiv preprint arXiv:2505.03275, 2025. URL https://arxiv.
+org/abs/2505.03275.
+[5] Xinzhe Li. A review of prominent paradigms for llm-based agents: Tool use (including rag),
+planning, and feedback learning. arXiv preprint arXiv:2406.05804, 2024. URL https://arxiv.
+org/html/2406.05804.
+[6] Xinzhe Li. A review of prominent paradigms for llm-based agents: Tool use (including rag),
+planning, and feedback learning. arXiv preprint arXiv:2406.05804, 2024. URL https://arxiv.
+org/html/2406.05804.
+[7] Ethan Lumer, Matthew R. Walter, He He, and Percy Liang. Scalemcp: Dynamic and auto-
+synchronizing model context protocol tools for llm agents. In Advances in Neural Information
+Processing Systems (NeurIPS) 2025, 2025. URL https://arxiv.org/abs/2505.06416.
+[8] Dong Nie and Peng Zhang. Large language models tool retrieval and context compression via
+dynamic graph-based relation modeling. In NeurIPS Datasets and Benchmarks Track, 2025.
+URL https://francis-press.com/papers/19363.
+11

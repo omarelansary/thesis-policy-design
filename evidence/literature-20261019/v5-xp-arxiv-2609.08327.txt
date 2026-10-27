@@ -1,0 +1,1270 @@
+
+=== [page 1] ===
+Tool Retrievers Are Underestimated:
+Annotation Expansion Reveals True Capability
+Yanyu Zhu1, Chenheng Zhang2∗, Shaoshen Chen1∗, Hoilam Pao1, Yufei Zhang3, Jiajun Chai3,
+Dongnian Wang3, Zhaoyu Hu3, Guojun Yin3, Wei Lin3, and Hai-Tao Zheng1†
+Shenzhen International Graduate School, Tsinghua University
+Peking University
+Meituan, Beijing
+Abstract
+In open-world scenarios with massive and evolving tool repos-
+itories, tool-augmented large language models rely on a re-
+triever to surface relevant tools for a given query. Because
+such repositories often contain many tools that implement
+the same functionality, a single query can often be resolved
+by several distinct but functionally equivalent tool combina-
+tions, making the natural query-to-tool mapping inherently
+one-to-many. However, existing tool retrieval benchmarks an-
+notate each query with a single relevant tool combination,
+collapsing this one-to-many mapping into a rigid one-to-one
+annotation and causing valid retrieved tools to be misjudged as
+failures. To address this, we propose ToolEX (Tool Equiv-
+alent eXpansion), a framework that automatically discovers
+and annotates the tool combinations functionally equivalent
+to the labeled ones. Applied to the 7,360-query Tool-DE
+benchmark, ToolEX finds that 67.9% of sub-queries admit
+equivalent alternatives, expanding the singular ground truth
+to an average of 5.3 valid combinations per query. Using the
+expanded benchmark ToolEq, we re-evaluate eight base re-
+trievers and two fine-tuned variants; metrics on ToolEq rise
+substantially over Tool-DE, showing that one-to-one annota-
+tion systematically underestimates retrievers and that 30–47%
+of the reported fine-tuning gain is an evaluation artifact rather
+than genuine improvement. Applying the same pipeline to
+skill retrieval on SkillRet further confirms that the one-to-
+one problem extends beyond tool retrieval.
+1
+Introduction
+As LLM agents move toward open-domain deployment, tool
+retrieval becomes a prerequisite for execution: an agent can-
+not invoke a capability it fails to retrieve. This has motivated
+dedicated tool retrieval benchmarks such as ToolRET (Shi
+et al. 2025), Tool-DE (Lu et al. 2025), and MetaTool (Huang
+et al. 2024b). These benchmarks are typically built by aggre-
+gating tools and task demonstrations from large tool-use cor-
+pora, including ToolBench (Qin et al. 2024), ToolACE (Liu
+et al. 2024a), and ToolEyes (Ye et al. 2024). However, this
+construction process inevitably introduces tools with over-
+lapping functionality under different names, providers, or
+interfaces. The resulting query-to-tool relation is therefore
+naturally one-to-many: a single query may be solvable by
+multiple distinct but functionally equivalent tool combina-
+tions. Existing benchmarks ignore this equivalence and in-
+∗These authors contributed equally.
+†Corresponding author.
+Copyright © 2027, Association for the Advancement of Artificial
+Intelligence (www.aaai.org). All rights reserved.
+valid tool
+annotated GT
+rejected
+Figure 1: The one-to-many relationship between queries
+and tools in real-world tool libraries. A single user query
+can be satisfied by multiple functionally equivalent tools, yet
+existing benchmarks annotate only one as ground truth.
+stead assign each query a single annotated ground-truth com-
+bination. Consequently, a retriever that returns an equivalent
+but unannotated tool is scored as wrong despite producing
+a valid retrieval. We call this the one-to-one annotation
+problem.
+Figure 1 illustrates the problem on a concrete query
+that asks to “retrieve a list of historical events that oc-
+curred on a specific calendar date.” A dense retriever
+ranks
+candidate
+tools
+by
+similarity.
+Only
+one
+tool,
+QueryHistoryToday, is annotated as the ground truth;
+four others — Get Historical Events of Today,
+/v1/historicalevents,
+Historical Events
+by API Ninjas, and v1_historicalevents — are
+functionally equivalent yet unannotated, and are therefore
+scored as misses, inducing a systematic underestimate of
+retrieval quality.
+To close this gap, we propose ToolEX, a fully automated
+annotation pipeline that discovers functionally equivalent
+tool combinations without human labeling. ToolEX oper-
+ates in three stages (Figure 2): an LLM first decomposes
+each composite query into k atomic sub-queries, one per
+arXiv:2609.08327v1  [cs.SE]  8 Sep 2026
+
+=== [page 2] ===
+tool in the ground-truth combination; for each sub-query, a
+dense retriever (Qwen3-Embedding-4B (Zhang et al. 2025))
+retrieves the top-20 candidate tools, which an LLM then ver-
+ifies to determine whether they satisfy the capability speci-
+fied by the sub-query; finally, the verified per-sub-query tool
+sets are merged via Cartesian product, ranked with Recip-
+rocal Rank Fusion (RRF) (Cormack, Clarke, and Buettcher
+2009), and filtered by an LLM dependency check that re-
+moves combinations violating inter-tool constraints. Applied
+to the 7,360-query Tool-DE evaluation set, which uses the
+same queries as ToolRet (Shi et al. 2025) but augments the
+tool documentation as in Tool-DE (Lu et al. 2025), ToolEX
+expands the average annotation from 1 to 5.3 tool combina-
+tions per query, with 67.9% of sub-queries receiving at least
+one additional equivalent tool beyond the original ground
+truth.
+Using these expanded annotations, we construct ToolEq,
+a new benchmark that credits a retrieval whenever it matches
+any valid equivalent combination, and re-evaluate eight base
+IR models and two fine-tuned tool retrievers. ToolEq cor-
+rects a systematic underestimation: across the eight base
+retrievers it raises NDCG@10 by 5–7 pp on average over
+Tool-DE (Table 2), recovering the credit withheld from re-
+trievals of functionally equivalent but unannotated tools. This
+underestimate also inflates the apparent fine-tuning gain: cor-
+recting it narrows the gap between fine-tuned and base re-
+trievers on ToolEq (0.6B: +6.4 pp →+4.5 pp; 4B: +7.2 pp
+→+3.8 pp), so part of the gain reported on Tool-DE reflects
+the evaluation protocol rather than only improved retrieval.
+We further find that applying the same pipeline to the Skill-
+Ret benchmark (Cho, Kang, and Kim 2026) confirms the
+one-to-one annotation problem is ecosystem-wide.
+In summary, our contributions are fourfold:
+• We unveil the one-to-one annotation problem in exist-
+ing tool retrieval benchmarks, demonstrating that scoring
+functionally equivalent tools as misses systematically un-
+derestimates retriever capability.
+• We propose ToolEX, a fully automated three-stage
+pipeline that discovers functionally equivalent tool com-
+binations without human annotation, and construct
+ToolEq as a new evaluation framework that credits any
+valid equivalent.
+• By expanding singular ground truths to an average of 5.3
+valid combinations per query, ToolEq corrects the under-
+estimation: eight base retrievers gain 5–7 pp NDCG@10
+on average over Tool-DE. Correcting the metric also
+exposes that fine-tuning gains are partly an evaluation
+artifact, as the fine-tuned-to-base gap shrinks once equiv-
+alents are credited.
+• Extending ToolEX to SkillRet shows the one-to-one
+problem is ecosystem-wide, confirming that functional
+equivalence is not specific to tool repositories.
+2
+Related Work
+Tool Learning Ecosystem: Use and Retrieval Bench-
+marks.
+Tool learning equips large language models
+(LLMs) with external tools, enabling them to execute ac-
+tions and solve practical tasks as agents. A broad line of
+benchmarks evaluates tool-use capabilities across diverse ex-
+ecution scenarios, including ToolBench (Qin et al. 2024),
+APIBank (Li et al. 2023), ToolAlpaca (Qiao et al. 2024),
+AppBench (Yang et al. 2024), GTA (Mao et al. 2024),
+MetaTool (Chang et al. 2024), ToolEyes (Ye et al. 2024),
+ToolACE (Liu et al. 2024a), and APIGen (Liu et al. 2024b).
+However, in open-domain scenarios where tool/skill repos-
+itories scale to tens of thousands of items, feeding all
+documentation directly into the LLM context window be-
+comes fundamentally infeasible. Tool and skill retrieval have
+thus emerged as indispensable prerequisites for open-domain
+agent execution, giving rise to dedicated benchmarks such as
+ToolRet (Shi et al. 2025), Tool-DE (Lu et al. 2025), and
+SkillRet (Cho, Kang, and Kim 2026). To construct these re-
+trieval benchmarks, standard pipelines collect large pools of
+candidate tools or skills, randomly sample seed tool subsets,
+and prompt LLMs to synthesize corresponding user queries.
+Crucially, this bottom-up synthesis pipeline inherently cou-
+ples each generated query exclusively with its seeded tools,
+creating an artificial one-to-one annotation problem that
+completely ignores functionally equivalent alternatives co-
+existing in the candidate repository.
+Tool Retrieval Methodologies.
+To tackle the open-domain
+retrieval bottleneck, recent methodologies focus on opti-
+mizing retrieval quality along several complementary tech-
+nical routes. A major line of work employs dense re-
+triever fine-tuning via contrastive learning with negative sam-
+pling (Karpukhin et al. 2020; Xiong et al. 2021), as well as
+specialized vector space alignments (Moon et al. 2024) and
+generative identifiers (Wang et al. 2025), to directly bridge
+the encoding gap between query intent and tool documen-
+tation. Complementary to representation learning, query re-
+formulation and decomposition techniques (Fang and Glass
+2026; Liu et al. 2025; Sengupta et al. 2026; Huang et al.
+2024a) rewrite complex user intents into atomic sub-goals
+or leverage structural graph modeling (Gao et al. 2025) to
+better match tool capabilities. More recently, joint optimiza-
+tion paradigms utilize reinforcement learning to co-optimize
+retrieval policies with agent execution in open-world environ-
+ments (Huang et al. 2026). Crucially, while these approaches
+significantly advance how queries and tools are encoded,
+reformulated, or retrieved, they universally evaluate predic-
+tions against a single, rigidly annotated target. As a result,
+whenever a model successfully surfaces a functionally equiv-
+alent alternative, traditional benchmarks falsely count it as
+a false negative. Our work is strictly orthogonal: rather than
+introducing another retrieval algorithm, we reform the eval-
+uation paradigm itself by expanding singular ground truths
+into valid sets of functionally equivalent tool combinations.
+3
+Equivalent Ground-truth for Tool Retrieval
+and Skill Retrieval
+In this section, we develop ToolEX, a framework that cor-
+rects the one-to-one annotation problem in existing tool re-
+trieval benchmarks. First, Section 3.1 analyzes the limitations
+of current benchmarks and formalizes the one-to-one anno-
+tation problem. Next, Section 3.2 introduces the ToolEX
+annotation pipeline for equivalent ground-truth expansion.
+
+=== [page 3] ===
+7.6k
+Queries
+43k
+Tools
+source pool
+s!: retrive straddle data 
+for ticker GOOGL
+s": retrive straddle data 
+for ticker GOOGL
+What is the straddle data for X 
+and the latest popular ideas for 
+the US stock market?
+GT tools: [staddle, ideas_list]
+Decompose the 
+query into atomic 
+sub-queries.
+straddle
+ideas_list
+Multi-tool query decomposition
+s!: retrive straddle data 
+for ticker GOOGL
+s"
+Top-k
+𝒯!(s!)
+𝒯"(s")
+Check if the subquery 
+can be solved by the tool?
+Retrieve & Verify
+Combine & Audit
+Final Results
+%𝒯" (s")
+%𝒯!(s!)
+Cartesion Product
+%𝒯!(s!) × %𝒯" (s")
+RRF Fusion Ranking
+Can this toolset solve the 
+multi-tool query ?
+Dep. & Coverage Check
+[toolbench_tool_1998, toolbench_tool_6234]
+[apigen_tool_2016, apigen_tool_2856]
+[apigen_tool_2016, toolbench_tool_6243]
+[toolbench_tool_1998, apigen_tool_2856]
+ToolRet
+7,360
+queries
+57,332 
+valid combos
+Avg 5.3 combos 
+per query
+SkillRet
+4,997
+queries
+53,834 
+valid combos
+Avg 10.8 combos 
+per query
+…
+Figure 2: The ToolEX annotation pipeline. Stage 1 decomposes each query into atomic sub-queries via DeepSeek-V3.2;
+Stage 2 retrieves top-K candidates per sub-query with Qwen3-Embedding-4B and verifies functional alignment via GPT-4o-
+mini; Stage 3 assembles Cartesian combinations, ranks them with RRF, and filters via Claude-Sonnet-5 dependency checking,
+yielding valid equivalent combinations.
+Finally, Section 3.3 presents the benchmarks ToolEq along
+with a new evaluation metric.
+3.1
+Limitations of Current Retrieval Benchmarks
+Let Q denote a set of user queries and T a heterogeneous
+tool library. Existing benchmarks (Shi et al. 2025; Lu et al.
+2025) annotate each query q ∈Q with a single ground-truth
+tool combination C∗= {t1, . . . , tk} ⊆T . This one-to-one
+convention rests on a hidden assumption: that each query
+admits exactly one correct tool combination. In open-world
+repositories, this assumption fails. Libraries assembled from
+independent sources inevitably contain functionally equiv-
+alent tools—APIs and services that perform the same op-
+eration under different names, providers, or documentation
+styles—so the true set of valid combinations for a query is
+Cq = {C ⊆T | C can fully solve q},
+(1)
+with |Cq| ≫1 whenever the library contains equivalents.
+Standard metrics treat only C∗as relevant and count every
+C ∈Cq \ {C∗} as a false negative, so the query-to-relevant-
+tools relation is in reality one-to-many but is evaluated as if
+it were one-to-one. We call this the one-to-one annotation
+problem.
+This mislabeling has two compounding consequences.
+During retriever fitting, one-to-one annotations cause un-
+labeled positives to contaminate the negative batch, which
+artificially tightens decision boundaries and suppresses gen-
+eralization to functionally equivalent tools. On the evaluation
+side, a retriever that correctly identifies an unlabeled equiv-
+alent receives no credit, while one that overfits to the single
+annotated combination is rewarded. The two effects reinforce
+each other: measured gains on benchmarks such as Tool-DE
+may therefore substantially overstate real improvement, and
+there is currently no way to tell how much of a measured
+gain is genuine retrieval ability and how much is benchmark
+artifact. ToolEX targets this structural source of bias by
+approximating Cq automatically, without human annotation.
+3.2
+Annotation Pipeline
+ToolEX operates in three stages, as illustrated in Figure 2.
+In the experiments reported here, the pipeline is applied to
+the Tool-DE evaluation set derived from ToolRet (Shi et al.
+2025) and Tool-DE (Lu et al. 2025), where ToolRet provides
+the query–tool structure and Tool-DE provides expanded
+tool documentation used for retrieval.
+Stage 1: Multi-Tool Query Decomposition.
+The goal of
+this stage is to rewrite each composite query q as k atomic,
+provider-agnostic sub-queries {s1, . . . , sk}, one per tool in
+the ground-truth combination C∗, so that each si can re-
+trieve functionally equivalent tools without revealing their
+names. DeepSeek-V3.2 (DeepSeek-AI et al. 2025) performs
+the decomposition (see supplementary materials for the full
+prompt), given the query, the task instruction, and the doc-
+umentation of all k ground-truth tools, and is instructed to
+minimize the semantic gap between each sub-query and its
+corresponding tool documentation. Because Stage 1 is used
+to construct expanded annotations, it intentionally uses the
+benchmark-provided ground-truth tool set; it is therefore an
+annotation-time component rather than a deployable test-
+time planner. Each sub-query describes two aspects: (a) the
+functionality (the precise operation, e.g., retrieve, calculate,
+search) and (b) the entity (the parameter values the query
+context can supply, e.g., a stock ticker, a calendar date). The
+
+=== [page 4] ===
+functionality term aligns the sub-query with equivalent tool
+documentation, while the entity term lets the Stage 2 verifier
+confirm the caller can supply the inputs the candidate tool
+requires.
+Stage 2: Candidate Retrieval and Functional Verifica-
+tion.
+The goal of this stage is, for each sub-query si, to
+collect every tool in T that is functionally equivalent to the
+annotated ground-truth tool ti and could substitute for it in
+solving si. We first retrieve the top-K candidate tools for si
+with Qwen3-Embedding-4B (Zhang et al. 2025), then ver-
+ify each candidate t with GPT-4o-mini (full verifier prompt
+in the supplementary materials). The verifier receives the
+sub-query si, the candidate’s full documentation as raw
+JSON (to avoid information loss from field parsing), and
+the ground-truth tool’s documentation as a reference, and
+judges whether t performs the same core operation as the
+reference and whether its output covers what si requires with
+parameters that si can supply. A candidate is accepted only
+when both conditions hold; under genuine uncertainty the
+verifier defaults to “no” to favor precision. The verified set
+is ˆTi = {t ∈T : LLM verifies t for si}, and by construction
+ti always passes verification (it is compared against itself),
+guaranteeing C∗∈the final expansion.
+Stage 3: Combination Assembly and Audit.
+The goal of
+this stage is to assemble the per-sub-query verified sets ˆTi
+into query-level tool combinations that genuinely solve q,
+and to discard those that do not. Candidate combinations are
+formed by Cartesian product,
+ˆCq = ˆT1 × ˆT2 × · · · × ˆTk,
+(2)
+and ranked by Reciprocal Rank Fusion (RRF (Cormack,
+Clarke, and Buettcher 2009)) over per-sub-query retrieval
+scores. Claude-Sonnet-5 then audits each combination (full
+audit prompt in the supplementary materials) against the
+original query, the task instruction, and the sub-query break-
+down, with the ground-truth set as a reference, checking two
+conditions: (1) Function coverage — the combination col-
+lectively performs every operation the query requires, using
+the sub-query breakdown as a checklist; (2) Dependency
+consistency — when one sub-query’s output (e.g., an au-
+thentication token, resource ID, or session handle) is con-
+sumed by another, the corresponding tools come from the
+same platform, since runtime values cannot cross platforms.
+Combinations passing both checks form the valid equivalent
+set ˆCq ⊇{C∗}.
+Annotation Results.
+Table 1 summarizes the expansion
+annotation statistics on the evaluation sets of ToolEq and
+SkillEq.
+On the ToolEq evaluation set, the pipeline verifies 4.2
+equivalent tools per sub-query on average, yielding 5.3 valid
+equivalent combinations per query. On SkillEq, the same
+pipeline verifies 5.26 equivalent skills per sub-query and
+yields 10.8 valid combinations per query. These results con-
+firm that functional equivalence is widespread: 67.9% of
+sub-queries admit at least one equivalent tool beyond the an-
+notated one, and 75.2% of queries admit at least one equiv-
+alent combination beyond the annotated ground truth.
+Table 1: Annotation statistics produced by the ToolEX
+pipeline. Side-by-side statistics are reported for the evalu-
+ation sets of ToolEq and SkillEq.
+Statistic
+ToolEq
+SkillEq
+Queries annotated
+7,360
+4,997
+Sub-queries (Stage 1)
+13,506
+8,347
+Verified items (Stage 2)
+57,332
+43,934
+Avg. items / sub-query
+4.2
+5.26
+Valid combinations (Stage 3)
+39,087
+53,834
+Avg. combos / query
+5.3
+10.8
+3.3
+Benchmark and Evaluation Metric
+Using the expanded annotations on the evaluation set, we
+construct ToolEq, a new tool retrieval benchmark in which
+each query is paired with a set of pre-annotated valid tool
+combinations rather than just one labeled answer.
+Let Lq be the ordered retrieval list for query q. For
+a single reference combination C, write NDCG(Lq, C),
+Recall(Lq, C), Comp(Lq, C) for the three standard IR met-
+rics (defined in §4.1). Given the expanded reference set
+ˆCq = {C1, . . . , CM} of valid equivalent combinations,
+ToolEq treats every Cj ∈ˆCq as a labeled ground-truth
+answer for q. Evaluation then applies the original one-to-one
+metric to each labeled reference separately and keeps the best
+score for that same metric:
+NDCG ToolEq
+q
+= max
+C ∈ˆCq
+NDCG(Lq, C),
+Recall ToolEq
+q
+= max
+C ∈ˆCq
+Recall(Lq, C),
+Comp ToolEq
+q
+= max
+C ∈ˆCq
+Comp(Lq, C).
+(3)
+Operationally, this is a best-match over pre-annotated ground
+truths, not a joint maximization across metrics. For each
+query, we (i) regard all Cj ∈ˆCq as valid labeled references,
+(ii) compute the standard one-to-one metric against each Cj,
+and (iii) for NDCG, Recall, and Comp separately, report the
+highest score obtained against any labeled equivalent combi-
+nation. A retrieval is therefore credited as soon as its ranked
+list best matches one of the pre-annotated valid alternatives,
+instead of being penalized for missing the benchmark’s orig-
+inally chosen combination.
+4
+Experiments
+This section first presents the experimental settings in §4.1,
+followed by the main results in §4.2, a downstream task
+evaluation on ToolBench (Qin et al. 2024) in §4.4 to ver-
+ify that ToolEX-expanded annotations improve end-to-end
+agent performance, and an extended experiment on skill re-
+trieval in §4.3.
+4.1
+Experimental Setup
+All models are evaluated on both Tool-DE (Lu et al. 2025)
+(original, one-to-one annotation) and ToolEq (multi-set,
+max-aggregation metric from Equation 3).
+
+=== [page 5] ===
+Table 2: Main results pairing the one-to-one benchmark Tool-DE against the new benchmark ToolEq (one-to-many, max-
+aggregation). All values are in %; each metric cell reports old / new, i.e. Tool-DE (gray) / ToolEq (black). ∆is the mean gain
+(ToolEq −Tool-DE) averaged over N@10/R@10/C@10 within each category (pp); † oracle-assisted sub-query diagnostic
+with RRF.
+Model
+Code
+Web
+Customized
+N@10
+R@10
+C@10
+∆
+N@10
+R@10
+C@10
+∆
+N@10
+R@10
+C@10
+∆
+Query-level
+BM25s
+45.2/49.5 58.6/62.7 57.2/61.3 +4.2 28.5/38.1 35.9/45.8 24.0/30.1
++8.5
+44.4/48.6 50.1/54.1 39.0/42.1
++3.8
+gte-Qwen2-1.5B
+41.4/46.0 53.2/56.9 51.2/54.9 +4.0 37.1/43.5 47.3/53.0 29.8/33.8
++5.4
+48.1/53.9 56.6/62.0 43.3/48.0
++5.3
+e5-mistral-7b
+41.9/47.4 55.9/60.4 53.9/58.4 +4.8 31.9/39.7 41.4/48.9 27.5/32.6
++6.8
+43.6/49.3 50.8/58.4 39.3/46.0
++6.7
+GritLM-7B
+24.0/27.5 33.4/37.4 32.0/36.1 +3.9 29.5/36.2 38.1/45.6 24.4/29.7
++6.5
+41.8/46.6 49.1/54.8 37.6/42.7
++5.2
+NV-Embed-v1
+48.8/52.1 63.0/63.2 60.0/63.5 +3.4 32.5/38.1 39.6/45.6 24.0/28.8
++5.5
+39.6/44.5 45.6/51.1 34.4/39.2
++5.1
+Qwen3-Embedding-0.6B
+48.4/53.8 62.3/66.0 59.9/63.6 +4.3 37.3/45.2 46.3/52.9 29.4/33.8
++6.3
+42.5/51.7 48.9/58.3 39.1/47.2
++8.9
+Qwen3-Embedding-4B
+53.5/60.2 70.7/74.2 69.2/72.5 +4.5 38.7/46.7 47.9/54.9 30.4/35.5
++6.7
+42.4/53.1 50.9/61.7 40.2/49.0 +10.1
+Qwen3-Embedding-8B
+52.6/59.1 68.1/71.1 66.2/69.0 +4.1 40.8/49.1 49.5/56.7 31.9/37.1
++6.9
+43.9/54.7 52.5/62.1 41.9/49.9
++9.5
+Tool-Embed-0.6B
+52.1/56.0 65.7/67.5 64.0/65.8 +2.5 42.3/49.1 52.5/58.1 35.6/39.7
++5.5
+53.1/59.0 61.8/65.9 47.6/50.4
++4.3
+Tool-Embed-4B
+55.6/59.9 70.6/72.6 68.7/70.7 +2.8 44.6/51.3 54.5/60.2 37.4/41.8
++5.6
+55.9/60.2 62.1/65.5 47.5/50.2
++3.5
+Sub-query-level (†)
+BM25s†
+71.6/80.2 83.6/88.7 80.8/85.7 +6.2 32.0/40.5 41.8/49.4 29.6/34.8
++7.1
+50.6/55.7 58.6/62.9 46.8/50.3
++4.3
+gte-Qwen2-1.5B†
+74.1/82.7 87.2/90.5 85.0/88.2 +5.0 37.7/45.3 49.2/55.9 33.9/39.1
++6.5
+56.8/62.7 64.8/69.6 50.8/54.4
++4.8
+e5-mistral-7b†
+74.2/83.1 85.8/90.1 82.4/86.8 +5.9 30.7/40.0 41.2/50.3 29.7/35.7
++8.1
+49.7/55.9 58.9/64.6 46.3/50.5
++5.4
+GritLM-7B†
+78.3/86.4 90.5/93.1 87.5/90.3 +4.5 33.3/42.5 43.2/52.1 31.2/37.5
++8.1
+57.3/62.7 66.2/70.4 53.3/56.0
++4.1
+NV-Embed-v1†
+78.5/87.8 91.6/94.9 88.3/91.5 +5.3 31.7/41.1 41.0/50.1 29.0/35.4
++8.3
+57.3/64.0 64.9/69.3 51.6/54.6
++4.7
+Qwen3-Embedding-0.6B† 76.2/84.7 88.5/92.0 84.5/88.1 +5.2 38.5/47.1 50.1/57.3 34.3/39.6
++7.0
+48.1/56.8 56.6/64.4 48.2/53.7
++7.3
+Qwen3-Embedding-4B†
+76.5/86.5 91.0/94.2 88.1/91.3 +5.5 38.6/47.6 48.8/56.3 33.9/39.3
++7.3
+49.8/59.7 59.6/67.9 49.2/55.9
++8.3
+Qwen3-Embedding-8B†
+75.4/83.8 87.8/90.7 81.3/84.1 +4.7 48.0/61.7 59.9/70.4 48.7/58.8 +11.5 46.9/55.8 55.1/62.8 39.5/44.9
++7.3
+Tool-Embed-0.6B†
+81.2/87.1 90.8/92.4 86.6/88.2 +3.0 53.5/65.4 65.7/73.9 53.8/61.5
++9.3
+49.4/55.7 56.1/61.4 38.3/41.9
++5.1
+Tool-Embed-4B†
+82.1/87.2 90.8/92.5 86.4/88.2 +2.8 54.2/65.8 67.0/75.3 55.4/63.4
++9.3
+54.4/60.7 61.4/66.3 42.3/45.7
++4.9
+Retrieval Methods.
+We evaluate two retrieval methods
+that differ in how queries are formulated and results are ag-
+gregated:
+• Query-level: the multi-tool query is encoded and matched
+against tool documents as a single retrieval unit. This is
+the standard approach used by prior benchmarks.
+• Sub-query-level diagnostic (†): we reuse the Stage 1 de-
+composition from the annotation pipeline to study how
+atomic capability descriptions affect ranking. Because this
+decomposition uses the benchmark-provided tool count
+and reference tools, it is an oracle-assisted upper bound
+rather than a deployable retrieval setting. Each sub-query
+retrieves an independent top-K candidate list; the per-sub-
+query results are then merged via Reciprocal Rank Fusion
+(RRF) to produce the final query-level ranking. We set
+K = 20 for each sub-query, yielding a maximum of k×20
+candidates.
+Baselines.
+We evaluate Tool-Embed-{0.6B, 4B}, trained
+with Tool-DE data and eight representative retrieval models
+on both Tool-DE and ToolEq:
+• Sparse retriever: BM25s (Stefanović 2024).
+• Dense retrievers: gte-Qwen2-1.5B-instruct (Li et al.
+2024), e5-mistral-7b-instruct (Wang et al. 2023), GritLM-
+7B (Muennighoff et al. 2024), NV-Embed-v1 (Lee et al.
+2024), and Qwen3-Embedding (Zhang et al. 2025) (0.6B,
+4B, 8B).
+Metrics.
+We adopt three widely used IR metrics to evaluate
+tool retrieval performance: (i) NDCG@K (N@K), which
+considers both the relevance of retrieved tools and their
+ranking positions; (ii) Recall@K (R@K), which measures
+the proportion of target tools successfully retrieved within
+the top-K results; and (iii) Comprehensiveness@K (C@K),
+which assigns C@K = 1 if all target tools are included in
+the top-K results and 0 otherwise. We report K = 10 per
+query category (Code, Web, Customized) and average. On
+ToolEq, scores follow the max-aggregation metric (Equa-
+tion 3).
+4.2
+Main Results
+A Systematic Underestimation.
+Table 2 pairs Tool-DE
+(gray) with ToolEq (black) for eight base retrievers under
+query-level retrieval. All eight score higher under ToolEq:
+expanding the single ground truth with its equivalent com-
+binations restores credit for retrievals the one-to-one met-
+ric had counted as misses. Averaged over Code, Web, and
+Customized, the NDCG@10 gap between the two metrics
+runs from +4.6 pp (NV-Embed-v1) to +8.5 pp (Qwen3-
+Embedding-8B), mean +6.5 pp; BM25s, e5-mistral-7b, gte-
+Qwen2-1.5B, and GritLM-7B each show a 5.0–6.3 pp gap.
+Each retriever’s top-K list already contains functionally
+equivalent tools, but Tool-DE leaves them unlabeled and
+so never scores them; ToolEq corrects this by crediting any
+equivalent combination (Equation 3). The old-new gap there-
+fore measures the very underestimation ToolEq recovers.
+
+=== [page 6] ===
+Category-Level Heterogeneity.
+False-negative correction
+differs markedly by query category. Using the Qwen3-
+Embedding-0.6B ToolEq vs. Tool-DE NDCG@10 delta
+as a proxy for annotation recovery, the Customized cate-
+gory benefits most (+9.2 pp: 42.5 →51.7), Web moderately
+(+7.9 pp: 37.3 →45.2), and Code the least (+5.4 pp: 48.4
+→53.8). The gradient reflects domain-specific redundancy:
+customized and web tool libraries aggregate numerous func-
+tionally similar APIs across providers, while code repos-
+itories (e.g., model hubs) tend to expose more distinctive
+interfaces.
+Unlocking Retrieval Gains with Query Decomposition
+We further report a controlled sub-query decomposition di-
+agnostic (†) that reuses the Stage 1 sub-queries from the an-
+notation pipeline, while keeping the retriever unchanged and
+retrieving over the full tool library. Under this setting, zero-
+shot Qwen3-Embedding-0.6B† gains 12.6 pp NDCG@10
+over its composite-query counterpart on ToolEq (averaged
+across categories). Tool-Embed-4B† further reaches 70.2
+NDCG@10. These results suggest that current retrievers al-
+ready encode much of the required tool semantics, and that
+a large share of the remaining error comes from semantic in-
+terference within composite queries rather than from a lack
+of retriever capacity. In other words, better query decom-
+position can unlock large gains without changing retriever
+parameters. We view this as a controlled estimate of the
+headroom from better query decomposition.
+The Illusion of Fine-Tuning Improvements.
+We find that
+single-target evaluation can substantially overstate the mea-
+sured benefit of fine-tuning retrieval models. When evalu-
+ated on the original Tool-DE benchmark, fine-tuning yields
+apparent gains: Tool-Embed-0.6B improves over Qwen3-
+Embedding-0.6B by 6.4 pp in NDCG@10 (averaged over
+Code/Web/Customized), and the 4B model by 7.2 pp. How-
+ever, under ToolEq the same gaps shrink to 4.5 pp at 0.6B
+and 3.8 pp at 4B (Figure 3). The inflation is most pronounced
+at 4B, where 47% of the reported gain vanishes once equiv-
+alents are credited; on Code the sign even reverses (Tool-DE
++2.1 pp vs. ToolEq −0.3 pp). This pattern indicates that a
+non-trivial fraction of the measured gain comes from align-
+ment to the single annotated target that Tool-DE privileges.
+Where Do Equivalent Tools Appear in the Ranking?
+Equivalent tools are often retrieved but left uncredited by
+one-to-one evaluation. In the Qwen3-Embedding-4B rank-
+ing, the best-matching equivalent tool appears in the top-10
+for 79.4% of queries with at least one verified equivalent,
+slightly above the GT tool itself (76.1%), while a random
+negative reaches only 9.2% on the same query set. Most im-
+portantly, for 14.5% of these queries the GT tool falls outside
+the top-10 while an equivalent tool appears within it. These
+are exactly the retrievals that Tool-DE counts as failures but
+ToolEq correctly credits.
+4.3
+Extended Experiment: Skill Retrieval
+To verify the generality of our framework beyond tools, we
+apply the ToolEX pipeline (Section 3.2) to skill retrieval on
+SkillRet (Cho, Kang, and Kim 2026). The merged expan-
+Figure 3: Training gain illusion: The gray excess over blue is
+the illusion gain — 47% of the reported improvement at 4B
+is an evaluation artifact.
+1
+5
+10
+15
+20
+Rank of best-matching tool
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Fraction of queries
+Ground-truth tool
+Equivalent tool (best)
+Random negative
+Figure 4: CDF of the best rank of equivalent tools.
+sion annotation statistics for ToolEq and SkillEq are listed
+in Table 1. We evaluate SkillRet-Embedding-0.6B, 8B, fine-
+tuned on SkillRet training data, alongside eight retrieval
+models detailed in Section 4.1. Table 3 reports the per-
+formance pairing SkillRet (one-to-one) against SkillEq
+(one-to-many).
+One-to-Many
+Generalizes
+to
+Skills.
+Evaluating
+on
+SkillEq yields consistent gains across all models over
+the original SkillRet; for example, SkillRet-0.6B improves
+from 53.2 to 64.6 in NDCG@10 (+11.4 pp), and zero-shot
+Qwen3-Embedding-0.6B rises from 49.9 to 60.8 (+10.9 pp).
+This confirms that the one-to-one annotation problem is not
+limited to tool retrieval.
+Skill Fine-Tuning Provides Genuine Improvement.
+Un-
+like tool retrieval, the fine-tuned SkillRet-8B still substan-
+tially outperforms zero-shot Qwen3-8B after expansion:
+82.93 vs. 61.89 NDCG@10 (+21.0 pp). This contrast stands
+in sharp relief against the tool-retrieval result, where the
+analogous gap collapses to +3.0 pp. We hypothesize that the
+difference stems from documentation length (Figure 5). Skill
+documents contain rich, structured descriptions of capabili-
+ties, invocation patterns, and examples; tool API documents
+are shorter and more uniform.
+4.4
+Downstream Task Evaluation on ToolBench
+To test practical utility, we evaluate downstream task pass
+rates on 568 ToolBench tasks in three settings: Oracle,
+
+=== [page 7] ===
+Table 3: Skill retrieval on the full library (17,810 skills), pair-
+ing SkillRet (one-to-one) against SkillEq (one-to-many).
+All values are in %; each metric cell reports old / new, i.e.,
+SkillRet (gray) / SkillEq (black). ∆is the mean gain
+SkillEq−SkillRet averaged over N@10/R@10/C@10
+(pp).
+Model
+N@10
+R@10
+C@10
+∆
+BM25s
+42.0/53.9 49.4/62.6 34.3/46.0 +12.3
+e5-mistral-7b
+43.0/53.8 50.8/61.8 35.3/44.9 +10.5
+gte-Qwen2-1.5B
+49.1/62.4 57.1/69.4 41.0/52.1 +12.2
+GritLM-7B
+54.1/66.7 62.3/73.4 46.1/57.1 +11.6
+NV-Embed-v1
+57.6/66.1 65.2/72.6 48.7/55.9
++7.7
+Qwen3-Embedding-0.6B 49.9/60.8 56.7/66.3 39.7/48.6
++9.8
+Qwen3-Embedding-8B
+50.2/61.9 57.1/67.2 39.9/49.2 +10.4
+SkillRet-0.6B
+53.2/64.6 61.1/72.6 45.4/56.9 +11.5
+SkillRet-8B
+74.6/82.9 83.2/89.5 72.7/81.1
++7.7
+Figure 5: Documentation length distribution for Tool API
+docs (orange) and Skill docs (blue).
+ToolBench-IR, and ToolEX-expanded, where the provided
+APIs are replaced by functionally equivalent combinations
+discovered by our pipeline. Figure 6 reports results across
+six instruction categories.
+ToolEX-expanded achieves the highest pass rate in all six
+categories, exceeding Oracle by +3.5–6.5 pp and ToolBench-
+IR by +1.0–6.9 pp. We view this as evidence that many
+discovered equivalents are practically usable, not as proof
+that ToolEX surpasses a fully specified execution oracle.
+4.5
+Discussion: Benchmark Implications
+ToolEq does not make evaluation more permissive; it re-
+stores credit for functionally valid solutions already present
+in the repository but omitted by one-to-one annotation. The
+gap between Tool-DE and ToolEq should therefore be read
+as annotation-induced underestimation rather than as an arbi-
+trary metric shift. Exact-reference evaluation remains useful
+for reproducibility, but in open-world tool ecosystems with
+substantial functional redundancy it should not be treated as
+the only notion of correctness.
+This distinction also affects how model gains are inter-
+preted. Under a single-reference benchmark, a retriever can
+be rewarded for matching the annotated API identity while re-
+G1
+Inst
+G2
+Inst
+G3
+Inst
+G1
+Tool
+G1
+Cat
+G2
+Cat
+50
+60
+70
+80
+90
+Pass Rate (%)
+76.1
+68.2
+67.2
+85.0
+81.5
+67.6
+Oracle
+ToolBench-IR
+ToolEX-Expanded
+Figure 6: Downstream task pass rates (%) on ToolBench
+across six instruction categories.
+ceiving no credit for an equally valid but unannotated alterna-
+tive. ToolEq instead evaluates functional sufficiency, which
+better matches deployment. The consistent gains on both
+SkillEq and ToolBench suggest that the recovered credit
+reflects a broader mismatch between one-to-one annotation
+and open-world tool use. We therefore recommend reporting
+both exact-reference and equivalent-aware scores in future
+tool-retrieval benchmarks.
+5
+Conclusion
+We identify a one-to-many annotation problem in tool re-
+trieval benchmarks: functionally equivalent tools are com-
+mon, but existing benchmarks annotate only one ground-
+truth combination per query. ToolEX addresses this with an
+automated pipeline that expands equivalent positives. Under
+the resulting ToolEq benchmark, 30–47% of the apparent
+fine-tuning gain on Tool-DE vanishes once equivalents are
+credited, showing that a substantial part of the reported gain
+is an evaluation artifact. Extending the same framework to
+SkillRet confirms that the problem is ecosystem-wide.
+Limitations.
+(i) ToolEX verifies tool equivalence seman-
+tically rather than by practically invoking the tools, which
+may introduce false positives. (ii) We conduct partial hu-
+man spot-checking, but do not yet perform exhaustive vali-
+dation of the expanded labels at full scale. more optimistic
+than conservative multi-reference alternatives. (iii) While we
+have applied ToolEX to Tool-DE, SkillRet, and ToolRet,
+generalization to other ecosystems remains to be validated.
+Future Work.
+Extending ToolEX to tool-use benchmarks
+where tools can be practically executed would enable run-
+time verification of functional equivalence. Active-learning
+loops could scale the pipeline to larger libraries by prioritiz-
+ing high-uncertainty candidates. Finally, designing retrievers
+that return diverse equivalent sets opens a new direction for
+tool-augmented agents (Shen et al. 2024; Patil et al. 2024).
+
+=== [page 8] ===
+References
+Chang, S.; Wang, A.; Wang, S.; Ju, C.; Mai, S.; and Zhang, X.
+2024. MetaTool: A Benchmark for Large Language Models
+to Determine What to Call and How to Call. arXiv preprint
+arXiv:2404.00943.
+Cho, H.; Kang, R.; and Kim, Y. 2026. SkillRet: A Large-
+Scale Benchmark for Skill Retrieval in LLM Agents. arXiv
+preprint.
+Cormack, G. V.; Clarke, C. L.; and Buettcher, S. 2009. Re-
+ciprocal rank fusion outperforms condorcet and individual
+rank learning methods. In SIGIR.
+DeepSeek-AI; Liu, A.; Mei, A.; and et al. 2025. DeepSeek-
+V3.2: Pushing the Frontier of Open Large Language Models.
+arXiv:2512.02556.
+Fang, W.; and Glass, J. 2026. Beyond Single-Shot: Multi-step
+Tool Retrieval via Query Planning. arXiv:2601.07782.
+Gao, L.; Wang, Y.; Peng, M.; Tang, J.; Shang, Y.; Sun, M.;
+and Su, J. 2025. Tool Graph Retriever: Exploring Depen-
+dency Graph-based Tool Retrieval for Large Language Mod-
+els. arXiv:2508.05152.
+Huang, S.; Zhang, M.; Hu, B.; and Zhang, M. 2026.
+ToolOmni: Enabling Open-World Tool Use via Agentic
+learning with Proactive Retrieval and Grounded Execution.
+arXiv:2604.13787.
+Huang, T.; Jung, D.; Kumar, V.; Kachuee, M.; Li, X.; Xu,
+P.; and Chen, M. 2024a. Planning and Editing What You
+Retrieve for Enhanced Tool Learning. In Duh, K.; Gomez,
+H.; and Bethard, S., eds., Findings of the Association for
+Computational Linguistics: NAACL 2024, 975–988. Mexico
+City, Mexico: Association for Computational Linguistics.
+Huang, Y.; Shi, J.; Li, Y.; Fan, C.; Wu, S.; Zhang, Q.; Liu, Y.;
+Zhou, P.; Wan, Y.; Gong, N. Z.; and Sun, L. 2024b. MetaTool
+Benchmark for Large Language Models: Deciding Whether
+to Use Tools and Which to Use. arXiv:2310.03128.
+Karpukhin, V.; Oguz, B.; Ye, S.; Lewis, P.; Riedel, S.; Chen,
+D.; and Yih, W.-t. 2020. Dense Passage Retrieval for Open-
+Domain Question Answering. In Proceedings of the 2020
+Conference on Empirical Methods in Natural Language Pro-
+cessing (EMNLP), 6769–6781.
+Lee, C.; et al. 2024. NV-Embed: Improved Techniques for
+Training LLMs as Generalist Embedding Models.
+arXiv
+preprint arXiv:2405.17428.
+Li, M.; Zhao, Y.; Yu, B.; Song, F.; Li, H.; Yu, H.; and Li,
+Z. 2023. API-Bank: A Comprehensive Benchmark for Tool-
+Augmented LLMs. In Proceedings of the 2023 Conference
+on Empirical Methods in Natural Language Processing.
+Li, Z.; et al. 2024. gte-Qwen2: A Generalist Text Embedding
+Family. arXiv preprint arXiv:2407.09261.
+Liu, W.; Huang, X.; Zeng, X.; Hao, X.; Yu, S.; Li, D.; Wang,
+S.; Gan, W.; Liu, Z.; and Yu, Y. 2024a. ToolACE: Winning
+the Points of LLM Function Calling. arXiv preprint.
+Liu, Y.; Peng, X.; Cao, J.; Zhang, Y.; Zhang, X.; Cheng, S.;
+Wang, X.; Yin, J.; and Du, T. 2025. Tool-Planner: Task Plan-
+ning with Clusters across Multiple Tools. arXiv:2406.03807.
+Liu, Z.; Hoang, T.; Zhang, J.; Zhu, M.; Lan, T.; Kokane, S.;
+Tan, J.; Yao, W.; Liu, Z.; and Xiong, C. 2024b. APIGen:
+Automated Pipeline for Generating Verifiable and Diverse
+Function-Calling Datasets. arXiv preprint.
+Lu, X.; Huang, H.; Meng, R.; Jin, Y.; Zeng, W.; and Shen,
+X. 2025. Tools are under-documented: Simple Document
+Expansion Boosts Tool Retrieval. arXiv preprint.
+Mao, Y.; Shi, Y.; Zhang, F.; Huang, H.; Liu, Z.; Chen, Y.; and
+Mao, Y. 2024. GTA: A Benchmark for General Tool Agents
+in Real-World Scenarios. arXiv preprint arXiv:2407.04407.
+Moon, S.; Jha, S.; Erdogan, L. E.; Kim, S.; Lim, W.; Keutzer,
+K.; and Gholami, A. 2024. Efficient and Scalable Estimation
+of Tool Representations in Vector Space. arXiv:2409.02141.
+Muennighoff, N.; et al. 2024. GritLM: Generating text with
+generative retrieval information language modeling. arXiv
+preprint arXiv:2402.09906.
+Patil, S. G.; Zhang, T.; Wang, X.; and Gonzalez, J. E. 2024.
+Gorilla: Large Language Model Connected with Massive
+APIs. In ICLR.
+Qiao, S.; Liu, X.; Lin, C.; Yu, S.; Yao, W.; Peng, M.; Lin,
+W.; Huang, D.; and Lu, J. 2024. ToolAlpaca: Generalizing
+Tool Learning of Small Language Models. arXiv preprint
+arXiv:2312.06244.
+Qin, Y.; Liang, S.; Ye, Y.; Zhu, K.; Yan, L.; Lu, Y.; Lin, Y.;
+Cong, X.; Tang, X.; and Qian, B. 2024. ToolLLM: Facilitat-
+ing Large Language Models to Master 16000+ Real-world
+APIs. In ICLR.
+Sengupta, S.; Zhou, Z.; Araki, J.; Wang, X.; Wang, B.; Wang,
+S.; and Feng, Z. 2026. ToolDreamer: Instilling LLM Rea-
+soning Into Tool Retrievers. In Demberg, V.; Inui, K.; and
+Marquez, L., eds., Proceedings of the 19th Conference of
+the European Chapter of the Association for Computational
+Linguistics (Volume 1: Long Papers), 5465–5482. Rabat,
+Morocco: Association for Computational Linguistics. ISBN
+979-8-89176-380-7.
+Shen, Y.; Song, K.; Tan, X.; Li, D.; Lu, W.; and Zhuang, Y.
+2024. HuggingGPT: Solving AI Tasks with ChatGPT and its
+Friends in HuggingFace. In NeurIPS.
+Shi, Z.; Wang, Y.; Yan, L.; Ren, P.; Wang, S.; Yin, D.; and
+Ren, Z. 2025. Retrieval Models Aren’t Tool-Savvy: Bench-
+marking Tool Retrieval for Large Language Models. In ACL.
+Stefanović, T. 2024. Smaller Flashlight, Bigger Accuracy:
+The Power of bm25s. arXiv preprint arXiv:2407.03618.
+Wang, L.; et al. 2023.
+Text Embeddings by Weakly-
+Supervised
+Contrastive
+Pre-training.
+arXiv
+preprint
+arXiv:2212.03533. E5-mistral-7b-instruct model.
+Wang, R.; Han, X.; Ji, L.; Wang, S.; Baldwin, T.; and Li,
+H. 2025. ToolGen: Unified Tool Retrieval and Calling via
+Generation. arXiv:2410.03439.
+Xiong, L.; Xiong, C.; Li, Y.; Tang, K.-F.; Liu, J.; Bennett,
+P.; Ahmed, J.; and Overwijk, A. 2021. Approximate Nearest
+Neighbor Negative Contrastive Estimation for Dense Text
+Retrieval. In ICLR.
+Yang, Z.; Wang, S.; Liu, M.; Zhang, J.; Dong, B.; Wang, H.;
+Gao, F.; Zhang, B.; Li, Y.; Liu, J.; et al. 2024. AppBench:
+
+=== [page 9] ===
+Aligning and Delegating LLMs as Versatile App Actors.
+arXiv preprint arXiv:2405.16340.
+Ye, J.; Li, G.; Gao, S.; Huang, C.; Wu, Y.; Li, S.; Fan, X.;
+Dou, S.; Ji, T.; Zhang, Q.; Gui, T.; and Huang, X. 2024.
+ToolEyes: Fine-Grained Evaluation for Tool Learning Capa-
+bilities of Large Language Models in Real-world Scenarios.
+arXiv preprint.
+Zhang, Y.; Li, M.; Long, D.; Zhang, X.; Lin, H.; Yang, B.;
+Xie, P.; Yang, A.; Liu, D.; Lin, J.; Huang, F.; and Zhou, J.
+2025. Qwen3 Embedding: Advancing Text Embedding and
+Reranking Through Foundation Models. arXiv preprint.
+A
+LLM Prompt Templates
+Stage 1: Multi-Tool Query Decomposition.
+We use
+DeepSeek-V3.2 for query decomposition during benchmark
+construction. The system prompt instructs the LLM to de-
+compose a query into exactly k atomic sub-queries, one per
+ground-truth tool, minimizing the semantic gap between sub-
+query text and tool documentation (Listing 1). Because this
+prompt receives the benchmark-provided tool count and ref-
+erence tools, it is an oracle-assisted annotation component
+rather than a deployable test-time planner; the corresponding
+diagnostic rows in the main paper reuse it only as an oracle
+upper bound.
+Stage 1 -- Sub-query Decomposition
+(DeepSeek-V3.2)
+You are the Planner in a
+Plan-and-Execute system.
+Given a user query and a set of relevant
+tools, your job is to decompose the
+query into exactly N executable steps
+(subqueries), one per relevant tool, so
+that executing all subqueries in order
+fully answers the query.
+Each subquery will later be used
+as a search query to retrieve its
+corresponding tool from a large tool
+library. Therefore, the primary goal of
+each subquery description is to MINIMIZE
+THE SEMANTIC GAP between the subquery
+text and the tool documentation, so
+that the correct tool can be accurately
+retrieved.
+Rules: 1. Produce exactly N subqueries
+where N equals the number of relevant
+tools provided. 2. Each subquery must
+map to exactly one relevant tool via its
+"relevant_tool_id". 3. Write subquery
+descriptions with enough detail to
+enable accurate retrieval. Focus on
+two things only: (a) FUNCTIONALITY --
+the precise operation the tool performs
+(e.g., retrieve, calculate, search,
+filter, authenticate, convert) (b)
+ENTITY -- the specific data subject
+or domain the operation acts on (e.g.,
+stock ticker, historical events on
+a date, user credentials, ...) Use
+domain-relevant terminology that likely
+appears in the tool documentation.
+Do NOT describe specific parameter
+names, parameter types, or return
+value types. 4. Do NOT mention any
+tool name, API name, or function name.
+Describe the operation and data, not the
+implementation.
+Return ONLY a valid JSON array -- no
+markdown fences, no explanation outside
+the JSON.
+Stage 2: Tool Verification.
+We use GPT-4o-mini to ver-
+ify tool functionality for the sub-query. The system prompt
+instructs the LLM to judge whether a candidate tool can be
+directly invoked to complete a given atomic sub-query, using
+the ground-truth tool as a reference benchmark (Listing 2).
+Stage 2 -- Tool Verification
+(GPT-4o-mini)
+Your task is to judge whether a given
+tool can be directly invoked to complete
+a given sub-query.
+The sub-query is atomic -- it describes
+a single operation completable by
+calling one tool. You are also given
+a Reference Tool -- a ground-truth
+tool that can already complete this
+sub-query. If the tool under evaluation
+performs the same core operation or has
+equivalent functionality, answer "yes".
+Rules: Answer "yes" when ALL of the
+following hold: 1. The tool’s primary
+function directly performs the same
+operation as the Reference Tool. 2.
+The tool’s output covers what the
+sub-query needs (same type of result
+as the Reference Tool).
+Answer "no" when ANY of the following
+apply: 1. The tool’s function does
+not match the sub-query’s required
+operation. 2. The tool’s output only
+partially satisfies the sub-query and
+significant extra steps are needed.
+When genuinely uncertain, answer "no".
+Return ONLY a valid JSON object:
+{"verdict": "yes" or "no", "reason":
+"<one concise sentence>"}
+Stage 3: Combination Audit.
+We use Claude-Sonnet-5 to
+audit tool combinations for the specific query and instruction.
+The system prompt instructs the LLM to determine whether a
+set of available tools is sufficient to fully complete the user’s
+query, using a sub-query breakdown as a coverage checklist
+and the ground-truth tool set as reference. In this stage, the
+LLM audits the provided tool combinations under the query
+context. (Listing 3).
+Stage 3 -- Combination Audit
+You are a tool-use agent. Your task is
+to determine whether a given set of
+available tools is sufficient to fully
+complete the user’s query.
+You will receive the user’s query, an
+instruction providing sub-query context,
+
+=== [page 10] ===
+and the available tools. You may also
+receive a subquery breakdown -- use it
+as a checklist to verify each required
+step is covered. If a reference tool set
+is provided, treat it as a known-correct
+benchmark: tools that perform the same
+core operations as the reference tools
+count as sufficient, even if they differ
+in name, interface details, or parameter
+formats.
+Rules: 1. Answer "yes" when the
+available tools collectively cover
+every operation needed to fulfill the
+query and can produce the result the
+user wants. Note that intermediate
+values (such as authentication tokens,
+resource IDs, or session handles) are
+assumed to be passed between tools at
+runtime -- you do not need to verify
+that explicitly; focus on whether the
+required operations exist.
+2. Answer "no" when an essential
+operation is entirely absent from the
+available tools -- meaning no tool can
+perform a required action at all (a
+functional mismatch, not a minor format
+or naming difference).
+Return ONLY a valid JSON object:
+{"verdict": "yes" or "no", "reason":
+"<one concise sentence>"}
+B
+Human Validation Guidelines
+This appendix specifies the protocol for the compact human
+validation used to check automatically added positives from
+ToolEX.
+Sampling unit.
+We audit only the final equivalent tool-
+combination annotations, i.e., accepted query-level combi-
+nations after Stage 3. In our implementation, these items
+are stored in query_combo_verified.jsonl. Audit
+items should be sampled stratified by domain (Code/We-
+b/Customized) and by query complexity (e.g., number of
+required tools / number of sub-queries).
+Reviewer inputs.
+Each reviewer receives the original
+query, the task instruction, the sub-query breakdown (if avail-
+able), the candidate tool combination, the reference ground-
+truth combination, and the model-produced rationale stored
+with that combination.
+Decision rule.
+Mark a candidate combination as valid iff
+both conditions hold: (1) the combination jointly covers all
+required operations in the original query, and (2) the tools
+are dependency-compatible whenever one tool’s output must
+feed another (e.g., shared platform, compatible identifiers, or
+session state). Otherwise mark it invalid.
+Adjudication and outputs.
+Each item is judged indepen-
+dently by two reviewers. Disagreements are resolved by
+a third reviewer who sees both rationales but not model
+scores. The audit should report combination-level precision,
+reviewer agreement, and a small failure taxonomy with at
+least the following buckets: decomposition ambiguity, near-
+synonym but non-substitutable tools, incomplete functional
+coverage, and cross-platform dependency mismatch.
+C
+Justification of Max-Aggregation
+This section formalizes why max-aggregation is the princi-
+pled way to extend a standard IR metric from one to many
+ground-truth combinations, and why the gap ∆M admits a
+clean interpretation.
+Setup.
+Fix a query q, the retrieval list Lq, a cutoff K,
+and the expanded set ˆCq = {C1, . . . , Cm} of valid equiv-
+alent combinations. Let M(Lq, Cj) ∈[0, 1] denote any of
+NDCG@K, Recall@K, Comp@K computed against the
+single reference Cj under the same single-reference defini-
+tions used in the main paper. All combinations in ˆCq are by
+construction equally valid solutions to q: the pipeline veri-
+fies each to be functionally sufficient, and none is privileged
+over another. The one-to-one benchmark resolves this equiv-
+alence arbitrarily by selecting one C∗∈ˆCq as the sole refer-
+ence; ToolEq instead asks the model-independent question:
+among all valid solutions, how well does the retrieval list do?
+Principled multi-reference extension.
+Each M(Lq, Cj)
+is the score the retrieval earns if Cj were the reference. Be-
+cause every Cj is an equally valid reference, the only label-
+agnostic score—one that does not depend on which com-
+bination the annotator happened to record—is a symmetric
+aggregate over {M(Lq, Cj)}m
+j=1. The max selects the most
+favorable valid reference and is the unique choice consistent
+with the semantics “a retrieval is correct if it matches any
+valid equivalent combination.” It is equivalently the indica-
+tor of the event “the retrieval list contains some combination
+that, taken as a reference, achieves the top score,” reducing to
+the standard single-reference metric when | ˆCq| = 1. Aggre-
+gates such as the mean would instead discount retrievals that
+match some but not all equivalents, re-introducing a false-
+negative penalty; the max alone credits each valid match in
+full.
+Upper bound and gap.
+Since Stage 3 guarantees C∗∈ˆCq,
+the max ranges over a superset of the one-to-one refer-
+ence, giving M ∗(q) = maxj M(Lq, Cj) ≥M(Lq, C∗)
+for every metric. Thus ToolEq upper-bounds Tool-DE
+query-by-query and metric-by-metric, and the gap ∆M(q) =
+M ∗(q) −M(Lq, C∗) ≥0 is exactly the score ToolEq re-
+stores by recognizing a retrieved equivalent that the one-
+to-one benchmark counted as a miss. When the retrieval
+already places C∗at least as well as any other equivalent,
+∆M(q) = 0; ∆M(q) > 0 precisely when some unannotated
+equivalent Cj̸ = C∗yields a higher single-reference score
+than C∗, i.e., when the one-to-one convention caused an un-
+derestimate. Because ∆M ≥0 holds pointwise, it also holds
+after macro-averaging, so the aggregate gap is a non-negative
+measure of annotation-induced underestimation, separable
+from genuine retrieval ability.
+Per-metric independence.
+The max is applied inde-
+pendently to each metric to each metric independently,
+so the reference combination realizing maxj NDCG@K,
+
+=== [page 11] ===
+maxj Recall@K, and maxj Comp@K may differ for the
+same query. This is deliberate: the three metrics reward dif-
+ferent aspects of the ranking (rank-weighted quality, top-K
+coverage, full coverage), and forcing a single proxy combi-
+nation to optimize all three would distort at least one.

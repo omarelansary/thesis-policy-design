@@ -1,0 +1,527 @@
+
+
+  GitHub - UsefulSoftwareCo/executor: The missing integration layer for AI agents. Let them call any OpenAPI / MCP / GraphQL / custom js functions in secure environment. · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+Appearance settings
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+executorPublic
+
+NotificationsYou must be signed in to change notification settings
+Fork386 (386)
+Star4.3k (4.3k)You must be signed in to star a repository
+
+About
+The missing integration layer for AI agents. Let them call any OpenAPI / MCP / GraphQL / custom js functions in secure environment.
+executor.sh
+Resources
+Readme
+MIT license
+
+Activity
+Custom properties
+
+Stars
+4.3k stars
+Watchers
+6 watching
+Forks
+386 forks
+Report repository
+
+main
+
+BranchesTags
+
+Go to fileCode
+Open more actions menu
+
+Latest commit
+
+History2,973 Commits
+
+2,973 Commits
+Folders and files
+
+NameName
+Last commit message
+Last commit date
+
+.agents/skills
+
+.agents/skills
+
+.astro
+
+.astro
+
+.changeset
+
+.changeset
+
+.claude/skills
+
+.claude/skills
+
+.codex/environments
+
+.codex/environments
+
+.githooks
+
+.githooks
+
+.github
+
+.github
+
+.skills
+
+.skills
+
+.vscode
+
+.vscode
+
+apps
+
+apps
+
+assets
+
+assets
+
+e2e
+
+e2e
+
+examples
+
+examples
+
+packages
+
+packages
+
+patches
+
+patches
+
+plans
+
+plans
+
+scripts
+
+scripts
+
+tests
+
+tests
+
+.dockerignore
+
+.dockerignore
+
+.gitignore
+
+.gitignore
+
+.oxfmtrc.json
+
+.oxfmtrc.json
+
+.oxlintrc.jsonc
+
+.oxlintrc.jsonc
+
+.prettierignore
+
+.prettierignore
+
+AGENTS.md
+
+AGENTS.md
+
+CLAUDE.md
+
+CLAUDE.md
+
+LICENSE
+
+LICENSE
+
+README.md
+
+README.md
+
+RELEASING.md
+
+RELEASING.md
+
+RUNNING.md
+
+RUNNING.md
+
+TELEMETRY.md
+
+TELEMETRY.md
+
+autumn.config.ts
+
+autumn.config.ts
+
+bun.lock
+
+bun.lock
+
+design.md
+
+design.md
+
+knip.config.ts
+
+knip.config.ts
+
+opencode.json
+
+opencode.json
+
+package.json
+
+package.json
+
+skills-lock.json
+
+skills-lock.json
+
+tsconfig.json
+
+tsconfig.json
+
+turbo.json
+
+turbo.json
+
+vision.md
+
+vision.md
+
+vitest.config.ts
+
+vitest.config.ts
+
+warden.toml
+
+warden.toml
+
+View all files
+
+Repository files navigation
+
+Executor
+
+Connect any agent to everything.
+
+Executor is an open-source integration layer for AI agents. Configure every
+integration once (MCP servers, OpenAPI specs, GraphQL APIs) with authentication
+and per-tool policies, then use that one catalog from any MCP-compatible agent.
+
+Website · Documentation · Discord
+
+Why Executor
+
+Every agent you use (Claude Code, Cursor, ChatGPT, and the rest) needs its own
+copy of every integration: the same API keys pasted in three places, the same
+MCP servers wired up again, no shared idea of what each tool is allowed to do.
+
+Executor is the layer in between. Add a tool once, give it credentials once,
+set its policy once, and every agent shares it over MCP. Your integrations,
+auth, and policies live in one place instead of being scattered across each
+client.
+
+Any integration. First-party support for MCP servers, OpenAPI, GraphQL, and
+Google Discovery. If you can describe it with a JSON schema, it can be an
+integration. The plugin system is open to any integration type.
+
+One catalog, every agent. Anything MCP-compatible connects to the same
+set of tools.
+
+Governed by policy. Each tool is allowed, gated behind approval, or
+blocked, with sensible defaults derived from the spec.
+
+Run it your way. Local CLI, a desktop app, hosted Executor Cloud, or
+self-hosted on Docker or Cloudflare. Same functionality, different packaging.
+
+How it works
+
+Add an integration: an MCP server, an OpenAPI spec, or a GraphQL API.
+
+Create a connection: one configured (optionally authenticated) instance
+of that integration. An integration can have many connections.
+
+Set policies: decide whether each tool is always allowed, needs
+approval, or is blocked.
+
+Point your agents at Executor over MCP. They all share the same catalog.
+
+See Concepts for the full model.
+
+Quick start
+
+The fastest path is Executor Cloud: sign in, add an
+integration, and point your agents at the hosted MCP endpoint. Nothing to
+install.
+
+To run it locally instead (Node.js 20+):
+
+npm install -g executor   # or: pnpm add -g / bun add -g / yarn global add
+executor install          # install the durable background service
+executor web              # open the web UI in your browser
+
+executor install keeps the service running across restarts. For a throwaway
+foreground runtime, use executor web --foreground. From the web UI, add your
+first integration and connect an agent.
+
+Set up with your agent
+
+Prefer to let your coding agent do the setup? Copy the
+setup prompt from the docs and paste it into Claude,
+Cursor, or any MCP-capable agent. It will help you pick how to run Executor,
+install it, connect over MCP, and get your first integration working end to end.
+
+Ways to run
+
+Every form exposes the same functionality, just packaged differently.
+
+Form
+Best for
+Docs
+
+Executor Cloud
+The fastest start. Use it from many agents (including cloud agents like ChatGPT) with nothing running locally. Free tier.
+Cloud
+
+CLI
+A headless or server environment. Runs a local background service.
+CLI
+
+Desktop app
+A regular desktop (Mac, Windows, Linux). The same runtime, as a native app.
+Desktop
+
+Self-host (Docker)
+Your own infrastructure, full control.
+Docker
+
+Self-host (Cloudflare)
+Deploy as a Cloudflare Worker.
+Cloudflare
+
+Connect an agent over MCP
+
+Add Executor to any MCP client (Claude Code, Cursor, OpenCode) with
+add-mcp, which detects the client and
+writes its config for you:
+
+# Over HTTP (the running service serves a streamable-HTTP endpoint)
+npx add-mcp http://127.0.0.1:4788/mcp --transport http --name executor
+
+# Or over stdio, with the executor CLI on your PATH
+npx add-mcp "executor mcp" --name executor
+
+The Connect card in the web UI shows the exact command (and port, if it
+differs) already filled in. Most MCP clients only load servers at startup, so
+you may need to restart the client or open a new chat before the Executor tools
+appear.
+
+Add an integration
+
+From the web UI, click Add Integration, paste an OpenAPI, GraphQL, or MCP URL,
+and Executor detects the type, indexes the tools, and handles auth. Or add one
+from the CLI:
+
+executor call executor openapi addIntegration '{
+  "spec": "https://petstore3.swagger.io/api/v3/openapi.json",
+  "namespace": "petstore",
+  "baseUrl": "https://petstore3.swagger.io/api/v3"
+}'
+
+Use baseUrl when the OpenAPI document has relative servers entries (for
+example "/api/v3"). Confirm it is live with executor tools integrations.
+
+Using tools
+
+From the CLI
+
+executor tools search "send email"      # find tools by intent
+executor call github issues --help      # browse a namespace
+executor call github issues create '{"owner":"octocat","repo":"Hello-World","title":"Hi"}'
+
+executor call, executor resume, and executor tools ... auto-start the
+local daemon if needed, and pick a free port if the default is busy. If an
+execution pauses for auth or approval, resume it:
+
+executor resume --execution-id exec_123
+
+From your own code
+
+Embed Executor with the TypeScript SDK (a Promise API; an Effect-native API is
+also available):
+
+import { createExecutor } from "@executor-js/sdk/promise";
+import { openApiPlugin } from "@executor-js/plugin-openapi/promise";
+
+const executor = await createExecutor({ plugins: [openApiPlugin()] });
+
+// add an integration, create a connection, then list and call tools
+const tools = await executor.tools.list({ integration: "inventory" });
+const schema = await executor.tools.schema(tools[0].address);
+
+await executor.close();
+
+See examples/ for runnable end-to-end scripts.
+
+CLI reference
+
+executor install                    # install/start the durable background service
+executor web                        # open the running web UI
+executor web --foreground           # start a temporary foreground runtime + web UI
+executor daemon run                 # start persistent local daemon in background
+executor daemon status              # show daemon status
+executor daemon stop                # stop daemon
+executor daemon restart             # restart daemon
+executor mcp                        # start MCP endpoint (stdio)
+executor call <path...> '{"k":"v"}' # invoke a tool by path segments
+executor call <path...> --help      # browse namespaces/resources/methods
+executor call <path...> --help --match "<text>" --limit <n> # narrow huge namespaces
+executor resume --execution-id <id> # resume paused execution
+executor tools search "<query>"     # search tools by intent
+executor tools integrations         # list configured integrations + tool counts
+executor tools describe <path>      # show tool TypeScript/JSON schema
+
+Project layout
+
+Executor is a Bun + Turborepo monorepo.
+
+apps/
+  cli/             the `executor` CLI and local background service
+  desktop/         the desktop app (Mac, Windows, Linux)
+  local/           the local runtime shared by the CLI and desktop
+  cloud/           Executor Cloud (the hosted product)
+  host-selfhost/   self-hosted server (Docker)
+  host-cloudflare/ Cloudflare Worker deployment
+  marketing/       the executor.sh site
+  docs/            the docs at executor.sh/docs
+packages/
+  core/            contracts, plugin wiring, scopes, policies, SDK, API, CLI core
+  kernel/          execution runtimes (QuickJS, Deno subprocess, dynamic worker)
+  plugins/         integration and provider plugins (openapi, graphql, mcp, google,
+                   microsoft, 1password, keychain, encrypted/file secrets, ...)
+  hosts/           host adapters (MCP surface, Cloudflare)
+  react/           shared React UI
+  app/             the web app UI
+examples/          runnable SDK examples
+e2e/               full-stack end-to-end tests
+
+Develop locally
+
+bun install
+bun run bootstrap   # idempotent: install deps, build required artifacts, fetch Playwright
+bun run dev         # start the dev servers (defaults to http://127.0.0.1:4788)
+
+bun run bootstrap is required in a fresh checkout: its build step produces
+artifacts the dev servers fail without. See RUNNING.md for dev
+servers, ports, and environment gotchas, and AGENTS.md for the
+contributor contract.
+
+Tests
+
+bun run test       # unit + integration suites
+bun run test:e2e   # full-stack e2e: boots the cloud and self-host apps and drives them
+
+The browser e2e scenarios need Playwright's Chromium once per machine:
+bunx playwright install chromium.
+
+Community
+
+Join the Discord. To learn more, visit
+executor.sh or Ask DeepWiki.
+
+License
+
+MIT
+
+Attribution
+
+Thank you to Crystian for providing
+the npm package name executor.
+
+References
+
+As part of my coding process, I give my agent access to references to other
+codebases to understand patterns and how other people have implemented systems.
+A non-exhaustive list:
+
+FumaDB - Storage adapter reference
+
+Effect - General code patterns
+
+OpenCode - Plugin system reference
+
+OpenClaw - Plugin system reference
+
+Emdash - Plugin system reference
+
+Pi - Plugin system reference
+
+You are also encouraged to use this codebase as a reference to understand how it
+is implemented.
+
+About
+The missing integration layer for AI agents. Let them call any OpenAPI / MCP / GraphQL / custom js functions in secure environment.
+executor.sh
+Resources
+Readme
+MIT license
+
+Activity
+Custom properties
+
+Stars
+4.3k stars
+Watchers
+6 watching
+Forks
+386 forks
+Report repository
+
+Releases
+
+Packages
+
+Contributors
+
+Languages
+
+    You can’t perform that action at this time.
+
