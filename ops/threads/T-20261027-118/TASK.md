@@ -1,0 +1,2 @@
+# Thread T-20261027-118: TASK (lead; AUTH-020 amendment of 2026-10-27, scouts for the verification review)
+Four general-purpose Sonnet 5.5 instances (primary price sources; price-structure literature; serving-system cache literature; cost-model literature), prompts in `design/package-v5/inputs/scout-prompts-literature-20261027.md`. WebSearch and WebFetch, no writes, no messages. The lead fetches and stores every page relied on; stewards (T-20261027-119) check the claims against the stored pages; one challenger (T-20261027-120) reviews the revised document.
