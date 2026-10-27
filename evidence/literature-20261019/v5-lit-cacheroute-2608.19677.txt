@@ -1,0 +1,1311 @@
+
+=== [page 1] ===
+CacheRoute: Planned Prefix-Affinity Routing
+for Large-Scale LLM Serving
+Huang Cheng
+Meta, Menlo Park, California, USA
+huangcheng@meta.com
+August 2026
+Abstract
+Prefix caching avoids prefill only when a repeated request returns to a server that still holds the prefix KV.
+Cache-blind balancing disperses that reuse; fixed affinity preserves it but can overload a server. CacheRoute resolves
+this tradeoff with a periodic routing plan. It admits high-rate keys to a stable warm set and places their assignments
+by expected load. Hot keys may use more than one destination, although every key in our primary semi-synthetic
+aggregate uses exactly one. On Llama-3.3-70B in fp8 across 60 H100 GPUs, CacheRoute sustains 176±11 QPS at a
+3.5-s p99 SLO, 2.3× the strongest of five baselines. Served KV-cache hit rate rises from 64.1±1.3% under cache-blind
+balancing to 93.2±0.5%. A second semi-synthetic aggregate and controlled 8B and burst experiments separate the
+effects of affinity and placement. Two 32B workloads provide the counterexamples: when affinity recovers too little
+KV work, its residual load skew reduces or erases the improvement. We therefore recommend gating any deployment
+with a shadow replay rather than enabling affinity from workload statistics alone.
+Keywords: LLM serving; prefix caching; request routing; request scheduling.
+1
+Introduction
+Prefix caching is now standard in LLM serving en-
+gines [Kwon et al.(2023), Zheng et al.(2024)], but the
+cache cannot control where a request lands. A cache-
+blind balancer spreads a recurring prefix across many
+destinations and lengthens the return time to each cache.
+Pinning a key to one destination restores locality, but
+maps key skew directly onto server queues.
+Cache-
+aware routers instead react to current cache and load
+state [Srivatsa et al.(2024), Yuan et al.(2026)]; once a
+destination fills, however, spilling the next request also
+forfeits the warm prefix.
+This problem arises in multi-tenant conversational
+assistants—for example, customer-support chatbots—
+where each business carries a stable, reusable context
+across a multi-turn conversation. Such skewed, prefix-
+reusing serving is common across LLM serving systems
+and not specific to any one provider. A stable per-business
+context recurs across conversations, while the default bal-
+ancer often sends successive requests to different model
+servers. Request rates also vary sharply across businesses,
+which rules out simple stickiness. The router must keep
+reusable prefixes local without creating a server whose
+queue sets the fleet-wide p99.
+CacheRoute builds a routing table from measured per-
+key rates. It admits the highest-rate keys under a warm-
+prefix slot allocation, gives an overloaded key enough
+destinations to cap its expected load per destination, and
+places the resulting assignments with longest-processing-
+time-first (LPT) list scheduling. Unadmitted traffic falls
+back to cache-blind power-of-two choices. The table re-
+mains fixed for a control interval, favoring cache stability
+over per-request remapping.
+Assignment and replication play different roles. In the
+primary distribution, even the hottest key falls below the
+single-destination load target; every assignment count is
+one. The 70B result therefore measures planned single-
+copy affinity, top-rate admission, and balanced placement.
+Only the controlled 8B experiments inject keys hot enough
+to exercise replication.
+The main experiment serves Llama-3.3-70B in fp8 on
+30 tensor-parallel-2 destinations (60 H100 GPUs). Across
+five paired runs, CacheRoute sustains 176±11 QPS
+at p99≤3.5 s; the strongest baseline, Preble, sustains
+76±11 QPS. At 100 offered QPS, CacheRoute’s p99 is
+1.8 s, compared with 3.8–8.5 s for the five baselines. On a
+second distribution, the advantage is 1.6× at the wider
+active set. The 8B ablation explains the gap: affinity
+raises KV hit rate, and LPT placement reduces imbalance
+from 3.46× to 1.24×, moving the measured SLO knee
+from 240 to at least 500 QPS.
+We make three contributions:
+• a prefix-affinity router that plans cache locality and
+expected load together;
+• a six-policy hardware evaluation centered on a 70B
+1
+arXiv:2608.19677v1  [cs.DC]  20 Aug 2026
+
+=== [page 2] ===
+model and 60 H100 GPUs, with paired runs, a second
+workload distribution, and burst experiments; and
+• a measured operating envelope that includes loss and
+tie regimes, plus evidence for using shadow replay
+instead of an analytic residency predictor.
+Top-rate admission and LPT are established techniques;
+we do not claim a new scheduling primitive. The contri-
+bution lies in the routing design, its large-scale measure-
+ments, and the conditions under which operators should
+leave the ordinary load balancer in place.
+2
+Workload and Failure Mode
+2.1
+Semi-synthetic aggregate workload
+The workload models a multi-tenant conversational-
+assistant service (e.g., customer-support chatbots), where
+each business carries a stable, reusable context.
+Our
+evaluation uses a semi-synthetic workload: a synthetic
+request stream designed to mimic aggregate workload
+characteristics—per-key rates, inter-arrival gaps, and pop-
+ularity distribution—derived from de-identified opera-
+tional serving telemetry. No raw requests, conversation
+content, user data, or business identifiers are used. The
+primary summary contains 128,824 opaque business keys
+and has a Gini coefficient of 0.756. Roughly 4% of keys
+account for 47% of requests, yet no key contributes more
+than 0.3%. The median per-key inter-arrival coefficient of
+variation is 1.93, and 80.8% of requests belong to multi-
+turn threads.
+Prompts average about 1.2K input tokens, 90% of which
+precede the current turn. Most of those tokens are not a
+routing opportunity. The global template is common to
+all businesses and warms on every destination; a retrieved
+few-shot block changes often enough to break the exact
+prefix in 67% of consecutive request pairs. The reusable,
+key-specific segment is the per-business context, about 180
+tokens or 15% of the prompt. We route on the business
+key and benefit only when that segment returns before
+eviction.
+We evaluate two independently derived semi-synthetic
+aggregates and several explicitly labeled synthetic work-
+loads. The aggregates retain only replay statistics, includ-
+ing opaque-key rates and inter-arrival gaps. Neither the
+paper nor its artifacts contain request text, user content,
+business names, or business identifiers. We reserve syn-
+thetic traffic for mechanism and boundary tests, where
+controlling skew, burstiness, or prefix reuse matters more
+than matching a full workload.
+2.2
+Why balancing and stickiness both
+fail
+For a business with rate λb sprayed uniformly across R
+destinations, the mean time between visits to one desti-
+nation scales as R/λb. Increasing the fleet can thus make
+a prefix colder even though total cache capacity grows. If
+this revisit time exceeds the effective eviction time, every
+request repeats prefill work.
+Pure affinity moves to the other extreme. A consistent
+hash keeps a prefix local, but the busiest hash bucket
+inherits the workload skew. Tail latency then follows the
+hottest destination rather than the fleet average. Bounded
+hashing and reactive reuse-versus-load policies reduce this
+problem, but may spill a request to a cold destination
+after a cap binds. The practical need is a stable many-key
+assignment computed with the rate distribution in view.
+Deployment turns on a measurable tradeoff: whether
+the recoverable hit-rate increase outweighs the residual
+load skew. Model size, precision, prefix length, offered
+load, active-set breadth, and cache size all shift that
+balance. As Section 5.3 shows, a higher cache-hit rate
+can still accompany lower capacity.
+3
+CacheRoute
+3.1
+Planning objective
+Let businesses b ∈B have estimated rates λb, and let the
+serving deployment have R destinations. A destination
+is one independently routable model-server group; in the
+70B deployment it is a tensor-parallel-2 pair. The planner
+produces a table T(b) for a fixed control interval.
+Load-based assignment count.
+We calibrate qcap
+from a single destination’s latency/load knee. A selected
+business receives
+kb = max (1, ⌈λb/qcap⌉)
+(1)
+destinations, making its expected load per assignment at
+most qcap. This is a load-control rule, not an eviction
+threshold or a cache-residency guarantee.
+Warm-set admission.
+The stable per-business pre-
+fixes are similar in size, so the planner represents cache
+allocation as C = RW prefix slots, with W slots per des-
+tination. It considers keys in decreasing λb and admits
+them while P kb ≤C. This equal-slot model does not
+cover workloads with heterogeneous reusable-prefix sizes;
+those require byte-aware measurements and admission.
+Placement and dispatch.
+Each admitted key con-
+tributes kb jobs of size λb/kb. After initializing destina-
+tions with their expected cold-tail share, the planner visits
+admitted keys in decreasing-rate order and assigns each
+job to the least-loaded eligible destination. The proce-
+dure follows classic LPT scheduling [Graham(1969)], but
+the standard approximation bound does not apply to our
+split jobs and distinct-destination constraint. During the
+control interval, admitted traffic chooses the least-loaded
+member of its fixed T(b); other traffic uses power-of-two
+choices across the fleet [Mitzenmacher et al.(2001)].
+2
+
+=== [page 3] ===
+aggregate telemetry
+key b, rate λb
+top-rate
+admission
+load sizing
+kb = max(1, ⌈λb/qcap⌉)
+LPT placement
+against total expected load
+stable table
+T : b 7→destination set
+periodic offline plan
+request with key b
+b admitted?
+least-loaded member
+of fixed T(b)
+power-of-two-choices
+over all destinations
+model destinations
+with native prefix KV cache
+yes
+cold tail
+Figure 1: CacheRoute separates a periodic, rate-aware assignment from fast request dispatch. The main distribution
+has kb = 1 for every key, so its 70B improvement comes from admission, stable single-copy affinity, and balanced
+placement; multiple destinations are exercised only in the synthetic-whale mechanism study. Cache residency is
+measured, not guaranteed by the plan.
+Algorithm 1 Periodic routing-table construction
+Require: rates {λb}, R, qcap, slot allocation C
+1: for each key b do
+2:
+kb ←max(1, ⌈λb/qcap⌉)
+3: end for
+4: sort keys by decreasing λb; admit while P kb ≤C
+5: initialize L[r] with expected cold-tail load, r ∈[1, R]
+6: for each admitted b in decreasing λb do
+7:
+T(b) ←kb distinct destinations with smallest L
+8:
+for each r ∈T(b) do
+9:
+L[r] ←L[r] + λb/kb
+10:
+end for
+11: end for
+12: dispatch admitted b within T(b); otherwise use flat-LB
+The planner runs in O(|B| log |B| + P
+b kb log R) and
+runs off the request path. Measured construction time is
+345 ms at R = 30 for 128,824 businesses. The serving path
+is a table lookup followed by a load comparison within a
+small assignment set.
+3.2
+Operational semantics
+The table stays fixed within a control interval. Stability
+avoids per-request cap thrashing, but drift can make the
+assignment stale. Installing a replacement table also starts
+some assignments cold. Section 5.4 measures both effects.
+Admitted and cold-tail prefixes share the engine’s native
+cache and eviction policy. CacheRoute neither reserves
+nor migrates KV blocks and offers no analytic residency
+guarantee. Before enabling a table, we shadow-replay it
+and measure served token-weighted KV hit and latency.
+For the primary distribution, maxb λb < qcap and there-
+fore kb = 1 for every business.
+Algorithm 1 reduces
+to top-rate admission followed by balanced, single-copy
+placement. Replication remains available for overload pro-
+tection but does not contribute to the main 70B result.
+4
+Experimental Method
+Implementation.
+Our client-side routing harness by-
+passes the serving deployment’s aggregate load balancer
+and sends each request according to one policy. An ex-
+periment identifier in request metadata attributes served,
+token-weighted KV-cache hits to the correct run. Poli-
+cies use the same serving stack, request stream, warm-up
+exclusion, offered-load ladder, and health criteria. The
+routing layer neither changes model execution nor reserves
+cache capacity.
+Testbeds.
+The flagship system is Llama-3.3-70B in fp8,
+served by 30 tensor-parallel-2 destinations on 60 H100
+GPUs. Each destination exposes 40,071 measured KV
+blocks (about 641K tokens).
+The mechanism testbed
+is Llama-3.1-8B-Instruct in bf16 on 30 single-H100 des-
+tinations. We use a 70B fp16 run only as supporting
+cache-pressure evidence, not for the capacity headline.
+Workloads.
+The main replay draws opaque keys from
+a semi-synthetic peak-hour aggregate distribution.
+A
+second, independently collected semi-synthetic aggregate
+distribution tests distribution shift. Poisson, CV-matched
+Gamma, and moving-block-bootstrap arrival processes
+test burst sensitivity. The 8B study uses a semi-synthetic
+aggregate distribution except where we explicitly inject
+synthetic whales.
+Policies.
+We
+compare
+against
+Flat-LB
+(power-of-two-choices),
+sticky
+consistent
+hash-
+ing
+[Karger et al.(1997)],
+consistent
+hashing
+with
+bounded
+loads
+(CHWBL)
+[Mirrokni et al.(2018)],
+a
+DualMap-style
+two-candidate
+cache/load
+pol-
+icy [Yuan et al.(2026)], and a Preble-style prefix-history
+and live-load policy [Srivatsa et al.(2024)].
+The latter
+three are reimplemented in our harness under a common
+interface; our absolute results should not be read as
+reproductions of their original systems. CHWBL uses
+ϵ = 0.25, selected by an offline sweep, and the Preble-style
+policy uses a 1.5 load-cap factor.
+3
+
+=== [page 4] ===
+Table 1: Llama-3.3-70B fp8, 30 TP2 destinations (60
+H100), primary distribution, top-K128, five paired seeds.
+Capacity is QPS at the SLO knee; KV-hit is served and
+token-weighted.
+Policy
+KV hit Cap.@3.5s Cap.@5s p99@100
+Flat-LB
+64.1±1.3%
+42±20
+80
+5.7s
+Sticky
+87.3±2.4%
+30
+42±20
+8.5s
+CHWBL
+75.6±0.8%
+64±11
+128±14
+3.8s
+DualMap
+88.7±1.9%
+58±22
+84±32
+5.3s
+Preble
+72.0±0.7%
+76±11
+140
+3.8s
+CacheRoute 93.2±0.5%
+176±11
+180
+1.8s
+Metrics and statistics.
+SLO capacity is the highest
+offered-QPS ladder point with p99 latency at or below
+the stated threshold and failure rate at most 5%. We
+compute the threshold independently per run and re-
+port its mean; a value at the ladder maximum is right-
+censored. The flagship top-K128 result uses five paired
+seeds {2, 3, 4, 5, 6} and reports mean ± 95% Student-t
+confidence intervals. The top-K256 confirmation uses
+eight seeds. The secondary-distribution and 8B studies
+use three paired seeds unless stated otherwise; their wider
+intervals warrant interpreting small differences as noise.
+KV-hit is served and token-weighted, not a simulator
+prediction.
+5
+Evaluation
+We begin with the large-scale capacity result, then isolate
+the mechanism, examine workloads where affinity loses or
+ties, and derive the measurements required before enabling
+a routing plan.
+5.1
+70B on 60 H100 GPUs
+Table 1 is the primary result; Figure 2 visualizes the
+common-load p99 and the primary SLO-capacity knee.
+At p99≤3.5 s, CacheRoute sustains 176±11 QPS, 2.3×
+Preble’s 76±11 and 4.2× Flat-LB’s 42±20. At a looser
+5-s SLO, the gap narrows to 1.3× over Preble (180 versus
+140 QPS). At a tight 2-s SLO, CacheRoute is the only
+policy to pass any tested load and sustains 120 QPS; all
+five baselines are left-censored below the 30-QPS mini-
+mum.
+Cache and queue measurements explain the capacity
+gap. CacheRoute records a 93.2% served KV-hit rate,
+29.1 points above Flat-LB. Sticky and DualMap also
+recover substantial reuse, but their p99s at 100 offered
+QPS are 8.5 and 5.3 s; locality alone does not help once a
+queue dominates the tail. Preble and CHWBL keep the
+queues more even, but their cache-hit rates fall to 72.0%
+and 75.6%. CacheRoute occupies the useful middle:
+high reuse without a comparable hot spot.
+With a top-K256 active set, a dedicated eight-seed run
+places the 3.5-s knees at 80 QPS for CacheRoute and
+60 QPS for DualMap (1.33×); at 5 s they are 120 and
+Table 2: SLO capacity (p99≤3.5 s) on the second distri-
+bution, 70B fp8/60 H100, three paired seeds.
+Policy
+top-K128
+top-K256
+Flat-LB
+30
+30
+Sticky
+30
+60
+CHWBL
+100
+60
+DualMap
+100
+100
+Preble
+60
+60
+CacheRoute
+100
+160
+Table 3: 8B SLO capacity (p99≤3.5 s), 30 H100, three
+paired seeds. “500” is right-censored.
+top-K
+Flat-LB Sticky CHWBL DualMap Preble CacheRoute
+16
+500
+100
+500
+100
+500
+500
+32
+500
+100
+360
+100
+360
+500
+64
+500
+160
+360
+160
+360
+500
+128
+240
+240
+360
+360
+360
+500
+256
+160
+240
+240
+360
+360
+500
+2000
+100
+360
+160
+360
+160
+360
+100 QPS. Their KV-hit rates are 82% and 60%, respec-
+tively. Failure rates at passing points remain between
+0.8% and 1.4%. An earlier high-failure observation did
+not reproduce in this confirmation run.
+Second semi-synthetic distribution.
+Table 2 repeats
+the experiment with an independently collected aggregate
+key-rate distribution on the same 70B fp8 fleet. When top-
+K128 fits within the warm allocation, the three balanced
+cache-aware policies tie at 100 QPS. Expanding to top-
+K256 separates them: CacheRoute sustains 160 QPS,
+compared with 100 QPS for the best baseline. The com-
+parison is useful precisely because it does not reproduce
+every cell of Table 1; the advantage appears only after
+the active set outgrows the warm allocation.
+5.2
+What creates the improvement?
+The 8B testbed reaches saturation with less load and
+separates locality from balance. Across the tested active-
+set sizes, CacheRoute never falls below Flat-LB’s
+measured SLO capacity (Table 3). Several results at top-
+K ∈{16, 32, 64} hit the 500-QPS sweep ceiling; those ties
+are right-censored, not evidence of equal capacity. The
+largest resolved six-policy advantage is 1.39× at top-K128
+and 256. At top-K2000, the warm allocation covers a
+smaller traffic share and CacheRoute’s measured knee
+falls to 360 QPS, still tied for the best result.
+Table 4 adds the components one at a time under a
+controlled synthetic-whale workload. Affinity raises KV
+hit from 56% to 88%, but also raises imbalance to 3.46×;
+capacity stays at 240 QPS. Load-proportional replication
+reduces imbalance to 2.60×, yet random placement again
+leaves the knee unchanged. Only after LPT placement
+brings imbalance down to 1.24× does capacity reach the
+500-QPS ceiling. Affinity recovers the cached work, while
+4
+
+=== [page 5] ===
+(a)
+Flat-LB
+Sticky
+CHWBL
+DualMap
+Preble
+CacheRoute
+5.7
+8.5
+3.8
+5.3
+3.8
+1.8
+3.5-s SLO
+0
+2
+4
+6
+8
+p99 TTFT at 100 offered QPS (s)
+(b)
+42±20
+30
+64±11
+58±22
+76±11
+176±11
+0
+50
+100
+150
+200
+SLO capacity at p99 ≤3.5 s (QPS)
+Figure 2: Primary 70B fp8 result on 30 TP2 destinations (60 H100), top-K128, five paired seeds. (a) Measured p99
+TTFT at the common 100-QPS operating point; only CacheRoute is below the primary 3.5-s SLO. (b) Per-seed
+SLO-capacity knees (mean and reported 95% Student-t CI); CacheRoute reaches 176±11 QPS, 2.3× the strongest
+baseline.
+Table 4: 8B component ablation, synthetic whales, top-
+K128, three seeds. Capacity 500 is right-censored.
+Configuration
+KV hit
+Imbalance
+Capacity
+Flat-LB
+56±1.9%
+1.00×
+240
++ affinity
+88±1.5%
+3.46×
+240
++ replication
+88±1.6%
+2.60×
+240
++ LPT (full)
+90±1.0%
+1.24×
+500
+Table 5: Measured operating regimes. Capacity multiplier
+is CacheRoute/Flat-LB; the 8B range is a single-
+window synthetic mechanism result, while both 32B rows
+use semi-synthetic aggregate distributions.
+Regime
+Flat hit Aff. hit Cap. mult. Result
+8B synthetic whales
+9.3%
+77.0%
+2–6× win
+Aggregate A–32B
+1.1%
+11.8% 0.50–0.67× lose
+Aggregate B–32B
+0.8%
+8.5%
+1.0× tie
+placement makes that recovery usable at saturation. The
+injected whales are the only reason replication appears
+in this ablation, so the row does not explain the primary
+result.
+5.3
+Operating envelope and negative re-
+sults
+Table 5 shows why affinity cannot be enabled uncondi-
+tionally. The 8B synthetic-whale workload offers many
+recoverable misses and favors CacheRoute. For 32B
+aggregate workload A, affinity moves KV hit only from
+1.1% to 11.8%. That improvement does not outweigh the
+remaining skew, and capacity falls to 0.50–0.67× Flat-
+LB. Aggregate workload B reaches 8.5% affinity hit and
+ties Flat-LB at the 5-s SLO. The two 32B workloads
+are de-identified semi-synthetic aggregates run with a
+different model configuration from the positive 70B case.
+Model size by itself does not distinguish these outcomes.
+We use a short shadow replay as the deployment gate.
+It preserves the candidate assignment without returning
+its responses to users. The replay compares served KV
+hit, per-destination load, and p99 against Flat-LB at
+one load below and one load near the current knee. A
+cache-hit increase is not enough; the plan is enabled only
+when p99 or capacity improves. We repeat the gate after
+changes to model, precision, context length, batching,
+cache allocation, or the active-set distribution.
+5.4
+Burstiness and replanning
+Arrival burstiness.
+On 70B fp8/top-K128, a Gamma
+arrival process matched to the workload’s marginal
+CV=1.9 reduces CacheRoute’s 3.5-s capacity by one lad-
+der step, from 180 to 160 QPS, while KV-hit moves from
+94% to 90%. Flat-LB remains at 30 QPS. In a separate,
+single-sweep comparison, a moving-block bootstrap of
+22,639 measured inter-arrival gaps from semi-synthetic ag-
+gregate workload A (block length 50, empirical CV=2.73)
+leaves CacheRoute at 180 QPS and 93% hit, while Flat-
+LB becomes left-censored below 30 QPS. These are two-
+policy, one-active-set sensitivities, not claims about all
+baselines. They show that the main improvement does
+not require smoothed arrivals.
+Rate drift and remapping.
+We perturb the primary
+rate vector over six intervals with a lognormal random
+walk (σ = 0.3) and compare fresh and one-interval-stale
+plans at 160 QPS. Recomputing LPT from scratch changes
+94.5% of key-to-destination sets, although only 1.1% of
+keys change assignment count. The stale plan loses 1.0
+percentage point of KV hit and 192 ms of p99 on average;
+the worst transition loses 3.0 points and 858 ms. Installing
+the fresh plan, meanwhile, produces a transient 13.6-
+point KV-hit drop during rewarming.
+A deployment
+should therefore preserve placements until the measured
+staleness penalty exceeds the warm-up penalty. We have
+not implemented a churn-aware replanner.
+5
+
+=== [page 6] ===
+Why we do not predict residency analytically.
+We
+also tested a single-characteristic-time occupancy model
+against the 70B fp8 engine. Component-level instrumen-
+tation passed seven isolation checks, and each TP2 desti-
+nation exposed 40,071 measured KV blocks. Prediction
+still missed served hit rate by 14.3 percentage points at
+the median and 44.7 points at p90. The observed curve
+drops sharply and then plateaus, a shape outside the
+tested model family. We neither size deployments with
+this model nor assign the shape to an engine mechanism
+without direct evidence. This failure is why shadow replay
+remains part of the deployment procedure.
+6
+Discussion and Limitations
+What generalizes.
+The planner requires a stable rout-
+ing key, a reusable key-specific prefix, and rate estimates
+that remain useful for at least one cache-warming interval.
+Another routing key—a tenant, a document collection, an
+agent, or an application—could replace the business key
+used here. Because the router changes placement rather
+than model execution, it does not depend on a particular
+model architecture or cache implementation.
+What does not yet generalize.
+Equal-slot admission
+assumes roughly uniform stable-prefix sizes. We did not
+measure a byte-aware value function for heterogeneous
+long contexts and make no byte-knapsack or optimal-
+admission claim. Cold-tail traffic shares the native cache
+and can evict admitted prefixes. The aggregate replays
+preserve key popularity and, for the burst experiment,
+short-range gap correlation; they do not preserve exact
+per-key timestamps. Finally, two distributions cannot
+represent every market or application.
+Preble, DualMap, and CHWBL are common-harness
+reimplementations, not the original codebases. They com-
+pare routing behavior under matched hardware but do
+not reproduce the published systems end to end. Several
+8B knees are right-censored at 500 QPS, so we report
+ratios only when the sweep resolves them. The three-seed
+studies also have wide t intervals; the five-seed flagship
+and eight-seed confirmation provide the stronger evidence.
+Deployment checklist.
+An operator adopting Cach-
+eRoute would begin with aggregate key rates and a
+single-destination measurement of qcap. After choosing
+a conservative warm-slot allocation, they would shadow-
+replay the plan and Flat-LB at matched loads, com-
+paring served KV hit, imbalance, p99, and failures. Ca-
+nary traffic would follow only if the plan wins, and the
+router would fall back to Flat-LB when the active set or
+measured p99 leaves that envelope. None of these steps
+requires request content.
+7
+Related Work
+PagedAttention/vLLM and SGLang make prefix KV reuse
+efficient within one serving engine [Kwon et al.(2023),
+Zheng et al.(2024)]. CacheRoute instead decides which
+destination receives the request.
+Preble
+scores
+prefix
+reuse
+against
+live
+load,
+while DualMap combines static and dynamic map-
+pings [Srivatsa et al.(2024), Yuan et al.(2026)].
+Con-
+sistent hashing and CHWBL provide stable affin-
+ity
+with
+explicit
+load
+control
+[Karger et al.(1997),
+Mirrokni et al.(2018)].
+CacheRoute constructs one
+global, rate-based table for a control interval. Admission
+and LPT are established heuristics; the new evidence
+concerns their use in a prefix-affinity plan and the
+workloads on which that plan helps.
+GeoCover
+studies
+a
+different
+form
+of
+resource-
+constrained placement [Cheng et al.(2015)]:
+it selects
+roadside units for spatial network coverage, whereas
+CacheRoute assigns recurring prefixes to model destina-
+tions under serving load. The algorithms and guarantees
+do not transfer between the two problems. Their common
+ground is the allocation of limited infrastructure under
+skewed demand.
+Mooncake and MemServe move or pool KV state
+across servers rather than preserve it through ingress
+affinity [Hu et al.(2024), Qin et al.(2025)]. Llumnix mi-
+grates requests to repair imbalance [Sun et al.(2024)];
+DistServe and Splitwise separate prefill and decode place-
+ment [Zhong et al.(2024), Patel et al.(2024)]. These sys-
+tems can still use an ingress plan to avoid prefill that
+routing would otherwise repeat.
+8
+Conclusion
+CacheRoute plans prefix affinity and expected load
+once per control interval. On a 70B fp8 model across 60
+H100 GPUs, it reaches 93.2% served KV hit and 2.3×
+the capacity of the strongest baseline at a 3.5-s p99 SLO.
+The negative workloads set an equally important bound-
+ary: affinity can reduce capacity when the recoverable
+prefix work is small. Any real deployment would therefore
+measure its own boundary with shadow replay.
+6
+
+=== [page 7] ===
+Supplementary Material
+The supplement records experiment provenance, sec-
+ondary runs, and negative results. It adds no headline
+claims.
+Each result is labeled as multi-run hardware,
+single-window hardware, or calibrated simulation.
+A
+Workload Detail
+A.1
+Semi-synthetic aggregate statistics
+The routing key is an opaque business identifier, and
+the planner reads aggregate counts rather than request
+text. Table 6 reports de-identified summaries derived from
+operational serving telemetry and distinguishes overall
+prompt structure from the segment whose residency the
+router can affect.
+Table 6: Primary workload characteristics. “Positional
+prefix” is not the same as the business-specific routing
+lever.
+Property
+Measured value
+Distinct business keys
+128,824
+Traffic Gini coefficient
+0.756
+Top-key share
+< 0.3%
+Top 4% share
+≈47%
+Multi-turn request share
+80.8%
+Mean requests per thread
+2.64
+Median per-key inter-arrival CV
+1.93
+Mean input length
+≈1.2K tokens
+Tokens preceding current turn
+≈90%
+Stable per-business context
+≈180 tokens (15%)
+Pairs whose exact prefix breaks at RAG
+67%
+Each prompt contains a global template, stable per-
+business context, retrieved few-shot block, and current
+turn. The shared template warms regardless of routing.
+Changes to the retrieved block often truncate exact reuse,
+leaving the per-business context as the stable routing-
+specific segment.
+Another application would need to
+identify its own stable segment before using the same
+design.
+A.2
+Data handling
+The workload inputs are aggregate per-key rates, prompt-
+length statistics, served cache counters, and inter-arrival
+gaps. Raw requests, text, user content, names, and busi-
+ness identifiers are absent from both the paper and its
+artifacts. The planner needs only {(b, λb)} and live des-
+tination load; b may be salted or ephemeral. Synthetic
+workloads are labeled separately, and infrastructure mea-
+surements are reported only at experiment level, without
+host identifiers or per-request records.
+B
+Experiment
+Provenance
+and
+Statistics
+B.1
+Study matrix
+Table 7 lists the replication unit for each study. Every seed
+defines a separate offered-load realization and warm-up
+exclusion. Policies within a row share seeds and request
+distributions, so their capacity comparisons are paired.
+B.2
+Threshold construction
+For each run and policy, capacity is the largest offered-
+load point whose p99 meets the SLO and whose failure
+rate is at most 5%. Reported capacity is the mean of
+these per-run knees, rather than a confidence interval
+around one latency measurement. A run that fails at
+the lowest load is left-censored; one that passes at the
+maximum is right-censored. The primary 70B ladder is
+{30, 60, 80, 100, 120, 140, 160, 180, 220, 300} QPS, and the
+8B ladder is {30, 60, 100, 160, 240, 360, 500} QPS.
+Continuous measurements use the sample mean and a
+two-sided 95% Student-t interval. With n = 3, t0.975,2 =
+4.303, so those intervals are necessarily wide; with n = 5,
+t0.975,4 = 2.776. Experiments, not individual requests,
+are the replication units.
+C
+Additional 70B Results
+C.1
+fp16 cache-pressure run
+Table 8 checks locality under greater KV pressure. No
+policy meets the fp8 study’s 3.5-s SLO, so this run supplies
+no capacity multiplier and is not combined with the fp8
+headline.
+Table 8: 70B fp16, 30 TP2 destinations/60 H100, top-
+K128, three seeds. Capacity is zero because all policies
+miss the fp8 study’s 3.5-s SLO.
+Policy
+Served KV hit Capacity@3.5s
+Flat-LB
+19.5 ± 2.1%
+0
+Sticky
+77.3 ± 0.7%
+0
+CacheRoute
+76.4 ± 0.5%
+0
+At top-K256, KV-hit is approximately 10% for Flat-
+LB and 77% for CacheRoute. The comparison measures
+the effect of scattering at model scale; it does not show a
+cache-hit advantage over sticky routing.
+C.2
+Top-K256 confirmation
+An earlier five-seed top-K256 sweep showed failures unre-
+lated to load. A dedicated eight-seed confirmation on the
+same fp8 fleet and a finer ladder did not reproduce them:
+failure rates for all CacheRoute seeds are 0.8–1.4% at
+30 and 60 QPS, comparable with both baselines. Table 9
+reports the confirmation. We retain the earlier anomaly in
+7
+
+=== [page 8] ===
+Table 7: Experiment provenance. “HW” denotes real H100 execution; “sim” denotes the calibrated offline simulator.
+The synthetic-whale and calibrated-simulation results are supporting mechanism evidence, not broad generalization
+evidence.
+Study
+Model/precision
+Destinations
+Workload
+Repetitions
+Evidence class
+Primary six-policy
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+primary aggregate, top-K128
+seeds 2–6 (n = 5) HW/core
+Wide active set
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+primary aggregate, top-K256
+seeds 2–9 (n = 8) HW/core
+Second distribution
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+independent aggregate, K ∈{128, 256} seeds 2–4
+HW/core
+Precision pressure
+Llama-3.3-70B/fp16 30 TP2 (60 H100)
+primary aggregate
+seeds 2–4
+HW/supporting
+8B six-policy/ablation Llama-3.1-8B/bf16
+30 MP1 (30 H100) aggregate or injected whales
+seeds 2–4
+HW/mechanism
+Burst–Gamma
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+marginal CV=1.9
+seeds 2–6
+HW/sensitivity
+Burst–trace blocks
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+22,639 gaps, block 50
+seeds 2–6
+HW/sensitivity
+Drift/replan
+Llama-3.3-70B/fp8
+30 TP2 (60 H100)
+six perturbed intervals
+seeds 2–4
+HW/sensitivity
+32B negative regimes
+Qwen3-32B/bf16
+30 MP2 (60 H100) two semi-synthetic aggregates
+matched runs
+HW/negative
+Outer-boundary sweep 8B-calibrated
+R = 30
+synthetic prefix fraction/load
+seeds 2–4
+sim/supporting
+the provenance but do not treat it as a repeatable policy
+reversal.
+Table 9: Dedicated 70B fp8/top-K256 confirmation (n =
+8).
+Policy
+KV hit
+Cap.@3.5s
+Cap.@5s
+DualMap
+60%
+60
+100
+CacheRoute
+82%
+80
+120
+D
+Arrival-Process Sensitivity
+The two arrival studies were run separately. Table 10
+compares fixed-rate and marginal-CV-matched Gamma
+arrivals; Table 11 adds a moving-block bootstrap in a new
+sweep. Their Poisson knees differ (30 versus 60 QPS), so
+ratios are computed only within each table.
+Table 10: Gamma sensitivity, 70B fp8/top-K128, five
+seeds. Capacity is at p99≤3.5 s.
+Flat-LB
+CacheRoute
+Arrival
+Cap.
+KV
+Cap.
+KV
+Poisson
+30
+64%
+180
+94%
+Gamma, CV=1.9
+30
+63%
+160
+90%
+Table 11:
+Self-contained block-bootstrap sweep, 70B
+fp8/top-K128, five seeds. The block trace has empiri-
+cal CV=2.73. Zero is left-censored below 30 QPS.
+Flat-LB
+CacheRoute
+Arrival
+Cap.
+KV
+Cap.
+KV
+Poisson
+60
+66%
+180
+93%
+Gamma, CV=1.9
+60
+66%
+180
+93%
+Trace blocks, CV=2.73
+0
+67%
+180
+93%
+The bootstrap draws contiguous blocks of 50 from
+22,639 measured inter-arrival gaps.
+It retains short-
+range gap correlation, but neither the original global
+order nor each key’s exact timestamp sequence. We leave
+timestamp-exact replay to future work.
+E
+Replanning Under Drift
+We evolve each key’s rate for six intervals with a lognormal
+random walk (σ = 0.3 per step) around the primary
+distribution. Churn uses all five transitions; the 160-QPS
+hardware comparison uses three transitions with paired
+seeds.
+Table 12: Detailed replan measurements. Cache-churn is
+1−Jaccard of consecutive assignment sets; count-churn is
+the fraction whose kb changes. Stale losses compare the
+previous plan with a freshly computed plan.
+Transition Cache churn Count churn KV loss p99 loss Warmup dip
+(points)
+(ms)
+(points)
+0 →1
+92.5%
+1.6%
+0.1
+−119
+15.6
+2 →3
+94.5%
+0.0%
+3.0
++858
+11.4
+4 →5
+98.0%
+1.6%
+−0.1
+−162
+13.8
+Mean
+94.5%
+1.1%
+1.0
++192
+13.6
+Recomputing LPT from scratch accounts for the high
+cache churn: a key may keep the same assignment count
+but move to another equally loaded destination. Place-
+ment hysteresis could avoid such moves, although we
+have not evaluated a churn-aware algorithm. For now,
+installing a new table should depend on whether the mea-
+sured stale-plan penalty exceeds the measured warm-up
+penalty.
+F
+8B Sensitivity and Replication
+Scope
+F.1
+Load target and skew
+Table 13 varies the load target and injected head share on
+the 8B testbed. Under the base (non-whale) distribution,
+every key remains below even the smallest qcap, so kb = 1
+throughout the sweep. The unchanged result is a sanity
+check, not evidence that replication is insensitive to its
+load target.
+8
+
+=== [page 9] ===
+Table 13: 8B sensitivity, R = 30, top-K128, three seeds.
+Capacities are ladder knees at p99≤3.5 s; 500 is right-
+censored.
+Axis
+Setting
+KV (CR/flat) CR cap. Mult.
+qcap
+50 QPS
+89 ± 0.9%/57%
+360 1.50×
+qcap
+100 QPS
+91 ± 3.1%/57%
+360 1.50×
+qcap
+200 QPS
+91 ± 3.2%/57%
+360 1.50×
+qcap
+500 QPS
+91 ± 3.1%/57%
+360 1.50×
+Injected skew 5% head
+89 ± 1.1%/56%
+500 3.12×
+Injected skew 15% head 89 ± 1.0%/56%
+500 2.08×
+Injected skew 25% head 89 ± 1.1%/57%
+500 2.08×
+Injected skew 45% head 89 ± 1.1%/59%
+500 2.08×
+F.2
+Fleet size under fixed absolute load
+Fleet size produces a non-monotonic result in the
+synthetic-whale sweep (Table 14). Because absolute QPS
+stays fixed, increasing R lowers the repeat rate seen by
+each destination; at R = 60, even targeted prefixes be-
+come cold. A deployment whose load scales with fleet size
+may behave differently.
+Table 14: Synthetic-whale fleet-size sweep. The R = 8
+ramp has no passing capacity point; R = 60 has no
+winning scenario.
+R
+Representative scenario KV (CR/flat)
+Result
+8
+2 whales@3.0
+45%/12% tail/KV only
+30
+8 whales@3.0
+70%/14%
+4.44×
+60
+16 whales@3.0
+32%/24%
+no win
+G
+Negative Hardware Regimes
+The two negative regimes use Qwen3-32B in bf16 on 30
+MP2 destinations (60 H100), de-identified semi-synthetic
+aggregates, and no injected whales. They are separate
+workloads from the positive 70B fp8 case. Table 15 reports
+measured knees rather than only ratios.
+Table 15: Negative and neutral hardware regimes. A dash
+denotes an unreported threshold, not zero.
+KV hit
+Capacity@3.5s Cap.@5s
+Regime
+flat affinity flat
+CR
+flat/CR
+Aggregate A–32B 1.1%
+11.8%
+20
+10
+30/20
+Aggregate B–32B 0.8%
+8.5%
+–
+–
+20/20
+On aggregate A–32B, CacheRoute reaches 0.50×
+Flat-LB’s capacity at 3.5 s and 0.67× at 5 s. The policies
+tie on aggregate B–32B at 5 s. Affinity adds only 8–11
+percentage points of cache hit in these workloads, too
+little to offset modest skew. This reversal motivates the
+shadow-replay gate used in the main paper.
+H
+Analytic
+Residency
+Model:
+Negative Result
+Each TP2 destination in the 70B fp8 engine exposes 40,071
+physical KV blocks, or approximately 641K tokens. An
+earlier configuration note used 30,000 blocks; the ratio
+between the values is 1.34×. Our results use the measured
+block count, not that ratio, as the relevant configuration.
+Component instrumentation passes seven isolation tests,
+and the business-hit crossover remains stable across the
+eviction sweep (coefficient of variation 0.038 over 24 cells).
+A single-characteristic-time occupancy model nevertheless
+misses served hit rate by 14.3 percentage points at the
+median and 44.7 points at p90; its rank agreement also
+falls below the deployment target. The measured resi-
+dency curve drops sharply and then plateaus, outside the
+tested model family. We lack direct evidence to attribute
+that shape to batching, block quantization, or another
+engine mechanism.
+Physical block capacity and aggregate rates are there-
+fore insufficient for pre-deployment sizing on this engine.
+The deployment interface includes a shadow replay that
+measures served KV hit and p99 for the candidate assign-
+ment.
+Claim-to-evidence map.
+The main claims map to the
+following evidence:
+• The 2.3× headline is supported by the 70B fp8, 60-
+H100, top-K128, five-seed hardware study; it is not
+a universal multiplier.
+• The wider-active-set result is a separate eight-seed
+confirmation and is smaller (1.33× at 3.5 s).
+• The second distribution ties at top-K128 and reaches
+1.6× only at top-K256.
+• The 8B ablation supports the affinity/placement de-
+composition; only synthetic whales exercise replica-
+tion, while the primary workload has kb = 1.
+• Burst robustness is a two-policy, one-active-set sen-
+sitivity and is not extrapolated to the other four
+baselines.
+• The 32B loss/tie workloads establish a deployment
+gate, and the failed analytic predictor supports mea-
+suring residency rather than asserting a microarchi-
+tectural cause.
+References
+[Kwon et al.(2023)] Woosuk Kwon, Zhuohan Li, Siyuan
+Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao
+Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica.
+Efficient memory management for large language
+model serving with PagedAttention. In Proceedings
+9
+
+=== [page 10] ===
+of the 29th ACM Symposium on Operating Systems
+Principles (SOSP), pages 611–626, 2023.
+[Zheng et al.(2024)] Lianmin Zheng, Liangsheng Yin,
+Zhiqiang Xie, Chuyue Sun, Jeff Huang, Cody Yu,
+Shiyi Cao, Christos Kozyrakis, Ion Stoica, Joseph E.
+Gonzalez, Clark Barrett, and Ying Sheng. SGLang:
+Efficient execution of structured language model pro-
+grams. In Advances in Neural Information Processing
+Systems (NeurIPS), pages 62557–62583, 2024.
+[Srivatsa et al.(2024)] Vikranth
+Srivatsa,
+Zijian
+He,
+Reyna Abhyankar, Dongming Li, and Yiying Zhang.
+Preble: Efficient distributed prompt scheduling for
+LLM serving. arXiv:2407.00023, 2024.
+[Yuan et al.(2026)] Ying Yuan, Pengfei Zuo, Bo Wang,
+Zhangyu Chen, Zhipeng Tan, and Zhou Yu. DualMap:
+Enabling both cache affinity and load balancing for
+distributed LLM serving. arXiv:2602.06502, 2026.
+[Graham(1969)] Ronald L. Graham. Bounds on multipro-
+cessing timing anomalies. SIAM Journal on Applied
+Mathematics, 17(2):416–429, 1969.
+[Mitzenmacher et al.(2001)] Michael
+Mitzenmacher,
+Andr´ea W. Richa, and Ramesh K. Sitaraman. The
+power of two random choices: A survey of techniques
+and results. In Handbook of Randomized Computing,
+pages 255–312. Springer, 2001.
+[Karger et al.(1997)] David Karger, Eric Lehman, Tom
+Leighton, Matthew Levine, Daniel Lewin, and Rina
+Panigrahy. Consistent hashing and random trees:
+Distributed caching protocols for relieving hot spots
+on the World Wide Web. In Proceedings of the 29th
+ACM Symposium on Theory of Computing (STOC),
+pages 654–663, 1997.
+[Mirrokni et al.(2018)] Vahab Mirrokni, Mikkel Thorup,
+and Morteza Zadimoghaddam. Consistent hashing
+with bounded loads. In Proceedings of the 29th ACM–
+SIAM Symposium on Discrete Algorithms (SODA),
+pages 587–604, 2018.
+[Cheng et al.(2015)] Huang Cheng, Xin Fei, Azzedine
+Boukerche, and Mohammed Almulla. GeoCover: An
+efficient sparse coverage protocol for RSU deployment
+over urban VANETs. Ad Hoc Networks, 24:85–102,
+2015. doi:10.1016/j.adhoc.2014.07.022.
+[Qin et al.(2025)] Ruoyu Qin, Zheming Li, Weiran He,
+Jialei Cui, Heyi Tang, Feng Ren, Teng Ma, Shang-
+ming Cai, Yineng Zhang, Mingxing Zhang, Yong-
+wei Wu, Weimin Zheng, and Xinran Xu. Mooncake:
+A KVCache-centric disaggregated architecture for
+LLM serving. ACM Transactions on Storage, 2025.
+doi:10.1145/3773772.
+[Hu et al.(2024)] Cunchen Hu, Heyang Huang, Junhao
+Hu, Jiang Xu, Xusheng Chen, Tao Xie, Chenxi
+Wang, Sa Wang, Yungang Bao, Ninghui Sun, and
+Yizhou Shan. MemServe: Context caching for dis-
+aggregated LLM serving with elastic memory pool.
+arXiv:2406.17565, 2024.
+[Sun et al.(2024)] Biao Sun, Ziming Huang, Hanyu Zhao,
+Wencong Xiao, Xinyi Zhang, Yong Li, and Wei Lin.
+Llumnix: Dynamic scheduling for large language
+model serving. In Proceedings of the 18th USENIX
+Symposium on Operating Systems Design and Imple-
+mentation (OSDI), pages 173–191, 2024.
+[Zhong et al.(2024)] Yinmin Zhong, Shengyu Liu, Junda
+Chen, Jianbo Hu, Yibo Zhu, Xuanzhe Liu, Xin Jin,
+and Hao Zhang. DistServe: Disaggregating prefill
+and decoding for goodput-optimized large language
+model serving. In Proceedings of the 18th USENIX
+Symposium on Operating Systems Design and Imple-
+mentation (OSDI), pages 193–210, 2024.
+[Patel et al.(2024)] Pratyush Patel, Esha Choukse, Chao-
+jie Zhang, Aashaka Shah, I˜nigo Goiri, Saeed Maleki,
+and Ricardo Bianchini. Splitwise: Efficient generative
+LLM inference using phase splitting. In Proceedings
+of the 51st ACM/IEEE International Symposium on
+Computer Architecture (ISCA), pages 118–132, 2024.
+10

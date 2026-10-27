@@ -1,0 +1,37 @@
+Cache is Crucial - Inferred | OpenRouter
+
+All Inferred editions
+Inferred 03Oct 8, 2026
+Cache is Crucial
+As agents take over the token stream on OpenRouter, cache rate is fast becoming the bellwether for performance.
+Highlights
+Agents are the primary token users: Agentic tokens are now 7x higher than human ones on a weekly basis.
+Agentic tokens are mostly cached: Cached prompt tokens hovered just under 90% of all tokens used by agents in September.
+Cache optimization has happened industry-wide: Almost all providers on OpenRouter had a cache rate over 70% in September and many over 90%.
+Agents now run the showWeekly tokens by user type on OpenRouter.
+On February 6th, agents used more tokens on OpenRouter than humans for the first time. In the last week of September, agentic API keys used about 7x the tokens from human API keys. This gap is likely to continue to widen over the coming months.
+We classify every API key each month as agentic, human or mixed, using signals like how often it calls tools, how many turns are in each conversation, and how quickly requests follow one another.
+Cache rules everything around meShare of weekly tokens by token type and user type.
+Agentic workloads look nothing like human ones. An agent re-sends its whole context on every step: the system prompt, the tool definitions, the files it has read and the history of every tool call so far. Each step adds a little new information and asks for a short reply. So the overwhelming majority of agentic tokens are prompt tokens the model has seen before.
+In September, cached prompt tokens were just under 90% of all agentic tokens. Novel prompt tokens made up most of the rest, and output plus reasoning was a sliver of around 1%. In January, the cached share was closer to 60%.
+By contrast, a person in a chat window keeps asking new questions, so novel prompt tokens are still the majority. Output and reasoning take a much bigger slice of human tokens (around 12%), because humans want to read answers and agents want to take actions.
+Caching and cost
+Cached tokens matter because they are cheap. On current frontier models from Anthropic, OpenAI and Google, a cache read costs a tenth of a fresh input token and a fiftieth of an output token. Claude Sonnet 5, for example, charges $2 per million input tokens, $10 per million output tokens and $0.20 per million cached tokens.
+The newest releases push the gap further. Claude Opus 5.5 and GPT-6.1 Sol price cache reads at 1/20th of input and 1/100th of output. Claude Fable 5.1 prices them at 1/200th of output.
+As an example, let’s look at the cost of an agentic token run using the current Sonnet 5 price sheet. A million agentic tokens (roughly 87% cached, 12% novel prompt, 1% output) costs about $0.51. The same million tokens with no caching would cost about $2.08, four times as much. Cached tokens are nearly nine in ten agentic tokens, but only about a third of the bill.
+Note that this ignores cache-write premiums, which some providers charge the first time a prompt prefix is stored.
+The industry has optimized for cacheAverage cache rate for agentic workloads by quarterly model cohort.
+The economics of AI have pushed the entire industry towards improving cache rates. Models launched in Q3 2026 averaged an 88.2% cache rate on agentic workloads, up from 54.8% for models launched in Q2 2025.
+All layers of the stack, from the OpenRouter algorithm to the model makers to the inference providers, should receive partial credit for such impressive acceleration.Agentic cache rate by inference provider, January 2026. Bubble size is prompt tokens.
+The inference provider picture has undergone particularly rapid change. In January, only 2 of 35 inference providers served agentic traffic at a cache rate above 90%, and both did it on tiny volume. The median provider cached 44% of agentic prompt tokens. Even the biggest, Google and Anthropic, sat between 65% and 80%.Agentic cache rate by inference provider, September 2026. Bubble size is prompt tokens.
+By September, the median provider was at 85%. 11 of 54 providers cleared 90%, including OpenAI (the largest bubble on the chart), Together, Z.ai and DeepSeek, which led the field at around 96%. Only a handful of small providers are still below 70%.
+What this means
+For anyone building agents, cache rate is now one of the biggest levers on cost.
+For model makers and providers, cache is no longer a nice-to-have. When nearly nine in ten agentic tokens are cache reads, the price of a cached token and how reliably you hit the cache are a large part of what customers actually pay. Headline input and output prices tell less of the story every month.
+To see your own cache rate, check the cached token fields in each response. Our prompt caching guide lists them, along with how each provider caches.
+Onwards,
+Peter Walker, OpenRouter
+Share charts are computed within the segment named in each chart’s footer. All charts exclude reseller activity. Cache rate = cached prompt tokens / total prompt tokens. Prices are OpenRouter list prices as of October 7, 2026.
+
+Sign Up
+Sign Up

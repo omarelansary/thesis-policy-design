@@ -1,0 +1,940 @@
+Prompt Caching: Cost & Performance Analysis Across Providers | Artificial Analysis
+
+Artificial Analysis
+K
+
+Prompt Caching: Cost & Performance Analysis Across Providers
+
+Prompt caching can cut input token costs by up to 90% and makes long context workloads viable. Compare cache pricing, discounts and API specifications across all major AI providers below.
+Caching requires exact prompt matches and varies by provider - some like OpenAI and DeepSeek offer automatic caching, while others including Google, Anthropic, and Amazon require manual setup. Learn more about how it works in our introduction to prompt caching below.
+
+Pricing
+
+Pricing: Cache Hit, Cache Write, Input, and Output
+Price (USD per M Tokens)
+
+26 of 337 modelsAdd model from specific provider
+
+Cache HitCache WriteInputOutput
+
+Cache Hit
+
+Price per token for cached prompts (previously processed), typically offering a significant discount compared to regular input price, represented as USD per million tokens. The values shown here are the cache hit price; cache write and cache storage are billed separately and vary by provider — see "Cache pricing by provider" for detail. 5 more notes
+
+Cache Discount
+
+Pricing: Cache Discount
+1 - (cache hit price / input price) · Higher is better
+
+26 of 337 modelsAdd model from specific provider
+
+Cache Price Discount
+
+Reduction in input token cost due to cache hit relative to input price. Formula: 1 - (Cache Hit Price per Token / Input Token Price). Note that this discount figure does not account for all costs associated with cache hits, such as cache write and storage costs. 3 more notes
+
+Prompt Caching API Specifications
+
+Provider
+Model
+Input (standard)
+Cache write
+Cache hit
+Cache storage
+Output (standard)
+Auto-Enabled
+Min tokens
+Cache TTL
+Notes
+
+Amazon Bedrock
+
+Amazon supports caching for Nova models and Anthropic's Claude models.
+
+Pricing and usage differs between model families.
+
+Documentation 
+Cache Pricing Details 
+Claude Opus 5.5 (Max, Default Fallback)
+$4.00
+$5.00
+$0.20
+-
+$20.00
+
+-
+-
+
+Claude Sonnet 5.5 (Max, Default Fallback)
+$2.00
+$2.50
+$0.10
+-
+$10.00
+
+-
+-
+
+Anthropic
+
+Cache read tokens are 90% cheaper than base input tokens
+
+Cache write tokens are 25% more expensive than base input tokens
+
+Documentation 
+Cache Pricing Details 
+Claude Opus 5.5 (Max, Default Fallback)
+$4.00
+$5.00
+$0.20
+-
+$20.00
+-
+-
+-
+
+Claude Sonnet 5.5 (Max, Default Fallback)
+$2.00
+$2.50
+$0.10
+-
+$10.00
+-
+-
+-
+
+Google
+
+Google supports caching for Gemini models and Anthropic's Claude models.
+
+Pricing and usage differs between model families.
+
+Documentation 
+Cache Pricing Details 
+Claude Opus 5.5 (Max, Default Fallback)
+$4.00
+$5.00
+$0.20
+-
+$20.00
+
+-
+-
+
+Claude Sonnet 5.5 (Max, Default Fallback)
+$2.00
+$2.50
+$0.10
+-
+$10.00
+
+-
+-
+
+Microsoft Azure
+
+OpenAI models:
+
+Cache read tokens are 50% cheaper than base input tokens (Standard deployments)
+
+Cache persists up to one hour during off-peak periods
+
+Documentation 
+Cache Pricing Details 
+Claude Opus 5.5 (Max, Default Fallback)
+$4.00
+$5.00
+$0.20
+-
+$20.00
+
+-
+-
+
+Claude Sonnet 5.5 (Max, Default Fallback)
+$2.00
+$2.50
+$0.10
+-
+$10.00
+
+-
+-
+
+Kimi
+
+Cache Pricing Details 
+Kimi K3.1 Pro
+$2.00
+-
+$0.20
+-
+$10.00
+
+-
+-
+
+Kimi K3.1 Pro
+$4.00
+-
+$0.20
+-
+$20.00
+
+-
+-
+
+OpenAI
+
+Cache read tokens are 50% cheaper than base input tokens
+
+Cache persists up to one hour during off-peak periods
+
+Documentation 
+Cache Pricing Details 
+GPT-6 Astra (Max)
+$10.00
+$12.50
+$1.00
+-
+$50.00
+-
+-
+-
+
+GPT-6 Astra (Max)
+$20.00
+$25.00
+$2.00
+-
+$100.00
+-
+-
+-
+
+Meta
+Muse Wonder (Max)
+$4.00
+-
+$0.20
+-
+$20.00
+
+-
+-
+
+SpaceXAI
+
+Prompt caching is not 100% guaranteed.
+
+Documentation 
+Cache Pricing Details 
+Grok 4.7 (Xhigh)
+$2.00
+-
+$0.50
+-
+$6.00
+
+-
+-
+
+DeepInfra
+
+Prompt caching is automatic — no extra parameters required.
+
+Documentation 
+Cache Pricing Details 
+MiMo-V2.6-Pro
+$0.39
+-
+$0.00
+-
+$0.78
+
+-
+-
+
+DeepSeek V4.1 Flash 1017 (Max)
+$0.10
+-
+$0.00
+-
+$0.29
+
+-
+-
+
+GMI
+MiMo-V2.6-Pro
+$0.43
+-
+$0.00
+-
+$0.87
+
+-
+-
+
+DeepSeek V4.1 Flash 1017 (Max)
+$0.18
+-
+$0.01
+-
+$0.72
+
+-
+-
+
+PrimaLabs
+MiMo-V2.6-Pro
+$0.43
+-
+$0.00
+-
+$0.87
+
+-
+-
+
+DeepSeek V4.1 Flash 1017 (Max)
+$0.24
+-
+$0.00
+-
+$0.96
+
+-
+-
+
+Xiaomi
+
+Cache Pricing Details 
+MiMo-V2.6-Pro
+$0.43
+-
+$0.00
+-
+$0.87
+
+-
+-
+
+Alibaba Cloud
+
+Alibaba offers two cache types: implicit and explicit.
+
+Implicit cache is automatically enabled. It is billed at 20% of the standard input token price.
+
+Explicit cache must be activated. It creates a cache for specific content to ensure a deterministic hit within its 5-minute validity period. Tokens used to create the cache are billed at 125% of the standard input token price, while subsequent cache hits are billed at 10% of that price.
+
+Documentation 
+Cache Pricing Details 
+Qwen3.8 Max (0902)
+$2.00
+-
+$0.25
+-
+$6.00
+
+-
+-
+
+Qwen3.8 27B (Xhigh)
+$0.50
+-
+$0.10
+-
+$3.00
+
+-
+-
+
+Baseten
+
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+DeepSeek V4.1 Flash 1017 (Max)
+$0.60
+-
+$0.01
+-
+$2.40
+
+-
+-
+
+DeepSeek
+
+Cache read tokens are 50% cheaper on average (up to 90% with cache optimization)
+
+Implements Context Caching on Disk technology
+
+No guarantee of 100% cache hits
+
+Documentation 
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+DigitalOcean
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Fireworks
+
+Prompt caching is enabled by default.
+
+The default discount is 50%, but the exact discount varies by model.
+
+Documentation 
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+MiniMax-M3.1-Flash
+$0.15
+-
+$0.01
+-
+$0.60
+
+-
+-
+
+Inco
+DeepSeek V4.1 Flash 1017 (Max)
+$0.60
+-
+$0.01
+-
+$2.40
+
+-
+-
+
+GLM-5.3 (Max)
+$2.80
+-
+$0.52
+-
+$8.80
+
+-
+-
+
+LithosAI
+DeepSeek V4.1 Flash 1017 (Max)
+$0.35
+-
+$0.01
+-
+$1.40
+
+-
+-
+
+DeepSeek V4.1 Flash 1017 (Max)
+$0.35
+-
+$0.01
+-
+$1.40
+
+-
+-
+
+Makora
+DeepSeek V4.1 Flash 1017 (Max)
+$0.15
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$0.14
+-
+$0.10
+-
+$4.40
+
+-
+-
+
+Nebius
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Novita
+
+Documentation 
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+-
+-
+-
+
+Parasail
+
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+SiliconFlow
+
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.15
+-
+$0.00
+-
+$0.60
+
+-
+-
+
+MiniMax-M3.1-Flash
+$0.15
+-
+$0.01
+-
+$0.60
+
+-
+-
+
+Systalyze
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+Together AI
+
+Cache Pricing Details 
+DeepSeek V4.1 Flash 1017 (Max)
+$0.30
+-
+$0.01
+-
+$1.20
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Wafer
+DeepSeek V4.1 Flash 1017 (Max)
+$0.15
+-
+$0.00
+-
+$0.60
+
+-
+-
+
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Bitdeer AI
+GLM-5.3 (Max)
+$0.63
+-
+$0.12
+-
+$1.98
+
+-
+-
+
+Crusoe
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Qwen3.8 27B (Xhigh)
+$0.25
+-
+$0.15
+-
+$2.00
+
+-
+-
+
+Databricks
+
+Cache Pricing Details 
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Inkling (Xhigh)
+$1.00
+-
+$0.17
+-
+$4.05
+
+-
+-
+
+FriendliAI
+
+Cache Pricing Details 
+GLM-5.3 (Max)
+$1.26
+-
+$0.23
+-
+$3.96
+
+-
+-
+
+Modal
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+Inkling (Xhigh)
+$1.20
+-
+$0.27
+-
+$5.00
+
+-
+-
+
+Modular
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+MiniMax-M3.1-Flash
+$0.15
+-
+$0.01
+-
+$0.60
+
+-
+-
+
+Multiverse Computing
+GLM-5.3 (Max)
+$0.20
+-
+$0.02
+-
+$0.64
+
+-
+-
+
+Qwen3.8 27B (Xhigh)
+$0.09
+-
+$0.02
+-
+$0.44
+
+-
+-
+
+Supernova
+GLM-5.3 (Max)
+$0.63
+-
+$0.12
+-
+$1.98
+
+-
+-
+
+GLM-5.3 (Max)
+$2.80
+-
+$0.52
+-
+$8.80
+
+-
+-
+
+Zai
+GLM-5.3 (Max)
+$1.40
+-
+$0.26
+-
+$4.40
+
+-
+-
+
+InclusionAI
+Ling 3.1 Flash 1019
+$0.30
+-
+$0.06
+-
+$0.90
+-
+-
+-
+
+StepFun
+
+Documentation 
+Cache Pricing Details 
+Step 5 Preview
+$1.00
+-
+$0.10
+-
+$2.70
+
+-
+-
+
+MiniMax
+
+MiniMax supports Anthropic API compatible caching that is managed through explicit cache_control settings.
+
+Documentation 
+Cache Pricing Details 
+MiniMax-M3.1-Flash
+$0.15
+-
+$0.01
+-
+$0.60
+
+-
+-
+
+SambaNova
+MiniMax-M3.1-Flash
+$0.30
+-
+$0.03
+-
+$1.20
+
+-
+-
+
+CoreWeave
+
+Cache Pricing Details 
+Qwen3.8 27B (Xhigh)
+$0.40
+-
+$0.15
+-
+$3.00
+
+-
+-
+
+Beam 1.0
+$1.00
+-
+$0.10
+-
+$3.00
+
+-
+-
+
+Mistral
+Mistral Large 4 Preview
+$1.36
+$1.36
+$0.14
+-
+$4.18
+-
+-
+-
+
+Thinking Machines
+Inkling (Xhigh)
+$1.00
+-
+$0.17
+-
+$4.05
+-
+-
+-Show all models 
+
+Introduction to Prompt Caching
+
+What is Prompt Caching?
+
+Prompt caching lets language model inference reuse previously processed input tokens, cutting their cost by up to 90% and making long context workloads viable. Getting your approach to caching right can deliver huge cost savings on input tokens and meaningful performance benefits.
+When you send a prompt, the system first checks if that exact prompt has been processed before. If found (cache hit), it returns the stored response instead of generating a new one. If not found (cache miss), the prompt is processed normally, and the response is stored for future use.
+Key Metrics to Watch
+Input Price: The standard price you pay for input tokens
+Cache Write Price: What you pay to save prompt tokens into the cache; sometimes higher than standard input pricing
+Cache Hit Price: Discounted rate for prompt tokens that hit the cache
+Cache Storage Price: Hourly cost per million cached tokens (currently unique to Google)
+Cache TTL: The time cached tokens remain available, ranging from hours to days
+Cache Minimum Tokens: Minimum matching token count required before a cache hit is served
+How Does Prompt Caching Work?
+
+When you send a prompt to a transformer-based language model, the attention layers process each input token into key (K) and value (V) vectors that are stored in the KV cache. By keeping these values in memory, processing on input tokens can be avoided when identical input tokens are sent into the model again.
+Until recently, leveraging the speed and cost benefits of caching was only available for dedicated deployments. Now, serverless API providers—including the frontier labs—have begun passing on some of the cost benefits of caching to developers.
+Optimal Use Cases
+System instructions: Large system prompts that must be included across many interactions
+Chat history: Conversation context that accompanies each new user turn
+Per-user personalized context: Extensive user memories or profiles that enable deep personalization
+
+Implementation Considerations
+
+Activation method varies by provider - some require manual setup while others offer automatic caching
+Cache hit discounts range from 50-90% off standard input token pricing - this really is worth the time to get right
+Caching improves performance for very long prompts (50k+ tokens)
+

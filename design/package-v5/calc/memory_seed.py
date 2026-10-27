@@ -22,10 +22,12 @@ uncached and against not adding them at all.
 Run: python design/package-v5/calc/memory_seed.py
 """
 W, O, H, Q, D = 1.25, 5.0, 5000, 150, 250
+CORE, SEARCH = 5, 300
+P = CORE * D + SEARCH  # core prefix (5 tools + a 300-token search tool) = 1,550 tokens; re-read by every extra client-side request (revision 4)
 
 
 def hstar(t, r, mode, k):
-    s = (H * r if mode == "client" else 0) + O * Q
+    s = ((H + P) * r if mode == "client" else 0) + O * Q  # revision 4: the avoided extra request also re-reads the core prefix P, as regime_bill.py charges it
     saving = s + (k - 1) * D * (W + (t / 2) * r) - D * r * ((t - 1) - t / 2)
     cost = D * (W + (t - 1) * r)
     return None if saving <= 0 else cost / (saving + cost)
@@ -39,8 +41,8 @@ for k in (1, 3):
         for r in (0.1, 0.05, 0.025):
             print(f"  {r:>6} " + " ".join(f"{(f'{h:.2f}' if h is not None else 'never'):<8}" for h in (hstar(t, r, mode, k) for t in (3, 10, 30, 100))))
 print("Reading: the break-even depends on how many matches a search appends (K) as much as on session length. With")
-print("K = 1, seeding needs a third to a half of seeds used in short sessions and may never pay in long ones at r = 0.1;")
-print("with K = 3 it needs about a fifth to a half. The arithmetic does not settle whether seeding pays: it gives the")
+print("K = 1, seeding needs about a fifth to nearly a half of seeds used in sessions of up to 10 requests, and most or all in a")
+print("100-request session ('never' at r = 0.1 with server-side search); with K = 3 it needs about 15% to 50%. The arithmetic does not settle whether seeding pays: it gives the")
 print("threshold that P1 must compare the measured precision h with, using the observed K, T, history size and mode.")
 
 print("\nPart 2: K = 10,000 added tokens kept for T requests (r = 0.1, w = 1.25)")

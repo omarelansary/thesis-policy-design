@@ -1,0 +1,186 @@
+GPT OSS 120B | Model library
+
+Live webinar Oct 28: How to evaluate open models for your coding agents. Save your spot
+
+LLM
+
+GPT OSS 120B
+
+120B MoE open model by OpenAI
+
+Try model APITry dedicated
+
+Model details
+Developed by
+OpenAI
+Model family
+GPT OSS
+Variant
+MoE
+Size
+117B-A5.1B
+API
+OpenAI SDK Compatible
+License
+Apache 2.0
+
+Model API pricing
+Per 1M tokens
+Input
+$0.10
+Output
+$0.50
+See all pricing
+
+gpt-oss-120b uses Harmony, OpenAI's new open-source schema, and is compatible with the OpenAI SDK.
+
+Input
+python
+
+1# You can use this model with any of the OpenAI clients in any language!
+2# Simply change the API Key to get started
+3
+4from openai import OpenAI
+5
+6client = OpenAI(
+7    api_key="YOUR_API_KEY",
+8    base_url="https://inference.baseten.co/v1"
+9)
+10
+11response = client.chat.completions.create(
+12    model="openai/gpt-oss-120b",
+13    messages=[
+14        {
+15            "role": "user",
+16            "content": "Implement Hello World in Python"
+17        }
+18    ],
+19    stream=True,
+20    stream_options={
+21        "include_usage": True,
+22        "continuous_usage_stats": True
+23    },
+24    top_p=1,
+25    max_tokens=1000,
+26    temperature=1,
+27    presence_penalty=0,
+28    frequency_penalty=0
+29)
+30
+31for chunk in response:
+32    if chunk.choices and chunk.choices[0].delta.content is not None:
+33        print(chunk.choices[0].delta.content, end="", flush=True)
+
+JSON output
+
+1{
+2    "id": "143",
+3    "choices": [
+4        {
+5            "finish_reason": "stop",
+6            "index": 0,
+7            "logprobs": null,
+8            "message": {
+9                "content": "[Model output here]",
+10                "role": "assistant",
+11                "audio": null,
+12                "function_call": null,
+13                "tool_calls": null
+14            }
+15        }
+16    ],
+17    "created": 1741224586,
+18    "model": "",
+19    "object": "chat.completion",
+20    "service_tier": null,
+21    "system_fingerprint": null,
+22    "usage": {
+23        "completion_tokens": 145,
+24        "prompt_tokens": 38,
+25        "total_tokens": 183,
+26        "completion_tokens_details": null,
+27        "prompt_tokens_details": null
+28    }
+29}
+
+🔥 Trending models
+
+Explore Baseten today
+Start deployingTalk to an engineer
+
+large language modelsSee all
+
+Model API
+LLM
+DeepSeek V4.1 Flash 1017
+V4.1 - Flash 1017
+
+Model API
+LLM
+DeepSeek V4.1 Flash
+V4.1 - Flash
+
+Model API
+LLM
+Muse Spark Open
+Open
+
+OpenAI modelsSee all
+
+Transcription
+Whisper Large V3
+V3 - Large - RTX-PRO-6000
+
+Transcription
+Whisper Large V3 Turbo
+V3 - Large Turbo - RTX-PRO-6000
+
+Model API
+LLM
+GPT OSS 120B
+MoE
+
+Model API
+System one decision
+mammoth-1
+
+Model API
+System one decision
+elephant-1
+
+Model API
+LLM
+Muse Spark Open
+Open
+
+Popular models
+
+mammoth-1
+
+elephant-1
+
+Muse Spark Open
+
+DeepSeek V4.1 Flash 1017
+
+GLM-5.3 Fast
+
+GLM-5.3-Flash
+
+Explore all
+
+Popular models
+
+mammoth-1
+
+elephant-1
+
+Muse Spark Open
+
+DeepSeek V4.1 Flash 1017
+
+GLM-5.3 Fast
+
+GLM-5.3-Flash
+
+Explore all

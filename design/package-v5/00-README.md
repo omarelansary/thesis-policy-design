@@ -22,7 +22,8 @@
 | `05-poc-loop-and-e2e.md` | Proof-of-concept items in dependency order with a decision rule; end-to-end outline; questions |
 | `06-contribution-and-traceability.md` | New versus reused; register of recommendations; `tools/trace_check.py` (0 misses: pointers and ids exist; wording checked by stewards and challengers, not by the script) |
 | `12-experiment-readiness.md` | Which loop items can start, which cannot, and a draft of what the experiments' authorization would need to say |
-| `11-price-ranges.md` | Price ranges of hosted open-weight models from benchmark pages, the three ratios that decide the bill's shape, and how they affect the break-evens (D-04) |
+| `11-price-ranges.md` | Price ranges of hosted open-weight models from the providers' own pages (revision 2), the three ratios r, w, o that decide the bill's shape, reference cases, and how they affect the break-evens (D-04) |
+| `13-literature-verification.md` | Multi-agent literature verification of `11`, the cost equation and the cache mechanics (stewards FND-0043..0045, challenger RV-0024); what is supported, corrected, or unverified |
 | `10-p0-university-api-reading.md` | What the university API reports and honours, from the human's probe of six models (cache counters, appended turn, `allowed_tools`, rate limit) |
 | `09-expose-ideas-checked.md` | The exposé's and the experiment brief's ideas, each kept, revised, parked or dropped against the stored evidence (Q-U32) |
 | `07-independent-review.md` | 30 challenges and their dispositions; rebuttal check RV-0023 |
