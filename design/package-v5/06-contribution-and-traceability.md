@@ -43,4 +43,5 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
 | D-03 | `calc/compact_tiers.py`, `calc/compact_tiers.stdout.txt` |
 | D-04 | `calc/price_sensitivity.py`, `calc/price_sensitivity.stdout.txt`; `11` |
+| D-05 | `calc/retention_and_write.py`, `calc/retention_and_write.stdout.txt`; `10` section 9; L/v5-ls-f03-claude-build-with-claude-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt; L/v5-ls-f12-google-docs-pricing.txt:288-305 (SUM-0057); REQ-U28-01 |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |
