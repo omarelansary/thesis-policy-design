@@ -1,0 +1,18 @@
+---
+type: "intake-text"
+id: "INT-T-015"
+authorization: "AUTH-020"
+supplied_by: "human (user), chat message of 2026-10-28 in the lead session"
+supplied_utc: "2026-10-28 (time of day not recorded)"
+form: "message"
+stated_nature: "The human's request for a fair, broad landscape research on persistent memory and learning in coding agents and agent-memory systems (open-source research, papers, code, products of large companies, SaaS), read from original documentation and papers (architectures, benchmarks, specifications), and a judgement of what V5 could reuse, change or leave unchanged; with permission to run multiple Sonnet 5.5 agents at high effort. Two earlier reports the human had another agent write are named as reading material, not as evidence."
+caveats: "Typed chat text. The two reports it names sit in the untracked folder .workspace/, which the human said must not be pushed; they are referenced here by SHA-256 only and are not copied into the repository: 'deep-research-report omp and opencode.md' f27bba6b7ec22b021571559496f44e0b2b8e9c6ae7cce89441e1a115af6d1314, 'deep-research-report broader landscape.md' 24d5f40b2ce1113c14599d6d0c23518c8007a13fd0d9db69c5aa83cc2402cad0. The human states that every claim in them is unverified. The scope and limits are the lead's reading, recorded as the fourth amendment to AUTH-020 (ops/AUTHORIZATIONS.md); the human can narrow or reverse them."
+body_sha256: "da4071fe8812a93a8150b5b2f287c6a3dd1b9a156498b19a4a7a5ba778dd7eb8"
+---
+<<<BEGIN-VERBATIM
+Donot push whats inside .workdpace.
+
+I was working with a PC i have and i wanted to download a coding agent on it, i found some coding agents where some using sth called presistent memory or it learnes, where it caught my attention since i thought we can get inspired from there ideas and from there architechtures, and other stuff, so i made the agent do do a resaech it first made a research to verify between omp and opencode and introdcuced some research papers and some some opensource projects and repos "C:\Users\omr\Documents\thesis-policy-design\.workspace\deep-research-report omp and opencode.md" then i found it only focused on narrow parts so i asked it to do a broader landscape, "C:\Users\omr\Documents\thesis-policy-design\.workspace\deep-research-report broader landscape.md" both researches are not what i wanted and the data in it are more biased to work on what i was workning on that PC this is not what i wanted i wanted a fair landscape research on all aspects  like opensource researches, papers, codes, products, big companies prodcuts, saas, etc and we should read there original docs and papers and architectures and what benchmarks they used and what specs and technicalitiies they used, and then we think what of those we might reuse in our policy (v5) or change sth in our v5 or change nothing all this and even the calims written by the agents are all claims nothing is true even the archittrues its saying are just what it understood so it might be wrong we have to check the true work, i am sending you this not to validate its work i am sending you this to read it well understand which parts are relevelnt to us and which are not and expand your search beyond maybe there is parts in the landscape we havent yet covered or we strengthens our approach or they have experemented sth and it failed or sth else worked which we were planning to experement or didnot know its ourcome or maybe they do better approach of a small componenet we have so we reuse it  in that part instead of us inventing it!
+
+you can run multiagents using sonnet 5.5 high delegations
+END-VERBATIM>>>

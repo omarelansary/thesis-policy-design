@@ -1,0 +1,184 @@
+
+
+    We audited LoCoMo: 6.4% of the answer key is wrong and the judge accepts up to 63% of intentionally - DEV Community
+
+  Skip to content
+
+                Powered by Algolia
+
+              Log in
+
+            Create account
+
+DEV Community
+
+        Add reaction
+
+      Like
+
+      Unicorn
+
+      Exploding Head
+
+      Raised Hands
+
+      Fire
+
+      Jump to Comments
+
+      Save
+
+      Boost
+
+Pick as gem
+
+              Copy link
+
+Copied to Clipboard
+
+              Share to X
+
+              Share to LinkedIn
+
+              Share to Facebook
+
+              Share to Mastodon
+
+            Share Post via...
+
+          Report Abuse
+
+                    Penfield
+
+                        Posted on Apr 4
+
+                We audited LoCoMo: 6.4% of the answer key is wrong and the judge accepts up to 63% of intentionally
+
+                      #ai
+                      #mcp
+                      #machinelearning
+                      #benchmarks
+
+Projects are still submitting new scores on LoCoMo as of March 2026.
+
+We audited it and found 6.4% of the answer key is wrong, and the LLM judge accepts up to 63% of intentionally wrong answers. LongMemEval-S is often raised as an alternative, but each question's corpus fits entirely in modern context windows, making it more of a context window test than a memory test. Here's what we found.
+
+  LoCoMo
+
+LoCoMo (Maharana et al., ACL 2024) is one of the most widely cited long-term memory benchmarks. We conducted a systematic audit of the ground truth and identified 99 score-corrupting errors in 1,540 questions (6.4%). Error categories include hallucinated facts in the answer key, incorrect temporal reasoning, and speaker attribution errors.
+
+Examples:
+
+The answer key specifies "Ferrari 488 GTB," but the source conversation contains only "this beauty" and the image caption reads "a red sports car." The car model exists only in an internal query field (annotator search strings for stock photos) that no memory system ingests. Systems are evaluated against facts they have no access to.
+
+"Last Saturday" on a Thursday should resolve to the preceding Saturday. The answer key says Sunday. A system that performs the date arithmetic correctly is penalized.
+
+24 questions attribute statements to the wrong speaker. A system with accurate speaker tracking will contradict the answer key.
+
+The theoretical maximum score for a perfect system is approximately 93.6%.
+
+We also tested the LLM judge. LoCoMo uses gpt-4o-mini to score answers against the golden reference. We generated intentionally wrong but topically adjacent answers for all 1,540 questions and scored them using the same judge configuration and prompts used in published evaluations. The judge accepted 62.81% of them. Specific factual errors (wrong name, wrong date) were caught approximately 89% of the time. However, vague answers that identified the correct topic while missing every specific detail passed nearly two-thirds of the time. This is precisely the failure mode of weak retrieval - locating the right conversation but extracting nothing specific - and the benchmark rewards it.
+
+There is also no standardized evaluation pipeline. Each system uses its own ingestion method (arguably necessary given architectural differences), its own answer generation prompt, and sometimes entirely different models. Scores are then compared in tables as if they share a common methodology. Multiple independent researchers have documented inability to reproduce published results (EverMemOS #73, Mem0 #3944, Zep scoring discrepancy).
+
+Full audit with all 99 errors documented, methodology, and reproducible scripts: locomo-audit
+
+  LongMemEval
+
+LongMemEval-S (Wang et al., 2024) is the other frequently cited benchmark. The issue is different but equally fundamental: it does not effectively isolate memory capability from context window capacity.
+
+LongMemEval-S uses approximately 115K tokens of context per question. Current models support 200K to 1M token context windows. The entire test corpus fits in a single context window for most current models.
+
+Mastra's research illustrates this: their full-context baseline scored 60.20% with gpt-4o (128K context window, near the 115K threshold). Their observational memory system scored 84.23% with the same model, largely by compressing context to fit more comfortably. The benchmark is measuring context window management efficiency rather than long-term memory retrieval. As context windows continue to grow, the full-context baseline will keep climbing and the benchmark will lose its ability to discriminate.
+
+LongMemEval-S tests whether a model can locate information within 115K tokens. That is a useful capability to measure, but it is a context window test, not a memory test.
+
+  LoCoMo-Plus
+
+LoCoMo-Plus (Li et al., 2025) introduces a genuinely interesting new category: "cognitive" questions testing implicit inference rather than factual recall. These use cue-trigger pairs with deliberate semantic disconnect - the system must connect "I just adopted a rescue dog" (cue) to "what kind of pet food should I buy?" (trigger) across sessions without lexical overlap. The concept is sound and addresses a real gap in existing evaluation.
+
+The issues:
+
+It inherits all 1,540 original LoCoMo questions unchanged, including the 99 score-corrupting errors documented above.
+
+The improved judging methodology (task-specific prompts, three-tier scoring, 0.80+ human-LLM agreement) was only validated on the new cognitive questions. The original five categories retain the same broken ground truth with no revalidation.
+
+The judge model defaults to gpt-4o-mini.
+
+Same lack of pipeline standardization.
+
+The new cognitive category is a meaningful contribution. The inherited evaluation infrastructure retains the problems described above.
+
+  Requirements for meaningful long-term memory evaluation
+
+Based on this analysis, we see several requirements for benchmarks that can meaningfully evaluate long-term memory systems:
+
+Corpus size must exceed context windows. If the full test corpus fits in context, retrieval is optional and the benchmark cannot distinguish memory systems from context window management. BEAM moves in this direction with conversations up to 10M tokens, though it introduces its own challenges.
+
+Evaluation must use current-generation models. gpt-4o-mini as a judge introduces a ceiling on scoring precision. Both the systems under test and the judges evaluating them should reflect current model capabilities.
+
+Judge reliability must be validated adversarially. When a judge accepts 63% of intentionally wrong answers, score differences below that threshold are not interpretable. Task-specific rubrics, stronger judge models, and adversarially validated ground truth are all necessary.
+
+Ingestion should reflect realistic use. Knowledge in real applications builds through conversation - with turns, corrections, temporal references, and evolving relationships. Benchmarks that test single-pass ingestion of static text miss the core challenge of persistent memory.
+
+Evaluation pipelines must be standardized or fully disclosed. At minimum: ingestion method (and prompt if applicable), embedding model, answer generation prompt, judge model, judge prompt, number of runs, and standard deviation. Without this, cross-system comparisons in published tables are not meaningful.
+
+Ground truth must be verified. A 6.4% error rate in the answer key creates a noise floor that makes small score differences uninterpretable. Northcutt et al. (NeurIPS 2021) found an average of 3.3% label errors across 10 major ML benchmarks and demonstrated that these errors can destabilize model rankings. LoCoMo's error rate is nearly double that baseline.
+
+The long-term memory evaluation problem is genuinely hard - it sits at the intersection of retrieval, reasoning, temporal understanding, and knowledge integration. We'd be interested in hearing what the community thinks is missing from this list, and whether anyone has found evaluation approaches that avoid these pitfalls.
+
+          Top comments (0)
+
+          Subscribe
+
+        Personal
+        Trusted User
+
+        Create template
+
+Templates let you quickly answer FAQs or store snippets for re-use.
+
+      Submit
+      Preview
+      Dismiss
+
+        Are you sure you want to hide this comment? It will become hidden in your post, but will still be visible via the comment's permalink.
+
+Hide child comments as well
+
+          Confirm
+
+For further actions, you may consider blocking this person and/or reporting abuse
+
+      Penfield
+
+  Follow
+
+    Named for the neurosurgeon who mapped memory. We give AI agents the same gift:  persistent recall, connected knowledge, and permanent continuity.
+
+          Joined
+
+          Feb 2, 2026
+
+            More from Penfield
+
+              The Man Who Studied the Hippocampus Is Telling You What's Missing
+
+                  #ai
+                  #aimemory
+                  #neuroscience
+                  #deepmind
+
+              We Fixed Karpathy’s LLM Wiki - PENgram Is the Typed Knowledge Graph Pipeline Everyone Asked For
+
+                  #ai
+                  #aimemory
+                  #obsidian
+                  #wiki
+
+          We're a place where coders share, stay up-to-date and grow their careers.
+
+        Log in
+
+        Create account
+

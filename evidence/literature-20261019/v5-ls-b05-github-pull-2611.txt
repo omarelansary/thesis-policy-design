@@ -1,0 +1,528 @@
+
+
+  Fix cache hit rate by making MCP tools order deterministic by warpdev · Pull Request #2611 · openai/codex · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Fix cache hit rate by making MCP tools order deterministic - #2611#2611
+
+Merged
+
+bolinfest merged 1 commit into
+openai:mainopenai/codex:mainfrom 
+warpdev:fix/mcp-tool-orderwarpdev/codex:fix/mcp-tool-orderCopy head branch name to clipboardAug 25, 2025
+
+Merged
+
+Fix cache hit rate by making MCP tools order deterministic#2611
+
+bolinfest merged 1 commit into
+openai:mainopenai/codex:mainfrom 
+warpdev:fix/mcp-tool-orderwarpdev/codex:fix/mcp-tool-orderCopy head branch name to clipboard
+
+Conversation
+
+            warpdev
+
+      commented
+
+        Aug 23, 2025
+
+  •
+
+          edited
+
+      Loading
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+Fixes #2610
+
+This PR sorts the tools in get_openai_tools by name to ensure a consistent MCP tool order.
+
+Currently, MCP servers are stored in a HashMap, which does not guarantee ordering. As a result, the tool order changes across turns, effectively breaking prompt caching in multi-turn sessions.
+
+An alternative solution would be to replace the HashMap with an ordered structure, but that would require a much larger code change. Given that it is unrealistic to have so many MCP tools that sorting would cause performance issues, this lightweight fix is chosen instead.
+
+By ensuring deterministic tool order, this change should significantly improve cache hit rates and prevent users from hitting usage limits too quickly. (For reference, my own sessions last week reached the limit unusually fast, with cache hit rates falling below 1%.)
+
+Result
+
+After this fix, sessions with MCP servers now show caching behavior almost identical to sessions without MCP servers.
+
+Without MCP
+With MCP
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+              👍
+            3
+  aladh, SwiftedMind, and unarmedcivilian reacted with thumbs up emoji
+              ❤️
+            1
+  SwiftedMind reacted with heart emoji
+
+    All reactions
+
+                👍
+                  3 reactions
+
+                ❤️
+                  1 reaction
+
+          fix(core): make MCP tools order deterministic to avoid prompt cache m…
+
+                  …
+
+          1063469
+
+…isses
+
+            github-actions
+    Bot
+
+      commented
+
+        Aug 23, 2025
+
+  •
+
+          edited
+
+      Loading
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+All contributors have signed the CLA  ✍️ ✅
+Posted by the CLA Assistant Lite bot.
+
+    All reactions
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+            warpdev
+
+      commented
+
+        Aug 23, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+  Author
+
+I have read the CLA Document and I hereby sign the CLA
+
+    All reactions
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+  github-actions Bot
+
+      added a commit
+      that referenced
+      this pull request
+
+      Aug 23, 2025
+
+          @warpdev has signed the CLA in #2611
+
+          b07a5ca
+
+warpdev
+
+        changed the title
+Make MCP tools order deterministic to cache input tokens
+
+Fix cache hit rate by making MCP tools order deterministic
+
+      Aug 23, 2025
+
+easong-openai
+
+          added
+  the 
+  code-review
+
+  Issues relating to code reviews performed by codex
+ label
+
+      Aug 24, 2025
+
+            bolinfest
+
+      commented
+
+        Aug 24, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Collaborator
+
+Or should we switch to IndexMap so the order is consistent, but matches the order users list them in in config.toml (assuming our TOML parser preserves order...).
+
+              👀
+            1
+  warpdev reacted with eyes emoji
+
+    All reactions
+
+                👀
+                  1 reaction
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+            warpdev
+
+      commented
+
+        Aug 25, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+  Author
+
+@bolinfest I agree. Switching to IndexMap would make the intent clearer and ensure the order is preserved. The change is a bit broader than my current patch. Would that be okay?
+
+    All reactions
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+            dylan-hurd-oai
+
+      commented
+
+        Aug 25, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+@warpdev @bolinfest given the impact here, I think it would be reasonable to land the fix with the current sort implementation and leave 2 things as follow-ups:
+
+the IndexMap change
+
+adding an integration test to prompt_caching.rs to test this end to end and ensure any serialization changes don't impact our cache hit rate
+
+              ❤️
+            1
+  warpdev reacted with heart emoji
+
+    All reactions
+
+                ❤️
+                  1 reaction
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+            bolinfest
+
+      commented
+
+        Aug 25, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Collaborator
+
+Ok I'll drive the IndexMap change after...thanks for taking the initiative on this!
+
+              ❤️
+            1
+  warpdev reacted with heart emoji
+
+    All reactions
+
+                ❤️
+                  1 reaction
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+bolinfest
+
+              self-assigned this
+
+      Aug 25, 2025
+
+              bolinfest
+
+                self-requested a review
+
+          August 25, 2025 02:29          
+
+                    bolinfest
+
+              approved these changes
+
+                    Aug 25, 2025
+
+    View reviewed changes
+
+            dylan-hurd-oai
+
+      commented
+
+        Aug 25, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+@bolinfest I'm happy to take on the IndexMap change! I did suggest this approach, after all 😅
+
+              ❤️
+            1
+  bolinfest reacted with heart emoji
+
+    All reactions
+
+                ❤️
+                  1 reaction
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+                    dylan-hurd-oai
+
+              approved these changes
+
+                    Aug 25, 2025
+
+    View reviewed changes
+
+            dylan-hurd-oai
+
+      commented
+
+        Aug 25, 2025
+
+              Copy link
+
+              Copy Markdown
+
+    Contributor
+
+Also documenting that I tested this change with mcp servers enabled - can reproduce the issue and confirmed the cache hit rate is back up on this branch.
+
+    All reactions
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+dylan-hurd-oai
+
+          removed
+  the 
+  code-review
+
+  Issues relating to code reviews performed by codex
+ label
+
+      Aug 25, 2025
+
+bolinfest
+
+              removed their assignment
+
+      Aug 25, 2025
+
+              bolinfest
+
+            merged commit ee2ccb5
+          into
+
+    openai:main
+
+        Aug 25, 2025
+
+github-actions
+Bot
+
+        locked and limited conversation to collaborators
+
+      Aug 25, 2025
+
+            bolinfest
+
+      commented
+
+        Jan 16, 2026
+
+              Copy link
+
+              Copy Markdown
+
+    Collaborator
+
+For posterity, when this commit was introduced, every call to McpConnectionManager::list_all_tools() created a new HashMap:
+
+      codex/codex-rs/core/src/mcp_connection_manager.rs
+
+        Lines 196 to 201
+      in
+      ee2ccb5
+
+               pub fn list_all_tools(&self) -> HashMap<String, Tool> { 
+
+                   self.tools 
+
+                       .iter() 
+
+                       .map(|(name, tool)| (name.clone(), tool.tool.clone())) 
+
+                       .collect() 
+
+               } 
+
+which was called for each turn of the agent loop.
+
+Had get_openai_tools() been called with the same HashMap within a conversation (at least when the set of tools did not change), then iteration order would have been consistent across turns, but that was not the case. (This was still a good change regardless, but the underlying source of the problem is not immediately evident from the lines of code touched by this PR.)
+
+    All reactions
+
+    Sorry, something went wrong.
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+      This file contains hidden or bidirectional Unicode text that may be interpreted or compiled differently than what appears below. To review, open the file in an editor that reveals hidden Unicode characters.
+      Learn more about bidirectional Unicode characters
+
+            Show hidden characters
+
+      Sign up for free
+      to subscribe to this conversation on GitHub.
+      Already have an account?
+      Sign in.
+
+    Reviewers
+
+    bolinfest
+
+    bolinfest approved these changes
+
+    dylan-hurd-oai
+
+    dylan-hurd-oai approved these changes
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+    Assignees
+
+    No one assigned
+
+    Labels
+
+    None yet
+
+    Projects
+
+    None yet
+
+    Milestone
+
+      No milestone
+
+    Development
+
+Successfully merging this pull request may close these issues.
+
+      Token cache rate drops drastically when using more than one MCP tool
+
+        Uh oh!
+
+There was an error while loading. Please reload this page.
+
+      4 participants
+
+Add this suggestion to a batch that can be applied as a single commit.This suggestion is invalid because no changes were made to the code.Suggestions cannot be applied while the pull request is closed.Suggestions cannot be applied while viewing a subset of changes.Only one suggestion per line can be applied in a batch.Add this suggestion to a batch that can be applied as a single commit.Applying suggestions on deleted lines is not supported.You must change the existing code in this line in order to create a valid suggestion.Outdated suggestions cannot be applied.This suggestion has been applied or marked resolved.Suggestions cannot be applied from pending reviews.Suggestions cannot be applied on multi-line comments.Suggestions cannot be applied while the pull request is queued to merge.Suggestion cannot be applied right now. Please check back later.
+
+    You can’t perform that action at this time.
+

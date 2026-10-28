@@ -1,0 +1,49 @@
+
+
+		                             Efficient MCP Tool Loading - Amp
+
+January 8, 2026 
+
+Efficient MCP Tool Loading    
+
+MCP servers often provide a lot of tools, many of which aren't used. That costs a lot of tokens, because these tool definitions have to be inserted into the context window whether they're used by the agent or not.
+
+As an example: the chrome-devtools MCP currently provides 26 tools that together take up 17k tokens; that's 10% of Opus 4.5's context window and 26 tools isn't even a lot for many MCP servers.
+
+To help with that, Amp now allows you to combine MCP server configurations with Agent Skills, allowing the agent to load an MCP server's tool definitions only when the skill is invoked.
+
+How It Works
+
+Create an mcp.json file in the skill definition, next to the SKILL.md file, containing the MCP servers and tools you want the agent to load along with the skill:
+
+{
+	"chrome-devtools": {
+		"command": "npx",
+		"args": ["-y", "chrome-devtools-mcp@latest"],
+		"includeTools": [
+			// Tool names or glob patterns
+			"navigate_page",
+			"take_screenshot",
+			"new_page",
+			"list_pages"
+		]
+	}
+}
+
+At the start of a thread, all the agent will see in the context window is the skill description. When (and if) it then invokes the skill, Amp will append the tool descriptions matching the includeTools list to the context window, making them available just in time.
+
+With this specific configuration, instead of loading all 26 tools that chrome-devtools provides, we instead load only four tools, taking up 1.5k tokens instead of 17k.
+
+Take a look at our ui-preview skill, that makes use of the chrome-devtools MCP, for a full example.
+
+If you want to learn more about skills in Amp, take a look at the Agent Skills section in the manual.
+
+To find out more about the implementation of this feature and how we arrived at it, read this blog post by Nicolay.
+
+AlsoofInterest 
+
+Agent Skills 
+
+How skills work in Amp 
+Read  
+

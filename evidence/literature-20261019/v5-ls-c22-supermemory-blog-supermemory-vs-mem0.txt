@@ -1,0 +1,141 @@
+Supermemory vs Mem0 — Features, Benchmarks and Evaluation — supermemorySkip to content
+
+HumanAgentMenuClose
+Blog·Learning
+Supermemory vs Mem0 — Features, Benchmarks and Evaluation
+Compare Supermemory and Mem0 using documented capabilities, benchmark methodology, deployment options and a workload-specific cost model.
+By Dhravya ShahSeptember 17, 2026·4 min read
+
+For the numbers side by side, including an independent benchmark that ran both, see supermemory vs Mem0.
+
+Supermemory and Mem0 both provide persistent memory for AI applications. The useful comparison is how each handles your sources, identities, changing facts and retrieval workload. This article is published by Supermemory and covers documented capabilities as of September 18, 2026.
+
+What capabilities do both products offer?
+
+Mem0 offers a managed Platform and an open-source implementation. Its Platform documentation describes hosted memory APIs. Supermemory offers hosted ingestion, search and profiles, plus a local deployment option. Compare a specific deployment and version on each side rather than mixing an open-source installation with a vendor's managed service.
+
+Area
+Supermemory
+Mem0 Platform
+
+Identity
+Container tags and scoped API keys
+User, agent, app and run scopes
+
+Context
+Searchable memories/documents and a profile endpoint
+Searchable memories, entity filters and background memory processing
+
+Input
+Text, URLs and supported files
+Conversations plus documented image and PDF input
+
+Changing facts
+Memory versioning and explicit forgetting
+Update/delete operations, expiration and Dream lifecycle features
+
+Deployment
+Hosted service or local binary with different operational features
+Managed Platform or separately operated open-source stack
+
+Mem0's multimodal documentation covers images and PDFs. Its Dream documentation also describes automatic superseding and merging, with pattern synthesis available on eligible plans.
+
+Supermemory's profiles provide maintained user context. Applications still need to retrieve and supply that context to their model; a profile is not guaranteed to accompany every search call. Use scoped keys or server-side authorization to enforce which containers a caller may access.
+
+How should the benchmark results be read?
+
+Supermemory's LongMemEval report publishes a 95% overall result for its GPT-4o setup with aggregation and retrieval at k=15. It also lists 84.6% for GPT-5 and 85.2% for Gemini 3 Pro. These are different reported configurations, not interchangeable measurements. The page's reported context-token reduction belongs to that experiment, not every production query.
+
+Mem0 publishes its own results and evaluation harness. Treat both vendors' results as vendor-reported until reproduced under a matched setup. Record dataset version, answer model, judge, retrieval budget, aggregation, cost and run configuration before comparing percentages.
+
+Run the same evaluation for the versions you intend to deploy, using questions and documents representative of your application.
+
+Which lifecycle behavior matters in production?
+
+Test a fact that changes, a duplicate, an expiration and an explicit deletion separately. Inspect both default retrieval and history-oriented retrieval. Mem0 documents that superseded memories can remain in default results unless the caller requests current facts. Supermemory's explicit memory forgetting is a soft-delete operation. Neither fact supersession nor hiding a memory automatically proves permanent erasure from every storage layer.
+
+Use Mem0's expiration specification and Supermemory's forget endpoint to define application behavior. Check the boundary immediately before and after expiration and keep deletion requirements separate from retrieval preferences.
+
+How should costs and hosting be compared?
+
+Build the same monthly workload against the current Mem0 pricing and Supermemory pricing pages. Include ingestion, retrieval, optional processing, model calls and operational costs. Allocate the plan's credits across those operations to estimate the complete monthly workload.
+
+Supermemory's supported updates with a stable document identity can avoid billing unchanged ingestion tokens again. Include separately metered search and processing operations in that estimate. See the billing guide.
+
+For self-hosting, compare operational features as well as the API. Supermemory's local-versus-enterprise documentation distinguishes a single-machine deployment from organizational controls and managed connectors. Offline operation requires local model and embedding configuration, not merely running the server on your machine.
+
+What should you evaluate next?
+
+Replay representative conversations and documents through both systems. Measure relevant-fact retrieval, stale answers, tenant isolation, time to searchable, p50/p95 latency and total cost under the same load. Add correction, expiration and deletion cases before a migration decision.
+
+Start with the memory evaluation harness guide and use the migration playbook only after the new path passes your acceptance criteria.
+
+Frequently asked questions
+
+Does Mem0 support multimodal inputs and lifecycle management?
+
+Mem0 Platform documents image and PDF inputs, memory expiration, and Dream features for superseding, merging and synthesis. Availability and behavior depend on the feature and plan.
+
+Are vendor benchmark percentages directly comparable?
+
+Only when the dataset, models, retrieval budgets, scoring and run configurations match. Vendor-reported results should be attributed and reproduced before claiming a winner.
+Other posts.
+How AI memory actually works. A beginner's guideHow AI apps remember things between chats, why a bigger context window doesn't solve it, and the parts every memory system shares.EngineeringOct 9, 2026
+We're open sourcing the company brain. Here's how we designed the multiplayer harnessCompany Brain is now open source. A walkthrough of the multiplayer harness behind its Slack experience, from proactivity and memory boundaries to approvals and recovery.NewsSep 25, 2026
+Jev changes a lot in memory & context engineering. Here's exactly how.We tested Jev across reranking, chunking, observation, and harness decisions. Here is where fast decision models help memory systems, where they cost more, and where they still fall short.EngineeringSep 24, 2026
+I reverse-engineered Instinct's memory. Here's exactly how it worksInstinct keeps its memory as git-tracked markdown files, found with grep rather than vectors. Here is the whole system as far as black-box probing can reconstruct it, and how to rebuild it on supermemory in about 60 lines.EngineeringSep 20, 2026
+An update to supermemoryWe've discontinued the supermemory company brain and Nova. Everyone who was charged has been refunded, our MCP and plugins continue to run, and we're going all in on the memory engine.NewsSep 10, 2026
+Scaling Conversations: How Adapta Grew Usage Without Losing ContextAdapta added Supermemory as a persistent memory layer so every conversation keeps its context — letting the team scale usage without losing the thread.Case StudyJun 12, 2026
+How Chatarmin Ditched RAG and Went Memory-Only with SupermemoryChatarmin replaced a heavy RAG pipeline with Supermemory's memory layer — cutting average AI response time from 40s to 12s and token usage by 40–50%.Case StudyJun 10, 2026
+SMFS: making agentic retrieval 55% cheaper AND more accurateWe launched SMFS.ai (Supermemory Filesystem) a few weeks ago, with a simple bet: We can redesign the filesystem specifically for agents, with special files, structures, and commands that it can use for it's tasks. Today, SMFS is used by hundreds of companies to power their agents.EngineeringMay 28, 2026
+Introducing Dynamic Dreaming: supermemory now connects the dots, for you.Dreaming is magical. TLDR: We're launching Dynamic Dreaming in supermemory today, which automatically works if you're using supermemory in any way - API, OpenClaw, Hermes agent, etc.EngineeringMay 25, 2026
+Dear reader, we just made supermemory insanely cheap... the Context CloudWhen I first started building supermemory, I had one goal: To build the best memory system for AI. I would talk to customers, and find out that memory was not the only thing they needed - They were all setting up 7-8 different vendors at the same time.EngineeringMay 18, 2026
+Introducing @supermemory/tools v2.0.0Today we're releasing v2.0.0. This release unifies the API across all agents sdk integrations from AI SDK to Mastra, makes conversation identity a first-class concept, and ships with memory saving on by default.EngineeringApr 27, 2026
+Solving the Precision-Recall Tradeoff: Search Result AggregationWhen you're building memory for AI, search is your foundational layer. The way search generally works is straightforward: the user defines a query, and then sets a limit (top-K) on how many search results they want returned. Usually, this is set to 10 or 20.EngineeringApr 5, 2026
+OpenClaw Memory Problems: Why It Forgets and How to Fix It (2026)OpenClaw remembers by writing Markdown files in its workspace, so it forgets anything the agent didn't save. Why that breaks down, how the supermemory plugin recalls and saves on every turn instead, and how to install it, free on every plan.EngineeringFeb 19, 2026
+Stateful Coding Agents with Memory: Build Long-Running Agents (2026)We built a plugin for Claude Code and OpenCode that gives your coding agent persistent memory. It remembers your preferences, learns your codebase, and never loses context mid-conversation. The result is an agent you can run for months without starting over.EngineeringFeb 18, 2026
+Clawd / Molt bot's memory SUCKS. We gave it supermemory.I'm the founder of supermemory. Clawd/Molt bot is blowing up right now, with many, many use cases. I set it up, too, and have been using it through telegram. TLDR: just go to https://supermemory.ai/docs/integrations/clawdbot to set up supermemory for your clawd bot.EngineeringJan 28, 2026
+Catch up with our UNFORGETTABLE Launch WeekOver the last year, one belief has guided almost everything we’ve built at Supermemory AI becomes meaningfully useful only when it remembers. Memory shouldn’t be something developers rebuild from scratch. It shouldn’t be fragile, expensive, or trapped inside a single tool.NewsJan 4, 2026
+Empowering the Next Generation of Founders: Supermemory Startup ProgramIf there’s one thing we’ve learned while building Supermemory, it’s that most startups don’t fail because they didn't build features; they fail when infrastructure slows them down, or they built too slow.NewsDec 31, 2025
+Building code-chunk: AST Aware Code ChunkingAt Supermemory, we're building context engineering infrastructure for AI. A huge part of that is dealing with code: ingesting repos, understanding structure, and making it searchable. The problem is that most code chunking solutions are terrible. We built code-chunk to fix this.EngineeringDec 29, 2025
+Supermemory raises $3 million with the best memory engine for LLMsToday, I am excited to announce our first funding round to accelerate our mission of building an interoperable, scalable and reliable memory for LLMs and agents. Memory is one of the hardest challenges in AI right now.NewsOct 6, 2025
+Mem0 vs Supermemory: Why Scira SwitchedScira AI moved its production memory layer from Mem0 to Supermemory. This is what failed, what improved, and how the team evaluated the two systems.Case StudyOct 2, 2025
+Never Record Again: How Montra Uses Supermemory to Rethink Video CreationCampbell Baron, the founder of Montra, has been making videos since he was twelve. By thirteen, he was already doing brand work. Today, he’s betting on a very different future for creators: a world where recording is the exception, and most videos are generated from scratch.Case StudyAug 21, 2025
+Unified Memory That Works Where You Work: Your Second Brain With SupermemoryHi everyone, I’m Dhravya, the founder of Supermemory. I want to start with a little story behind why this product means so much to me. You can also skip straight to what it is and how it works below.EngineeringJul 25, 2025
+Supermemory just got faster on PlanetScaleWhat is Supermemory? Supermemory completes the missing part of the LLM puzzle: memory. Just as memory is crucial for human intelligence, it's essential for truly intelligent AI systems.EngineeringJul 18, 2025
+Faster, smarter, reliable infinite chat: Supermemory IS context engineering.People are obsessed with prompts and prompt engineering. Sure, what you say is important, but what the model knows when you say it is the difference between a stateless text generator and an intelligent AI system. In short, context is the most crucial component.NewsJul 9, 2025
+We solved AI API interoperabilityOne API to rule them all, One spec to find them, One library to bring them all and in the TypeScript, bind them. When we were building the Infinite Chat API, initially, we only supported the OpenAI format. This was fine, until a lot of our customers started asking for more.EngineeringJul 7, 2025
+The Wow Factor of Memory - How Flow Used Supermemory To Build Smarter, Stickier ProductsOverview: Flow is a note-taking app built around a bold vision: to create a more personal, context-aware writing experience powered by AI. At the heart of this mission is memory.Case StudyJun 14, 2025
+The UX and technicalities of awesome MCPsLast month, we launched the Supermemory MCP, mostly to test our own infrastructure and get some initial traction. It blew up. To my absolute surprise, the initial launch itself got half a million impressions (!!!). Then, we launched and got #2 on ProductHunt too.EngineeringJun 8, 2025
+Architecting a memory engine inspired by the human brainLanguage is at the heart of intelligence, but what truly powers meaningful interaction is memory — the ability to accumulate, recall, and contextualize information over time. Large Language Models (LLMs) have mastered language, but memory remains their Achilles’ heel.EngineeringJun 5, 2025
+Start building with supermemory.
+Memory and continual learning for any model, any harness. Available through our API, plugins, and MCP.Build with supermemory
+
+Optional cookies for analytics, ads/referrals, company insights and embedded content. Your choice. Details
+PreferencesReject allAccept all
+ YOUR PRIVACY×
+
+Your cookies. Your call.
+Keep it essential, or choose what you’re comfortable sharing. The site works either way.
+
+EssentialAlways on
+Remember your privacy choices and keep the site secure. These don’t require consent.
+
+Site analytics
+Page views, clicks, and performance help us improve the site. No session recordings.PostHog · Storage details
+First-party cookie: 180 days. Local and session storage for visitor and session identifiers. Privacy details
+
+Ads & referrals
+Measure Reddit and Google Ads campaigns and credit partners for referrals. Reddit and Google may use visit data to personalise ads.Reddit Pixel · Google Ads · Dub · Storage details
+Reddit and Google Ads identifiers: 90 days. Dub referral cookie: 60 days. Privacy details
+
+Company insights
+Snitcher uses your IP address, page visits, and device information to identify the business visiting us.Snitcher · Storage details
+Browser/device identifier: up to 1 year. Visit session: 30 minutes after activity. Privacy details
+
+Embedded content
+Load videos, posts, and interactive content from YouTube, Vimeo, X, and Claude. These providers receive your IP and may use their own cookies.YouTube · Vimeo · X · Anthropic · Storage details
+Third-party cookies and browser storage depend on the provider. Their policies describe the durations and controls. Privacy details
+
+Reject allAccept allSave my choices →
+Change or withdraw any time via Cookie settings in the footer. Read our cookie notice.

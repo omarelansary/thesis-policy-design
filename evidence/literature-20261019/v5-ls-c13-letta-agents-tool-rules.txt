@@ -1,0 +1,142 @@
+ Built-in server tools | Letta Docs                
+
+  Skip to content 
+
+     Letta Docs     
+
+  Docs  
+  Agent SDK  
+  Handbook     
+
+Agent SDK     
+
+DocsDocs 
+Agent SDKAgent SDK 
+
+HandbookHandbook           Search the docs  CtrlK    
+   Cancel  
+
+  Discord      
+
+V1 SDK (legacy)
+Concepts
+Tools
+Built-in tools
+Copy Markdown
+
+Open in Claude
+
+Open in ChatGPT
+
+Open in Cursor
+
+Copy Markdown
+
+View as Markdown
+
+Built-in server tools
+Use Letta API's built-in tools for common actions like web search   
+
+Letta provides built-in server tools that enable agents to search the web, execute code, and fetch webpage content.
+
+Available toolsSection titled “Available tools”
+
+Web SearchSection titled “Web Search”
+
+Search the internet in real-time using Exa’s AI-powered search engine.
+
+agent = client.agents.create(
+
+    tools=["web_search"],
+
+    memory_blocks=[{
+
+        "label": "persona",
+
+        "value": "I use web_search for current events and external research."
+
+    }]
+
+)
+
+Key features:
+
+AI-powered semantic search
+
+Category filtering (news, research papers, PDFs, etc.)
+
+Domain filtering
+
+Date range filtering
+
+Highlights and AI-generated summaries
+
+Setup: Works out of the box with the Letta API. Docker requires EXA_API_KEY.
+
+Read full documentation →
+
+Fetch WebpageSection titled “Fetch Webpage”
+
+Fetch and convert webpages to readable text/markdown.
+
+agent = client.agents.create(
+
+    tools=["fetch_webpage"],
+
+    memory_blocks=[{
+
+        "label": "persona",
+
+        "value": "I fetch and read webpages to answer questions."
+
+    }]
+
+)
+
+Key features:
+
+Converts HTML to clean markdown
+
+Extracts article content
+
+Multiple fallback extraction methods
+
+Optional Exa integration for enhanced extraction
+
+Setup: Works out of the box everywhere. Optional EXA_API_KEY for enhanced extraction.
+
+Read full documentation →
+
+Code InterpreterSection titled “Code Interpreter”
+
+Execute code in a secure sandbox with full network access.
+
+agent = client.agents.create(
+
+    tools=["run_code"],
+
+    memory_blocks=[{
+
+        "label": "persona",
+
+        "value": "I use Python for data analysis and API calls."
+
+    }]
+
+)
+
+Key features:
+
+Python with 191+ pre-installed packages (numpy, pandas, scipy, etc.)
+
+JavaScript, TypeScript, R, and Java support
+
+Full network access for API calls
+
+Fresh environment per execution (no state persistence)
+
+Setup: Works out of the box with the Letta API. Docker requires E2B_API_KEY.
+
+Read full documentation →  
+
+     

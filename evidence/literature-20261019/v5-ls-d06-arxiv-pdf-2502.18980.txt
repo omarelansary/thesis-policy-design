@@ -1,0 +1,1570 @@
+
+=== [page 1] ===
+PEToolLLM: Towards Personalized Tool Learning in
+Large Language Models
+Qiancheng Xu1, Yongqi Li1†, Heming Xia1, Fan Liu2, Min Yang3, Wenjie Li1
+1 The Hong Kong Polytechnic University
+2 National University of Singapore
+3 Shenzhen Institutes of Advanced Technology, Chinese Academy of Sciences
+{qiancheng.xu, he-ming.xia}@connect.polyu.hk
+liyongqi0@gmail.com
+cswjli@comp.polyu.edu.hk
+Abstract
+Tool learning has emerged as a promising di-
+rection by extending Large Language Models’
+(LLMs) capabilities with external tools. Ex-
+isting tool learning studies primarily focus on
+the general-purpose tool-use capability, which
+addresses explicit user requirements in instruc-
+tions. However, they overlook the importance
+of personalized tool-use capability, leading
+to an inability to handle implicit user prefer-
+ences. To address the limitation, we first for-
+mulate the task of personalized tool learning,
+which integrates user’s interaction history to-
+wards personalized tool usage. To fill the gap
+of missing benchmarks, we construct PETool-
+Bench, featuring diverse user preferences re-
+flected in interaction history under three dis-
+tinct personalized settings, and encompassing a
+wide range of tool-use scenarios. Moreover,
+we propose a framework PEToolLLaMA to
+adapt LLMs to the personalized tool learning
+task, which is trained through supervised fine-
+tuning and direct preference optimization. Ex-
+tensive experiments on PEToolBench demon-
+strate the superiority of PEToolLLaMA over
+existing LLMs. We release our code and data
+at https://github.com/travis-xu/PEToolBench.
+1
+Introduction
+Large Language Models (LLMs) possess exten-
+sive knowledge and have powerful instruction-
+following abilities, making them effective AI as-
+sistants for tasks such as text rewriting, question
+answering, and code writing (Zhao et al., 2023).
+However, they often struggle in addressing user
+needs in scenarios such as checking weather and
+booking flights. To address this, tool learning (Qin
+et al., 2024a; Qu et al., 2024) has emerged as a
+promising solution by enabling LLMs to utilize
+external tools, such as real-time weather APIs and
+booking systems. In this way, tool learning has ex-
+tended LLMs’ capabilities to tackle more complex
+†Corresponding author.
+tasks, enabling them to fulfill a wide range of user
+needs.
+Current tool learning procedure typically begins
+with a user instruction, and then LLMs are required
+to use tools with appropriate functionalities for sat-
+isfying users’ needs. Existing tool learning meth-
+ods can be categorized into in-context learning (Wu
+et al., 2024; Liu et al., 2025b) and fine-tuning ap-
+proaches (Schick et al., 2023; Wang et al., 2025b).
+The former approach allows LLMs to use tools by
+directly providing tool documentation in input but
+the performance is constrained by the input length.
+The latter approach trains LLMs to internalize tool
+knowledge but struggles with tool generalization.
+Despite the advancement, existing tool learning
+methods primarily focus on the general-purpose
+tool-use capability but overlook the critical role of
+personalization. In tool learning, more personal-
+ized user needs are expected to be derived from
+the user’s previous tool usage history as a supple-
+ment to user instructions, which can help LLMs
+provide more customized tool-usage assistance to
+enhance the user experience. As illustrated in Fig-
+ure 1, personalized tool learning is non-trivial due
+to the following aspects. 1) Implicit user prefer-
+ences. User preferences for tool usage are often im-
+plicitly conveyed through the user’s history rather
+than explicitly stated in user instructions, making
+them difficult to understand. For instance, when a
+user requests a search for articles, their preference
+for academic-related content needs to be inferred
+from previous interactions with academic tools
+like Google Scholar. 2) Non-functional tool at-
+tributes. Since many tools have the same function-
+alities, user preferences cannot be effectively distin-
+guished based solely on tool functionalities. This
+underscores the need to consider non-functional
+tool attributes, such as usability, integrability, and
+accessibility, which can better reflect user prefer-
+ences. As shown in Figure 1, Google Search can be
+distinguished from other search tools by its integra-
+1
+arXiv:2502.18980v1  [cs.CL]  26 Feb 2025
+
+=== [page 2] ===
+I want to search for articles 
+related to DeepSeek.
+Interaction History
+Find location … 
+Export citations… 
+User Instruction
+The interaction history suggests that the user might prefer Google-integrated 
+or academic-related tools. So, I will use Google Search.
+Tool
+Functionality
+Non-functional Attributes
+Google Search
+Baidu Search
+Search
+Search
+Google-integrated, academic support, …
+Chinese localization support, …
+Google Scholar
+Google Map
+···
+···
+(b) Personalized Tool Learning
+Candidate Tools
+Implicit Preference
+Explicit Requirement
+User Instruction
+I want to search for articles 
+related to DeepSeek.
+Multiple tools can do searching. 
+Which should I use?
+Candidate Tools
+(a) Tool Learning
+Tool
+Functionality
+Google Search
+Baidu Search
+Search
+Search
+···
+Explicit Requirement
+Figure 1: Comparison between (a) tool learning and (b) personalized tool learning. Personalized tool learning
+facilitates implicit preference comprehension and customized tool usage for individual users.
+tion into Google’s ecosystem with Google Scholar,
+making it more suitable for users with academic
+needs.
+To address the above issues, we formulate the
+task of personalized tool learning in LLMs, aim-
+ing at personalized tool usage for individual users.
+Formally, given user instructions along with user’s
+interaction history, LLMs are required to answer
+user instructions with tools by considering both ex-
+plicit user requirements in instructions and implicit
+user preferences behind interaction history.
+Since there is no benchmark for this task cur-
+rently, we fill this gap by introducing the first per-
+sonalized tool learning benchmark (PEToolBench).
+Specifically, the benchmark is created through three
+following steps. 1) Tool Preparation. We collect
+a bunch of high-quality tools from RapidAPI and
+then leverage LLM to understand the functionality
+and non-functional attributes of each tool. 2) Pref-
+erence Construction. Among same-functionality
+tools, we construct the user’s tool preferences by as-
+signing tools with distinct non-functional attributes
+to different users. 3) Data Creation. Based on tool
+preference, we synthesize the user’s interaction his-
+tory into a sequence of tool-use interactions, each
+consisting of a user instruction and an LLM’s tool
+call. We design three personalized tool-usage set-
+tings by generating the interaction history in three
+types, i.e., preferred-only, rating-integrated, and
+chronological. And then we use tools not included
+in the interaction history to synthesize user instruc-
+tions. After rigorous filtering, we obtain 12,000
+user instructions with interaction histories reflect-
+ing diverse user preferences and cover a wide range
+of tool-use scenarios by encompassing 7454 tools
+across 46 categories.
+Based on the PEToolBench dataset, we propose
+the personalized tool learning framework (PETool-
+LLaMA) to equip LLMs with personalized tool-
+use capability. The training process consists of two
+stages: 1) the supervised fine-tuning (SFT) stage,
+which equips LLM with foundational tool-use ca-
+pability to address user needs; 2) the direct pref-
+erence optimization (DPO) stage, which samples
+the user’s preferred and non-preferred tool calls for
+pair-wise optimization to better align with user pref-
+erences. We evaluate 6 distinct open-source and
+closed-source LLMs including the latest GPT-4o on
+PEToolBench. Experimental results demonstrate
+that our PEToolLLaMA significantly outperforms
+the best-performing LLM across all settings with
+improvements even more than 50%, showcasing its
+superior personalized tool-use capabilities.
+In summary, our contributions are as follows.
+• We are the first to formulate the task of per-
+sonalized tool learning in LLMs, which incor-
+porates user’s interaction history to achieve
+personalized tool-usage assistance.
+• We construct the first benchmark for person-
+alized tool learning in LLMs, PEToolBench,
+featuring user instructions integrated with in-
+teraction history reflecting diverse user prefer-
+ences and encompassing various tools.
+• We propose a novel personalized tool learning
+framework PEToolLLaMA. Extensive exper-
+iments demonstrate that PEToolLLaMA sig-
+nificantly surpass the best-performing LLM
+2
+
+=== [page 3] ===
+by more than 50%, exibiting exceptional per-
+sonalized tool-use capabilities.
+2
+Related Work
+2.1
+Tool Learning in LLMs
+Tool learning aims at extending the capabilities of
+LLMs by equipping them with external tools to
+solve tasks like weather inquiry, car navigation,
+and restaurant reservation. Existing benchmarks
+primarily focus on evaluating the tool learning pro-
+ficiency of LLMs in addressing user instructions,
+from aspects such as tool selection and calling ac-
+curacy (Xu et al., 2024; Wang et al., 2024b; Ye
+et al., 2024; Wang et al., 2025a), tool planning
+ability (Basu et al., 2024; Wang et al., 2024a;
+Shen et al., 2024; Liu et al., 2025a), and com-
+plex workflow creation (SHEN et al., 2025; Qiao
+et al., 2025; Fan et al., 2025). To improve tool-
+use capabilities, various strategies have been intro-
+duced, including in-context learning which enables
+LLMs to use tools via documentation (Yuan et al.,
+2024; Shi et al., 2024; Qu et al., 2025), and fine-
+tuning which trains LLMs on specialized tool-use
+datasets (Zhuang et al., 2024; Chen et al., 2024,
+2025). However, prior studies neglect the crucial
+role of personalized tool usage in LLMs. This pa-
+per addresses this gap by introducing personalized
+tool learning, developing a comprehensive bench-
+mark for evaluation, and proposing an optimization
+strategy to enhance personalized tool-use capabili-
+ties in LLMs.
+2.2
+Personalization in LLMs
+The goal of personalization in LLMs is to leverage
+personal user data, such as historical behaviors and
+background information, to generate outputs that
+better align with the user preferences (Tseng et al.,
+2024). Approaches such as fine-tuning (Cai et al.,
+2025) and prompt engineering (Yuan et al., 2025)
+have been explored to adapt LLMs to individual
+or domain-specific tasks. These approaches have
+been applied across various fields, including rec-
+ommendation systems (Lyu et al., 2024), search
+engines (Zhou et al., 2024), education (Liu et al.,
+2024), and dialogue generation (Wang et al., 2023).
+However, previous research has not investigated
+LLMs’ personalization in the area of tool learning.
+In this work, we bridge this gap by incorporating
+user’s interaction history to assess and enhance the
+LLMs’ capability in providing personalized tool-
+usage assistance for specific users.
+3
+Task and Benchmark
+3.1
+Task Formulation
+Tool Learning
+Given an instruction qu of the
+user u, tool learning aims to generate an appro-
+priate tool call, including the selected tool and
+its corresponding parameters, from a set of can-
+didate tools. Formally, let the candidate tool set
+be T = {d(t1), d(t2), ..., d(tN)}, where d(ti) rep-
+resents the documentation of tool ti and N is the
+total number of candidate tools. The LLM is then
+tasked with generating a tool call c = (t, p), where
+t ∈T and p denotes its parameters:
+(t, p) = LLM(qu, T ).
+(1)
+Personalized Tool Learning
+In personalized
+tool learning, we incorporate the users’ interac-
+tion history alongside their instructions, enabling
+the LLM to generate tool calls that satisfy both
+the users’ explicit requirements and implicit prefer-
+ences. For a user u, we define the interaction history
+as Hu = {h1
+u, h2
+u, ..., hM
+u }, where each hi
+u consists
+of a past user instruction qi
+u and the corresponding
+tool call ci
+u = (ti
+u, pi
+u), with ti
+u representing the
+selected tool and pi
+u denoting its associated param-
+eters. Let cu = (tu, pu) represent the personalized
+tool call for user u, the personalized tool learning
+task can then be formulated as:
+(tu, pu) = LLM(qu, T , Hu),
+(2)
+3.2
+Benchmark Construction
+Due to the lack of real user interaction histories on
+tool-usage, we adopt a tool-driven approach to sim-
+ulate interactions based on pre-constructed user’s
+tool preferences. The whole process for construct-
+ing PEToolBench, illustrated in Figure 2, consists
+of three steps: tool preparation, preference con-
+struction, and data creation.
+3.2.1
+Tool Preparation
+Tool Collection
+Following ToolBench (Qin et al.,
+2024b), we adopt the tools from RapidAPI for our
+benchmark, since it offers a large-scale and diverse
+collection of real-world tools that can potentially
+address a wide range of user needs. To ensure the
+quality of the collected tools, we perform strict
+filtering by removing: 1) outdated tools, which
+are marked as deprecated in RapidAPI; 2) tools
+with insufficient information, such as inadequate or
+missing tool documentation; and 3) duplicate tools,
+which have repeated tool names, descriptions, or
+category names.
+3
+
+=== [page 4] ===
+Functionality
+Non-functional Attributes
+Tool-use Example
+Documentation
+Tools
+Tool Preparation
+Preference Construction
+Tool Classification
+Functionality Groups
+Tool Preference
+Construction
+Instruction 
+Generation
+Interaction History
+Generation
+User's Tool Preference
+...
+...
+Interaction History
+...
+Instructions
+PersonalToolBench
+Tool Collection
+Tool Understanding
+Data Creation
+Figure 2: Illustration of the process for constructing our PEToolBench.
+Tool Understanding
+Since tool documentation
+often contains redundant and irrelevant informa-
+tion, directly extracting tool attributes from it can
+be challenging. To address this, we first provide
+the documentation of each tool to LLM and prompt
+it to generate a tool-use example, including a sim-
+ulated user instruction and parameters for calling
+the tool. Next, based on the tool documentation
+and tool-use example, the LLM is instructed to
+generate descriptions of the tool’s functionality
+and non-functional attributes separately. Besides,
+we include demonstrations in the prompt to help
+the LLM distinguish between these two attribute
+types. By leveraging specific tool-use examples
+and demonstrations, the LLM can develop a more
+comprehensive understanding of each tool’s func-
+tionality and non-functional characteristics.
+3.2.2
+Preference Construction
+Tool Classification
+To identify potential tool-
+usage scenarios for users, we classify tools with
+the same functionalities into groups. Specifically,
+we first employ the Ada Embedding model 1 to
+compute embeddings for the functionality descrip-
+tions of all tools. Then, we apply the DBSCAN
+algorithm (Schubert et al., 2017) to cluster these
+tools into multiple groups based on the similarity
+of their embeddings. Within each group, the tools
+share the same functionality and can be applied to a
+specific tool-usage scenario. To further ensure that
+tools within each group exhibit uniform function-
+ality, we conduct rigorous filtering and only retain
+1https://platform.openai.com/docs/guides/
+embeddings/embedding-models.
+groups where tools 1) have the same input-output
+formats (i.e., required/optional parameters and re-
+sponse schema) and 2) belong to the same category
+(e.g., sports, music, finance).
+Tool Preference Construction
+We leverage non-
+functional tool attributes to construct the user’s tool
+preference. First, we randomly sample a function-
+ality group for a user, representing a potential tool-
+usage scenario for interaction. Within this group,
+we choose a tool with specific non-functional at-
+tributes as the user’s preferred tool, while the others
+are considered non-preferred. Using the preferred
+tool as a reference, we retrieve the top-5 tools with
+the most similar non-functional attributes. Simi-
+larity is computed based on the embeddings of the
+tools’ non-functional descriptions, which are gen-
+erated in the Tool Understanding phase. Through
+multiple iterations of sampling and retrieving, we
+obtain a diverse set of preferred and non-preferred
+tools that represent user preferences. After each it-
+eration, we check for functionality overlap between
+newly retrieved tools and previously selected ones.
+If an overlap is detected, the tools are discarded,
+and the sampling process is restarted. This ensures
+that each tool-usage scenario is associated with
+only one preferred tool per user. By following this
+approach, we construct diverse tool sets that align
+with different user preferences.
+3.2.3
+Data Creation
+Interaction History Generation
+Based on tool
+preference, we leverage the LLM to construct the
+user’s interaction history. Specifically, for each
+user, we provide LLM with the user’s preferred
+4
+
+=== [page 5] ===
+and non-preferred tools, including tool attributes
+and tool-use examples generated in the Tool Under-
+standing phase. The LLM will generate a sequence
+of simulated user-LLM interactions, each consist-
+ing of a user instruction and an LLM’s tool call, as
+the user’s interaction history.
+We design three personalized tool-use settings
+by generating the interaction history in three types
+(illustrated in Figure 7): 1) preferred-only history,
+where the tools involved in the interactions are
+all preferred by the user; 2) rating-integrated his-
+tory, including both the user’s preferred and non-
+preferred tools, with a user’s binary rating for each
+tool-usage interaction representing the user prefer-
+ence, i.e., “liked” if the tool aligns with the user
+preferences, and “disliked” otherwise. 3) chrono-
+logical history, which organizes interactions in time
+order to reflect changes in user preferences over
+time, i.e., the more recent tool-usage interactions
+are more preferred by the user, while earlier interac-
+tions are less preferred. In this way, we can present
+different forms of user preferences.
+Instruction Generation
+Next, we use LLM to
+generate user instructions based on the user’s pre-
+ferred tools that are not included in the user’s in-
+teraction history. We instruct the LLM to avoid
+directly generating the name of the tool in the in-
+struction, ensuring that the user preference for the
+tool can only be inferred from the user’s interaction
+history. Each user instruction is combined with the
+user’s interaction history into a data instance.
+Finally, we obtain 12,000 data instances encom-
+passing 7,454 tools across 46 categories. We split
+all data into two parts: a training set comprising
+9,000 instances for three personalized settings and
+a test set containing the rest instances.
+3.3
+Benchmark Analysis
+We present the statistical information of our
+PEToolBench in Table 3, including the statistics
+of data instances in three settings and under vary-
+ing interaction history lengths. We also present
+the distribution of tool categories in Figure 4. Sta-
+tistical information demonstrates the diversity and
+complexity of our dataset.
+3.4
+Evaluation Metrics
+Given the user’s instruction and interaction history,
+LLM is expected to select the appropriate tool from
+a candidate tool set, and then call the selected tool
+Train
+Test
+0
+1000
+2000
+3000
+# Data Instances
+preferred-only
+rating-integrated
+chronological
+1-20
+21-40
+41-60
+61-80
+81-100
+0
+1000
+2000
+3000
+# Data Instances
+Figure 3: Statistics of data instances in three person-
+alized settings (in the left figure) and distributions of
+interaction history length (in the right figure).
+13.7%
+11.7%
+8.5%
+7.5%
+4.8%
+3.7%
+3.1%
+3.0%
+2.9%
+2.9%
+2.9%
+2.5%
+2.4%
+2.3%
+2.2%
+1.8%
+1.8%
+1.8%
+1.6%
+1.6%
+1.6%
+Data
+Finance
+Sports
+Social
+Entertainment
+Tools
+Business
+News Media
+Other
+Location
+Gaming
+Music
+Travel
+eCommerce
+Weather
+Food
+Business Software
+Financial
+Education
+Database
+Communication
+Media
+Movies
+Video Images
+Transportation
+Mapping
+Commerce
+Science
+Advertising
+Artificial Intelligence
+Search
+SMS
+Health and Fitness
+Devices
+Text Analysis
+Medical
+Logistics
+Email
+Events
+Monitoring
+Cryptography
+Translation
+Visual Recognition
+Energy
+Payments
+Jobs
+Figure 4: Distributions of tool categories.
+with corresponding parameters. Therefore, we de-
+fine two metrics as follows.
+• Tool Accuracy (Tool Acc): The metric as-
+sesses the ability of LLM to select the ap-
+propriate tool to call. If the tool is correctly
+selected, the score is 1; otherwise, the score is
+0.
+• Parameter Accuracy (Param Acc): The metric
+assesses the ability of LLM to generate cor-
+rect parameters for the tool call. If the input
+parameters are correctly generated, the score
+is 1; otherwise, the score is 0.
+4
+Method: PEToolLLaMA
+To equip LLM with personalized tool-use capabil-
+ity, we conduct a two-stage training process: 1)
+personalized SFT, where LLM is fine-tuned on
+PEToolBench to acquire fundamental proficiency
+in personalized tool usage, and 2) personalized
+DPO, where LLM is optimized on a preference
+dataset for better alignment with user preferences.
+Personalized SFT.
+The first stage in our ap-
+proach is Supervised Fine-Tuning (SFT), where
+we directly fine-tune LLM on the training set of
+PEToolBench. Given the user’s instruction qu, in-
+teraction history Hu, and the candidate tool set T
+as inputs, LLM is trained to generate the ground
+5
+
+=== [page 6] ===
+Table 1: Evaluation results of different LLMs on PEToolBench in terms of tool and parmater accuracy under settings
+including preferred-only, rating-integrated, chronological, and the whole data (All). Bold highlights the best score
+among all LLMs and % improve represents the relative improvement achieved by our method over the previously
+best-performing LLM.
+Methods
+PREFERRED-ONLY
+RATING-INTEGRATED
+CHRONOLOGICAL
+ALL
+Tool Acc
+Param Acc
+Tool Acc
+Param Acc
+Tool Acc
+Param Acc
+Tool Acc
+Param Acc
+Vicuna-7B
+25.50
+44.80
+10.80
+57.40
+12.70
+56.00
+16.33
+52.73
+Mistral-7B
+30.30
+55.70
+15.40
+63.20
+14.10
+64.90
+19.93
+61.27
+Qwen2.5-7B
+40.40
+63.80
+24.80
+66.50
+24.80
+70.20
+30.00
+66.83
+LLaMA3-8B
+48.10
+71.10
+26.90
+77.70
+26.60
+78.10
+33.87
+75.63
+GPT-4o-mini
+51.80
+72.90
+38.40
+77.70
+31.20
+80.50
+40.47
+77.03
+GPT-4o
+53.70
+77.60
+45.70
+79.60
+33.60
+81.80
+44.33
+79.67
+PEToolLLaMA
+74.30
+87.90
+78.40
+89.70
+80.80
+91.30
+77.83
+89.63
+% improve
+38.36%
+13.27%
+71.55%
+12.69%
+140.5%
+11.61%
+75.57%
+12.50%
+w/o DPO
+71.50
+82.10
+74.20
+86.90
+77.30
+90.40
+74.33
+86.47
+w/o SFT
+53.20
+61.80
+55.30
+62.40
+51.40
+61.10
+53.30
+61.77
+truth tool call c. Hu uniformly covers all three
+types of user interactions to capture diverse user
+preferences. In this way, LLM can obtain basic per-
+sonalized tool-usage experiences by understanding
+both the user needs and preferences.
+Personalized DPO.
+In the second stage, we fur-
+ther enhance the LLM’s performance through di-
+rect preference optimization (DPO) (Rafailov et al.,
+2023). Our goal is to guide the LLM to call the
+user’s preferred tools instead of non-preferred ones.
+Specifically, for each user instruction qu, we col-
+lect multiple tool calls generated by LLM after the
+SFT stage. Then we select the user’s preferred
+and non-preferred tool calls cw and cl based on the
+user’s tool preference constructed in PEToolBench.
+cw and cl will be used to construct the preference
+dataset DDPO = {(x, cw, cl)}, where x denotes the
+input, including the user instruction qu, interaction
+history Hu, and the candidate tool set T . We then
+apply DPO to optimize the LLM by guiding it to
+generate the desired tool call cw while avoid gener-
+ating cl. The loss function can be defined as:
+L = −E
+
+log σ
+
+β log πθ(cw | x)
+πref(cw | x) −β log πθ(cl | x)
+πref(cl | x)
+
+,
+(3)
+where σ is the logistic function and β is a weighting
+parameter that controls the deviation of the policy
+model πθ (i.e., the LLM we need to optimize) from
+the reference model πref (i.e., the LLM after SFT
+stage). In this way, LLM can focus on generating
+tool calls that are more aligned with individual user
+preferences.
+5
+Experiments
+5.1
+Setup
+Baselines.
+We adopt multiple LLMs from both
+closed-source and open-source models to en-
+sure a comprehensive evaluation.
+For closed-
+source LLMs, we select two representative mod-
+els: GPT-4o and GPT-4o-mini from OpenAI. For
+open-source LLMs, we include a wide spectrum
+of models, i.e., LLaMA-3.1-8B (Dubey et al.,
+2024), QWen-2.5-7B (Yang et al., 2024), Vicuna-
+7B-v1.5 (Chiang et al., 2023) and Mistral-7B-
+v0.3 (Jiang et al., 2023).
+Implementation details.
+In PEToolBench con-
+struction, we employ gpt-4o-mini as the LLM for
+tool understanding and generation of user instruc-
+tions and interaction history. The candidate tool set
+consists of three parts: the ground-truth tool along
+with all other tools sharing the same functional-
+ity, five tools retrieved using ToolRetriever (Qin
+et al., 2024b), and the remaining tools that were
+randomly sampled.
+5.2
+Main Results
+The detailed experimental results are shown in Ta-
+ble 1. From the results, we can obtain the following
+key findings. 1) It can be observed that the perfor-
+mance of LLMs is generally unsatisfactory, par-
+ticularly in tool accuracy with the majority failing
+to exceed 50%. This indicates that current LLMs
+are severely limited in personalized tool-use ca-
+pabilities. Additionally, the lower tool accuracy
+compared to parameter accuracy further suggests
+that personalized tool selection is more challeng-
+6
+
+=== [page 7] ===
+ing than parameter configuration. This is because
+LLMs must account for both implicit user pref-
+erences and explicit user requirements when de-
+termining which tool to use. 2) Most LLMs per-
+form worse in the rating-integrated and chronologi-
+cal settings. This is likely due to the inclusion of
+non-preferred interactions in the interaction history,
+which confuses LLMs and hinders their ability to
+accurately recognize user preferences. Notably, the
+chronological setting yields the lowest scores, sug-
+gesting that capturing evolving user preferences
+over time is even more challenging than interpret-
+ing explicit user ratings. 3) Our proposed PETool-
+Bench significantly outperforms all closed-source
+and open-source LLMs, demonstrating both effec-
+tiveness and robustness. It maintains strong perfor-
+mance, even in the two more challenging settings,
+by enabling the LLM to better understand diverse
+manifestations of user preferences and facilitate
+personalized tool usage.
+5.3
+Ablation Study
+We conduct ablation studies to investigate the ef-
+ficacy of the two-stage training process in our
+PEToolLLaMA. First, we remove the second train-
+ing stage (i.e., personalized DPO) to assess its con-
+tribution. Then, we examine the impact of the SFT
+stage by directly conducting DPO training on the
+initial LLaMA3-8B model. Table 1 reports the
+performance on the test set of PEToolBench in all
+three settings. The results indicate that the SFT
+stage is crucial for personalized tool learning per-
+formance, as it endows the model with fundamental
+tool usage and personalization capabilities. Remov-
+ing the DPO stage results in a slight performance
+drop, suggesting that it can further refine the tool
+usage alignment with user preferences.
+5.4
+In-depth Analysis
+Analysis on the impact of interaction history.
+To investigate the impact of interaction history on
+LLM performance, we remove the interaction his-
+tory from the inputs and provide only the user in-
+structions with candidate tools set to conduct our
+experiments. The results are presented in Figure 5.
+From the results, we can observe that both closed-
+source and open-source LLMs experience varying
+degrees of performance degradation without inter-
+action history, compared to when provided with
+preferred-only history. This suggests that interac-
+tion history only containing the user’s preferred
+tools can help the LLM effectively infer user pref-
+PEToolLLaMA
+GPT-4o
+LLaMA3-8B
+Models
+0
+10
+20
+30
+40
+50
+60
+70
+80
+Tool Accuracy (%)
+w/ preferred-only history
+w/ rating-integrated history
+w/ chronological history
+w/o history
+Figure 5: Performance comparison of tool accuracy
+when provided with and without interaction history.
+1-20
+21-40
+41-60
+61-80
+81-100
+Interaction History Length
+0
+10
+20
+30
+40
+50
+60
+70
+80
+Tool Accuracy (%)
+PEToolLLaMA
+GPT-4o
+GPT-4o-mini
+Llama3-8B
+Qwen2.5-7B
+Mistral-7B
+Vicuna-7B
+Figure 6: Performance comparison of tool accuracy on
+different interaction history length in the preferred-only
+setting.
+erences. On the other hand, we find that LLMs
+perform better in the absence of interaction history
+than with chronological history. This indicates that
+including both preferred and non-preferred tools
+can interfere with the LLM’s understanding of user
+preferences, thus hindering its personalization ca-
+pabilities. In contrast, our PEToolLLaMA consis-
+tently improves performance across all three types
+of interaction history compared to the no-history
+setting. This demonstrates that our method enables
+LLM to effectively recognize different forms of
+user preferences from the interaction history.
+Analysis on interaction history length.
+To eval-
+uate the performance of LLMs under varying in-
+teraction history lengths, we break down the tool
+accuracy scores of LLMs based on the number of
+interactions in the history under the preferred-only
+setting. As shown in Figure 6, the performance of
+both closed-source and open-source LLMs deterio-
+rates as interaction history length increases. This is
+because a longer interaction history makes it more
+challenging for the LLM to identify the historical
+preferences relevant to identify relevant historical
+preferences in relation to the user’s current con-
+7
+
+=== [page 8] ===
+Table 2: The percentage (%) of different error types in LLMs on the test set of PEToolBench under preferred-only
+and chronological settings. IF, TH, TFM, TPM, PNM, PVM stand for Invalid Format, Tool Hallucination, Tool
+Functionality Mismatch, Tool Preference Mismatch, Parameter Name Mismatch and Parameter Value Mismatch
+errors, respectively.
+Models
+PREFERRED-ONLY
+CHRONOLOGICAL
+IF
+TH
+TFM
+TPM
+PNM
+PVM
+IF
+TH
+TFM
+TPM
+PNM
+PVM
+Qwen2.5-7B
+10.9
+3.6
+19.6
+25.5
+10.4
+14.9
+11.2
+2.3
+7.1
+54.6
+5.4
+13.2
+LLaMA3-8B
+2.5
+5.3
+19.3
+24.8
+11.4
+15.0
+2.5
+3.7
+2.8
+64.4
+6.8
+12.6
+GPT-4o-mini
+0.1
+3.5
+20.1
+24.4
+10.6
+16.4
+0.0
+1.5
+6.9
+60.2
+6.2
+13.3
+GPT-4o
+0.5
+1.5
+20.0
+30.3
+7.9
+14.0
+1.3
+1.1
+6.6
+57.3
+4.7
+12.2
+PEToolLLaMA
+0.6
+3.4
+9.3
+12.0
+7.6
+3.9
+0.5
+1.8
+6.5
+10.4
+5.1
+3.1
+text. In contrast, our PEToolLLaMA significantly
+outperforms all LLMs and maintains strong, consis-
+tent performance even as interaction history grows.
+This demonstrates that our method enables LLMs
+to effectively extract and utilize user preferences
+from complex historical data.
+5.5
+Error Analysis
+We further conduct an error analysis to investigate
+the issues leading to incorrect tool calls in two per-
+sonalized settings. We categorize the errors into
+six types: 1) Invalid Format. The tool call gen-
+erated by the LLMs does not follow the expected
+JSON format. 2) Tool Hallucination. The LLM
+generates a tool that does not exist in the given can-
+didate tool set, which is a common hallucination
+issue in LLMs. 3) Tool Functionality Mismatch.
+The selected tool lacks the necessary functionality
+to fulfill the user’s requirements. 4) Tool Prefer-
+ence Mismatch. The selected tool has the correct
+functionality but is not preferred by the user. 5)
+Parameter Name Mismatch. The tool call contains
+missing or incorrect parameter names. 6) Param-
+eter Value Mismatch. The parameter names are
+correctly generated, but the parameter values do
+not match the ground truth.
+From the results in Table 2, we observe that most
+LLMs perform worst in Tool Preference Mismatch,
+particularly in the chronological setting, where the
+error rate exceeds 50%. This suggests that identi-
+fying user preferences from the interaction history
+is highly challenging, especially when preferences
+change over time, leading to significant model mis-
+interpretation. In contrast, our PEToolLLaMA sig-
+nificantly reduces the error rate in Tool Preference
+Mismatch, demonstrating its effectiveness in cap-
+turing implicit user preferences. Additionally, the
+reduction in Tool Functionality Mismatch and Pa-
+rameter Value Mismatch errors suggests that our
+method enhances LLMs’ fundamental tool-usage
+ability, improving their handling of explicit user re-
+quirements. Furthermore, PEToolLLaMA achieves
+low error rates in Invalid Format and Tool Halluci-
+nation, comparable to closed-source LLMs, high-
+lighting its strong instruction-following capabili-
+ties.
+6
+Conclusion and Future Work
+In this paper, we advanced general-purpose tool-
+use LLMs into personalized tool-use LLMs, aim-
+ing to provide users with customized tool-usage
+assistance. We formulate the task of personalized
+tool learning and identify the goal of leveraging
+user’s interaction history to achieve implicit prefer-
+ence understanding and personalized tool calling.
+For training and evaluation, we construct the first
+PEToolBench benchmark, featuring diverse users’
+interaction history in three types. We also propose
+a novel personalized framework PEToolLLaMA
+conducted under a two-stage training process to en-
+dow LLMs with personalized tool-use capabilities.
+Extensive experiments on PEToolBench demon-
+strate that PEToolLLaMA consistently surpasses
+existing baselines, effectively meeting user require-
+ments and preferences. We believe that the task,
+benchmark, and framework for personalized tool
+learning will broaden the research scope, introduce
+new challenges and inspire novel methods.
+In the future, we aim to enhance this work from
+the following dimensions. 1) We plan to explore
+more heterogeneous personal user data beyond in-
+teraction history, such as user profiles or personas.
+This will allow us to reflect user preferences from
+multiple dimensions, providing a more comprehen-
+sive evaluation on the personalized tool-use capa-
+bilities of LLMs. 2) Currently, our work is limited
+to tool-usage scenarios involving a single tool. In
+the future, we intend to expand to more complex
+8
+
+=== [page 9] ===
+personalized tool-usage, such as multi-tool scenar-
+ios. These scenarios will require LLMs to perform
+personalized tool planning and engage in multi-
+round tool calling to address user needs effectively.
+Limitations
+1) Due to the lack of real user interaction histories
+on tool usage, we utilize LLM to synthesize such
+data. However, this approach may compromise the
+authenticity and reliability of the data, which is a
+common challenge in data synthesis methods. To
+mitigate this issue, we incorporate pre-constructed
+user preference information into the data genera-
+tion process. This strategy helps guide LLM in
+generating contextually relevant outputs, thereby
+improving the quality and consistency of the syn-
+thesized data. 2) In real-world scenarios, tools have
+multiple dimensions of attributes. However, due to
+the limited information contained in tool documen-
+tation, it is difficult to identify and fully exploit all
+possible tool attributes. Fortunately, the attributes
+we have obtained are sufficient to differentiate be-
+tween tools, enabling us to effectively construct
+user preferences.
+Ethics Statement
+The dataset used in our work is derived from pub-
+licly available sources and generated through inter-
+actions with LLMs in English. Since the user inter-
+action histories in our study are entirely simulated,
+user privacy is fully protected, and no real personal
+information is included in the dataset. Further-
+more, all scientific artifacts used in this research
+are publicly accessible for academic purposes un-
+der permissive licenses, and their use in this paper
+complies with their intended purposes. Given these
+considerations, we believe our research adheres to
+the ethical standards of the conference.
+References
+Kinjal Basu, Ibrahim Abdelaziz, Subhajit Chaudhury,
+Soham Dan, Maxwell Crouse, Asim Munawar, Ver-
+non Austel, Sadhana Kumaravel, Vinod Muthusamy,
+Pavan Kapanipathi, and Luis Lastras. 2024. API-
+BLEND: A comprehensive corpora for training and
+benchmarking API LLMs. In Proceedings of the
+62nd Annual Meeting of the Association for Compu-
+tational Linguistics (Volume 1: Long Papers), pages
+12859–12870. Association for Computational Lin-
+guistics.
+Hongru Cai, Yongqi Li, Wenjie Wang, Fengbin ZHU,
+Xiaoyu Shen, Wenjie Li, and Tat-Seng Chua. 2025.
+Large language models empowered personalized web
+agents. In THE WEB CONFERENCE 2025.
+Guoxin Chen, Zhong Zhang, Xin Cong, Fangda Guo,
+Yesai Wu, Yankai Lin, Wenzheng Feng, and Yasheng
+Wang. 2025. Learning evolving tools for large lan-
+guage models. In The Thirteenth International Con-
+ference on Learning Representations.
+Sijia Chen, Yibo Wang, Yi-Feng Wu, Qing-Guo Chen,
+Zhao Xu, Weihua Luo, Kaifu Zhang, and Lijun
+Zhang. 2024. Advancing tool-augmented large lan-
+guage models: Integrating insights from errors in
+inference trees. In The Thirty-eighth Annual Confer-
+ence on Neural Information Processing Systems.
+Wei-Lin Chiang, Zhuohan Li, Zi Lin, Ying Sheng,
+Zhanghao Wu, Hao Zhang, Lianmin Zheng, Siyuan
+Zhuang, Yonghao Zhuang, Joseph E Gonzalez, et al.
+2023. Vicuna: An open-source chatbot impressing
+gpt-4 with 90%* chatgpt quality. See https://vicuna.
+lmsys. org (accessed 14 April 2023), 2(3):6.
+Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey,
+Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman,
+Akhil Mathur, Alan Schelten, Amy Yang, Angela
+Fan, et al. 2024. The llama 3 herd of models. arXiv
+preprint arXiv:2407.21783.
+Shengda Fan, Xin Cong, Yuepeng Fu, Zhong Zhang,
+Shuyan Zhang, Yuanwei Liu, Yesai Wu, Yankai
+Lin, Zhiyuan Liu, and Maosong Sun. 2025. Work-
+flowLLM: Enhancing workflow orchestration capa-
+bility of large language models. In The Thirteenth
+International Conference on Learning Representa-
+tions.
+Albert Q Jiang, Alexandre Sablayrolles, Arthur Men-
+sch, Chris Bamford, Devendra Singh Chaplot, Diego
+de las Casas, Florian Bressand, Gianna Lengyel, Guil-
+laume Lample, Lucile Saulnier, et al. 2023. Mistral
+7b. arXiv preprint arXiv:2310.06825.
+Jiayu Liu, Zhenya Huang, Tong Xiao, Jing Sha, Jinze
+Wu, Qi Liu, Shijin Wang, and Enhong Chen. 2024.
+SocraticLM: Exploring socratic personalized teach-
+ing with large language models. In The Thirty-eighth
+Annual Conference on Neural Information Process-
+ing Systems.
+Weiwen Liu, Xingshan Zeng, Xu Huang, xinlong hao,
+Shuai Yu, Dexun Li, Shuai Wang, Weinan Gan,
+Zhengying Liu, Yuanqing Yu, Zezhong WANG, Yux-
+ian Wang, Wu Ning, Yutai Hou, Bin Wang, Chuhan
+Wu, Wang Xinzhi, Yong Liu, Yasheng Wang, Duyu
+Tang, Dandan Tu, Lifeng Shang, Xin Jiang, Ruiming
+Tang, Defu Lian, Qun Liu, and Enhong Chen. 2025a.
+ToolACE: Enhancing function calling with accuracy,
+complexity, and diversity. In The Thirteenth Interna-
+tional Conference on Learning Representations.
+Yanming Liu, Xinyue Peng, Jiannan Cao, Shi Bo, Yuwei
+Zhang, Xuhong Zhang, Sheng Cheng, Xun Wang,
+Jianwei Yin, and Tianyu Du. 2025b. Tool-planner:
+Task planning with clusters across multiple tools. In
+The Thirteenth International Conference on Learning
+Representations.
+9
+
+=== [page 10] ===
+Hanjia Lyu, Song Jiang, Hanqing Zeng, Yinglong Xia,
+Qifan Wang, Si Zhang, Ren Chen, Chris Leung, Jiajie
+Tang, and Jiebo Luo. 2024. LLM-rec: Personalized
+recommendation via prompting large language mod-
+els. In Findings of the Association for Computational
+Linguistics: NAACL 2024, pages 583–612. Associa-
+tion for Computational Linguistics.
+Shuofei Qiao, Runnan Fang, Zhisong Qiu, Xiaobin
+Wang, Ningyu Zhang, Yong Jiang, Pengjun Xie, Fei
+Huang, and Huajun Chen. 2025. Benchmarking agen-
+tic workflow generation. In The Thirteenth Interna-
+tional Conference on Learning Representations.
+Yujia Qin, Shengding Hu, Yankai Lin, Weize Chen,
+Ning Ding, Ganqu Cui, Zheni Zeng, Xuanhe Zhou,
+Yufei Huang, Chaojun Xiao, Chi Han, Yi Ren Fung,
+Yusheng Su, Huadong Wang, Cheng Qian, Runchu
+Tian, Kunlun Zhu, Shihao Liang, Xingyu Shen,
+Bokai Xu, Zhen Zhang, Yining Ye, Bowen Li, Ziwei
+Tang, Jing Yi, Yuzhang Zhu, Zhenning Dai, Lan Yan,
+Xin Cong, Yaxi Lu, Weilin Zhao, Yuxiang Huang,
+Junxi Yan, Xu Han, Xian Sun, Dahai Li, Jason Phang,
+Cheng Yang, Tongshuang Wu, Heng Ji, Guoliang Li,
+Zhiyuan Liu, and Maosong Sun. 2024a. Tool learn-
+ing with foundation models. ACM Comput. Surv.,
+57(4).
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan
+Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang,
+Bill Qian, Sihan Zhao, Lauren Hong, Runchu Tian,
+Ruobing Xie, Jie Zhou, Mark Gerstein, dahai li,
+Zhiyuan Liu, and Maosong Sun. 2024b. ToolLLM:
+Facilitating large language models to master 16000+
+real-world APIs. In The Twelfth International Con-
+ference on Learning Representations.
+Changle Qu, Sunhao Dai, Xiaochi Wei, Hengyi Cai,
+Shuaiqiang Wang, Dawei Yin, Jun Xu, and Ji-Rong
+Wen. 2024. Tool learning with large language mod-
+els: A survey. arXiv preprint arXiv:2405.17935.
+Changle Qu, Sunhao Dai, Xiaochi Wei, Hengyi Cai,
+Shuaiqiang Wang, Dawei Yin, Jun Xu, and Ji-Rong
+Wen. 2025. From exploration to mastery: Enabling
+LLMs to master tools via self-driven interactions. In
+The Thirteenth International Conference on Learning
+Representations.
+Rafael Rafailov, Archit Sharma, Eric Mitchell, Christo-
+pher D Manning, Stefano Ermon, and Chelsea Finn.
+2023.
+Direct preference optimization: Your lan-
+guage model is secretly a reward model. In Advances
+in Neural Information Processing Systems, pages
+53728–53741. Curran Associates, Inc.
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessi, Roberta
+Raileanu, Maria Lomeli, Eric Hambro, Luke Zettle-
+moyer, Nicola Cancedda, and Thomas Scialom. 2023.
+Toolformer: Language models can teach themselves
+to use tools.
+In Advances in Neural Information
+Processing Systems, volume 36, pages 68539–68551.
+Curran Associates, Inc.
+Erich Schubert, Jörg Sander, Martin Ester, Hans Peter
+Kriegel, and Xiaowei Xu. 2017. Dbscan revisited,
+revisited: why and how you should (still) use dbscan.
+ACM Transactions on Database Systems (TODS),
+42(3):1–21.
+Haiyang SHEN, Yue Li, Desong Meng, Dongqi Cai,
+Sheng Qi, Li Zhang, Mengwei Xu, and Yun Ma. 2025.
+Shortcutsbench: A large-scale real-world benchmark
+for API-based agents. In The Thirteenth Interna-
+tional Conference on Learning Representations.
+Yongliang Shen, Kaitao Song, Xu Tan, Wenqi Zhang,
+Kan Ren, Siyu Yuan, Weiming Lu, Dongsheng Li,
+and Yueting Zhuang. 2024. Taskbench: Benchmark-
+ing large language models for task automation. In
+Advances in Neural Information Processing Systems,
+volume 37, pages 4540–4574. Curran Associates,
+Inc.
+Zhengliang Shi, Shen Gao, Xiuyi Chen, Yue Feng,
+Lingyong Yan, Haibo Shi, Dawei Yin, Pengjie Ren,
+Suzan Verberne, and Zhaochun Ren. 2024. Learning
+to use tools via cooperative and interactive agents.
+In Findings of the Association for Computational
+Linguistics: EMNLP 2024, pages 10642–10657. As-
+sociation for Computational Linguistics.
+Yu-Min Tseng, Yu-Chao Huang, Teng-Yun Hsiao, Wei-
+Lin Chen, Chao-Wei Huang, Yu Meng, and Yun-
+Nung Chen. 2024. Two tales of persona in LLMs: A
+survey of role-playing and personalization. In Find-
+ings of the Association for Computational Linguistics:
+EMNLP 2024, pages 16612–16631. Association for
+Computational Linguistics.
+Hongru Wang, Rui Wang, Boyang Xue, Heming Xia,
+Jingtao Cao, Zeming Liu, Jeff Z. Pan, and Kam-
+Fai Wong. 2024a. AppBench: Planning of multiple
+APIs from various APPs for complex user instruction.
+In Proceedings of the 2024 Conference on Empiri-
+cal Methods in Natural Language Processing, pages
+15322–15336. Association for Computational Lin-
+guistics.
+Jian Wang, Yi Cheng, Dongding Lin, Chak Leong, and
+Wenjie Li. 2023. Target-oriented proactive dialogue
+systems with personalization: Problem formulation
+and dataset curation. In Proceedings of the 2023
+Conference on Empirical Methods in Natural Lan-
+guage Processing, pages 1132–1143. Association for
+Computational Linguistics.
+Jize Wang, Ma Zerun, Yining Li, Songyang Zhang,
+Cailian Chen, Kai Chen, and Xinyi Le. 2024b. Gta:
+A benchmark for general tool agents. In Advances in
+Neural Information Processing Systems, volume 37,
+pages 75749–75790. Curran Associates, Inc.
+Pei Wang, Yanan Wu, Noah Wang, Jiaheng Liu, Xi-
+aoshuai Song, Z.Y. Peng, Ken Deng, Chenchen
+Zhang, JiakaiWang, Junran Peng, Ge Zhang, Hangyu
+Guo, Zhaoxiang Zhang, Wenbo Su, and Bo Zheng.
+2025a. MTU-bench: A multi-granularity tool-use
+benchmark for large language models. In The Thir-
+teenth International Conference on Learning Repre-
+sentations.
+10
+
+=== [page 11] ===
+Renxi Wang, Xudong Han, Lei Ji, Shu Wang, Timothy
+Baldwin, and Haonan Li. 2025b. Toolgen: Unified
+tool retrieval and calling via generation. In The Thir-
+teenth International Conference on Learning Repre-
+sentations.
+Qinzhuo Wu, Wei Liu, Jian Luan, and Bin Wang. 2024.
+ToolPlanner: A tool augmented LLM for multi gran-
+ularity instructions with path planning and feedback.
+In Proceedings of the 2024 Conference on Empiri-
+cal Methods in Natural Language Processing, pages
+18315–18339. Association for Computational Lin-
+guistics.
+Qiancheng Xu, Yongqi Li, Heming Xia, and Wenjie Li.
+2024. Enhancing tool retrieval with iterative feed-
+back from large language models. In Findings of the
+Association for Computational Linguistics: EMNLP
+2024, pages 9609–9619. Association for Computa-
+tional Linguistics.
+An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui,
+Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu,
+Fei Huang, Haoran Wei, et al. 2024. Qwen2. 5 tech-
+nical report. arXiv preprint arXiv:2412.15115.
+Junjie Ye, Yilong Wu, Songyang Gao, Caishuang
+Huang, Sixian Li, Guanyu Li, Xiaoran Fan, Qi Zhang,
+Tao Gui, and Xuanjing Huang. 2024. RoTBench: A
+multi-level benchmark for evaluating the robustness
+of large language models in tool learning. In Pro-
+ceedings of the 2024 Conference on Empirical Meth-
+ods in Natural Language Processing, pages 313–333.
+Association for Computational Linguistics.
+Ruifeng Yuan, Shichao Sun, Yongqi Li, Zili Wang,
+Ziqiang Cao, and Wenjie Li. 2025. Personalized
+large language model assistant with evolving con-
+ditional memory. In Proceedings of the 31st Inter-
+national Conference on Computational Linguistics,
+pages 3764–3777. Association for Computational
+Linguistics.
+Siyu Yuan, Kaitao Song, Jiangjie Chen, Xu Tan,
+Yongliang Shen, Kan Ren, Dongsheng Li, and De-
+qing Yang. 2024. EASYTOOL: Enhancing LLM-
+based agents with concise tool instruction. In ICLR
+2024 Workshop on Large Language Model (LLM)
+Agents.
+Wayne Xin Zhao, Kun Zhou, Junyi Li, Tianyi Tang,
+Xiaolei Wang, Yupeng Hou, Yingqian Min, Beichen
+Zhang, Junjie Zhang, Zican Dong, et al. 2023. A
+survey of large language models.
+arXiv preprint
+arXiv:2303.18223.
+Yujia Zhou, Qiannan Zhu, Jiajie Jin, and Zhicheng Dou.
+2024. Cognitive personalized search integrating large
+language models with an efficient memory mecha-
+nism. In Proceedings of the ACM Web Conference
+2024, page 1464–1473. Association for Computing
+Machinery.
+Yuchen Zhuang, Xiang Chen, Tong Yu, Saayan Mitra,
+Victor Bursztyn, Ryan A. Rossi, Somdeb Sarkhel,
+and Chao Zhang. 2024. Toolchain*: Efficient action
+space navigation in large language models with a*
+search. In The Twelfth International Conference on
+Learning Representations.
+A
+Details of Benchmark Construction
+We provide the illustration of three types of the
+user’s interaction history in Figure 7.
+(a) Preferred-only
+Preferred tool interaction
+(c) Chronological
+(b) Rating-integrated 
+Non-preferred tool interaction
+Earlier
+Later
+···
+···
+···
+Figure 7: Illustration of three types of the user’s interac-
+tion history.
+B
+Implementation details
+To train PEToolLLaMA, we fine-tune the LLaMA-
+3.1-8B model with LoRA and a warm-up ratio of
+0.1 in the SFT stage. The learning rate is set to
+1e−4 with a batch size of 16 per GPU. In the DPO
+stage, the learning rate is set to 1e−6 and the bal-
+ancing factor β is set to 0.1 with a batch size of
+32. We have trained the model several times to
+ensure the improvement is not randomly achieved
+and present the mid one. For evaluation, we set
+the number of candidate tools N to 10 and the tem-
+perature to 0.1 to reduce randomness. Since the
+maximum context length varies in different LLMs,
+we constrain the context window to 4000 tokens.
+The experiments on closed-source LLMs are ful-
+filled by APIs of OpenAI and those on open-source
+LLMs are conducted on NVIDIA A6000 GPUs
+with 48 GB of memory.
+C
+Prompt Details
+The prompt templates in for tool-use example gen-
+eration and tool attributes understanding are shown
+in Figure 8 and Figure 9. The prompt templates
+for interaction history generation across three types
+are shown in Figure 10, Figure 11, and Figure 12.
+The prompt template for instruction generation is
+shown in Figure 13.
+11
+
+=== [page 12] ===
+Prompt for Tool-use Example Generation
+Prompt:
+Given a tool documentation as input, your task is to output an example for using this tool, including
+a simulated user instruction and parameters for calling the tool. The output example should be in
+JSON format: {“instruction”: xx, “parameters”: xx}
+Here is a demonstration:
+Input:
+{
+"tool_name ": "<Text_Analysis >.<Spellout >.<Languages >",
+"tool_desciption ": "List ISO 639 languages",
+"required_parameters ": [],
+"optional_parameters ": [
+{
+"name": "nameFilter",
+"type": "STRING",
+"description ": "Filter as \" contains \" by language name",
+"default ": ""
+}
+]
+}
+Output:
+{
+"instruction ": "I want to filter the list of languages by English",
+"parameters ": {
+"nameFilter ": "English"
+}
+}
+Now you will be given the tool documentation, please generate the tool-use example.
+Begin!
+Figure 8: The prompt for tool-use example generation.
+12
+
+=== [page 13] ===
+Prompt for Tool Attributes Understanding
+Prompt:
+Given a tool documentation and the corresponding tool-use example as input, your task is to
+understand the tool attributes thoroughly. Then generate two descriptions about the functionality
+and non-functional attributes of the tool respectively.
+Here is a demonstration:
+Input:
+Tool documentation:
+{
+"tool_name ": "<Commerce >.<Face Compare >.<GET Call >",
+"tool_desciption ": "Used to fetch results using the request id received in responses .",
+"required_parameters ": [
+{
+"name": "request_id",
+"type": "STRING",
+"description ": "",
+"default ": "76d1c748 -51ed -435b-bcd8 -3 d9c9d3eb68a"
+}
+],
+Tool -use example:
+{
+"instruction ": "I want to use the request id '76d1c748 -51ed -435b-bcd8 -3 d9c9d3eb68a ' to fetch
+the result",
+"parameters ": {
+"request_id ": "76d1c748 -51ed -435b-bcd8 -3 d9c9d3eb68a"
+}
+}
+Output:
+Functionality: Fetches API results based on the request ID received in previous responses.
+Non -functional attributes: Designed for commerce applications , used in face comparison scenarios.
+Now you will be given the tool documentation and the tool-use example, generate two short phrases
+to describe the two types of attributes.
+Begin!
+Figure 9: The prompt for tool attributes understanding.
+Prompt for Interaction History (Preferred-only) Generation
+Prompt:
+Given a list of tools preferred by a user as input, your task is to simulate the user’s interaction
+history based on these tools. You should output a sequence of tool-usage interactions, each
+consisting of a simulated user instruction and a tool call to fulfill that instruction. The interaction
+sequence should be a list in JSON format:
+[
+{
+"instruction ": xx,
+"tool_call ": {
+"tool_name ": xx,
+"parameters ": xx
+}
+}, ...
+]
+Now you will be given the tools, please generate the interaction sequence.
+Begin!
+Figure 10: The prompt for interaction history (preferred-only) generation.
+13
+
+=== [page 14] ===
+Prompt for Interaction History (Rating-integrated) Generation
+Prompt:
+Given a list of tools preferred by a user and a list of tools not preferred as input, your task is to
+simulate the user’s interaction history based on these two lists. You should output a sequence of
+tool-usage interactions, each consisting of a simulated user instruction, a tool call to fulfill that
+instruction, and a binary rating reflecting the user’s satisfaction with the tool call. The interaction
+sequence should be a list in JSON format:
+[
+{
+"instruction ": xx,
+"tool_call ": {
+"tool_name ": xx,
+"parameters ": xx
+},
+"rating ": 1 or 0,
+}, ...
+]
+Now you will be given the two lists of tools, please generate the interaction sequence.
+Begin!
+Figure 11: The prompt for interaction history (rating-integrated) generation.
+Prompt for Interaction History (Chronological) Generation
+Prompt:
+Given a list of tools preferred by a user and a list of tools not preferred as input, your task is to
+simulate the user’s interaction history based on these two lists. You should output a sequence
+of tool-usage interactions, each consisting of a simulated user instruction, a tool call to fulfill
+that instruction. The interactions should be organized in time order to reflect changes in user
+preferences over time, i.e., the more recent tool-usage interactions are more preferred by the user,
+while earlier interactions are less preferred. The interaction sequence should be a list in JSON
+format:
+[
+{
+"instruction ": xx,
+"tool_call ": {
+"tool_name ": xx,
+"parameters ": xx
+}
+}, ...
+]
+Now you will be given the two lists of tools, please generate the interaction sequence.
+Begin!
+Figure 12: The prompt for interaction history (chronological) generation.
+14
+
+=== [page 15] ===
+Prompt for Instruction Generation
+Prompt:
+Given a user’s interaction history and a tool documentation as input, your task is to generate a
+simulated user instruction which can be fulfilled by calling the tool with parameters. The generated
+output should be in JSON format:
+{
+"instruction ": xx,
+"parameters ": xx
+}
+Remember, tool name is strictly prohibited from appearing in the generated instruction. Now you
+will be given the user’s interaction history and tool documentation, please generate the output.
+Begin!
+Figure 13: The prompt for instruction generation.
+15

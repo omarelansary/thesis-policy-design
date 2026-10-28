@@ -1,0 +1,51 @@
+Benchmarking AI Agent Memory: Is a Filesystem All You Need? | Letta
+
+RESEARCH — AUG 12, 2025
+Benchmarking AI Agent Memory: Is a Filesystem All You Need?
+
+BRIEFLetta agents running on gpt-4o-mini achieve 74.0% accuracy on LoCoMo by simply storing conversation histories in files, rather than using specialized memory or retrieval tools. This suggests that: 1) current memory benchmarks may not be very meaningful, and 2) memory is more about how agents manage context than the exact retrieval mechanism used.
+Memory for AI Agents
+Since the dawn of GPT-4, LLMs have been their limited context length. Without long-term memory, LLMs and agents face significant limitations: they forget information, cannot learn and improve over time, and lose track of their objectives during long-running, complex tasks (a phenomenon often referred to as “derailment”).
+MemGPT introduced memory management for agents by creating a memory hierarchy inspired by a traditional operating system (OS). Agents actively manage what remains in their immediate context (core memory) versus what gets stored in external layers (conversational memory, archival memory, and external files) that can be retrieved as needed. This approach allows agents to maintain unlimited memory capacity within fixed context windows. Many agentic systems today, including Letta, implement MemGPT’s design to enable long-term memory in LLM agents.
+Additionally, various memory-specific tools have emerged to offer "memory" as a pluggable service, providing agents with tools to store and retrieve information, often using specialized knowledge graphs or vector database solutions.
+Attempts at Benchmarking Memory Tools (e.g., Mem0, LangMem, Zep)
+Evaluating the effectiveness of these memory tools in isolation is extremely challenging. The quality of an agent's memory often depends more on the underlying agentic system's ability to manage context and call tools than on the memory tools themselves. For example, even if a search tool is theoretically more performant, it won't work well for memory if the agent cannot use it effectively (due to poor prompting or lack of examples in training data).
+As a result, evaluation of memory tools has primarily focused on retrieval benchmarks like LoCoMo, rather than agentic memory itself. LoCoMo is a question-answering benchmark focusing on retrieval from long conversations. Each sample contains two fictional speakers and a list of AI-generated, timestamped conversations. The task involves answering questions about the speakers or facts presented in their conversations.
+One memory tool creator, Mem0, published controversial results claiming to have run MemGPT on LoCoMo. The results were puzzling, since our research team (the same team behind MemGPT) was unable to determine a way to backfill LoCoMo data into MemGPT/Letta without significant refactoring of the codebase. Mem0 did not respond to requests for clarification on how the benchmarking numbers were computed, or provide any modified MemGPT implementation that supports meaningful backfill of LoCoMo data.
+Benchmarking Letta Filesystem with LoCoMo
+Although Letta does not have a native way to ingest conversational histories like those in LoCoMo, we recently added support for connecting files to Letta agents (including MemGPT agents) - called Letta Filesystem. We were curious to see how Letta would perform by simply placing the LoCoMo conversational history into a file, without any specialized memory tools.
+When files are attached to a Letta agent, the agent gains access to a set of file operation tools:
+grep
+search_files
+open
+close
+The conversational data is placed into a file, which is uploaded and attached to the agent. Files in Letta are automatically parsed and embedded to enable semantic (vector) search over their contents. The agent is given tools for semantic search (search_files), text matching (grep), and answering questions (answer_question).
+We used GPT-4o mini for the agent to match the original experiment that was said to have been run with MemGPT. Since GPT-4o mini is a weaker model, we made the agent only partially autonomous by defining tool rules to limit the agent's tool-calling patterns. The agent must start by calling search_files and continue searching through files until it decides to call answer_question and terminate. What it searches for and how many times it calls tools is up to the agent.
+This simple agent achieves 74.0% on LoCoMo with GPT-4o mini and minimal prompt tuning, significantly above Mem0's reported 68.5% score for their top-performing graph variant.
+Why Does a Filesystem Beat Specialized Memory Tools?
+Agents today are highly effective at using tools, especially those likely to have been in their training data (such as filesystem operations). As a result, specialized memory tools that may have originally been designed for single-hop retrieval are less effective than simply allowing the agent to autonomously search through data with iterative querying.
+Agents can generate their own queries rather than simply searching the original questions (e.g., transforming "How does Calvin stay motivated when faced with setbacks?" into "Calvin motivation setbacks"), and they can continue searching until the right data is found.
+Memory for Agents: Agent Capabilities Matter More Than the Tools
+Whether an agent "remembers" something depends on whether it successfully retrieves the right information when needed. Therefore, it's much more important to consider whether an agent will be able to effectively use a retrieval tool (knowing when and how to call it) rather than focusing on the exact retrieval mechanisms (e.g. knowledge graphs vs vector databases).
+Agents today are extremely effective at using filesystem tools, largely due to post-training optimization for agentic coding tasks. In general, simpler tools are more likely to be in the training data of an agent and therefore more likely to be used effectively. While more complex solutions like knowledge graphs may help in specific domains, they may also come at the cost of being more difficult for the LLM (agent) to understand.
+How to Properly Evaluate Agent Memory
+An agent's memory depends on the agent architecture, its tools, and the underlying model. Comparing agent frameworks and agent memory tools is like comparing apples to oranges, as you can always mix and match frameworks and tools (and, of course, models).
+The Letta Memory Benchmark (Letta Leaderboard) provides an apples-to-apples comparison evaluating different models' capabilities in terms of memory management, keeping the framework (currently just Letta) and tools constant. The benchmark creates memory interactions on-the-fly to evaluate memory in a dynamic context, rather than just retrieval (as with LoCoMo).
+Another approach to evaluating memory is to assess the agent's holistic performance on specific tasks that require memory. One example is Terminal-Bench, which evaluates how well agents can solve complex, long-running tasks. Because tasks are long-running and require processing far more state than what fits into context, agents can leverage their memory to keep track of their task state and progress. Letta's OSS terminal-use agent is currently #4 overall (#1 for OSS) on the Terminal-Bench coding benchmark.
+Conclusion
+With a well-designed agent, even simple filesystem tools are sufficient to perform well on retrieval benchmarks such as LoCoMo. More complex memory tools can be plugged into agent frameworks like Letta via MCP or custom tools.
+For more resources, see:
+Letta Memory Benchmark for evaluating model capabilities for agentic memory
+Code for running the LoCoMo benchmark
+You can get started with Letta agents on Letta Platform.
+MAILING LIST  SUBSCRIBE →  
+
+CITE THIS POSTCOPY
+@article{letta2025benchmarkingaiagentmemory,
+  author = {Letta},
+  title = {Benchmarking AI Agent Memory: Is a Filesystem All You Need?},
+  journal = {Letta Blog},
+  year = {2025},
+  month = {August},
+  url = {https://www.letta.com/blog/benchmarking-ai-agent-memory/},
+}

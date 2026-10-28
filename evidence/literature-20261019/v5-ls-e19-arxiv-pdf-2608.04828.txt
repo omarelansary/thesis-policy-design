@@ -1,0 +1,1925 @@
+
+=== [page 1] ===
+Tencent Hunyuan
+SKILL-USE: Can LLMs Actually Use Skills in Agentic
+Harnesses?
+Jinyi Han1, ∗
+Yuanjian Xu2, ∗
+Ying Liao3
+Xinyi Wang3
+Zishang Jiang3
+Zixiang Di1
+Fanyang Lu4
+Zhichao Hu4, †
+Yanghua Xiao3, †
+1East China Normal University
+2Hong Kong University of Science and Technology
+3Fudan University
+4Tencent Hunyuan
+∗Equal contribution.
+†Corresponding authors.
+https://github.com/JinyiHan99/Skill-Use-Bench
+Abstract
+Large language model (LLM) agents increasingly rely on skills, structured doc-
+uments that specify when to act, which procedure to follow, and which tools are
+allowed. Existing evaluations mostly judge the quality of a skill or its contribution
+to task success, leaving unexamined whether an agent can recognize a relevant skill
+and apply it on its own. We introduce SKILL-USE, a benchmark that evaluates skill
+use under progressive disclosure, where an agent sees only a skill’s name and short
+description and must retrieve the full procedure before following it. SKILL-USE
+separates three facets of skill use. Trigger measures whether the agent invokes the
+relevant skill, Compliance measures how faithfully it follows the prescribed proce-
+dure, and Boundary measures whether it avoids forbidden operations. A Skill-Use
+(SU) score combines the three and credits execution only after the skill is triggered.
+SKILL-USE pairs 79 real skills with 177 executable tasks across nine domains,
+each grounded in real files, run in an isolated Docker sandbox, and scored by a
+trajectory-based rubric. Evaluating eight LLMs under two agent harnesses, we find
+that reliable skill use remains out of reach, as the strongest configuration reaches
+an SU of only 0.613. Triggering and procedural compliance fail as independent
+bottlenecks, and both scores and model rankings shift with the harness, so skill use
+behaves as a capability conditioned on the harness rather than a fixed property of
+the model.
+4
+6
+8
+1 0
+1 2
+1 4
+1 6
+8
+1 2
+1 6
+2 0
+2 4
+2 8
+F r o n t e n d & M
+o b i l e D e v .
+( 1 1 , 2 8 )
+S o f t w a r e A r c h i t e c t u r e
+( 1 1 , 2 4 )
+D e v O p s &
+I n f r a s t r u c t u r e
+( 8 , 2 3 )
+C o n t e n t W
+r i t i n g
+( 8 , 2 2 )
+D a t a S c i e n c e
+( 1 4 , 2 0 )
+D a t a b a s e
+( 8 , 1 7 )
+D o c u m e n t
+P r o c e s s i n g
+( 7 , 1 7 )
+S e c u r i t y
+( 8 , 1 5 )
+B u s i n e s s O p e r a t i o n s
+( 4 , 1 1 )
+1 3 %
+5 5 %
+1 2 %
+2 0 %
+N u m b e r o f t a s k s
+S k i l l e n t r i e s
+
+J S c o n c e p t
+d o c u m e n t a t i o n
+P y T o r c h
+d o c s t r i n g
+f o o t b a l l d a t a
+e t e r n a l - h a v e n
+l o r e p a c k
+C i r q
+s t o r y s h o r t s c a n
+
+g i t w o r k t r e e s
+
+D r i z z l e O R M
+s t y l e g u i d e
+g i t w o r k f l o w s
+A i r f l o w 
+m i g r a t i o n
+D r i z z l e O R M
+s l a c k b o t b u i l d e r
+
+
+P D F t o o l k i t
+C # c o n c u r r e n c y
+p a t t e r n s
+D O C X
+s o f t w a r e
+a r c h i t e c t u r e
+g o n g w e n f o r m a t
+a r c h i t e c t u r e
+p a t t e r n s
+
+e n t e r p r i s e l e g a l
+g u a r d r a i l s
+K 8 s 
+s e c u r i t y
+m o l t b o o k 
+v a l i d a t o r
+
+
+M
+o d a l 
+i m p e r a t i v e A P I
+s t r u c t u r e d
+a u t o n o m y p l a n
+V e r c e l A I S D K
+p a y r o l l d a t a a u d i t
+c r y p t o p a y m e n t s
+c o m p a r i s o n
+d 3 v i s u a l i z a t i o n
+
+C o n t e n t 
+W
+r i t i n g
+& D o c u m e n t a t i o n
+( 1 2 . 4 %
+)
+D a t a S c i e n c e &
+A I ( 1 1 . 3 %
+)
+D e v O p s &
+I n f r a s t r u c t u r e
+( 1 3 . 0 %
+)
+D a t a b a s e &
+B a c k e n d
+D e v e l o p m e n t
+( 9 . 6 %
+)
+S o f t w a r e 
+A r c h i t e c t u r e
+& C o d e Q u a l i t y
+( 1 3 . 6 %
+)
+F i l e &
+D o c u m e n t
+P r o c e s s i n g
+( 9 . 6 %
+)
+S e c u r i t y &
+C o m p l i a n c e
+( 8 . 5 %
+)
+B u s i n e s s &
+O p e r a t i o n s
+( 6 . 2 %
+)
+F r o n t e n d &
+M
+o b i l e
+D e v e l o p m e n t 
+( 1 5 . 8 %
+)
+7 9 S k i l l E n t r i e s
+9 C a t e g o r i e s
+( a )
+( b )
+( c )
+( d )
+S h a r e o f r u b r i c i t e m s ( %
+)
+  
+ T a s k - o u t c o m e   
+ B o u n d a r y 
+  
+ C o m p l i a n c e   
+ E v a l u a b i l i t y g a t e 
+0
+2
+4
+6
+8
+1 0
+1 2
+0
+1 0
+2 0
+3 0
+m e a n 4 . 7
+N u m b e r o f t a s k s
+S k i l l - e x c l u s i v e c o n s t r a i n t s p e r t a s k
+Figure 1: Composition and coverage of SKILL-USE. (a) Domain distribution of the 79 skills across
+nine categories, where the inner ring gives each category’s share and the outer ring lists representative
+skills. (b) Skill and task counts per domain, where each bubble marks one domain and reports its
+skill and task totals. (c) Composition of the rubric items by type. (d) Distribution of skill-exclusive
+requirements per task, our proxy for difficulty, where the dashed line marks the mean.
+1
+arXiv:2608.04828v1  [cs.CL]  5 Aug 2026
+
+=== [page 2] ===
+1
+Introduction
+Large language model (LLM) agents increasingly carry out complex, multi-step tasks in real software
+and web environments [1, 2]. Within the past year, skills have become an emerging interface for
+agent harnesses, popularized by Claude Code [3] and now appearing across systems such as Cursor,
+OpenClaw, and OpenAI Codex. Community repositories now host a fast-growing library of skills
+for diverse tasks [4, 5, 6, 7]. These systems and repositories treat a skill as a structured document
+that encodes reusable domain knowledge for accomplishing a class of tasks, specifying the situations
+in which it applies, the procedure to follow, and the tools and restrictions that govern its execution.
+The implicit assumption is that pairing a capable agent with the right skill is all it takes to solve the
+corresponding task.
+The growing skill ecosystem translates into real capability only if agents can use the skills they are
+given. In the progressive-disclosure mechanism [3], the agent sees only a skill’s name and a short
+description; the full procedure is loaded only when the agent asks for it. To solve a task, the agent
+must first judge that a skill applies, retrieve it, and then follow it faithfully.
+Existing benchmarks, however, do not evaluate all of these requirements together. Two lines of
+work come closest, but each covers only part of the process. Skill-centric benchmarks treat skills as
+artifacts and judge their intrinsic quality or their marginal contribution to task success [5, 6, 8, 9, 10];
+their evidence is the final outcome rather than the consuming agent’s behavior. The closest effort
+scores adherence to the preconditions and orderings prescribed inside a skill, yet preloads the full skill
+and thereby bypasses retrieval altogether [11]. Instruction-following benchmarks score constraint
+compliance, but the constraints they target concern surface properties of the output such as format,
+length, or wording [12, 13, 14, 15, 16], and reach the agent verbatim in the prompt. A skill, in
+contrast, prescribes a domain procedure together with forbidden operations, and reaches the agent
+only through progressive disclosure. Neither line, therefore, addresses skill use as a process the agent
+must carry out on its own.
+To fill this gap, we introduce SKILL-USE, a benchmark that evaluates skill use along three facets.
+Trigger measures whether an agent retrieves the relevant skill from its name and short description
+alone. Compliance measures adherence to the prescribed procedure, while Boundary measures
+avoidance of forbidden operations. By separating recognition, execution, and restraint, the benchmark
+reveals where skill use fails. Specifically, we construct SKILL-USE in three stages. We curate real
+skills and design executable tasks whose procedures leave observable traces and whose forbidden
+shortcuts are genuinely tempting. We then author trajectory-based rubrics for each task, and fi-
+nally validate every skill-task-rubric triple end to end. Masked-skill screening removes generic
+requirements, and multi-agent adversarial review audits task scope and rubric verifiability.
+SKILL-USE pairs 79 real skills from community repositories with 177 executable tasks across nine
+domains (Figure 1). Each task is grounded in real files and runs in an isolated Docker sandbox with
+full tool access; its complete trajectory is logged and scored using a multi-item rubric. We report the
+three facets separately and combine them into a gated Skill-Use (SU) score, where execution receives
+credit only after the relevant skill is triggered.
+Evaluating eight state-of-the-art models under two agent harnesses, we find that reliable skill use
+remains out of reach. The strongest configuration reaches an SU of only 0.613. Triggering and
+procedural compliance break down as separate bottlenecks, since a model that recognizes a skill often
+still departs from its procedure while a model that could comply sometimes fails to trigger at all. Both
+absolute scores and model rankings shift once the harness changes, so skill use behaves as a capability
+conditioned on the surrounding harness rather than as a fixed property of the model [17, 18].
+Contributions. In summary, we make the following contributions:
+• We first formulate skill use as a distinct evaluation target and decompose it into three aspects,
+Trigger, Compliance, and Boundary, that capture recognition, procedural adherence, and
+restraint under progressive disclosure.
+• We release SKILL-USE, a broad-coverage benchmark spanning nine domains, with 79 real-
+world skills and 177 sandboxed tasks graded by trajectory-based rubrics, together with a
+reusable three-stage construction pipeline.
+2
+
+=== [page 3] ===
+• We conduct a systematic evaluation of eight frontier LLMs under two agent harnesses,
+yielding empirical insights into skill-use failure modes.
+2
+Related Work
+Our work is most closely related to two lines of research: skill benchmarks and instruction-following
+benchmarks. Table 2 in Appendix A provides a detailed comparison.
+Skill Benchmarks.
+Skills package reusable agent knowledge as progressive-disclosure docu-
+ments [3, 5, 7]. SkillsBench [5] evaluates whether a provided skill improves task completion.
+SkillLearnBench [6] evaluates whether agents can generate reusable skills from experience through
+continual learning. Related work on skill libraries and continual skill acquisition focuses on organiz-
+ing, producing, and refining such artifacts [8, 9, 10]. Collectively, these benchmarks focus on skill
+quality or final task success rather than whether an agent correctly uses a fixed skill. SLBench [11] is
+closest to our setting. It evaluates whether an agent respects logical relations within a skill, including
+preconditions, constraints, and overrides. However, preloading the full skill document leaves skill
+recognition and retrieval untested.
+Instruction-Following Benchmarks.
+Instruction following measures whether LLMs can complete
+a task while satisfying user or system requirements. IFEval [12] formalizes this ability as compliance
+with verifiable constraints on length, format, keywords, and response structure. Later benchmarks
+broaden the scope to richer constraint types [13, 14, 15], system prompts [19], and multi-turn interac-
+tions [20]. AgentIF [16] further studies agentic instructions drawn from real system prompts. These
+benchmarks provide requirements directly in the prompt and therefore do not evaluate instruction
+following in the skill-use setting.
+Agent Harness.
+Agent behavior depends not only on the base model but also on the surrounding
+harness that manages context, tools, and control flow. Recent studies show that the harness can
+account for more performance variance than the model and even reverse model rankings [17, 18].
+Motivated by this, we evaluate skill use across multiple harnesses rather than treating it as a fixed
+property of the model.
+In summary, SKILL-USE extends instruction-following evaluation to progressively disclosed skills.
+It also moves skill benchmarking beyond artifact quality and task success toward process-level
+evaluation in an open environment.
+3
+SKILL-USE Benchmark
+We begin by formalizing the benchmark setting and evaluation protocol in Section 3.1. Section 3.2
+then characterizes the benchmark’s composition and coverage. Finally, Section 3.3 details the
+three-stage construction pipeline.
+3.1
+Problem Formulation
+Each evaluation instance asks whether an agent can recognize and correctly apply one relevant skill
+while solving a realistic task. An instance is a tuple x = (s, q, E, R) containing a skill s, a user task q,
+an executable sandbox E, and a scoring rubric R. The task consists of a user request and input assets
+such as a code repository, document, or dataset. The sandbox supplies the files and tools needed to
+execute the task. The rubric is hidden from the agent and is used only for evaluation.
+Input. We represent the skill as s = (m, p), where m contains its name, short description, and file
+path, and p contains its full procedure. The agent initially receives (q, E, m) as input. It does not
+receive p. Under the same progressive-disclosure interface [3], the agent must infer from the task and
+metadata that the skill is relevant, then retrieve the skill file to access its full procedure.
+Output. Running the agent on this input produces an execution trajectory
+τ = (o0, a1, o1, . . . , aT , oT )
+(1)
+and a terminal artifact state zT . Here, o0 is the initial context, ak is the k-th action, and ok is the
+observation returned after that action. Actions include reading files, invoking tools, and editing
+3
+
+=== [page 4] ===
+artifacts. The state zT contains the files produced or modified by the agent when execution ends. We
+denote the recorded output by y = (τ, zT ).
+Scoring. Skill use unfolds in two stages: the agent must first recognize and retrieve the relevant
+skill, then apply its instructions faithfully. Trigger, formalized in Definition 1, captures the first stage.
+Compliance, defined in Definition 2, measures adherence to prescribed actions, while Boundary,
+defined in Definition 3, measures respect for prohibited actions. Together, the three dimensions
+characterize whether a skill is engaged and how faithfully it governs the subsequent execution.
+Definition 1 (Trigger). For output y
+=
+(τ, zT ) and target skill s, Trigger is g(y; s)
+:=
+I[Retrieve(s) ∈τ].
+Definition 2 (Compliance). Let Rc be the set of prescribed skill requirements. Each item i has weight
+wi > 0 and verifier ϕi(y) = 1 iff the requirement is satisfied. Compliance is C(y) :=
+P
+i∈Rc wiϕi(y)
+P
+i∈Rc wi
+.
+Definition 3 (Boundary). Let Rb be the set of skill prohibitions. Here ϕi(y) = 1 iff the prohibited
+behavior is absent. Boundary is B(y) :=
+P
+i∈Rb wiϕi(y)
+P
+i∈Rb wi
+.
+Finally, we consolidate the three dimensions into a single score that summarizes overall skill-use
+quality:
+SU(y) = g(y; s) [α C(y) + (1 −α) B(y)] ,
+(2)
+We fix α = 0.7 throughout the paper, giving Compliance the larger weight because it measures
+whether the agent enacts the skill’s prescribed procedure, while Boundary only guards against
+prohibited actions. Sensitivity to this choice is reported in Appendix E.6.
+3.2
+Benchmark Composition and Coverage
+Domain Coverage. SKILL-USE contains 79 real skill entries paired with 177 executable tasks across
+nine domains, spanning software development, infrastructure, data science, databases, document
+and content processing, security, and business operations. As shown in Figure 1 (a) and (b), both
+skills and tasks are broadly distributed across these domains, with no single category dominating the
+benchmark.
+Rubric Composition. Each task is graded by a hidden trajectory-level rubric. The 177 rubrics hold
+1,314 scoring items, averaging 7.4 per rubric and ranging from 3 to 16. Figure 1(c) groups these
+items into four types. Evaluability gates carry zero weight and only flag whether a run is well-formed
+enough to score. Compliance and Boundary are skill-derived and together form the Skill-Use signal.
+Task-outcome items record whether the requested result was produced and remain outside Skill-Use.
+Task Difficulty. We proxy difficulty by the number of skill-exclusive requirements per task, those that
+follow from the skill itself rather than from the task prompt or generic practice. As Figure 1(d) shows,
+each task carries 4.8 such requirements on average, with a tail reaching 12. Most tasks therefore
+expose several independent failure points rather than a single checkpoint.
+3.3
+Data Construction
+SKILL-USE is constructed in three stages. We first collect and curate real skill documents and
+construct executable tasks for the retained skills. We then design a trajectory-based scoring rubric for
+each task. Finally, we validate every skill-task-rubric triple end to end. Figure 2 gives an overview of
+the pipeline.
+Skill curation, task construction, and rubric construction each follow a written guideline that we
+refine iteratively. We start from a short draft, apply it, audit the artifacts, and fold each uncovered
+failure back as a new rule, repeating until audits surface no new failure. The multi-agent adversarial
+review enforces the task and rubric guidelines. Appendix B.6 reports the protocol and the failures
+behind each rule.
+Skill and Task Construction.
+Candidate skills are collected from public GitHub repositories
+and two existing benchmarks, SkillsBench [5] and SkillLearnBench [4]. We use real documents to
+preserve the structures, workflows, and tool assumptions encountered in practice, and retain skills
+according to two criteria:
+4
+
+=== [page 5] ===
+Figure 2: Data construction pipeline of SKILL-USE. The stages run left to right. Skill and Task
+Construction curates 79 skills from 105,586 candidates and builds one in-scope task per skill, giving
+177 tasks. Rubric Construction attaches a three-tier rubric whose skill-derived items form the Skill-
+Use signal. End-to-End Validation checks each skill-task-rubric triple before release.
+• Skill exclusivity. The skill must contain requirements that cannot be inferred from the task
+request or generic practice, allowing the scored behavior to be attributed to the skill itself.
+• Process observability. The skill must constrain how the agent acts and leave verifiable
+evidence in its trajectory or artifacts, such as tool choices, action ordering, or prohibited
+operations.
+We rank and sample candidates by repository quality and domain coverage, screen their process
+constraints, and apply a masked-skill check to remove generic requirements. Appendix B.1 reports
+the funnel and its thresholds.
+For each retained skill, we construct an executable task within its
+declared scope that exercises at least one skill-exclusive requirement, uses real assets, and hides the
+skill’s prescribed procedure from the prompt. Two filters guard task quality. The masked-skill check
+drops any requirement a strong model still meets from the prompt alone, so every scored requirement
+remains skill-exclusive. A cross-family adversarial review then requires reviewers from different
+model families to confirm each such requirement, and we apply its revisions or discard tasks that
+cannot be repaired. Detailed descriptions are provided in Appendix B.2 and Appendix B.4.
+Rubric Construction. For each task, we construct a weighted rubric with three tiers. Evaluability
+gates determine whether the run can be scored, skill-derived items measure Compliance and Boundary,
+and task-outcome items record whether the requested result was produced. Only skill-derived items
+contribute to Skill-Use. We design these items according to two criteria:
+• Skill exclusivity. Every scored item must trace to a distinct skill requirement that is not
+implied by the task prompt or generic practice.
+• Observable evidence. Every item must be verified from a specific trajectory event or
+artifact. We prefer deterministic checks and use a scope-restricted LLM judge only when a
+requirement cannot be expressed reliably as a rule. Appendix B.3 specifies the rubric tiers
+and the judge.
+Each rubric passes the same multi-agent adversarial review detailed in Appendix B.4, and we apply
+its revisions before end-to-end validation.
+End-to-End Validation. Finally, we validate each assembled skill-task-rubric triple as a whole and
+retain only instances that satisfy three criteria:
+• Executability. All required tools, dependencies, and assets are available in the isolated
+sandbox, allowing the task to run to completion under the evaluation harness.
+• Cross-component consistency. Each task requirement traces to a specific skill requirement,
+and each rubric item targets an observable signal that the task can produce during execution.
+• Rubric reliability. We replay each rubric on collected trajectories to identify inactive
+signals, unstable verifiers, format-sensitive failures, and leakage between Skill-Use and
+task-completion scoring.
+5
+
+=== [page 6] ===
+4
+Experiments
+4.1
+Experimental Setup
+Models and harnesses. We evaluate eight LLMs from seven families, namely Claude Opus 4.7,
+Claude Opus 4.8, GPT-5.5, DeepSeek-V4-Pro, GLM-5.1, MiniMax-M3, Kimi-K2.6, and Qwen3.6-
+Max. Each model is evaluated under two agent harnesses, Claude Code (CC) and Codex. Every
+task runs in an isolated Docker sandbox. Sampling parameters and gateway routing are reported in
+Appendix D.
+Metrics. We report Trigger, Compliance, Boundary, and their gated aggregate Skill-Use (SU), as
+defined in Section 3.1. Model-level metrics are means over evaluation trajectories. Comp.† and
+Bound.† restrict to traces that trigger the target skill. Rubric items judged by an LLM use GPT-5.4 at
+temperature 0, following the standard LLM-as-a-judge practice [21].
+Harness
+Model
+Skill-Use
+On Triggered Traces
+Trigger
+Compliance
+Boundary
+SU
+Compliance†
+Boundary†
+SU+
+Claude Code
+Claude Opus 4.7
+0.966
+0.609
+0.712
+0.599
+0.606
+0.709
+0.637
+Claude Opus 4.8
+0.940
+0.625
+0.704
+0.597
+0.638
+0.710
+0.660
+GPT-5.5
+0.972
+0.611
+0.718
+0.613
+0.625
+0.723
+0.654
+DeepSeek-V4-Pro
+0.324
+0.439
+0.658
+0.250
+0.588
+0.699
+0.621
+GLM-5.1
+0.324
+0.455
+0.639
+0.267
+0.638
+0.632
+0.636
+MiniMax-M3
+0.833
+0.569
+0.706
+0.501
+0.592
+0.698
+0.624
+Kimi-K2.6
+0.337
+0.447
+0.580
+0.190
+0.576
+0.464
+0.542
+Qwen3.6-Max
+0.446
+0.475
+0.625
+0.318
+0.590
+0.650
+0.608
+Codex
+Claude Opus 4.7
+0.836
+0.604
+0.705
+0.535
+0.626
+0.724
+0.655
+Claude Opus 4.8
+0.881
+0.599
+0.715
+0.559
+0.626
+0.721
+0.654
+GPT-5.5
+0.966
+0.486
+0.700
+0.503
+0.490
+0.709
+0.556
+DeepSeek-V4-Pro
+0.650
+0.496
+0.653
+0.379
+0.571
+0.701
+0.610
+GLM-5.1
+0.706
+0.525
+0.617
+0.421
+0.599
+0.616
+0.604
+MiniMax-M3
+0.864
+0.475
+0.632
+0.446
+0.497
+0.655
+0.544
+Kimi-K2.6
+0.706
+0.489
+0.623
+0.374
+0.529
+0.614
+0.554
+Qwen3.6-Max
+0.684
+0.266
+0.573
+0.238
+0.304
+0.571
+0.384
+Table 1: Main results on SKILL-USE across Claude Code and Codex. All metrics are scaled to
+[0, 1]. Compliance and Boundary are averaged over all traces; their † variants are restricted to traces
+that trigger the target skill.
+marks the highest-SU model under each harness.
+4.2
+Main Results
+Table 1 reports SU together with its Trigger, Compliance, and Boundary components under both
+harnesses. We make two main observations:
+Û Findings:
+Reliable skill use remains out of reach because triggering and conditional
+execution remain distinct bottlenecks.
+The strongest configuration, GPT-5.5 under CC, achieves an SU of only 0.613. Missed triggers
+alone do not explain this gap. Even among triggered traces, the highest Compliance† reaches only
+0.638. Boundary is higher than Compliance across all model-harness configurations, so models
+avoid forbidden actions more reliably than they complete the full prescribed workflow. Under CC,
+a group of open-weight middle-tier models trigger the target skill on only about a third of tasks,
+yet their conditional compliance is on par with models whose SU is twice as high. For them the
+missing capability is recognizing when the skill applies, not carrying it out. Under Codex, trigger
+rates concentrate in a narrower band and conditional compliance becomes the dominant source of
+between-model variation.
+Û Findings: Skill-use performance and rankings depend on the harness because CC and
+Codex stress different sub-abilities.
+Absolute scores and relative orderings both shift when the harness changes. The head of the ranking
+is occupied by GPT-5.5 under CC and by Claude Opus 4.8 under Codex; several models improve
+under Codex while others regress, and the correlation between the two per-model SU vectors is only
+moderate, as detailed in Appendix E.1. SU is therefore a property of a model-harness configuration,
+and rankings under one harness may not transfer to another. Moving from CC to Codex compresses
+6
+
+=== [page 7] ===
+D a t a
+S c i e n c e
+C o n t e n t
+W
+r i t i n g
+I n f r a s t r u c t u r e
+S o f t w a r e 
+A r c h i t e c t u r e
+F r o n t e n d a n d
+M
+o b i l e D e v e l o p m e n t
+ C o m p l i a n c e
+ B o u n d a r y  
+D a t a b a s e
+D o c u m e n t
+P r o c e s s i n g
+0 . 7 2
+0 . 5 4
+0 . 7 2
+0 . 5 4
+0 . 5 4
+0 . 6 0
+0 . 8 0
+0 . 6 0
+0 . 8 0
+0 . 6 0
+0 . 8 0
+0 . 7 2
+0 . 6 0
+0 . 4 5
+S e c u r i t y
+B u s i n e s s
+O p e r a t i o n s
+0 . 7 2
+0 . 5 4
+0 . 8 0
+0 . 6 0
+Figure 3: Compliance and Boundary scores by skill category (CC). Boundary exceeds Compliance in
+every category except Security & Compliance, where models follow the prescribed steps but fail to
+respect prohibitions.
+the spread of Trigger while widening the spread of conditional Compliance. Codex lifts the weakest
+triggers toward the pack, yet some strong models lose ground on execution quality, with GPT-5.5’s
+Compliance† falling by more than a tenth. Codex thus lowers the barrier to selecting a skill but
+demands more sustained procedural execution once the skill is entered. Models whose strength is
+triggering benefit from CC, while models whose strength is execution retain more of their score under
+Codex.
+4.3
+How Skill Type Affects Skill-Use
+To examine how skill-use performance varies across skill categories, Figure 3 reports category-level
+Compliance and Boundary.
+Û Findings: Models follow concrete procedures more reliably than open-ended ones and
+generally avoid prohibitions more easily than they complete required workflows.
+File processing, database, and data science skills have the highest Compliance. These skills typically
+prescribe a named tool, file format, or well-defined operation. Business analysis and software
+architecture score lower because their workflows involve open-ended planning. Boundary exceeds
+Compliance in almost every category, confirming that models suppress banned actions more easily
+than they execute every required step. Security and compliance is the sole exception. Models in this
+category achieve reasonable Compliance but the lowest Boundary, indicating that they carry out the
+safety steps yet still invoke the skill where restraint is needed.
+4.4
+How Skill Injection Mode Affects Skill-Use
+To isolate the effect of skill injection, we pair two Codex runs on every (task, model) combination,
+changing only how the skill enters the agent’s context. In the native mode, the prompt lists the
+skill’s name, one-line description, and file path; the model must actively open the file to see the full
+procedure. In the preloaded mode, the entire skill document is inserted into the initial instructions so
+the procedure is visible from the start. Figures 4 and 5 report Trigger and SU under both modes.
+Û Findings: Preloading primarily improves skill selection, revealing retrieval as the main
+bottleneck under native injection.
+On all paired traces, preloading improves SU because it raises Trigger. The effect is largest for
+models whose native Trigger is weak and nearly disappears for models already near saturation. When
+7
+
+=== [page 8] ===
++ 0 . 2 4
++ 0 . 1 8
++ 0 . 1 2
++ 0 . 2 1
++ 0 . 1 1
+   
++ 0 . 1 0
++ 0 . 0 2
+D e e p S e e k - V 4 - P r o
+Q w e n 3 . 6 - M
+a x
+K i m i - K 2 . 6
+G L M
+- 5 . 1
+C l a u d e O p u s 4 . 7
+M
+i n i M
+a x - M
+3
+C l a u d e O p u s 4 . 8
+G P T - 5 . 5
+0 . 6
+0 . 7
+0 . 8
+0 . 9
+1 . 0
+S k i l l t r i g g e r r a t e ( %
+)
+ p r e l o a d e d   
+ n a t i v e 
+Figure 4: Per-model Trigger rate under both injection modes on paired traces. Preloading consistently
+raises Trigger.
+0 . 4
+0 . 5
+0 . 6
+0 . 7
+0 . 4
+0 . 5
+0 . 6
+0 . 7
+S k i l l - u s e s c o r e ( p r e l o a d e d )
+S k i l l - u s e s c o r e ( n a t i v e )
+ C l a u d e O p u s - 4 . 7
+ C l a u d e O p u s 4 . 8 
+ G P T - 5 . 5
+ D e e p S e e k - V 4 - P r o 
+ G L M
+- 5 . 1
+ M
+i n i M
+a x - M
+3 
+ K i m i - K 2 . 6
+ Q w e n 3 . 6 - M
+a x 
+Figure 5: Native SU (x) against preloaded SU (y). Per-model SU restricted to traces that trigger
+under both modes. Clustering near the diagonal indicates that injection mode has little effect on
+execution quality after the skill is triggered.
+both modes trigger, the SU gap becomes small and most model points stay close to the diagonal.
+Thus, showing the full skill text mainly helps the model recognize the skill as relevant; it does not
+materially improve rule following once the skill has been selected.
+Native injection asks the model to act from a compact skill description before it sees the full procedure.
+The paired comparison shows that this extra decision, rather than downstream execution, accounts for
+most of the injection effect.
+4.5
+How Skill Library Size Affects Skill-Use
+We test whether a larger skill library makes it harder to trigger the correct skill. Under CC, we install
+N ∈{1, 10, 20, 30} skills into the agent’s library. The target skill is always included; the remaining
+N−1 slots are filled with randomly sampled distractors. We label a run correct if the model selects
+the target skill, wrong if it selects a distractor, and none if it does not invoke any skill. The results are
+shown in Figure 6(a–b).
+Û Findings: Adding distractors causes the main performance drop, driven more by missed
+triggers than by wrong-skill selections.
+All models mostly select the target reliably in the single-skill setting. Moving to a ten-skill library
+causes the visible drop, especially for weaker models. After that point, the curves change little.
+8
+
+=== [page 9] ===
+Figure 6: Skill selection, applicability, and task-completion effects under CC. (a–b) Increasing library
+size mainly raises no-skill outcomes rather than wrong-skill selections. (c) Within-scope Skill-Use
+and out-of-scope avoidance are not aligned across models. (d) Paired task-completion gain increases
+with Skill-Use; each triggered skill-enabled trace is paired with a no-library baseline on the same task
+and model.
+Library growth creates an entry cost, not a steady decline. At larger library sizes, most failures are
+runs with no skill call. Wrong-skill calls are rare and occur mainly for broad, overlapping descriptions
+such as test-driven-development and software-architecture, as documented in Appendix E.3. Models
+often fail to decide that any skill is relevant enough to invoke.
+4.6
+How Models Avoid Unnecessary Skill Use
+All previous experiments use tasks that fall within the target skill’s scope. Here we ask the question:
+can models refrain from invoking a skill when it does not apply? We construct 53 out-of-scope tasks
+whose topics overlap a skill but whose requested outputs do not require that skill’s procedure. We
+evaluate six models under CC and define an avoidance score as the fraction of out-of-scope tasks on
+which the model does not invoke the target skill. Figure 6(c) compares each model’s avoidance score
+with its within-scope SU.
+Û Findings: Strong skill use does not guarantee restraint when skills do not apply.
+The rank correlation between within-scope SU and out-of-scope avoidance is negative, so the models
+best at following a skill can be the worst at suppressing unnecessary invocations. The two abilities
+rest on separate judgments. One governs behavior after entering a skill, and the other governs whether
+to enter at all. The over-invocations are driven by topical overlap, mostly document-shaped requests
+whose topic matches the skill’s domain even though the output never needs its procedure, as detailed
+in Appendix E.4.
+4.7
+How Skill-Use Relates to Task Completion
+We test whether following a skill’s procedure improves task completion, as shown in Figure 6(d).
+Under CC, we start from the 779 runs that trigger the target skill. For each run, we build a paired
+9
+
+=== [page 10] ===
+baseline on the same task and model with the skill library disabled. We group the pairs by SU and
+report the mean paired gain TCskill −TCbase in each bin.
+Û Findings: Whether a skill helps or hurts depends on both skill-use quality and skill type.
+The paired gain turns from negative to positive near an SU score of 0.5. Below this point, the model
+uses the skill partially or incorrectly, and task completion drops below the no-skill baseline. Above it,
+the model follows the procedure closely, and the skill acts as a scaffold that raises completion. A
+partial procedure is worse than none because the model commits to a prescribed toolchain or format
+without carrying it through, and the resulting artifact is neither what the skill demands nor what the
+model would produce unaided. Adding a skill library is therefore not a free improvement; it pays off
+only when a model can execute the procedure and when the skill supplies an operational recipe rather
+than a stylistic prescription.
+5
+Conclusion
+This paper introduces SKILL-USE, a benchmark for evaluating skill use in LLM agents under
+progressive disclosure. SKILL-USE decomposes skill use into Trigger, Compliance, and Boundary,
+and pairs 79 real skills with 177 executable tasks across nine domains. Using this benchmark, we
+evaluate eight frontier LLMs under two agent harnesses. The results show that skill use remains an
+open problem: no configuration achieves reliable performance on all three axes, and both scores and
+rankings depend on the harness rather than on the model alone. Our analysis further indicates that the
+main gap is retrieval under progressive disclosure, and that within-scope skill use does not transfer to
+restraint on out-of-scope tasks. We release SKILL-USE, together with its construction pipeline, to
+support future work on training and evaluating agents that use skills reliably.
+10
+
+=== [page 11] ===
+References
+[1] Junyu Luo, Weizhi Zhang, Ye Yuan, Yusheng Zhao, Junwei Yang, Yiyang Gu, Bohan Wu, Binqi Chen,
+Ziyue Qiao, Qingqing Long, et al. Large language model agent: A survey on methodology, applications
+and challenges. arXiv preprint arXiv:2503.21460, 2025.
+[2] Frank Fangzheng Xu, Yufan Song, Boxuan Li, Yuxuan Tang, Kritanjali Jain, Mengxue Bao, Zora Wang,
+Xuhui Zhou, Zhitong Guo, Murong Cao, et al. Theagentcompany: benchmarking llm agents on consequen-
+tial real world tasks. Advances in Neural Information Processing Systems, 38, 2026.
+[3] Yash Vishe, Rohan Surana, Xunyi Jiang, Zihan Huang, Xintong Li, Nikki Lijing Kuang, Tong Yu, Ryan A
+Rossi, Jingbo Shang, Julian McAuley, et al. Skill-r1: Agent skill evolution via reinforcement learning.
+arXiv preprint arXiv:2605.09359, 2026.
+[4] George Ling, Shanshan Zhong, and Richard Huang. Agent skills: A data-driven analysis of claude skills
+for extending large language model functionality. arXiv preprint arXiv:2602.08004, 2026.
+[5] Xiangyi Li, Yimin Liu, Wenbo Chen, Bingran You, Zonglin Di, Yifeng He, Shenghan Zheng, Kyoung Whan
+Choe, Jiankai Sun, Shuyi Wang, et al. Skillsbench: Benchmarking how well agent skills work across
+diverse tasks. arXiv preprint arXiv:2602.12670, 2026.
+[6] Shanshan Zhong, Yi Lu, Jingjie Ning, Yibing Wan, Lihan Feng, Yuyi Ao, Leonardo FR Ribeiro, Markus
+Dreyer, Sean Ammirati, and Chenyan Xiong. Skilllearnbench: Benchmarking continual learning methods
+for agent skill generation on real-world tasks. arXiv preprint arXiv:2604.20087, 2026.
+[7] Hao Li, Chunjiang Mu, Jianhao Chen, Siyue Ren, Zhiyao Cui, Yiqun Zhang, Lei Bai, and Shuyue Hu. Orga-
+nizing, orchestrating, and benchmarking agent skills at ecosystem scale. arXiv preprint arXiv:2603.02176,
+2026.
+[8] Yuan Liang, Ruobin Zhong, Haoming Xu, Chen Jiang, Yi Zhong, Runnan Fang, Jia-Chen Gu, Shumin
+Deng, Yunzhi Yao, Mengru Wang, et al. Skillnet: Create, evaluate, and connect ai skills. arXiv preprint
+arXiv:2603.04448, 2026.
+[9] Yutao Yang, Junsong Li, Qianjun Pan, Bihao Zhan, Yuxuan Cai, Lin Du, Jie Zhou, Kai Chen, Qin Chen,
+Xin Li, et al. Autoskill: Experience-driven lifelong learning via skill self-evolution. arXiv preprint
+arXiv:2603.01145, 2026.
+[10] Huichi Zhou, Siyuan Guo, Anjie Liu, Zhongwei Yu, Ziqin Gong, Bowen Zhao, Zhixun Chen, Menglong
+Zhang, Yihang Chen, Jinsong Li, et al. Memento-skills: Let agents design agents. arXiv preprint
+arXiv:2603.18743, 2026.
+[11] Xuan Chen, Chengpeng Wang, Lu Yan, and Xiangyu Zhang. Slbench: Evaluating how llm agents follow
+logical relations in skills. arXiv preprint arXiv:2607.09016, 2026.
+[12] Jeffrey Zhou, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy Basu, Yi Luan, Denny Zhou, and
+Le Hou. Instruction-following evaluation for large language models. arXiv preprint arXiv:2311.07911,
+2023.
+[13] Yuxin Jiang, Yufei Wang, Xingshan Zeng, Wanjun Zhong, Liangyou Li, Fei Mi, Lifeng Shang, Xin Jiang,
+Qun Liu, and Wei Wang. Followbench: A multi-level fine-grained constraints following benchmark for
+large language models. In Proceedings of the 62nd Annual Meeting of the Association for Computational
+Linguistics (Volume 1: Long Papers), pages 4667–4688, 2024.
+[14] Yiwei Qin, Kaiqiang Song, Yebowen Hu, Wenlin Yao, Sangwoo Cho, Xiaoyang Wang, Xuansheng Wu,
+Fei Liu, Pengfei Liu, and Dong Yu. Infobench: Evaluating instruction following ability in large language
+models. In Findings of the Association for Computational Linguistics: ACL 2024, pages 13025–13048,
+2024.
+[15] Bosi Wen, Pei Ke, Xiaotao Gu, Lindong Wu, Hao Huang, Jinfeng Zhou, Wenchuang Li, Binxin Hu, Wendy
+Gao, Jiaxin Xu, et al. Benchmarking complex instruction-following with multiple constraints composition.
+In Proceedings of the 38th International Conference on Neural Information Processing Systems, pages
+137610–137645, 2024.
+[16] Yunjia Qi, Hao Peng, Xiaozhi Wang, Amy Xin, Youfeng Liu, Bin Xu, Lei Hou, and Juanzi Li. Agentif:
+Benchmarking large language models instruction following ability in agentic scenarios. Advances in
+Neural Information Processing Systems, 38, 2026.
+[17] Yunbei Zhang, Janet Wang, Yingqiang Ge, Weijie Xu, Jihun Hamm, and Chandan K Reddy. Stop comparing
+llm agents without disclosing the harness. arXiv preprint arXiv:2605.23950, 2026.
+[18] Yilun Yao, Xinyu Tan, Chao-Hsuan Liu, Yaoming Li, Zhengyang Wang, Wenhan Yu, Zhewen Tan, Yuxuan
+Tian, Guangxiang Zhao, Lin Sun, et al. Harness-bench: Measuring harness effects across models in
+realistic agent workflows. arXiv preprint arXiv:2605.27922, 2026.
+[19] Yanzhao Qin, Tao Zhang, Yanjun Shen, Wenjing Luo, Yan Zhang, Yujing Qiao, Zenan Zhou, Wentao
+Zhang, Bin CUI, et al. Sysbench: Can llms follow system message? In The Thirteenth International
+Conference on Learning Representations, 2024.
+11
+
+=== [page 12] ===
+[20] Yun He, Di Jin, Chaoqi Wang, Chloe Bi, Karishma Mandyam, Hejia Zhang, Chen Zhu, Ning Li, Tengyu
+Xu, Hongjiang Lv, et al. Multi-if: Benchmarking llms on multi-turn and multilingual instructions following.
+arXiv preprint arXiv:2410.15553, 2024.
+[21] Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang, Zi Lin,
+Zhuohan Li, Dacheng Li, Eric Xing, et al. Judging llm-as-a-judge with mt-bench and chatbot arena.
+Advances in neural information processing systems, 36:46595–46623, 2023.
+[22] Zekun Li, Shinda Huang, Jiangtian Wang, Nathan Zhang, Antonis Antoniades, Wenyue Hua, Kaijie Zhu,
+Sirui Zeng, Chi Wang, William Yang Wang, et al. Sopbench: Evaluating language agents at following
+standard operating procedures and constraints. arXiv preprint arXiv:2503.08669, 2025.
+12
+
+=== [page 13] ===
+Appendix Contents
+A Benchmark Comparison . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+B Construction Pipeline . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+B.1 Skill Selection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+B.2 Task Construction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+B.3 Rubric and Judge . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+B.4 Adversarial Review . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+B.5 Release Validation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+B.6 Guideline Development . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+C Human Quality Audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+D Experimental Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+E Additional Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+E.1 Cross-Harness Behaviour . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+E.2 Skill Injection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+E.3 Library Scaling . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+E.4 Out-of-Scope Behaviour . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+E.5 Robustness Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+E.6 Weight Sensitivity Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+F Prompt Templates . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+F.1 Skill-Selection Red Team . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+F.2 Task and Rubric Adversarial Review . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+F.3 LLM Judge . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+G Ethical Statement . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+A
+Benchmark Comparison
+Table 2 places SKILL-USE against instruction-following and skill-centric benchmarks. Instruction-
+following benchmarks put constraints in the prompt and grade the final response, so they neither run an
+agent in an open environment nor test recognition. Skill-centric benchmarks such as SkillsBench and
+SkillLearnBench focus on skill generation, skill learning, or task success under a supplied skill, rather
+than autonomous retrieval and process-level use. SLBench [11] checks procedure following with the
+full document preloaded, so recognition is assumed and Boundary is not isolated. SKILL-USE is the
+only benchmark that jointly scores Trigger, Compliance, and Boundary in an open, process-level
+setting under progressive disclosure.
+B
+Construction Pipeline
+This section details each construction stage summarized in Section 3.3, from skill selection through
+the guideline loop that governs it.
+B.1
+Skill Selection
+Four phases narrow 105,586 public GitHub skills to 79. Cost per candidate rises with each phase, so
+cheap filters run first. Table 3 summarises the funnel.
+13
+
+=== [page 14] ===
+Benchmark
+Environment
+Skill-Use Dimensions
+Scale
+Open Env.
+Process
+Skill Doc.
+Trigger
+Compliance
+Boundary
+IFEval [12]
+✗
+✗
+✗
+✗
+✓
+✗
+541 inst.
+FollowBench [13]
+✗
+✗
+✗
+✗
+✓
+✗
+820 inst.
+ComplexBench [15]
+✗
+✗
+✗
+✗
+✓
+✗
+1,150 inst.
+InfoBench [14]
+✗
+✗
+✗
+✗
+✓
+✗
+500 inst.
+SysBench [19]
+✗
+✗
+✗
+✗
+✓
+✗
+500 sys.
+AgentIF [16]
+✗
+✗
+✗
+✗
+✓
+✗
+707 inst.
+SOPBench [22]
+✗
+✓
+✗
+✗
+✓
+✓
+663 tasks
+SkillsBench [5]
+✓
+✗
+✓
+✗
+✗
+✗
+87 tasks
+SkillLearnBench [6]
+✓
+✗
+✓
+✗
+✗
+✗
+20 tasks
+SLBench [11]
+✓
+✓
+✓
+✗
+✓
+✓
+86 tasks
+SKILL-USE (ours)
+✓
+✓
+✓
+✓
+✓
+✓
+79 skills / 177 tasks / 1,314 items
+Table 2: Positioning of SKILL-USE against instruction-following and skill benchmarks. Open Env.:
+the agent acts in a sandbox with real tools. Process: scoring uses the execution trajectory, not only the
+final answer. Skill Doc.: guidance ships as a progressive-disclosure skill document rather than inline
+prompt text. Trigger, Compliance, and Boundary are the three Skill-Use dimensions: recognizing
+and retrieving the skill, following its procedure, and respecting its prohibitions. ✓supported, ✗not
+supported. SKILL-USE is the only benchmark that covers all three dimensions in an open, process-
+level setting under progressive disclosure.
+Phase
+In
+Out
+Main rejection
+1. Filter + cluster
+105,586
+15,000
+low stars, duplicates
+2. Fetch under quota
+1,500
+1,000
+fetch failure
+3. Rule scoring
+1,000
+400
+generic, no rule
+4. Masked-skill eval
+400
+80–150
+no exclusive rule
+Table 3: Skill selection funnel. Input and output counts (approximate) and dominant rejection reason
+for each of the four phases that reduce 105,586 candidate GitHub skills to 79. Phase 1 output is
+downsampled to the Phase 2 fetch quota; the final set adds retained SkillsBench and SkillLearnBench
+entries.
+Phase 1: filter and cluster. We drop entries below 5 stars, mirror aggregators, meta-skills that
+teach how to write skills, names that are pure numbers or single letters or contain test, example,
+template, or demo, and names a prior benchmark already covers. We impose no fixed taxonomy,
+since a wrong one would discard dense regions of 105 unknown skills. Instead we split names on
+hyphens and underscores, cluster the top 200 tokens, and ask an LLM to propose 15 to 25 categories
+grounded in those clusters. Keyword rules then label the pool, with the LLM as fallback.
+Phase 2: fetch under quotas. Each category gets a fetch quota by its overlap with prior bench-
+marks: 80 for no overlap, 50 for partial, 20 for existing coverage, capped near 1,500. Within a
+category we rank by name specificity, then star count, then recency, so a compound name such as
+postgres-migration-patterns outranks a short generic one. For each entry we fetch SKILL.md
+first, then .cursorrules or .clinerules, then a constraint-style README.md.
+Phase 3: rule scoring. We score each document d on constraint density and style specificity,
+sden(d) =
+X
+i
+wden
+i
+fi(d),
+ssty(d) =
+X
+j
+wsty
+j gj(d),
+and admit it only if it clears both thresholds, sden(d) ≥τden and ssty(d) ≥τsty, with τden = 0.30
+and τsty = 0.25. Density features {fi} count modal terms (MUST, NEVER, ALWAYS, REQUIRED,
+FORBIDDEN, CRITICAL), code examples, good-versus-bad blocks, numbered rules, length, and
+guardrail sections. Style features {gj} count named tools and commands, process constraints, counter-
+intuitive rules, and machine-checkable cues. Thresholding the axes separately rejects documents that
+are dense but generic or specific but thin. We flag hard-to-sandbox needs (GUI, GPU, paid API) for
+Phase 4 without rejecting.
+Phase 4: masked-skill evaluation. An LLM inspects every constraint of each surviving document,
+and the red-team attacker prompt in Figure 15 tries to refute each proposed constraint. Let C(d) be its
+14
+
+=== [page 15] ===
+constraint set, Cex(d) those that survive the masked-skill check as non-generic, Crv(d) those with a
+rule-based verifier (regex, file check, AST, command trace, or state diff), and D(d) the dimensions
+(tool choice, step ordering, conditional trigger, safety boundary, output format, error handling) they
+cover. We tier each document by
+tier(d) =
+
+
+
+
+
+
+
+A
+|Cex| ≥3, |Crv| ≥2, |D| ≥2,
+B
+|Cex| ≥2, |Crv| ≥1,
+C
+|Cex| ≥1, |Crv| ≥1,
+D
+otherwise (rejected).
+We admit Tier A without quota; Tiers B and C enter under the Phase 2 quotas, with looser caps for
+domains prior benchmarks do not cover. A 10% human spot-check audits the LLM’s labels.
+B.2
+Task Construction
+For each skill we write executable, in-scope tasks that a strong model cannot solve without the skill.
+The masked-skill check enforces this: we hide the document and ask whether a strong model, given
+only the prompt and generic practice, would produce the same behaviour. A requirement it still meets
+is generic and dropped; a requirement it fails is skill-exclusive and kept. We run the check twice,
+once per skill during selection and once per task-requirement pair during construction.
+The check tests precision, not topic recognition. A good task turns on the exact choice the skill
+prescribes, such as tiering a rate limit per user rather than per IP at the skill’s threshold, not on
+whether the model knows the general topic. Any requirement a model meets from common practice
+carries no signal.
+Prompts read like user requests and hide the procedure. We reject checklist leakage that restates
+the rubric axes, directional leakage that reveals the intended fix, and reverse leakage that tells an
+out-of-scope task not to use the skill. We also keep prescribed formats, tool names, and parameters
+out of the prompt, since these are themselves skill-exclusive signals.
+Assets come from real projects and datasets, with reproducible preprocessing. The prompt, the
+manifest, and the on-disk files share one relative path, so the task resolves inside the sandbox.
+Reference implementations stay on the evaluator side, so a model cannot copy an answer without
+reading the skill.
+B.3
+Rubric and Judge
+Each rubric has three tiers. Evaluability gates carry zero weight and only confirm a run is well formed.
+Skill-derived items form the Skill-Use signal and split into Compliance and Boundary. Task-outcome
+items record whether the requested result appeared and stay outside Skill-Use. Every scored item
+traces to one skill-exclusive requirement.
+We prefer deterministic checks. State-diff checks read the produced files, and regex checks anchor to
+structured tool-call fields, not free text, so the agent’s narration cannot cause a false match. We use
+the scope-restricted LLM judge only when a requirement resists a reliable rule.
+The judge scores one item at a time and returns yes or no, with no numeric bands. It sees the rule,
+one closed-form question, and only that item’s locus: the produced artifact for an output item, the
+trajectory for a process item. It bases its verdict on tool-call and artifact evidence rather than stated
+intent, and accepts any variant the skill allows. Each item is judged twice and disagreements are
+re-adjudicated once, using the settings in Appendix D. Table 4 lists the configuration and Figure 20
+reproduces the prompt template.
+B.4
+Adversarial Review
+Every task and rubric passes a multi-agent review before entering the benchmark. Reviewers come
+from different model families, so no single family’s blind spot goes unchecked. One reviewer
+proposes revisions, one attacks the artifact, and a separate aggregator settles disputes. Figures 16–19
+reproduce the four role prompts used across the task and rubric debates.
+The task review checks discriminative power. At least two reviewers from different families must
+confirm that each skill-exclusive point is hard to reach without the skill. If any reviewer shows a
+15
+
+=== [page 16] ===
+Dimension
+Operational rule
+Verdict
+Binary YES or NO on one requirement, with a reason of at most 25 words
+Evidence locus
+Output items see only the produced artifact; process items see the trajectory
+Context window
+Serialized tool calls, the final answer, and the first few tool results, selected
+per item
+Evidence source
+The verdict rests on tool-call and artifact evidence, not the agent’s narration
+Equivalent variants
+The question accepts every implementation the skill sanctions
+Adjudication
+Each item is judged twice and disagreements are re-adjudicated once
+Table 4: LLM-judge configuration. Operational rules governing the scope-restricted judge: it issues
+a binary YES/NO verdict on one rubric item at a time, from item-specific evidence only, with each
+item judged twice and disagreements re-adjudicated once.
+credible no-skill path to the same behaviour, the point loses its exclusive status and is down-weighted,
+or the task is rebuilt. Exclusivity is thus an agreement among models, not one author’s claim.
+The rubric review adds executability. Each rubric passes a schema check, and each verifier is dry-run
+against one passing and one failing trace, so it fires exactly when it should. Reviewers then confirm
+that every scored item maps to a skill-exclusive behaviour; weak-agreement items are down-weighted
+or re-reviewed. Recurring findings feed the guideline loop in Appendix B.6.
+B.5
+Release Validation
+We release a skill-task-rubric triple only if it passes three checks.
+Executability. An asset validator confirms that the required tools, dependencies, and assets resolve
+inside the sandbox and that the task runs to completion. The prompt, manifest, and on-disk files must
+share one relative path, since a mismatch fails every model on its first tool call.
+Consistency. Each task requirement must trace to a specific skill passage, and each scored item must
+target a signal the run can produce. We drop requirements with no supporting passage and items with
+no producible signal.
+Rubric reliability. We replay each rubric on one passing and one failing trace. Replay flags signals
+that never fire, verifiers that match narration, regexes that time out under backtracking, format-
+sensitive failures, and leakage between the Skill-Use and task-completion scores. Regex checks stay
+anchored to tool-call fields under a watchdog, binary artifacts go through parsers, and the trigger gate
+reads deterministically. We discard any triple that fails and cannot be repaired.
+B.6
+Guideline Development
+A written guideline governs each construction stage. The skill guideline sets the admission criteria,
+verification methods, and tier thresholds. The task guideline sets how a task must depend on its
+skill, the leakage forms a prompt must avoid, and the rules on assets and path resolution. The rubric
+guideline sets item classification, verifier placement across the deterministic and semantic tiers, and
+the safety rules for automated verifiers.
+No guideline was written up front. Each began as a short draft, was applied to a batch, and every
+audited failure traced to either an unclear rule or an uncovered case. We then added, sharpened, or
+split the rule and re-applied it to a fresh batch, repeating until an audit found no new failure, then
+froze the guideline and regenerated downstream artifacts. The rubric guideline took the most rounds
+and ended with three additions: a skill-exclusivity justification on every scored item, a three-tier
+weight split, and a cap on total prohibition weight.
+Because concrete failures drive the loop, each frozen rule traces to the counterexample behind it, as
+Table 5 lists.
+Figures 12, 13, and 14 reproduce the three frozen guidelines as rendered English document figures.
+16
+
+=== [page 17] ===
+Rule (guideline)
+Failure that motivated it
+No absolute paths in task prompts
+(task)
+A prompt referred to files by an absolute path absent at runtime,
+failing every model on its first tool call
+No severity tags or checklists in task
+prompts (task)
+Such tags leaked the rubric structure and reduced the task to
+instruction-following
+Reference implementations invisible
+at runtime (task)
+A reference artifact among the inputs let models reproduce the
+target behaviour without reading the skill
+Weights split into gate, hard, and soft
+tiers (rubric)
+Assigning every item the maximum weight and stacking prohibi-
+tions produced identically zero scores, hiding all variance
+Every scored item carries a skill-
+exclusivity justification (rubric)
+An audit found items rewarding generic engineering; a justification
+field forces an auditable attribution
+Output judges must not read the tra-
+jectory (rubric)
+Judges credited models that described the behaviour but never
+wrote the output
+Regexes anchor to structured tool-
+call fields (rubric)
+Free-text regexes matched filenames from the model’s narration,
+giving false positives
+Regexes must avoid catastrophic
+backtracking (rubric)
+One unbounded pattern on a long trace hung the scorer, motivating
+a per-regex watchdog
+Table 5: Guideline rules and motivating failures. Frozen rules in the task and rubric guidelines,
+each paired with the concrete construction failure that triggered its addition during the audit loop.
+Skill-Use  •  Data Verification Console
+Task SF03_t7 / 177
+Task Prompt
+user request shown to the agent
+Merge three RFC PDFs into a training deck, in this exact order:
+first rfc9110 pages 8-45, then rfc9000 pages 15-68, finally rfc9114
+pages 5-42. Save the result next to the inputs.
+Retrieved Skill  ·  pdftk-server/SKILL.md
+opened by the agent at turn 2
+MUST
+use pdftk with uppercase handle syntax (A=, B=, C=)
+MUST
+validate each input via pdftk dump_data first
+NEVER
+fall back to qpdf, pdfunite, pypdf, or ghostscript
+ALWAYS
+name the merge output merged_<first_input_stem>.pdf
+Agent Trajectory
+tool calls  ·  9 steps
+t01 Bash
+ls  &&  cat README.txt
+t02 Skill
+open("pdftk-server")  →  procedure loaded
+t03 Bash
+pdftk rfc9110_http_semantics.pdf dump_data | grep Pages
+t04 Bash
+pdftk rfc9000_quic.pdf dump_data | grep Pages
+t05 Bash
+pdftk rfc9114_http3.pdf dump_data | grep Pages
+t06 Bash
+pdftk A=rfc9110... B=rfc9000... C=rfc9114... \
+t07 Bash
+  cat A8-45 B15-68 C5-42 output training.pdf
+t08 Bash
+pdftk training.pdf dump_data | grep NumberOfPages
+Rubric Checklist
+4 items · scored twice
+Uses pdftk cat/output for the merge
+skill-exclusive
+Satisfied
+Violated
+N/A
+Avoids qpdf, pdfunite, pypdf, ghostscript
+boundary
+Satisfied
+Violated
+N/A
+Preserves the user-specified merge or…
+skill-exclusive
+Satisfied
+Violated
+N/A
+✎  handles reassigned alphabetically
+Uses default merged_<stem>.pdf outp…
+skill-exclusive
+Satisfied
+Violated
+N/A
+✎  output saved as training.pdf
+2 annotators · agreement 3 / 4
+Submit  →
+Figure 7: Human-verification console for rubric audit. Annotators view the task prompt, the retrieved
+skill procedure, and the agent trajectory on the left; on the right they mark each rubric item as satisfied,
+violated, or not applicable, add a note, and see the item’s skill-exclusive or boundary provenance.
+Five crowd annotators score one sampled task per skill, and disagreements are adjudicated by a third
+reviewer.
+C
+Human Quality Audit
+The automated pipeline and the adversarial review are complemented by a crowdsourced human audit
+of the released benchmark. We sample one task per skill, yielding 79 audited triples, and route them
+to five independent crowd annotators through the web console in Figure 7. For every task the console
+shows the user prompt, the skill procedure the agent retrieved, and the recorded trajectory, and asks
+the annotator to mark each rubric item as satisfied, violated, or not applicable, and to flag any item
+that could be met without the skill. Annotators are paid at the standard rate of 100 CNY per hour,
+tracked per audited task.
+17
+
+=== [page 18] ===
+Across 100 sampled items scored by every annotator, pairwise agreement is 86/100 and Cohen’s
+κ = 0.65, indicating substantial agreement under the Landis-Koch scale. A third reviewer adjudicates
+the remaining items, and we repair or drop the rubric item behind each unresolved disagreement.
+The audit confirms that the released rubrics are reliable and that scored items track skill-exclusive
+behaviour rather than generic engineering, providing a human check on top of the model-based
+review.
+D
+Experimental Setup
+This section collects the runtime details left out of Section 4.1.
+Routing. The gateway routes each model through a family-specific channel. We sample at tempera-
+ture 0, top-p 1.0, and reasoning effort “high” where offered. We exclude the Gemini family from
+every analysis: its channel runs a schema sanitiser that renames or drops fields in the Skill tool,
+leaving the tool non-invokable across four checks.
+Sandbox. Each task runs in a fresh Ubuntu-22.04 container with its own gateway. The turn limit is
+120 under CC and 80 under Codex, since CC counts the Skill() step Codex lacks; the wall-clock
+limit is 1,500s. We fail and re-run a trace on (a) an upstream 5xx or 429, (b) a missing terminal
+result event, or (c) a non-zero exit whose first assistant message starts with “API Error”.
+Trace check. We verify each trace at three layers: llm_metrics.jsonl for upstream status,
+interaction.jsonl for request-response pairing, and trace.jsonl for the CLI trajectory, and
+accept it only when all three agree. About 2.8% of raw traces fail and are re-run.
+Judge. GPT-5.4 scores every LLM-judge item through the gateway at temperature 0, twice per item
+with one re-adjudication. Deterministic verifiers score in-process and are logged for replay.
+E
+Additional Analysis
+This section reports the tables and analyses behind Section 4. Figures quoted in the main text are not
+repeated.
+E.1
+Cross-Harness Behaviour
+Table 6 pairs each model’s CC and Codex SU on shared tasks.
+Û Findings: Cross-harness rank is stable at the top of the leaderboard but breaks in the
+middle, and a single-harness leaderboard therefore misreports mid-tier open-weight models.
+Head models correlate strongly and preserve rank. Middle-tier open-weight models correlate weakly
+and several reverse sign, so a single-harness leaderboard misreports them.
+Figure 8(a) shows the signed Compliance-Boundary gap ϕcomp −ϕbound is negative for every model
+under both harnesses, so prohibitions are easier than full procedures. Figure 8(b) reports the sham-
+trigger rate, the fraction of triggered traces with Compliance below 0.3; it rises most under Codex for
+the weakest executors, so a high trigger rate can hide shallow rule following.
+E.2
+Skill Injection
+This subsection expands Section 4.4 with per-skill and per-model detail.
+Û Findings: Preloading the skill lifts recognition rather than execution, since gains concen-
+trate on skills with abstract names while conditional Compliance stays flat.
+Figure 9 ranks skills by paired ∆SU, defined as preloaded minus native. Skills with abstract names
+such as moltbook-validator, tdd, and structured-autonomy-plan gain most, while keyword-
+rich names gain little or reverse. The effect is on recognition, not execution. Splitting skills by native
+trigger rate, hard skills drive most between-model variance, so trigger is not keyword matching.
+Reading conditional Compliance, sham rate, and trace length together separates Codex behaviour into
+18
+
+=== [page 19] ===
+−0.30
+−0.25
+−0.20
+−0.15
+−0.10
+−0.05
+0.00
+ϕcomp −ϕbound
+Qwen3.6-Max
+GPT-5.5
+DeepSeek-V4-Pro
+MiniMax-M3
+Kimi-K2.6
+Claude Opus 4.8
+Claude Opus 4.7
+GLM-5.1
+(a) Compliance−Boundary gap
+Codex
+CC
+GLM-5.1
+DeepSeek-V4-Pro
+Claude Opus 4.8
+Claude Opus 4.7
+Kimi-K2.6
+MiniMax-M3
+GPT-5.5
+Qwen3.6-Max
+0
+10
+20
+30
+40
+Sham-trigger rate (%)
+(b) Sham triggers
+CC
+Codex
+Figure 8: Execution behaviour across harnesses. (a) Signed Compliance-Boundary gap ϕcomp −ϕbound
+per model, negative in both harnesses, showing that prohibitions are easier to respect than full
+procedures. (b) Sham-trigger rate, the fraction of triggered traces with Compliance below 0.3, rising
+most under Codex for the weakest executors.
+Agreement
+Mean SU
+Model
+rPear
+ρSpear
+CC
+Codex
+∆
+Claude Opus 4.8
+0.648
+0.680
+0.597
+0.559
+−0.039
+Claude Opus 4.7
+0.552
+0.550
+0.599
+0.535
+−0.064
+GPT-5.5
+0.518
+0.542
+0.613
+0.503
+−0.110
+MiniMax-M3
+0.424
+0.425
+0.501
+0.446
+−0.055
+Qwen3.6-Max
+0.302
+0.337
+0.318
+0.238
+−0.081
+DeepSeek-V4-Pro
+0.290
+0.257
+0.250
+0.379
++0.129
+GLM-5.1
+0.285
+0.246
+0.267
+0.421
++0.154
+Kimi-K2.6
+0.281
+0.285
+0.190
+0.374
++0.185
+Table 6: Cross-harness SU agreement per model. Pearson r and Spearman ρ between CC and
+Codex task-level SU, together with each harness’s mean SU and their difference ∆= Codex −CC,
+over n ≈170 paired tasks. Head models correlate strongly and keep their order, while middle-tier
+open-weight models correlate weakly and several reverse sign.
+four profiles. Claude Opus 4.7 and 4.8 are balanced, combining high Compliance with a low sham rate.
+DeepSeek-V4-Pro and GLM-5.1 are selection-bound, matching head-level Compliance yet triggering
+natively at a low rate. GPT-5.5 and MiniMax-M3 are read-and-skip, recovering trigger but losing
+Compliance. Qwen3.6-Max is degenerate, producing the shortest traces, the lowest Compliance, and
+the highest sham rate.
+E.3
+Library Scaling
+This subsection annotates Figures 6 (c) and (d) in Section 4.5.
+Û Findings: As the library grows, lost SU comes almost entirely from calling no skill rather
+than from picking the wrong one, so scaling is bounded by recognition rather than by selection.
+At N ≥10 the loss is almost entirely none runs; wrong-skill calls stay below a few percent and
+cluster on broad descriptions like test-driven-development and software-architecture.
+This matches the recognition-limited pattern in Appendix E.2. Qwen3.6-Max invokes skills later than
+the others, so some of its none outcomes at large N are cut off by the 80-turn Codex limit; its curve
+is a lower bound.
+19
+
+=== [page 20] ===
+Claude Code (CC)
+Codex
+Model
+α=0.25
+α=0.5
+α=0.7
+α=0.75
+α=0.25
+α=0.5
+α=0.7
+α=0.75
+GPT-5.5
+0.619
+0.616
+0.613
+0.613
+0.540
+0.520
+0.504
+0.499
+Claude Opus 4.8
+0.593
+0.595
+0.597
+0.598
+0.565
+0.561
+0.559
+0.558
+Claude Opus 4.7
+0.602
+0.595
+0.590
+0.589
+0.544
+0.539
+0.535
+0.534
+MiniMax M3
+0.507
+0.504
+0.501
+0.500
+0.468
+0.456
+0.446
+0.443
+Qwen3.6 Max
+0.261
+0.262
+0.262
+0.262
+0.283
+0.258
+0.238
+0.233
+GLM-5.1
+0.194
+0.198
+0.202
+0.202
+0.413
+0.417
+0.421
+0.421
+DeepSeek V4 Pro
+0.202
+0.198
+0.195
+0.194
+0.388
+0.383
+0.379
+0.378
+Kimi K2.6
+0.182
+0.186
+0.190
+0.190
+0.375
+0.375
+0.374
+0.374
+Table 7: Per-model SU under varied compliance weight α. Task-level SU for each model at four
+settings of the compliance weight α ∈{0.25, 0.5, 0.7, 0.75} under both harnesses. The default in
+Eq. 2 is α = 0.7; head models keep their order across the sweep while middle-tier models shift by at
+most one adjacent pair.
+CC
+Codex
+α
+τ
+ρ
+shift
+SU
+τ
+ρ
+shift
+SU
+0.25
++.86
++.95
+1
+.395
++1.00
++1.00
+0
+.447
+0.5
++1.00
++1.00
+0
+.394
++1.00
++1.00
+0
+.439
+0.7
++1.00
++1.00
+0
+.394
++1.00
++1.00
+0
+.432
+0.75
++1.00
++1.00
+0
+.394
++1.00
++1.00
+0
+.430
+Table 8: Ranking stability against the α = 0.7 baseline. Kendall τ, Spearman ρ, and the count
+of adjacent-pair reorderings at each swept weight, along with the harness-mean SU. Rankings hold
+across α ∈[0.5, 0.75] on both harnesses; only CC at α = 0.25 swaps a single adjacent pair.
+E.4
+Out-of-Scope Behaviour
+Section 4.6 reports pooled avoidance scores across 53 out-of-scope tasks. This subsection breaks that
+pool into task types and identifies which models fail on which tasks.
+Û Findings: Models agree on most out-of-scope tasks, and over-invocation concentrates on
+Claude Opus and GPT-5.5, while GLM-5.1 shows an all-or-nothing profile.
+Models agree on most of the 53 tasks, and only 9 separate them, as Table 9 shows. All-avoid
+tasks carry a clean out-of-scope cue such as a mismatched framework name. All-enter tasks are
+document-shaped prompts whose topic overlaps the skill’s domain even though the output never
+needs the procedure.
+Over-invocation clusters on Claude Opus and GPT-5.5, the two models closest to a skill-first harness;
+they share the over-invocation pattern while others differ mainly in when they refuse. GLM-5.1
+either fully engages or fully ignores a skill, so its per-task distribution is bimodal, matching its Codex
+profile in Appendix E.2.
+E.5
+Robustness Analysis
+To test whether a single scoring pass is stable enough for model-level comparison, we freeze the CC
+traces and rescore a stratified subset of 83 aligned (task, model) observations three times with the
+same judge, rubric, and prompt, so all variation comes from the judge rather than the agent.
+Û Findings:
+The leaderboard survives repeated scoring, and judge noise is confined to
+mid-range traces rather than to clear wins or clear failures.
+20
+
+=== [page 21] ===
+−0.5
+0.0
+0.5
+ΔSU (preloaded − native)
+pcap-analysis
+swiftui-view-refactor
+geospatial-analysis
+drizzle-orm-schema
+tdd
+ortools-routing-modeling
+docker-patterns
+python-project-structure
+structured-autonomy-plan
+moltbook-validator
+-0.30
+-0.23
+-0.21
+-0.18
++0.27
++0.31
++0.31
++0.32
++0.42
++0.62
+Figure 9: Per-skill gain from preloading. Paired ∆SU, defined as preloaded minus native, per skill.
+Abstract names gain most because native selection misfires, while keyword-rich names gain little or
+reverse. The effect operates on recognition, not execution.
+Task
+Avoid
+Over-invokers
+docs_only_negative
+5/6
+GPT-5.5
+api_security_inventory
+5/6
+Opus 4.7
+frontend_backend
+4/6
+Opus 4.7, GPT-5.5
+go_release_note
+4/6
+Opus 4.7, GPT-5.5
+airflow_release_notes
+5/6
+Opus 4.7
+reading_inventory
+5/6
+GPT-5.5, GLM
+python_email
+4/6
+Opus 4.7, GPT-5.5
+warehouse_inventory_note
+3/6
+Opus 4.7, GPT-5.5, GLM
+crypto_market_landscape
+4/6
+Opus 4.7, GPT-5.5
+Table 9: Out-of-scope disagreement tasks. The 9 of 53 tasks where models split. Avoid is the number
+of the six evaluated models that correctly refrain from invoking the skill, and Over-invokers names
+those that trigger anyway. Claude Opus and GPT-5.5 account for most inappropriate invocations.
+Figure 10 shows the three rescores preserve the leaderboard; the few swaps involve models already
+within a narrow SU gap. Averaged over about one hundred tasks per model, the model-mean
+uncertainty falls far below the tier gaps in Table 1.
+Table 10 reports per-metric agreement. Compliance is the most stable continuous component;
+Boundary and task completion vary more, and Boundary has fewer observations because early
+records omit the field. Figure 11 shows judge disagreement peaks for mid-range traces and is lowest
+at clear successes and failures. Section 4.2 makes no ordering claim between adjacent mid-range
+models, so this noise does not threaten the conclusions. Section 3.1 shows that the trigger gate is
+deterministic, so all variation comes from judge stochasticity.
+E.6
+Weight Sensitivity Analysis
+The default SU weight in Eq. 2 is α = 0.7, reflecting that reading and following a skill is the primary
+target while boundary adherence is a secondary check. We test whether this choice is decisive by
+sweeping α ∈{0.25, 0.5, 0.7, 0.75} on both harnesses, omitting α ∈{0, 1} because they collapse
+21
+
+=== [page 22] ===
+1
+2
+3
+4
+5
+6
+7
+8
+Rank in the first run
+1
+2
+3
+4
+5
+6
+7
+8
+Rank in a single rescore run
+GPT-5.5
+Opus-4-7
+MiniMax-M3
+Opus-4-8
+Kimi-K2.6
+Qwen-3.6
+GLM-5.1
+DeepSeek-V4
+rescore run 1
+rescore run 2
+rescore run 3
+Figure 10: Ranking stability across three independent rescores. Each dot plots a model’s rank in one
+rescore against its rank in another, and near-diagonal alignment indicates a preserved leaderboard.
+The two off-diagonal pairs involve models within 0.01 SU of each other.
+Metric
+n
+ICC(2,1)
+Within std
+Skill-Use
+83
+0.530
+0.141
+Compliance
+83
+0.604
+0.116
+Boundary
+39
+0.471
+0.186
+Task completion
+83
+0.478
+0.176
+Table 10: Repeated-score agreement per metric. ICC(2,1) and within-observation std across
+three rescores of the aligned CC subset. Compliance is the most stable continuous component, and
+Boundary has fewer observations because early baseline records omit this field.
+SU to a single component. Table 7 lists per-model SU at each α and Table 8 the ranking stability
+against the α = 0.7 baseline, on the same samples as Section 4.2.
+Û Findings: Model rankings are stable across a wide range of compliance weights, so the
+default α = 0.7 is not a fragile setting.
+Both harnesses give identical orderings for α ∈[0.5, 0.75]. Only CC at α = 0.25 reorders, confined
+to two adjacent pairs that cross no tier boundary. Absolute SU shifts under reweighting are one to two
+orders of magnitude smaller than the tier gaps, so the qualitative claims of Section 4.2 hold across the
+range.
+F
+Prompt Templates
+This section reproduces the prompt templates behind the three review roles that guard benchmark
+quality: the red-team attacker used during skill selection, the four proposer-attacker-aggregator
+prompts used in the multi-vendor task and rubric debates, and the scoring-time LLM judge. Each
+prompt is shown in its English form, with concrete file paths and Python placeholders stripped for
+readability. Templates for skill categorisation, masked-skill checking, task generation, and rubric
+generation are omitted; those stages are described in Appendices B.1–B.3, and their template text is
+not required to reproduce the results.
+22
+
+=== [page 23] ===
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Average SU score
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+Std
+std = 0.14)
+std = 0.21)
+std = 0.08)
+GPT-5.5
+Opus-4-7
+MiniMax-M3
+GLM-5.1
+DeepSeek-V4
+Kimi-K2.6
+Qwen-3.6
+Opus-4-8
+individual (task, model)
+mean within-std per SU region
+Figure 11: Judge noise across the SU range. Within-observation std over three rescores against SU.
+Noise peaks in the middle band and is lowest at both extremes, where the paper’s strong-comparison
+claims sit.
+F.1
+Skill-Selection Red Team
+Appendix B.1 describes the skill-selection stage, where every candidate constraint is challenged by a
+red-team attacker that tries to refute its skill-specificity, verifiability, triggerability, non-redundancy,
+and gradability. Constraints that survive the attack are kept; the rest are revised or dropped. Figure 15
+reproduces the attacker prompt together with its scoring rubric and the accept/revise/reject verdict.
+F.2
+Task and Rubric Adversarial Review
+Every task and every rubric goes through the multi-vendor debate described in Appendix B.4. Each
+debate uses two role prompts, a reviewer that proposes revisions from a fixed list of review axes, and an
+aggregator that converts the debate transcript into a per-field or per-rule edit list. Figure 16 reproduces
+the task reviewer prompt, which covers six axes: skill-exclusive discrimination, description safety,
+real data and scenario, trigger design, evaluability, and asset consistency. Figure 17 reproduces the
+task aggregator prompt, which emits an actionable field-level edit list under hard constraints on which
+YAML fields may be edited, five red-line failure modes, and a quality gate. Figure 18 reproduces
+the rubric reviewer prompt, which covers four axes: skill-exclusive judgement, evaluation reliability,
+task-completion quality, and signal correctness. Figure 19 reproduces the rubric aggregator prompt,
+which issues a per-rule action table (keep, remove, revise, merge, downgrade) together with a must-fix
+list and a quality gate that reports signal purity, verifier reliability, and LLM-judge share.
+F.3
+LLM Judge
+The scope-restricted judge scores one rubric item at a time and returns a binary verdict under the
+configuration in Table 4. Figure 20 reproduces the full template: the rule identifier and specification,
+one closed-form YES/NO question, and a trace context assembled from serialised tool-call steps, the
+first few tool-call results, and the final answer.
+G
+Ethical Statement
+SKILL-USE is built entirely from public GitHub skills and open-source datasets under licences that
+permit redistribution, and contains no personally identifying information. Human audits use crowd
+annotators who are informed of the research purpose and compensated above the local minimum
+wage. All runs execute in isolated containers, and we release the rubrics and prompts so that external
+reviewers can reproduce and audit our results. The benchmark measures skill use in an agentic
+harness and is not a certification of safety or deployment readiness.
+23
+
+=== [page 24] ===
+Figure 12: Skill-selection guideline. Frozen rules governing which GitHub skill documents are
+admitted into the benchmark, including admission criteria, verification methods, and tier thresholds.
+24
+
+=== [page 25] ===
+Figure 13: Task-construction guideline. Frozen rules governing how each task must depend on its
+skill, forbidden leakage patterns in prompts, and requirements on assets and path resolution inside
+the sandbox.
+25
+
+=== [page 26] ===
+Figure 14: Rubric-design guideline. Frozen rules governing rubric item classification, verifier
+placement across the deterministic and semantic tiers, and safety constraints for automated verifiers.
+26
+
+=== [page 27] ===
+Figure 15: Skill attacker prompt. Per-constraint attack protocol used during the skill-selection filter to
+decide whether each proposed constraint is truly skill-specific, verifiable, triggerable, non-redundant,
+and gradable, together with the global scoring rubric and the accept/revise/reject verdict.
+Figure 16: Task reviewer prompt at initial debate round.
+27
+
+=== [page 28] ===
+Figure 17: Task aggregator prompt.
+Figure 18: Rubric reviewer prompt at initial debate round.
+28
+
+=== [page 29] ===
+Figure 19: Rubric aggregator prompt.
+Figure 20: The LLM-judge prompt.
+29

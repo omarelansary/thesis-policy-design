@@ -1,0 +1,57 @@
+Introducing memory in Kiro IDE and CLI - Kiro
+
+Back to all posts
+October 20, 2026
+Introducing memory in Kiro IDE and CLI
+By
+
+YU
+
+Yujie Li
+EngineeringBE
+
+Behrooz Omidvar-Tehrani
+Applied Science
+AL
+
+Alex Jia
+Product Marketing
+
+Today, we’re introducing memory in Kiro IDE and CLI. Kiro can remember how you prefer to work, repository-specific commands and conventions, corrections, debugging insights, and approaches you have already ruled out. When any of that becomes relevant again, Kiro carries your context forward, so you spend less time re-explaining context or repeating corrections, while Kiro can follow your preferences without being reminded and become more useful the longer you work with it.
+
+Terminal — 80×24
+
+Loading cast file...
+
+Remember what comes up along the way
+
+Rules and project documents work well for context you can state deliberately up front and want Kiro to apply consistently. Memory is for context that emerges as you work and might otherwise go unwritten.
+
+You might correct Kiro on where a certain kind of logic belongs, discover while debugging that integration tests only pass after a local service is running, or establish a preference for how Kiro should approach a change. With memory enabled, Kiro captures those details as they come up.
+
+Memory keeps specific context that can help with later work, rather than replaying past conversations. Kiro can refine memories as its understanding changes. Memories stay local to your machine and are shared between Kiro IDE and CLI on that machine, so context captured in one client is available in the other. Each memory can apply globally or to a specific repository, so Kiro can distinguish broader working preferences from context that belongs to a particular codebase.
+
+See and control what Kiro remembers
+
+In the IDE, chat shows when Kiro accesses, creates, updates, or deletes a memory, so you can see when Kiro is using or changing what it remembers. Open the Memories view from the activity bar to browse and search what Kiro remembers, see where a memory applies, inspect individual entries, and delete anything you no longer want Kiro to keep. In the CLI, recalled memories appear in chat as Memory entries, and /memories lets you search, preview, and open saved memories.
+
+Memory is off by default for this launch. In both the IDE and CLI, you control whether Kiro can use existing memories and whether it can create or update them. Recalled memories become part of the context available to Kiro, so using memory can increase context usage. These controls let you decide both what Kiro carries forward and whether it can continue learning as you work.
+
+Getting started
+
+In Kiro IDE, open the Memories view from the activity bar, open its settings, and choose Use and learn to let Kiro use existing memories and automatically create or refine memories as you work. Once enabled, work with Kiro as usual. You can return to the Memories view at any time to review what it remembers, remove memories you no longer want, or change how memory behaves.
+
+In Kiro CLI, memory is available in local V3 sessions. Type /memories to review saved memories or configure access. With read & write access, you can enable automatic memory updates so Kiro can create and refine memories as you work. Changes to memory access take effect in a new CLI session.
+
+Availability
+
+Memory is available in Kiro IDE 1.4.0 and later, and in Kiro CLI 2.29.0 and later for local V3 sessions. Memory is off by default and can be enabled and configured from either the IDE or CLI.
+
+Spend less time repeating yourself and more time moving your work forward. Turn on memory in your next Kiro session. See the memory documentation for more details on settings and controls.
+
+{PREVIOUS}
+How Kiro fixes itself, and how we keep the fixes honest
+
+{NEXT}
+Keeping a software factory stable at 1,000 PRs a week
+

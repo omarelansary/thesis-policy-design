@@ -1,0 +1,210 @@
+Caching | liteLLM
+
+Skip to main content
+
+Decisions API is here. Call Jev, Clef or any decision model through one /v1/decisions endpoint. →
+
+On this page
+
+Copy page
+Caching
+
+note
+
+For OpenAI/Anthropic Prompt Caching, go here
+
+Cache LLM Responses. LiteLLM's caching system stores and reuses LLM responses to save costs and
+reduce latency. When you make the same request twice, the cached response is returned instead of
+calling the LLM API again.
+
+Supported caches​
+
+Cachecache_params.typeSetup
+Redis, Valkey, ElastiCache, MemorystoreredisRedis and Valkey
+Redis semanticredis-semanticSemantic caching
+Valkey semanticvalkey-semanticSemantic caching
+Qdrant semanticqdrant-semanticSemantic caching
+S3 buckets3S3 and GCS
+GCS bucketgcsS3 and GCS
+In memorylocalbelow
+Diskdiskbelow
+
+Redis is the right default for anything past a single worker. An in-memory cache lives inside one
+worker process, so a proxy running four workers keeps four separate caches and the hit rate drops
+roughly by the worker count. See What Needs Redis for the rest of what
+Redis buys you.
+
+Exact-match caches (redis, s3, gcs, local, disk) key on a hash of the whole request, so
+any change to the conversation is a miss. Semantic caches embed the prompt and serve the closest
+match above a similarity threshold, which suits single-shot prompts and goes badly wrong on agentic
+traffic; read Semantic caching before turning one on.
+
+Quick start​
+
+Step 1: Add cache to the config.yaml​
+
+Caching is enabled by adding the cache key to the config.yaml
+
+model_list:
+  - model_name: gpt-6-luna
+    litellm_params:
+      model: gpt-6-luna
+  - model_name: text-embedding-ada-002
+    litellm_params:
+      model: text-embedding-ada-002
+
+litellm_settings:
+  set_verbose: True
+  cache: True # set cache responses to True, litellm defaults to using a redis cache
+
+Step 2: Add Redis credentials to .env​
+
+REDIS_URL = ""        # REDIS_URL='redis://username:password@hostname:port/database'
+## OR ##
+REDIS_HOST = ""       # REDIS_HOST='redis-18841.c274.us-east-1-3.ec2.cloud.redislabs.com'
+REDIS_PORT = ""       # REDIS_PORT='18841'
+REDIS_PASSWORD = ""   # REDIS_PASSWORD='liteLlmIsAmazing'
+
+For namespaces, ACL users, cluster and sentinel topologies, TLS, IAM authentication and the full
+list of REDIS_* variables, see Redis and Valkey. The per-command timeout
+of the cache client is cache_params.socket_timeout (default 5 s), not REDIS_SOCKET_TIMEOUT;
+see Redis socket_timeout.
+
+Step 3: Run proxy with config​
+
+$ litellm --config /path/to/config.yaml
+
+Step 4: Test it​
+
+/chat/completions
+/v1/responses
+/embeddings
+
+Send the same request twice:
+
+curl http://0.0.0.0:4000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+     "model": "gpt-6-luna",
+     "messages": [{"role": "user", "content": "write a poem about litellm!"}],
+     "temperature": 0.7
+   }'
+
+curl http://0.0.0.0:4000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+     "model": "gpt-6-luna",
+     "messages": [{"role": "user", "content": "write a poem about litellm!"}],
+     "temperature": 0.7
+   }'
+
+Send the same request twice:
+
+curl http://0.0.0.0:4000/v1/responses \
+  -H "Content-Type: application/json" \
+  -d '{
+     "model": "gpt-6-luna",
+     "input": "write a poem about litellm!"
+   }'
+
+curl http://0.0.0.0:4000/v1/responses \
+  -H "Content-Type: application/json" \
+  -d '{
+     "model": "gpt-6-luna",
+     "input": "write a poem about litellm!"
+   }'
+
+Send the same request twice:
+
+curl --location 'http://0.0.0.0:4000/embeddings' \
+  --header 'Content-Type: application/json' \
+  --data ' {
+  "model": "text-embedding-ada-002",
+  "input": ["write a litellm poem"]
+  }'
+
+curl --location 'http://0.0.0.0:4000/embeddings' \
+  --header 'Content-Type: application/json' \
+  --data ' {
+  "model": "text-embedding-ada-002",
+  "input": ["write a litellm poem"]
+  }'
+
+The second response is served from the cache. It carries an x-litellm-cache-key response header,
+which you can feed to /cache/delete.
+
+With cache: True and no supported_call_types, caching is on for /chat/completions,
+/completions, /embeddings, /audio/transcriptions, /rerank, /v1/responses and
+/v1/messages. To restrict it to some of them, see
+supported call types.
+
+On /v1/responses, exact-match caches key on the request body, so a request that carries
+previous_response_id is a different key from the one that inlines the conversation, and each
+turn of a multi-turn conversation is its own entry.
+
+In memory and disk caches​
+
+Neither needs external infrastructure, and neither is shared between workers or replicas, so use
+them for local development rather than production.
+
+In Memory Cache
+Disk Cache
+
+litellm_settings:
+  cache: True
+  cache_params:
+    type: local
+
+litellm_settings:
+  cache: True
+  cache_params:
+    type: disk
+    disk_cache_dir: /tmp/litellm-cache # OPTIONAL, default to ./.litellm_cache
+
+Debugging Caching - /cache/ping​
+
+LiteLLM Proxy exposes a /cache/ping endpoint to test if the cache is working as expected
+
+Usage
+
+curl --location 'http://0.0.0.0:4000/cache/ping'  -H "Authorization: Bearer $LITELLM_API_KEY"
+
+Expected Response - when cache healthy
+
+{
+    "status": "healthy",
+    "cache_type": "redis",
+    "ping_response": true,
+    "set_cache_response": "success",
+    "litellm_cache_params": {
+        "supported_call_types": "['completion', 'acompletion', 'embedding', 'aembedding', 'atranscription', 'transcription']",
+        "type": "redis",
+        "namespace": "None"
+    },
+    "redis_cache_params": {
+        "redis_client": "Redis<ConnectionPool<Connection<host=redis-16337.c322.us-east-1-2.ec2.cloud.redislabs.com,port=16337,db=0>>>",
+        "redis_kwargs": "{'url': 'redis://:******@redis-16337.c322.us-east-1-2.ec2.cloud.redislabs.com:16337'}",
+        "async_redis_conn_pool": "BlockingConnectionPool<Connection<host=redis-16337.c322.us-east-1-2.ec2.cloud.redislabs.com,port=16337,db=0>>",
+        "redis_version": "7.2.0"
+    }
+}
+
+Next steps​
+
+Tune what gets cached and for how long with cache controls, look up any
+setting in the cache_params reference, or set up a specific backend from
+the table above.
+
+Supported caches
+Quick start
+Step 1: Add cache to the config.yaml
+Step 2: Add Redis credentials to .env
+Step 3: Run proxy with config
+Step 4: Test it
+In memory and disk caches
+Debugging Caching - /cache/ping
+Next steps
+
+LiteLLM Enterprise
+SSO/SAML, audit logs, spend tracking, multi-team management, and guardrails, built for production.Learn more →
+

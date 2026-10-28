@@ -1,0 +1,2 @@
+# Thread T-20261028-125: TASK (lead; AUTH-020 fourth amendment of 2026-10-28, evidence stewards)
+At most twelve evidence-stewards check the scouts' claims (T-20261028-124) against the pages the lead stored in `evidence/literature-20261019/` (ids prefixed `v5-ls-`), one batch of about 7 claims each; no messaging threads. Output: one `findings/SUM-*` summary per steward (type: summary, unverified until checked against extracts), moved by the lead to `design/package-v5/inputs/` as in batch 16.

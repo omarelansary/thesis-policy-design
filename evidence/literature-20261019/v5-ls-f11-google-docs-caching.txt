@@ -1,0 +1,133 @@
+
+
+      Context caching  |  Gemini API  |  Google AI for Developers
+
+      Skip to main content
+
+            /
+
+      English
+
+      Deutsch
+
+      Español – América Latina
+
+      Français
+
+      Indonesia
+
+      Italiano
+
+      Polski
+
+      Português – Brasil
+
+      Shqip
+
+      Tiếng Việt
+
+      Türkçe
+
+      Русский
+
+      עברית
+
+      العربيّة
+
+      فارسی
+
+      हिंदी
+
+      বাংলা
+
+      ภาษาไทย
+
+      中文 – 简体
+
+      中文 – 繁體
+
+      日本語
+
+      한국어
+
+  Get API key
+
+  Cookbook
+
+  Community
+
+              Sign in
+
+          Gemini 4 Argon is now available. Try it out.
+
+          Home
+
+          Gemini API
+
+          Docs
+
+    Send feedback
+
+      Context caching
+
+In a typical AI workflow, you might pass the same input tokens over and over to
+a model. The Gemini API offers implicit caching to optimize performance and costs.
+Note: The Interactions API only supports implicit caching. Explicit caching
+(manually creating and managing cache objects) is not supported in the
+Interactions API, or for Gemini 4 Argon and onward. To use explicit caching on
+supported Gemini 3 and 2.5 models, switch to the
+generateContent API.
+
+Implicit caching
+
+Implicit caching is enabled by default for all Gemini 2.5 and newer models. It is
+supported for both stateful (using previous_interaction_id)
+and stateless conversation modes.
+We automatically pass on cost savings if your request hits caches. You don't need to configure anything to turn it on. The following table lists the minimum input token count for each model:
+
+Model
+Min token limit
+
+Gemini 4 Argon
+4,096
+
+Gemini 3.8 Flash
+4,096
+
+Gemini 3.6 Flash
+4,096
+
+Gemini 3.1 Pro Preview
+4,096
+
+Gemini 2.5 Flash
+2,048
+
+Gemini 2.5 Pro
+2,048
+
+To increase the chance of an implicit cache hit:
+
+Try putting large and common contents at the beginning of your prompt
+
+Try to send requests with similar prefix in a short amount of time
+
+Note: Multi-turn and agent loops on Gemini 4 (Argon and newer): Gemini
+caches the full previous request only if the new request adds at least 2,050
+tokens. Model output, thought, and function results all count toward this total.
+For smaller additions, Gemini re-processes the last 2,050 tokens of the previous
+request at the standard input rate. Most agent turns exceed this threshold.
+
+You can see the number of tokens which were cache hits in the response object's
+usage.total_cached_tokens (Python and JavaScript) field.
+
+    Send feedback
+
+Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+Last updated 2026-10-23 UTC.
+
+    Need to tell us more?
+
+      [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Missing the information I need","missingTheInformationINeed","thumb-down"],["Too complicated / too many steps","tooComplicatedTooManySteps","thumb-down"],["Out of date","outOfDate","thumb-down"],["Samples / code issue","samplesCodeIssue","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-10-23 UTC."],[],[]]
+

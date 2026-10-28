@@ -1,0 +1,2242 @@
+
+=== [page 1] ===
+AutoTool: Efficient Tool Selection for Large Language Model Agents
+Jingyi Jia, Qinbin Li*
+School of Computer Science and Technology
+Huazhong University of Science and Technology
+{jingyijia, qinbin}@hust.edu.cn
+Abstract
+Large Language Model (LLM) agents have emerged as pow-
+erful tools for automating complex tasks by leveraging the
+reasoning and decision-making abilities of LLMs. However, a
+major bottleneck in current agent frameworks lies in the high
+inference cost of tool selection, especially in approaches like
+ReAct that repeatedly invoke the LLM to determine which
+tool to use at each step. In this work, we propose AutoTool,
+a novel graph-based framework that bypasses repeated LLM
+inference by exploiting a key empirical observation: tool usage
+inertia—the tendency of tool invocations to follow predictable
+sequential patterns. AutoTool constructs a directed graph from
+historical agent trajectories, where nodes represent tools and
+edges capture transition probabilities, effectively modeling the
+inertia in tool selection. It further integrates parameter-level
+information to refine tool input generation. By traversing this
+structured representation, AutoTool efficiently selects tools
+and their parameters with minimal reliance on LLM infer-
+ence. Extensive experiments across diverse agent tasks demon-
+strate that AutoTool reduces inference costs by up to 30%
+while maintaining competitive task completion rates, offer-
+ing a practical and scalable enhancement for inference-heavy
+frameworks. Our work highlights the promise of integrating
+statistical structure into LLM agent design for greater effi-
+ciency without sacrificing performance.
+Code — https://github.com/jiajingyyyyyy/AutoTool
+1
+Introduction
+Large Language Models (LLMs) have experienced explo-
+sive growth, demonstrating impressive capabilities in vari-
+ous tasks (Achiam et al. 2023; Dubey et al. 2024b; Yang
+et al. 2025) from natural language understanding (Devlin
+et al. 2019) and reasoning (Guo et al. 2025) to automation
+of complex workflows (Wang et al. 2025). LLM-powered
+agents, which leverage these capabilities for interactive (Yi
+et al. 2024) and decision-making (Wei et al. 2025) tasks,
+have become increasingly prevalent in numerous domains,
+including software development (Jin et al. 2024), intelligent
+personal assistants (Li et al. 2024) and scientific research
+automation (Team et al. 2025).
+*Corresponding Author
+Copyright © 2026, Association for the Advancement of Artificial
+Intelligence (www.aaai.org). All rights reserved.
+However, despite their versatility, a significant drawback
+of current LLM-based agents is the substantial computational
+overhead (Kim et al. 2025), particularly evident in frame-
+works like ReAct (Yao et al. 2023b) that involve many LLM
+inferences. Among these inference processes, one major goal
+is to repeatedly infer appropriate tools to use based on dy-
+namic contexts, leading to high inference costs and latency.
+Given these challenges, a natural question arises: Can we
+utilize statistical methods instead of relying heavily on LLM
+inference to select tools efficiently?
+Addressing this issue, we empirically observe a critical
+phenomenon termed tool usage inertia, where tool selections
+demonstrate predictable sequential patterns. For instance,
+when an agent searches in an academic database, the invo-
+cation of AuthorNodeCheck is often followed by LoadAu-
+thorNet to retrieve detailed information. This sequential de-
+pendence is observable across diverse agent tasks (Qin et al.
+2023; Ma et al. 2024), confirming that prior tool selections
+significantly influence subsequent choices. Such inertia is
+widely present in many domain tasks, where LLM agents are
+usually applied.
+Inspired by these insights, we introduce AutoTool, a novel
+graph-based method for automatic tool selection in LLM
+agents. AutoTool constructs a graph representation capturing
+the observed inertia in tool selection from historical work-
+flows, where nodes correspond to tools and edges encode
+observed sequential dependencies. Additionally, AutoTool
+intelligently integrates parameter-level information into this
+graph, thereby enabling automated parameter filling. By effi-
+ciently traversing this structured representation, AutoTool se-
+lects the appropriate tools and parameters significantly faster
+than traditional inference-based approaches. Experimental
+evaluations demonstrate that AutoTool substantially reduces
+token consumption and LLM call counts while maintaining
+comparable agent task progress rates to LLM-based methods.
+Our contributions are summarized as follows:
+• We empirically identify and analyze the phenomenon of
+tool usage inertia in LLM-based agents, both in tool se-
+lection and parameter filling.
+• We design a method to construct an inertia-aware tool
+graph that captures sequential patterns and data flow in
+agent behavior.
+• We develop a graph-based selection algorithm that effi-
+arXiv:2511.14650v1  [cs.AI]  18 Nov 2025
+
+=== [page 2] ===
+ciently determines the next tool and its parameters with
+minimal LLM intervention.
+• We conduct extensive experiments showing that AutoTool
+achieves significant reductions in LLM inference cost
+while preserving task performance.
+2
+Background and Related Work
+2.1
+LLM Agent Frameworks
+LLM agents have significant potential in solving complex
+problems, primarily through effective task planning, reason-
+ing, and interaction with external tools (Qin et al. 2024; Qu
+et al. 2025). The seminal work ReAct (Yao et al. 2023b) intro-
+duces the core paradigm of driving agent decisions through
+interleaved “Thought-Act-Observe” cycles, which has be-
+come a cornerstone for numerous open-source frameworks,
+including Langchain (LangChain 2023) and MetaGPT (Hong
+et al. 2023). Subsequent research has expanded agents’ ca-
+pabilities to interact with a vast array of external tools, such
+as RESTful APIs in RestGPT (Song et al. 2023) or various
+AI models orchestrated by HuggingGPT (Shen et al. 2023).
+However, a shared limitation across these powerful frame-
+works is that the fundamental decision of which tool to use
+at each step still predominantly relies on a costly LLM infer-
+ence (Belcak et al. 2025). This reliance creates a significant
+computational bottleneck, which is the primary issue our
+work aims to address.
+2.2
+Automated Tool Selection
+Research in tool selection can be broadly categorized into
+two types: fine-tuning-dependent and tuning-free methods.
+Fine-tuning methods like Toolformer (Schick et al. 2023),
+Gorilla (Patil et al. 2024) and ToolRL (Qian et al. 2025)
+aim to improve intrinsic tool-use capabilities. While these
+approaches demonstrably enhance a model’s intrinsic ability
+to call tools correctly, their reliance on high-quality data or
+carefully crafted reward signals presents a significant barrier
+to scalability and adaptability. Tuning-free methods employ
+different strategies at runtime. Approaches like AnyTool (Du,
+Wei, and Zhang 2024) and ToolNet (Liu et al. 2024b) fo-
+cus on improving retrieval completeness and handling large-
+scale APIs. Many search strategies are introduced to find
+the optimized action sequences, such as the DFSDT in Tool-
+LLM (Qin et al. 2023), BFS in ITS (Koh et al. 2024), and the
+toolkit-based planning in ToolPlanner (Liu et al. 2024c).
+2.3
+Automated Workflow Generation
+To accomplish many complex tasks, agents need to ex-
+ecute a sequence of interdependent actions. Some ap-
+proaches focus on search and planning. For instance, Tree
+of Thoughts (Yao et al. 2023a) explores diverse action paths,
+while ToolChain (Zhuang et al. 2023) employs the A* search
+algorithm over a decision tree. Other works, such as LLM-
+Compiler (Kim et al. 2024), target execution efficiency by
+enabling parallel function calling. In parallel, another key
+approach is learning from past interactions: ART (Paran-
+jape et al. 2023) automates multi-step reasoning and tool
+use by retrieving and composing examples from a task li-
+brary, whereas Agent Workflow Memory (Wang et al. 2024)
+extracts reusable workflows to guide web agents in long-
+horizon tasks. Furthermore, several works have begun to ap-
+ply graph-based methods to enhance planning and workflow
+automation (Zhuge et al. 2024; Wu et al. 2024). Although
+most of these methods primarily focus on improving success
+rates and workflow quality, their planning or search processes
+can be computationally intensive. A comparison between our
+method and related studies is summarized in Table 1.
+3
+Motivation
+Observation 1: LLM Agents have high inference costs
+for tool selection
+The predominant focus in LLM agent
+research has been on maximizing task success rates, often
+leaving significant room for improvement in operational effi-
+ciency—a crucial factor for practical deployment. A multi-
+step task can trigger numerous LLM calls, posing significant
+challenges for real-time or resource-constrained applications.
+We argue that this universal reliance on the LLM is not
+only costly but also sub-optimal. The core issue is that not all
+decision steps in a task are of equal complexity or importance.
+Many tool invocations, both for selection and parameter fill-
+ing, occur in highly patterned or repetitive contexts that do
+not require the LLM’s full, nuanced reasoning power. This
+universal application of a resource-intensive model for both
+complex and simple decisions constitutes an over-utilization
+of its powerful abilities, creating unnecessary computational
+overhead.
+Observation 2: Tool Invocation Exhibits Predictable, Low-
+Entropy Inertia
+Motivated by this efficiency challenge, we
+conducted an empirical analysis to test the hypothesis that
+tool usage is not a series of independent events, but rather a
+process governed by sequential patterns. We utilize a ReAct
+agent within the ScienceWorld environment to generate 322
+trajectories, yielding 6014 tool invocations. Analyzing these
+sequences, we discover strong “Sequential Inertia”: tool selec-
+tion is not independent but follows predictable, low-entropy
+patterns.
+We quantify this predictability by modeling the sequence
+as a k-th order Markov chain and measuring the reduction in
+conditional entropy (Shannon 1948). The analysis reveals a
+substantial drop in uncertainty: a 0-order model (assuming
+independence) yields a baseline entropy of 3.50 bits, this
+value decreases to 2.52 bits for a 1st-order model and drops
+further to 1.93 bits for a 2nd-order model.
+To validate the statistical significance of these sequential
+dependencies, we performed likelihood ratio tests (G2-tests,
+N = 6014). The results confirm that each increase in model or-
+der yields a highly significant improvement in fit. Specifically,
+the transitions from a 0-order to a 1st-order model, and from
+a 1st-order to a 2nd-order model, are both statistically signif-
+icant, with G2(361) = 9390.70 and G2(3914) = 5437.03
+respectively (p < .001 for both).
+We provide a rigorous theoretical foundation for AutoTool
+in Appendix F.
+Empirically, this manifests as highly skewed successor
+distributions, as illustrated in Figure 1. The go to action is
+followed by look around in 88.7% of cases. Similarly, after
+the sequence focus on →wait, the next action is look around
+
+=== [page 3] ===
+Feature
+AutoTool
+DFSDT
+AnyTool
+ToolChain
+ToolNet
+ToolPlanner
+LLMCompiler
+Efficiency
+✓
+✗
+✓
+✗
+✓
+✓
+✓
+LLM Offloading
+✓
+✗
+✗
+✗
+✗
+✗
+✗
+Inertia Aware
+✓
+✗
+✗
+✗
+✗
+✗
+✗
+Parameter Flow
+✓
+✗
+✗
+✗
+✗
+✗
+✗
+Tool Graph
+✓
+✗
+✓
+✓
+✓
+✗
+✓
+Table 1: A comparison of AutoTool with other tuning-free tool selection methods
+Action
+Src Tool
+Src Param
+%
+use(target)
+move
+source
+44.8
+pick up
+OBJ
+22.1
+move
+target
+11.5
+pour
+OBJ
+11.0
+Other
+–
+10.6
+pick up(OBJ)
+focus on
+OBJ
+40.1
+move
+source
+24.3
+pour
+from
+16.4
+look at
+OBJ
+5.9
+Other
+–
+13.3
+Table 2: Parameter source analysis for the ‘use’ and ‘pick up’
+actions.
+Figure 1: The distribution of successor tools for different
+tools or tool sequences.
+with a high probability of 55.7%. These skewed distributions,
+where the next action often concentrates on one or two highly
+likely candidates, confirm the low-entropy nature of the task
+and demonstrate that non-LLM prediction is not only possible
+but highly feasible. Furthermore, the sources for directly
+transferred parameters are highly concentrated. As detailed
+in Table 2, a narrow set of preceding actions often provides
+a substantial portion of the necessary inputs. For instance,
+the top source alone accounts for 44.8% of parameters for
+use(target) and 40.1% for pick up(OBJ).
+This quantifiable inertia—as revealed through theoretical
+and empirical analysis in ScienceWorld—forms the founda-
+tion for our proposed method.
+4
+Methodology
+4.1
+Problem Statement
+In LLM-driven agent systems, an agent selects an action
+at = (toolt+1, paramst+1) at each timestep t based on an
+observation ot, a task goal G, and a set of available tools
+T . Current methods, such as ReAct, typically infer at ∼
+pLLM(a|ot, G, T ) via a complete LLM inference. This incurs
+significant computational costs, limiting their applicability in
+resource-constrained or real-time scenarios.
+To address this limitation, we define our problem as fol-
+lows: Given a dataset of trajectories Dhist = {τ1, τ2, . . . , τN}
+collected from historical task executions, where each trajec-
+tory τi = (o(i)
+0 , a(i)
+0 , o(i)
+1 , a(i)
+1 , . . .) records a sequence of ob-
+servations and actions. Our objective is to construct MAutoTool,
+a training-free decision-making algorithm based on the Tool
+Inertia Graph, which can selectively bypass the LLM for
+predictable actions to improve efficiency.
+4.2
+Overview
+Figure 2 illustrates the AutoTool framework, which attempts
+an ‘inertial invocation’ before each standard LLM call to
+bypass costly inference. This process operates in two stages:
+first, the Inertia Sensing module (Fig. 2b) predicts the next
+likely tool by combining historical frequency and contextual
+relevance. If a tool is identified, the Parameter Filling module
+(Fig. 2c) then populates its arguments by backtracking the
+parameter flow on the graph. A tool is executed directly only
+if both stages succeed, thus bypassing a costly LLM inference.
+We introduce each module below and defer more details
+and pseudo code of the algorithms to Appendix A due to
+page limit.
+4.3
+Graph Construction
+The Tool Inertia Graph (TIG) is a dynamic graph, denoted
+as Gt = (Vt, Et, Wt). It is incrementally constructed from
+execution trajectories and can also be bootstrapped with prior
+knowledge. The TIG’s node structure (Vt) is hierarchical:
+
+=== [page 4] ===
+neighbourCheck
+Workflow
+In the DBLP citation network, which venue 
+has the most publications by Andrea 
+Omicini?
+Inertial Sensing
+Param Filling
+Input node
+Output node
+Pending node
+tool edge
+In-chain 
+param edge
+Out-of-chain 
+param edge
+Semantic 
+information
+Match based on 
+frequency and the 
+contextual relevance.
+Frequency 
+information
+Tool node
+Predicted tool
+Param filling through 
+backtracking param flow.
+Out-of-chain 
+param node
+loadAuthorNet
+authorNodeCheck
+authorNodeCheck
+loadPaperNet
+node_name
+authorNodeCheck
+loadAuthorNet
+neighbourCheck
+graph_name
+author_name
+node_id
+graph_name
+Thought
+Action
+Obs
+Task intuition
+Structed input  
+and output
+Start
+End
+Before each step, attempt inertial invocation. If both inertia 
+detection and parameter filling succeed, invoke the tool; otherwise, 
+defer to the LLM.
+Inertial Sensing
+Param Filling
+(a)
+(b)
+(c)
+Figure 2: An overview of the AutoTool framework. This figure illustrates our proposed workflow, which initiates with the Inertia
+Sensing module predicting the next likely tool by exploiting historical usage patterns. If a high-confidence tool is identified, the
+Parameter Filling module then populates its required parameters. Only when both stages succeed is the tool executed directly via
+the inertial path, bypassing a costly LLM call. Otherwise, the system reverts to a standard LLM invocation.
+• Tool Nodes (vi): Primary nodes, each representing an
+available tool, toolk ∈T . They store the tool’s functional
+description and track execution-level attributes, such as
+success or failure status. Notably, these nodes can be ini-
+tially constructed from basic tool documentation alone,
+ensuring the graph’s scalability. Each Tool Node encapsu-
+lates a dynamic subgraph containing:
+– Parameter Nodes (pi): Secondary nodes within the
+subgraph, each representing a specific input or output
+parameter of the parent Tool Node.
+This hierarchical structure allows the TIG to meticulously
+track not only the sequence of tools but also the parameter-
+level data flows between them.
+These nodes are connected by two types of directed edges
+(Et):
+• Tool Sequence Edges (etool
+ij
+= (vi, vj)): Connect Tool
+Nodes to represent sequential dependencies.
+• Parameter Dependency Edges (eparam
+xy
+= (px, py)): Con-
+nect Parameter Nodes to model the data flow between
+tools.
+The initial creation and continuous update of these edges
+and their corresponding weights (Wt) are detailed in Sec-
+tion 4.4. This online construction mechanism ensures the TIG
+promptly reflects the agent’s latest experiences and learned
+patterns, making inertial predictions both adaptive and effec-
+tive.
+4.4
+Edge Filling
+The TIG learns and adapts from execution trajectories by
+dynamically creating and updating the edges that model both
+sequential tool dependencies and parameter-level data flows.
+Tool Sequence Edges.
+When a tool toolj is executed im-
+mediately after tooli, a Tool Sequence Edge (etool
+ij ) is created
+between them if it does not exist, typically with an initial
+weight of 1. The edge’s weight is reinforced exclusively by
+high-confidence sequences generated from the LLM. This
+design choice prevents error propagation from potentially
+sub-optimal inertial calls.
+More critically than just recording frequencies, AutoTool
+enables the TIG to differentiate between effective and inef-
+fective pathways. Each sequence edge is associated with a
+posterior efficacy score, which is continuously updated based
+on execution feedback. If an inertia-driven tool call is suc-
+cessful (judged by environmental feedback or task progres-
+sion), the weight of the corresponding edge is incremented.
+Conversely, a failure penalizes the edge by decrementing its
+weight. This online learning mechanism allows the TIG not
+only to record historical co-occurrence frequencies but also
+to learn the actual effectiveness of tool sequences, enabling
+robust adaptation to changing task dynamics.
+Parameter Dependency Edges.
+Tracking parameter flow
+is crucial for automating parameter filling. When a tool is
+invoked, our framework parses its structured input and output.
+It then backtracks through the execution history to identify
+the source of each input parameter. When a parameter of the
+
+=== [page 5] ===
+current tool inherits its value from any parameter of a preced-
+ing tool, a Parameter Dependency Edge (eparam
+xy
+) is established
+or reinforced between the corresponding Parameter Nodes.
+These edges encode recurring data transfer patterns, laying
+the groundwork for efficient, non-LLM parameter filling.
+4.5
+Graph Searching
+At each decision step, instead of immediately invoking the
+LLM, AutoTool first performs a graph search to attempt an
+inertial call. This process involves two sequential stages: tool
+selection and parameter filling.
+Tool Selection via CIPS
+First, AutoTool searches the TIG
+to identify candidate tools that have historically followed the
+sequence of the most recent k tools. For each candidate, we
+calculate a Comprehensive Inertia Potential Score (CIPS),
+which balances historical patterns with the current task con-
+text:
+CIPS = (1 −α) · Scorefreq + α · Scorectx
+(1)
+The Frequency Score (Scorefreq) quantifies historical us-
+age patterns extracted from TIG edge weights, while the
+Contextual Score (Scorectx) evaluates semantic alignment
+between the agent’s current intuition and the candidate
+tool’s description. We select the tool v∗achieving the high-
+est CIPS. If this score surpasses the predefined threshold
+(CIPS(v∗) > θinertial), the process proceeds to parameter fill-
+ing. Otherwise, the inertial attempt aborts and control reverts
+to the standard LLM inference module.
+Hierarchical Parameter Filling
+If a tool candidate v∗
+passes the threshold, AutoTool attempts to populate its re-
+quired parameters using a hierarchical, non-LLM strategy
+that follows a strict priority order, ensuring that the most
+reliable information sources are always prioritized.
+The primary method is dependency backtracking, which
+traverses the parameter dependency edges in the TIG to find
+an input’s source in a preceding tool’s output. If this fails, the
+framework attempts environmental state matching, using key
+states maintained by the agent (e.g., current location). As a
+final non-LLM attempt, it resorts to heuristic filling based
+on the agent’s current state or task goal. The inertial call
+is executed only if all required parameters are successfully
+populated through this hierarchy. If any parameter remains
+undetermined, the inertial call is aborted, and the decision-
+making process falls back to the LLM, ensuring that only
+high-confidence, fully specified actions are executed via iner-
+tia.
+5
+Evaluation
+We present the primary experimental results below. Due to the
+page limit, additional results including inertia analysis on
+ToolBench, case studies, dynamic analysis, and parameter
+filling accuracy are provided in the appendix.
+5.1
+Experimental Setup
+Datasets
+We evaluate AutoTool on three diverse and chal-
+lenging multi-hop benchmarks to assess its generalizability
+across different domains. We begin with Alfworld (Shrid-
+har et al. 2020), a classic text-based simulator for embodied
+household tasks. For more complex procedural tasks, we
+employ ScienceWorld (Wang et al. 2022), where agents
+must follow logical sequences in scientific experiments. Fi-
+nally, to evaluate multi-step API usage, we use ToolQuery-
+Academic (Ma et al. 2024), a benchmark from AgentBoard
+involving queries to an academic database. Together, these
+datasets provide a comprehensive test environment, covering
+challenges from physical reasoning and procedural following
+to structured API interactions.
+Evaluation Metrics
+Our evaluation focuses on two core
+aspects: task execution accuracy and efficiency.
+To measure accuracy, we adopt the progress rate metric
+from the AgentBoard testing framework (Ma et al. 2024).
+AgentBoard manually defines key sub-goals for each task. It
+then calculates the progress rate by comparing the sequence
+of sub-goals an agent actually achieves against the predefined
+sequence. This metric serves as our primary indicator of an
+agent’s ability to successfully complete tasks.
+To evaluate task execution efficiency, we focus on two key
+metrics. We use the average number of LLM calls as a robust,
+hardware-agnostic proxy for temporal efficiency, since API
+latency is the primary runtime bottleneck. Concurrently, we
+measure the average token consumption to quantify the
+computational cost.
+Baselines
+To our knowledge, there is no other published
+open-source work designed to improve the efficiency of tool
+selection in LLM agents without calling LLMs. Given this,
+and because our framework is designed for easy integra-
+tion, we evaluate AutoTool by applying it to two founda-
+tional agent paradigms: ReAct (Yao et al. 2023b) and Reflex-
+ion (Shinn et al. 2023). This approach allows us to demon-
+strate its effectiveness as an enhancement module.
+ReAct, a foundational LLM agent paradigm, uses a
+“Thought-Action-Observation” loop for multi-step reasoning
+and interaction. Reflexion enhances ReAct by introducing a
+self-reflection mechanism powered by an LLM-based eval-
+uator. This evaluator assesses the agent’s trajectories and
+generates feedback to prompt the agent to reflect on its errors.
+Our experiments mirror the original paper’s heuristic self-
+reflection: reflection is triggered by failed tool calls or three
+consecutive identical observations, with the LLM-generated
+reflection added to the agent’s memory.
+Settings
+All experiments are conducted on a server
+equipped with four Intel(R) Xeon(R) Gold 5117 CPUs
+and four NVIDIA Tesla V100-SXM2-32GB GPUs. We use
+Llama4-Scout-17b as the default model. The sampling tem-
+perature is consistently set to 0.
+5.2
+Speedup
+Our core objective is to verify that AutoTool can significantly
+reduce computational overhead (measured by the number of
+LLM calls and token consumption) while while maintaining
+comparable task performance (measured by progress rate).
+Notably, the graph construction time is negligible, as ana-
+lyzed in Section 5.3. We primarily assess efficiency improve-
+
+=== [page 6] ===
+Method
+AlfWorld
+ScienceWorld
+Tool-Query-Academia
+PR
+tok-in
+tok-out
+LLMC
+PR
+tok-in
+tok-out
+LLMC
+PR
+tok-in
+tok-out
+LLMC
+ReAct
+0.394
+6560
+2310
+24.1
+0.716
+9574
+1072
+23.3
+0.901
+1230
+658
+7.58
++ AutoTool
+0.531
+4110
+804
+20.4
+0.708
+7377
+758
+17.8
+0.895
+1070
+717
+6.32
+SpeedUp
+—
+1.60x
+2.87x
+1.18x
+—
+1.30x
+1.41x
+1.31x
+—
+1.15x
+0.92x
+1.20x
+Reflexion
+0.481
+6813
+2379
+30.7
+0.730
+7282
+1211
+24.9
+0.917
+1680
+680
+8.85
++ AutoTool
+0.453
+5130
+1976
+23.7
+0.712
+7842
+1012
+19.5
+0.923
+1260
+569
+7.05
+SpeedUp
+—
+1.33x
+1.20x
+1.29x
+—
+0.93x
+1.20x
+1.28x
+—
+1.33x
+1.19x
+1.26x
+Table 3: Performance and resource consumption comparison of baseline methods with and without AutoTool. progress rate (PR)
+measures task accuracy, while SpeedUp row shows the cost reduction ratio.
+ment by comparing the average LLM calls and token con-
+sumption of AutoTool-enhanced agents (ReAct+AutoTool
+and Reflexion+AutoTool) with their original baselines. We
+use SimCSE (Gao, Yao, and Chen 2021) to calculate the
+contextual relevance score.
+In our experimental setup, core AutoTool hyperparameters
+were tuned to achieve a 10-30% reduction in LLM calls,
+with θinertial = 0.1 controlling the inertia trigger threshold
+and α = 0.5 weighting contextual relevance. To maximize
+task progress, we implement a uniform constraint that limits
+inertia calls to no more than 30% of the total operations
+and explicitly prohibits consecutive inertia calls. To ensure
+fair comparison, we keep all agent components and prompts
+consistent with their respective baselines.
+All experiments are conducted in a pure cold-start setting.
+The core graph is built online from scratch without any prior
+trajectories, ensuring fairness across comparisons.
+As shown in Table 3, introducing AutoTool’s optimiza-
+tion mechanism yields substantial efficiency gains across all
+datasets. On average, it reduces the LLM call count by 15%
+to 25% and the total token consumption by 10% to 40%.
+For ReAct+AutoTool
+We integrate into the TIG a special-
+ized fault tolerance mechanism—designed as a preconfigured
+recovery path that activates upon detecting consecutive tool
+failures. It triggers a check operation to retrieve the current
+list of available tools, enabling the agent to re-orient itself
+and break out of ineffective exploration loops.
+On the AlfWorld dataset, the effectiveness of this approach
+is particularly striking, as the TIG not only delivers sub-
+stantial efficiency gains, with a 1.18x SpeedUp in LLM
+calls and over 1.60x in total token consumption, but also
+boosts progress rate, which in turn leads to fewer total execu-
+tion steps. On the ScienceWorld and ToolQuery-Academic
+datasets, ReAct+AutoTool also demonstrates stable efficiency
+gains in both LLM call counts and token consumption, with
+total SpeedUp values of 1.3x/1.3x/1.4x (for tok-in, tok-out,
+and LLMC respectively) and 1.2x/1.2x/1.0x. In essence, the
+efficiency gains are attributable to the inertia graph’s pre-
+dictive capability, whereas the progress rate improvement
+(especially on AlfWorld) and overall stability are ensured by
+the fault-tolerance mechanism and the 30% cap on inertial
+calls respectively.
+For Reflexion+AutoTool
+To avoid conflicting with its in-
+herent reflection mechanism, we do not introduce a precon-
+figured recovery path. Despite this, AutoTool is still able to
+effectively utilize tool usage inertia and maintain competitive
+performance. A comparison between Reflexion+AutoTool
+and ReAct+AutoTool reveals that the former yields a superior
+progress rate, primarily because the Reflexion mechanism im-
+proves the quality of collected inertia trajectories by reducing
+meaningless trial operations.
+Furthermore, to assess the model-agnostic nature of our
+framework, we replicated experiments on ScienceWorld
+using diverse LLMs, including Llama-3.3-70B (Dubey
+et al. 2024a), Qwen2.5-72B (Hui et al. 2024), and
+DeepSeekV3 (Liu et al. 2024a). As detailed in Appendix C,
+AutoTool consistently delivered significant efficiency gains
+across all models, demonstrating that our method is a ro-
+bust architectural improvement, not dependent on a specific
+model’s characteristics.
+5.3
+Overhead Analysis
+To quantify the computational overhead introduced by our
+framework, we systematically analyzed the time consump-
+tion of its core components for both ReAct+AutoTool and
+Reflexion+AutoTool across all three datasets. We dissect
+this overhead into two primary categories: the non-semantic
+modules (e.g., graph search and construction), detailed in Ta-
+ble 5, and the semantic relevance calculation modules, which
+constitute the primary overhead, presented in Table 4.
+As detailed in Table 5, our analysis reveals that the over-
+head from AutoTool’s non-semantic components is minimal,
+typically remaining on the order of seconds even when LLM
+inference time for a task exceeds a thousand seconds. The
+primary overhead stems from contextual relevance calcula-
+tion, which involves embedding both the agent’s intuition
+and tool descriptions. However, as Table 4 shows, this cost is
+negligible: computing contextual relevance accounts for only
+2.7% ± 1.5% of total task execution time, a mere fraction of
+standard LLM inference.
+5.4
+Sensitivity Analysis
+To investigate the impact of AutoTool’s key hyperparame-
+ters on its performance, we conduct a sensitivity analysis
+on the inertia trigger threshold θinertial and the semantic
+
+=== [page 7] ===
+Method
+Dataset
+Init
+Semantic Modules (s)
+Total
+Overhead % of
+(SimSCE)
+Intuition Emb.
+Tool Emb.
+Similarity Comp.
+Overhead (s)
+Total Task Time
+ReAct+
+AutoTool
+AlfWorld
+4.04
+23.5793
+3.0367
+1.1830
+31.84
+1.21
+ScienceWorld
+4.03
+21.1180
+1.0173
+0.4775
+26.64
+1.38
+Academic
+3.76
+6.1420
+0.1704
+0.0210
+10.09
+4.16
+Reflexion+
+AutoTool
+AlfWorld
+4.02
+35.3731
+7.2560
+2.1583
+48.81
+1.72
+ScienceWorld
+4.07
+26.6970
+2.2535
+0.7911
+33.81
+1.53
+Academic
+3.77
+5.1539
+0.1105
+0.0153
+9.05
+3.75
+Note: ‘Init (SimSCE)’ refers to the one-time cost of loading the SimSCE model into memory.
+Table 4: Time cost analysis of semantic modules in AutoTool. This table details the overhead from computing contextual
+relevance and its percentage of the total task execution time. All time values are in seconds (s).
+Method
+Dataset
+AutoTool Core Modules (s)
+LLM Time
+Action Counts
+Graph Const.
+Graph Search
+Parsing
+Param Filling
+Gen. Action
+(s)
+Inertial
+Total
+ReAct+
+AutoTool
+AlfWorld
+0.3159
+1.5026
+0.2370
+0.4653
+0.0267
+2604.1
+1076
+3605
+ScienceWorld
+0.2414
+0.9907
+0.4578
+0.1839
+0.0192
+1909.4
+690
+2316
+Academic
+0.0286
+0.0201
+0.0218
+0.0195
+0.0031
+232.1
+49
+203
+Reflexion+
+AutoTool
+AlfWorld
+0.4460
+0.9933
+0.2531
+0.6226
+0.0064
+2799.8
+1080
+3763
+ScienceWorld
+0.3500
+0.6857
+0.5055
+0.2914
+0.0075
+2173.8
+689
+2406
+Academic
+0.0320
+0.0139
+0.0213
+0.0119
+0.0014
+232.5
+34
+184
+Note: ‘LLM Time’ is the LLM inference time within the AutoTool framework, while ‘Parsing’ is the time spent parsing LLM outputs and
+tool outputs.
+Table 5: Time cost and action count analysis of AutoTool’s core modules. This table details the performance of non-semantic
+components within the AutoTool framework.
+θin
+α
+PR
+Tok-In
+Tok-Out
+LLMC
+Avg Act
+0.1
+0.3
+0.719
+67724
+710
+17.13
+24.45
+0.5 0.694
+69 010
+702
+16.85
+24.18
+0.7 0.686
+73 897
+785
+18.38
+26.47
+0.15
+0.3 0.706
+71 077
+765
+17.72
+25.36
+0.5 0.715
+70 640
+744
+17.66
+25.22
+0.7 0.687
+69 287
+726
+17.33
+24.75
+0.2
+0.3 0.696
+78 213
+812
+19.14
+26.93
+0.5 0.695
+73 515
+854
+17.94
+24.88
+0.7 0.696
+73 846
+861
+18.12
+24.67
+Table 6: Sensitivity analysis of AutoTool on the ScienceWorld
+dataset. We vary the inertia trigger threshold θin and the
+contextual relevance weight α.
+similarity weight α. The experiments are performed on the
+ScienceWorld dataset with ReAct+AutoTool, and the results
+are shown in Table 6. The experimental results largely meet
+our expectations: a lower θinertial (e.g., 0.1) tends to trigger
+more inertia calls, thereby most effectively reducing the aver-
+age number of LLM calls (e.g., reaching the lowest value of
+16.85 among all tested combinations when α = 0.5) and the
+corresponding token consumption.
+Interestingly, the progress rate remains stable despite the
+lower threshold. We attribute this to the two key constraints:
+a 30% cap on total inertia calls, and a prohibition on consec-
+utive ones. Indeed, even with a relatively high θinertial of
+0.2, the number of triggered inertia calls already approaches
+or reaches this 30% ceiling. This reveals an insight into our
+design: under these constraints, a more lenient θinertial is
+not only safe but beneficial. It allows AutoTool to capture a
+more diverse range of effective inertia patterns without being
+overwhelmed by low-quality calls, thus avoiding the rigidity
+and insufficiency of an overly strict threshold.
+6
+Conclusion
+We propose AutoTool, a graph-based and lightweight tool
+selection framework. Rather than simply following observed
+tool usage inertia, AutoTool treats it as a behavior to be ac-
+tively managed. By innovatively integrating statistical struc-
+ture into the design of LLM agents, AutoTool leverages the
+observed tool usage inertia to effectively address the high
+latency and resource consumption associated with multi-
+step tool selection in existing frameworks. While we de-
+tail the framework’s current limitations in Appendix G, our
+method has demonstrated strong generalization and adapt-
+ability, showing great potential for practical applications.
+
+=== [page 8] ===
+Acknowledgments
+This work is supported by the National Natural Science Foun-
+dation of China (Grant No. 62502174).
+References
+Achiam, J.; Adler, S.; Agarwal, S.; Ahmad, L.; Akkaya,
+I.; Aleman, F. L.; Almeida, D.; Altenschmidt, J.; Altman,
+S.; Anadkat, S.; et al. 2023. Gpt-4 technical report. arXiv
+preprint arXiv:2303.08774.
+Belcak, P.; Heinrich, G.; Diao, S.; Fu, Y.; Dong, X.; Muralid-
+haran, S.; Lin, Y. C.; and Molchanov, P. 2025. Small Lan-
+guage Models are the Future of Agentic AI. arXiv preprint
+arXiv:2506.02153.
+Devlin, J.; Chang, M.-W.; Lee, K.; and Toutanova, K. 2019.
+Bert: Pre-training of deep bidirectional transformers for lan-
+guage understanding. In Proceedings of the 2019 conference
+of the North American chapter of the association for compu-
+tational linguistics: human language technologies, volume 1
+(long and short papers), 4171–4186.
+Du, Y.; Wei, F.; and Zhang, H. 2024. Anytool: Self-reflective,
+hierarchical agents for large-scale api calls. arXiv preprint
+arXiv:2402.04253.
+Dubey, A.; Jauhri, A.; Pandey, A.; Kadian, A.; Al-Dahle,
+A.; Letman, A.; Mathur, A.; Schelten, A.; Yang, A.; Fan,
+A.; and et al. 2024a.
+The Llama 3 Herd of Models.
+arXiv:2407.21783.
+Dubey, A.; Jauhri, A.; Pandey, A.; Kadian, A.; Al-Dahle, A.;
+Letman, A.; Mathur, A.; Schelten, A.; Yang, A.; Fan, A.;
+et al. 2024b. The llama 3 herd of models. arXiv e-prints,
+arXiv–2407.
+Duhigg, C. 2012. The power of habit: Why we do what we
+do in life and business, volume 34. Random House.
+Gao, T.; Yao, X.; and Chen, D. 2021. Simcse: Simple con-
+trastive learning of sentence embeddings. arXiv preprint
+arXiv:2104.08821.
+Guo, D.; Yang, D.; Zhang, H.; Song, J.; Zhang, R.; Xu, R.;
+Zhu, Q.; Ma, S.; Wang, P.; Bi, X.; et al. 2025. Deepseek-r1:
+Incentivizing reasoning capability in llms via reinforcement
+learning. arXiv preprint arXiv:2501.12948.
+Hong, S.; Zheng, X.; Chen, J.; Cheng, Y.; Wang, J.; Zhang,
+C.; Wang, Z.; Yau, S. K. S.; Lin, Z.; Zhou, L.; et al. 2023.
+Metagpt: Meta programming for multi-agent collaborative
+framework. arXiv preprint arXiv:2308.00352, 3(4): 6.
+Hui, B.; Yang, J.; Cui, Z.; Yang, J.; Liu, D.; Zhang, L.; Liu,
+T.; Zhang, J.; Yu, B.; Lu, K.; et al. 2024. Qwen2. 5-coder
+technical report. arXiv preprint arXiv:2409.12186.
+Jin, H.; Huang, L.; Cai, H.; Yan, J.; Li, B.; and Chen, H. 2024.
+From llms to llm-based agents for software engineering: A
+survey of current, challenges and future.
+arXiv preprint
+arXiv:2408.02479.
+Kim, J.; Shin, B.; Chung, J.; and Rhu, M. 2025. The Cost of
+Dynamic Reasoning: Demystifying AI Agents and Test-Time
+Scaling from an AI Infrastructure Perspective. arXiv preprint
+arXiv:2506.04301.
+Kim, S.; Moon, S.; Tabrizi, R.; Lee, N.; Mahoney, M. W.;
+Keutzer, K.; and Gholami, A. 2024. An llm compiler for par-
+allel function calling. In Forty-first International Conference
+on Machine Learning.
+Koh, J. Y.; McAleer, S.; Fried, D.; and Salakhutdinov, R.
+2024. Tree search for language model agents. arXiv preprint
+arXiv:2407.01476.
+LangChain. 2023.
+Langchain: Build context-aware rea-
+soning applications.
+URL: https://github.com/langchain-
+ai/langchain.
+Li, Y.; Wen, H.; Wang, W.; Li, X.; Yuan, Y.; Liu, G.; Liu,
+J.; Xu, W.; Wang, X.; Sun, Y.; et al. 2024. Personal llm
+agents: Insights and survey about the capability, efficiency
+and security. arXiv preprint arXiv:2401.05459.
+Liu, A.; Feng, B.; Xue, B.; Wang, B.; Wu, B.; Lu, C.; Zhao,
+C.; Deng, C.; Zhang, C.; Ruan, C.; et al. 2024a. Deepseek-v3
+technical report. arXiv preprint arXiv:2412.19437.
+Liu, X.; Peng, Z.; Yi, X.; Xie, X.; Xiang, L.; Liu, Y.;
+and Xu, D. 2024b.
+Toolnet: Connecting large language
+models with massive tools via tool graph. arXiv preprint
+arXiv:2403.00839.
+Liu, Y.; Peng, X.; Cao, J.; Bo, S.; Zhang, Y.; Zhang, X.;
+Cheng, S.; Wang, X.; Yin, J.; and Du, T. 2024c. Tool-Planner:
+Task Planning with Clusters across Multiple Tools. arXiv
+preprint arXiv:2406.03807.
+Ma, C.; Zhang, J.; Zhu, Z.; Yang, C.; Yang, Y.; Jin, Y.; Lan,
+Z.; Kong, L.; and He, J. 2024. Agentboard: An analytical
+evaluation board of multi-turn llm agents. arXiv preprint
+arXiv:2401.13178.
+Paranjape, B.; Lundberg, S.; Singh, S.; Hajishirzi, H.; Zettle-
+moyer, L.; and Ribeiro, M. T. 2023. Art: Automatic multi-
+step reasoning and tool-use for large language models. arXiv
+preprint arXiv:2303.09014.
+Patil, S. G.; Zhang, T.; Wang, X.; and Gonzalez, J. E. 2024.
+Gorilla: Large language model connected with massive apis.
+Advances in Neural Information Processing Systems, 37:
+126544–126565.
+Qian, C.; Acikgoz, E. C.; He, Q.; Wang, H.; Chen, X.;
+Hakkani-T¨ur, D.; Tur, G.; and Ji, H. 2025. Toolrl: Reward is
+all tool learning needs. arXiv preprint arXiv:2504.13958.
+Qin, Y.; Hu, S.; Lin, Y.; Chen, W.; Ding, N.; Cui, G.; Zeng,
+Z.; Zhou, X.; Huang, Y.; Xiao, C.; et al. 2024. Tool learning
+with foundation models. ACM Computing Surveys, 57(4):
+1–40.
+Qin, Y.; Liang, S.; Ye, Y.; Zhu, K.; Yan, L.; Lu, Y.; Lin, Y.;
+Cong, X.; Tang, X.; Qian, B.; et al. 2023. Toolllm: Facilitating
+large language models to master 16000+ real-world apis.
+arXiv preprint arXiv:2307.16789.
+Qu, C.; Dai, S.; Wei, X.; Cai, H.; Wang, S.; Yin, D.; Xu,
+J.; and Wen, J.-R. 2025. Tool learning with large language
+models: A survey. Frontiers of Computer Science, 19(8):
+198343.
+Schick, T.; Dwivedi-Yu, J.; Dess`ı, R.; Raileanu, R.; Lomeli,
+M.; Hambro, E.; Zettlemoyer, L.; Cancedda, N.; and Scialom,
+T. 2023. Toolformer: Language models can teach themselves
+to use tools. Advances in Neural Information Processing
+Systems, 36: 68539–68551.
+
+=== [page 9] ===
+Shannon, C. E. 1948. A mathematical theory of communica-
+tion. The Bell system technical journal, 27(3): 379–423.
+Shen, Y.; Song, K.; Tan, X.; Li, D.; Lu, W.; and Zhuang,
+Y. 2023. Hugginggpt: Solving ai tasks with chatgpt and its
+friends in hugging face. Advances in Neural Information
+Processing Systems, 36: 38154–38180.
+Shinn, N.; Cassano, F.; Gopinath, A.; Narasimhan, K.; and
+Yao, S. 2023. Reflexion: Language agents with verbal rein-
+forcement learning. Advances in Neural Information Pro-
+cessing Systems, 36: 8634–8652.
+Shridhar, M.; Yuan, X.; Cˆot´e, M.-A.; Bisk, Y.; Trischler, A.;
+and Hausknecht, M. 2020. Alfworld: Aligning text and em-
+bodied environments for interactive learning. arXiv preprint
+arXiv:2010.03768.
+Song, Y.; Xiong, W.; Zhu, D.; Wu, W.; Qian, H.; Song, M.;
+Huang, H.; Li, C.; Wang, K.; Yao, R.; et al. 2023. Restgpt:
+Connecting large language models with real-world restful
+apis. arXiv preprint arXiv:2306.06624.
+Team, T. D.; Li, B.; Zhang, B.; Zhang, D.; Huang, F.;
+Li, G.; Chen, G.; Yin, H.; Wu, J.; Zhou, J.; et al. 2025.
+Tongyi DeepResearch Technical Report.
+arXiv preprint
+arXiv:2510.24701.
+Wang, Q.; Wang, T.; Tang, Z.; Li, Q.; Chen, N.; Liang, J.;
+and He, B. 2025. MegaAgent: A large-scale autonomous
+LLM-based multi-agent system without predefined SOPs. In
+Findings of the Association for Computational Linguistics:
+ACL 2025, 4998–5036.
+Wang, R.; Jansen, P.; Cˆot´e, M.-A.; and Ammanabrolu, P.
+2022. Scienceworld: Is your agent smarter than a 5th grader?
+arXiv preprint arXiv:2203.07540.
+Wang, Z. Z.; Mao, J.; Fried, D.; and Neubig, G. 2024. Agent
+workflow memory. arXiv preprint arXiv:2409.07429.
+Wei, H.; Zhang, Z.; He, S.; Xia, T.; Pan, S.; and Liu, F. 2025.
+Plangenllms: A modern survey of llm planning capabilities.
+arXiv preprint arXiv:2502.11221.
+Wu, X.; Shen, Y.; Shan, C.; Song, K.; Wang, S.; Zhang, B.;
+Feng, J.; Cheng, H.; Chen, W.; Xiong, Y.; et al. 2024. Can
+graph learning improve planning in LLM-based agents? Ad-
+vances in Neural Information Processing Systems, 37: 5338–
+5383.
+Yang, A.; Li, A.; Yang, B.; Zhang, B.; Hui, B.; Zheng, B.; Yu,
+B.; Gao, C.; Huang, C.; Lv, C.; et al. 2025. Qwen3 technical
+report. arXiv preprint arXiv:2505.09388.
+Yao, S.; Yu, D.; Zhao, J.; Shafran, I.; Griffiths, T.; Cao, Y.;
+and Narasimhan, K. 2023a. Tree of thoughts: Deliberate
+problem solving with large language models. Advances in
+neural information processing systems, 36: 11809–11822.
+Yao, S.; Zhao, J.; Yu, D.; Du, N.; Shafran, I.; Narasimhan,
+K.; and Cao, Y. 2023b. React: Synergizing reasoning and
+acting in language models. In International Conference on
+Learning Representations (ICLR).
+Yi, Z.; Ouyang, J.; Liu, Y.; Liao, T.; Xu, Z.; and Shen, Y.
+2024. A survey on recent advances in llm-based multi-turn
+dialogue systems. arXiv preprint arXiv:2402.18013.
+Zhuang, Y.; Chen, X.; Yu, T.; Mitra, S.; Bursztyn, V.; Rossi,
+R. A.; Sarkhel, S.; and Zhang, C. 2023. Toolchain*: Efficient
+action space navigation in large language models with a*
+search. arXiv preprint arXiv:2310.13227.
+Zhuge, M.; Wang, W.; Kirsch, L.; Faccio, F.; Khizbullin, D.;
+and Schmidhuber, J. 2024. Gptswarm: Language agents as
+optimizable graphs. In Forty-first International Conference
+on Machine Learning.
+
+=== [page 10] ===
+A
+Details of AutoTool
+Data Structure
+The core data structure of AutoTool is the Tool Inertia Graph
+(TIG), designed to capture and leverage sequential patterns in
+tool usage and parameter dependencies. The TIG is primarily
+composed of several interconnected components that work
+in concert.
+At the foundational level are ToolNodes, each precisely
+representing an available tool within the system. A ToolN-
+ode encapsulates the tool’s name, functional description,
+and a formalized list of its input arguments (args) and out-
+put arguments (returns). To manage data flow within in-
+dividual tools more granularly, each ToolNode embeds a
+ParamGraph. This dedicated subgraph is responsible for
+maintaining ParamNodes associated with the tool. These
+ParamNodes not only distinguish between input and output
+attributes but also cache example values observed during
+runtime, thereby providing a basis for subsequent parameter
+filling.
+To track the transfer of data across different tool
+invocations, the TIG incorporates ParamEdges. This
+constitutes
+a
+core
+mapping
+structure,
+conceptually
+organized
+as
+{target tool: {target param:
+{(source tool, source param):
+ParamEdge instance}}}.
+Each
+individual
+ParamEdge instance meticulously records a spe-
+cific historical data flow: it signifies that an output value
+or input value from a particular “source param” of a
+“source tool” has previously served as an input for a specific
+“target param” of a subsequent “target tool.” A counter
+within the ParamEdge quantifies the strength and frequency
+of this observed dependency.
+Complementing the node and data-flow structures, the TIG
+maintains ToolPaths to learn and utilize sequential patterns
+of tool invocations. Each ToolPath object stores an observed
+complete sequence of tool calls (represented as a list of tool
+names) along with the frequency of that specific sequence’s
+occurrence. For erroneous tool invocations, AutoTool simply
+add a tool call chain with a negative frequency, but ensure
+that its length is greater than the inertia observation window.
+For
+efficient
+retrieval
+and
+management
+of
+these
+paths, the TIG internally employs several key mappings.
+self.path index provides a rapid index from an individ-
+ual tool name to a set of all ToolPath IDs that contain that tool.
+The self.paths list allows direct access to the ToolPath
+object itself (containing the tool sequence, frequency, etc.) via
+its unique ID. Furthermore, self.paths lookup enables
+quick lookup of a ToolPath ID from a tuple representation
+of a tool sequence, which is crucial for efficiently checking
+path existence and updating path frequencies.
+Collectively, these components—ToolNodes with their em-
+bedded ParamGraphs, the graph of ParamEdges, and the sys-
+tematically managed ToolPaths—form the foundation of the
+TIG. This architecture enables the TIG to dynamically learn
+from execution history and effectively support inertia-driven
+tool selection.
+Tool Prediction
+AutoTool predicts the next tool by analyzing a segment of
+recently executed tools called the current sequence. This
+current sequence is a truncated portion of the full tool exe-
+cution history, and its length is defined by a variable called
+the inertia window. The inertia window is typically set to
+2, this means AutoTool rely on two consecutive action se-
+quences for inertia prediction. When the length is 1, the lack
+of contextual information results in lower accuracy for inertia
+prediction. Increasing the length to 3 or more theoretically
+allows for capturing longer dependencies, but on the current
+datasets, the number of historical paths that meet the criteria
+significantly decreases, leading to a decline in the model’s
+generalization ability and an increased risk of overfitting to
+specific long sequences. Exploring a dynamically changing
+inertia window is a direction for further optimization.
+The
+graph
+searching
+process
+begins
+by
+identify-
+ing candidate historical ToolPaths that contain the
+current sequence as a sub-sequence. Tool Prediction
+module first use TIG.path index to get the set of path
+IDs associated with the first tool in current sequence.
+Then, for each subsequent tool in current sequence,
+this set of path IDs is intersected with the set of path IDs
+associated with that tool. This efficiently narrows down to
+potential path indices that are supersets of the cur-
+rent execution window.
+Once
+these
+potential path indices
+are
+ob-
+tained, Tool Prediction module iterate through each
+corresponding ToolPath. It first verifies whether the
+current sequence is indeed a sub-sequence of the his-
+torical path. Then it checks if there is at least one tool follow-
+ing the current sequence in that historical path. If both
+conditions are satisfied, the tool that immediately follows the
+current sequence in the historical path is considered
+a candidate for the next action. The weight for each unique
+candidate next tool in the candidate tool dic is then
+updated based on the frequency attribute of the historical
+ToolPath, denoted as w(cj).
+The Inertia Confidence Score (ICS) calculation often
+yields multiple candidate tools for the next action. AutoTool
+first computes the total aggregated weight Wtotal = P w(ci)
+across all candidate tools ci, reflecting the overall histori-
+cal evidence strength for any known subsequent tool. To
+prevent premature high-confidence inertial calls when his-
+torical data is sparse (i.e., Wtotal is small), an Inertia Con-
+fidence Factor (ICF) is introduced, derived by applying a
+slowly increasing, bounded-by-1 exponential function to
+Wtotal: ICF = 1 −k−Wtotal, where k is a constant greater
+than 1 (e.g., k = 1.1). When Wtotal is small, ICF approaches
+0, suppressing overall confidence; as Wtotal grows, ICF ap-
+proaches 1, indicating higher confidence. Finally, the Inertia
+Confidence Score (ICS) for each candidate tool cj is cal-
+culated as: ICS(cj) =
+
+w(cj)
+Wtotal
+
+× ICF. This score is then
+combined with contextual relevance to form the final com-
+prehensive inertia potential score. This mechanism ensures
+AutoTool effectively leverages inertia when sufficient data is
+available while maintaining conservative decision-making in
+data-scarce scenarios.
+
+=== [page 11] ===
+Algorithm 1: ToolPrediction
+Input
+:current history, current memory, tool graph
+Output :predicted tool (String or None),
+confidence score (Float)
+1 // Goal: Predict the next tool
+based on historical patterns and
+current context.
+2 current sequence :=
+GetRecentToolSequence(current history);
+3 intuition := ExtractRelevantThought(current memory);
+4 // Step 1: Candidate Path
+Identification
+5 candidate paths :=
+FindMatchingPaths(current sequence, tool graph);
+6 if candidate paths is empty then
+7
+return None, 0.0;
+8 end
+9 // Step 2: Scoring Candidate Next
+Tools
+10 scored next tools := EmptyMap;
+11 foreach path in candidate paths do
+12
+next tool := GetNextToolInPath(path,
+current sequence);
+13
+if next tool exists then
+14
+freq score :=
+CalculateFrequencyScore(next tool, path,
+tool graph);
+15
+sem score :=
+CalculateSemanticSimilarity(next tool’s
+description, intuition);
+16
+combined score := WeightedSum(freq score,
+sem score);
+17
+UpdateOrAdd(scored next tools, next tool,
+combined score);
+18
+end
+19 end
+20 if scored next tools is empty then
+21
+return None, 0.0;
+22 end
+23 // Step 3: Prediction Decision
+24 best tool, highest score :=
+GetToolWithMaxScore(scored next tools);
+25 return best tool, highest score;
+Param Filling
+A significant challenge in designing a general-purpose pa-
+rameter filling mechanism arises from the considerable het-
+erogeneity across different datasets, particularly concerning
+the input/output structures of tools and varying environment
+states. To ensure broad applicability and maintain a modu-
+lar architecture, AutoTool adopts an Adaptor pattern. This
+approach effectively decouples the core parameter filling
+framework from dataset-specific intricacies.
+For each new dataset or environment, a corresponding con-
+crete Adaptor subclass must be implemented to bridge these
+specific details with the generic filling logic. The core frame-
+work then orchestrates the Adaptor and other components to
+perform the comprehensive parameter filling process. The
+base class definition for the Adaptor interface is presented
+here.
+import abc
+from typing import Dict, List, Any, Tuple,
+Optional, Set
+class EnvironmentAdapter(abc.ABC):
+"""
+Environment adapter base class, defines
+interfaces related to specific
+environments/datasets.
+Each new environment should implement a
+concrete adapter subclass.
+"""
+def
+init
+(self, debug: bool = False):
+"""
+Initialize the environment adapter
+Args:
+debug: Whether to enable debug
+mode
+"""
+self.debug = debug
+@abc.abstractmethod
+def reset(self, init observation: str =
+None):
+pass
+@abc.abstractmethod
+def parse action(self, action text: str,
+tool descriptions: Dict) -> Optional[
+Dict[str, Any]]:
+"""
+Parse action text and return
+structured action data
+Args:
+action_text: Action text
+tool_descriptions: Tool
+description dictionary
+Returns:
+Parsed action dictionary, format
+: {"tool name": str, "inputs": Dict[str,
+Any]}
+"""
+pass
+@abc.abstractmethod
+
+=== [page 12] ===
+def infer output(self, tool name: str,
+inputs: Dict[str, Any], result: Any) ->
+Dict[str, Any]:
+"""
+Infer structured output based on
+tool execution result
+Args:
+tool_name: Tool name
+inputs: Input parameters
+result: Execution result
+Returns:
+Inferred structured output
+dictionary
+"""
+pass
+@abc.abstractmethod
+def update state(self, action parsed:
+Dict[str, Any], structured outputs: Dict
+[str, Any]) -> None:
+"""
+Update environment state based on
+action and output
+Args:
+action_parsed: Parsed action
+dictionary
+structured_outputs: Structured
+output dictionary
+"""
+pass
+@abc.abstractmethod
+def get contextual params(self, action
+type: str, missing params: Set[str],
+required params info: Dict) -> Dict[str,
+Any]:
+"""
+Infer parameter values based on
+current environment state
+Args:
+action_type: Target action type
+missing_params: Set of missing
+parameters
+required_params_info: Dictionary
+of required parameter descriptions
+Returns:
+Inferred parameter dictionary
+"""
+pass
+@abc.abstractmethod
+def generate action from params(self,
+action type: str, params: Dict[str, Any
+]) -> str:
+pass
+Listing 1: Abstract Base Class for Environment Adapters
+Future work will explore applying some prompt engineer-
+ing to achieve a more structured presentation in status and
+tool output observation, which will make parameter filling
+adaptable to different datasets and environments much more
+easily, while minimizing the introduction of additional token
+overhead.
+Algorithm 2: ParameterFilling
+Input
+:target tool, exec history, param dep graph,
+env adapter, tool graph
+Output :filled parameters (Map), was successful
+(Boolean)
+1 // Goal: Automatically populate
+input parameters for the
+target tool.
+2 required params := GetInputSchema(target tool,
+tool graph schema);
+3 filled params := EmptyMap;
+4 // Priority 1: Parameter Dependency
+Graph (Learned direct
+output-to-input links)
+5 foreach param name in required params do
+6
+if param name not yet filled then
+7
+sources := QuerySources(param dep graph,
+target tool, param name);
+8
+if value found in sources then
+9
+value :=
+GetValueFromHistory(exec history,
+source tool, source param);
+10
+if value is valid and type-compatible then
+11
+filled params[param name] := value;
+12
+end
+13
+end
+14
+end
+15 end
+16 // Priority 2: Environment Context
+17 foreach param name in required params do
+18
+if param name not yet filled then
+19
+value :=
+env adapter.GetContextualValue(target tool,
+param name);
+20
+if value is available and valid then
+21
+filled params[param name] := value;
+22
+end
+23
+end
+24 end
+25 all critical filled :=
+CheckIfAllCriticalParamsAreFilled(filled params,
+required params);
+26 return filled params, all critical filled;
+
+=== [page 13] ===
+When a source parameter value is retrieved from histori-
+cal data via backtracking and matching, AutoTool handles it
+based on its type. If the source value is singular (e.g., a string
+or number), it is directly assigned to the target parameter.
+However, a challenge arises when the source value is a list
+of multiple elements while the target parameter typically ex-
+pects a single value, necessitating a selection strategy. While
+an ideal strategy would deeply integrate tool semantics and
+current task context, this often results in dataset-specific solu-
+tions that compromise generality. Although sophisticated,
+scenario-specific heuristic rules could be developed, our
+current AutoTool implementation employs a more general
+method to balance efficacy with simplicity: the framework
+maintains a record of all values already used for parameter
+filling within the ongoing task. When sourcing from a list, Au-
+toTool randomly selects an element from that source list that
+has not yet appeared in this record. This approach provides
+a foundational mechanism for diversifying parameter inputs
+from list-type sources within the same task, acknowledging
+that more contextually-aware selection strategies represent
+an avenue for future enhancement.
+B
+Macro-Level Inertia Analysis on ToolBench
+To validate the generalizability of our ”Sequential Inertia”
+hypothesis beyond task-oriented domains, we conducted a
+supplementary macro-level analysis on the ToolBench G3
+(Figure 3). ToolBench is a large-scale benchmark featuring
+over 16,000 real-world APIs, with its G3 subset being a
+comprehensive collection of over 15,000 diverse tools. This
+dataset provides an ideal testbed for evaluating the structural
+properties of tool-calling behavior in a more open-ended, less
+constrained environment.
+We processed 15,980 valid invocation trajectories from
+the G3 dataset. To ensure the analysis reflects meaningful se-
+quential patterns, we applied a preprocessing step to remove
+repetitive tool calls (e.g., A →A) and overly short trajecto-
+ries (length less than 2). Based on the cleaned trajectories,
+we constructed a transition probability matrix representing
+the likelihood of transitioning from any given tool to another.
+Our primary metric for this macro-level analysis is the
+system-wide conditional entropy, which quantifies the aver-
+age uncertainty of predicting the next tool, given the current
+one. The results are as follows:
+• Calculated Conditional Entropy H(Y—X): Our analysis
+revealed a system-level conditional entropy of only 3.62
+bits.
+• Maximum Theoretical Entropy (Uniform Baseline):
+For a system with 1,595 unique tools, the maximum pos-
+sible entropy, assuming completely random transitions, is
+log2(1595) ≈10.64 bits.
+• Entropy Reduction: The observed entropy of 3.62 bits
+represents a 65.96% reduction from the theoretical max-
+imum.
+The nearly 66% reduction in entropy provides a powerful,
+formal guarantee of the system’s non-random and highly pre-
+dictable structure. It confirms that even in a vast and diverse
+ecosystem of real-world APIs like ToolBench, tool invocation
+is not a random walk. Instead, it is governed by strong, under-
+lying patterns of usage. This macro-level evidence strongly
+supports our central claim that tool-calling inertia is a funda-
+mental and generalizable property of LLM agents, making
+our AutoTool approach broadly applicable.
+Figure 3: ToolBench Inertia Analysis. We calculated the fre-
+quency distribution of successor tools for each tool and de-
+rived the proportion of its top-k successor tools among all its
+successor tools.
+C
+Model Robustness
+To verify the generalization ability of our method across
+different models, we conducted experiments on the Science-
+World dataset using a diverse set of models with varying
+parameter sizes and architectures. Specifically, we tested
+the following models: Llama-4-Scout-17B-16E-Instruct,
+DeepSeekV3, Llama3.3-70B-Instruction, and Qwen2.5-72B-
+Instruct-Turbo. The results are presented in Table 7.
+Our method demonstrates strong generalization across dif-
+ferent models. Despite significant performance differences
+among these models on the same dataset, our approach con-
+sistently reduces token consumption and the number of LLM
+calls while maintaining a comparable progress rate. This pro-
+vides empirical evidence for further generalization in multiple
+scenarios.
+For DeepSeekV3, the poor instruction-following ability of
+the base model leads to a significant waste of solution steps as
+it fails to output action in the prescribed format. However, our
+preconfigured recovery path (two consecutive erroneous calls
+force a call to check valid action, to verify the set of available
+tools) significantly improves the progress rate while reducing
+token consumption. Similar experimental phenomena were
+also observed in the test results of ReAct + AutoTool on
+alfworld, as detailed in Table 3.
+D
+Case Study
+To provide a comprehensive and balanced evaluation of Au-
+toTool, this section presents both a detailed success case and
+an analysis of characteristic failure scenarios. This approach
+allows us to not only demonstrate the practical benefits of
+
+=== [page 14] ===
+Table 7: Performance Comparison of AutoTool with ReAct across Different LLMs on ScienceWorld. Metrics include Progress
+Rate (PR), Token Consumption (token-in, token-out), and Number of LLM Calls.
+Base LLM
+Method
+Progress Rate
+token-in
+token-out
+llm call
+Llama-4-Scout-17B-16E-Instruct
+ReAct
+0.7159
+95 743.62
+1072.03
+23.31
+ReAct+AutoTool
+0.7082
+73 779.72
+758.87
+17.81
+Llama-3.3-70B-Instruct-Turbo
+ReAct
+0.8126
+90 001.91
+1687.08
+19.15
+ReAct+AutoTool
+0.7891
+63 886.16
+1130.70
+14.60
+Qwen2.5-72B-Instruct-Turbo
+ReAct
+0.7600
+81 466.92
+1168.15
+19.71
+ReAct+AutoTool
+0.7484
+66 563.08
+876.54
+15.93
+DeepSeekV3
+ReAct
+0.4479
+112 062.43
+2204.80
+25.00
+ReAct+AutoTool
+0.5889
+72 608.53
+871.43
+17.26
+our method but also to transparently define its operational
+boundaries.
+Success Case Analysis
+Here we present case studies comparing the ReAct agent with
+the AutoTool+ReAct agent. We illustrate examples from the
+30th Scienceworld task in Figure 4.
+As shown on the right, Look around is executed twice
+by inertial tool calling, which significantly reduces token
+consumption. Meanwhile, the baseline has to take one step
+at a time. This obvious inertial calling is harmless for the
+agent to solve the task. Even if the inertial calling leads to
+inefficient or erroneous actions, it barely causes any waste of
+tokens and time.
+Case Study for Scienceworld
+Your task is to find a counter in the kitchen.. First, focus on the thing. 
+Then, move it to the purple box in the kitchen.
+ReAct
+ReAct+AutoTool
+You move to the hallway.
+look around
+This room is called the hallway. In it, 
+you see: the agent, a painting
+go to kitchen
+You move to the kitchen.
+look around
+This room is called the kitchen. In it, 
+you see:the agent, a chair
+focus on counter
+You focus on the counter.
+go to hallway
+...
+2776
+0
+3029
+0
+3418
+You move to the hallway.
+look around
+This room is called the hallway. In it, 
+you see: the agent, a painting
+go to kitchen
+You move to the kitchen.
+look around
+This room is called the kitchen. In it, 
+you see:the agent, a chair
+focus on counter
+You focus on the counter.
+go to hallway
+...
+2750
+2863
+3028
+3118
+3426
+Figure 4: Case study for scienceworld
+Failure Case Analysis
+In the typical usage scenarios of AutoTool, there are three
+classic failure scenarios. An analysis of these scenarios not
+only reveals the methodological boundaries of AutoTool but
+also inversely demonstrates the necessity of our designed
+feedback and fallback mechanisms. All cases presented below
+are derived from authentic experimental logs.
+Scenario 1: Parameter Filling with Incorrect Context
+When an agent needs to fill parameters for an action, Au-
+toTool might retrieve a “frequently used” parameter from a
+completely unrelated historical memory, entirely ignoring the
+agent’s current physical location and task constraints. This
+leads to action failure due to unsatisfied preconditions.
+Goal
+put two cd in safe.
+Context
+The agent is located near desk 2 and is currently carrying cd 1, as 
+confirmed by an inventory check in Step 22. The final destination 
+for the object is the safe.
+Inertial Call
+put cd 1 in/on drawer 1
+Analysis
+AutoTool's inertial call put cd 1 in/on drawer 1 failed due to two 
+critical errors. (1) Logical Mismatch: The parameter drawer 
+1 contradicted the task goal (safe). (2) Physical Precondition 
+Violation: The agent was at desk 2, making an action at drawer 
+1 physically impossible. This demonstrates a severe contextual 
+disconnect in parameter filling.
+Figure 5: Failure Scenario 1
+Scenario 2: Inertia-Induced Redundant Actions
+A more
+subtle risk of inertia is that it can cause the agent to “spin
+its wheels.” If an action sequence is historically chained,
+AutoTool might mechanically execute the next step without
+first evaluating whether the current state already satisfies
+the desired condition. While this may not cause a task-level
+“failure,” it generates useless steps, wasting both time and
+execution turns.
+Scenario 3: Overgeneralization of Tool Usage Patterns
+AutoTool builds its inertia graph by learning high-frequency
+action sequences. However, it might learn a general pattern
+(e.g., go to →open) without understanding the semantic
+
+=== [page 15] ===
+Goal
+put two soapbar in garbagecan.
+Context
+The agent arrived at countertop 1. In Step 12, it picked 
+up soapbar 1 from countertop 1. At this moment, the 
+agent's physical location was still at countertop 1.
+Inertial Call
+go to countertop 1
+Analysis
+This action was entirely redundant because the agent was 
+already at that location. The environment correctly 
+returned Nothing happens, and the step was wasted.
+Figure 6: Failure Scenario 2
+constraints of the objects to which it applies. A failure of
+”overgeneralization” occurs when it applies this general pat-
+tern to an object that does not support the action.
+Goal
+put a clean spatula in drawer.
+Context
+In last step, the agent executed go to sinkbasin 1 and 
+arrived at "Sink Basin 1."
+Inertial Call
+open sinkbasin 1
+Analysis
+In many tasks, after reaching a container (e.g., a drawer), 
+the next step is to open it. Based on the high-frequency 
+pattern go to -> open, AutoTool directly made an 
+inertial call: open sinkbasin 1. However, a "sinkbasin" 
+is an open container and lacks a door or lid that can be 
+"opened". 
+Figure 7: Failure Scenario 3
+E
+Dynamic Analysis
+To demonstrate AutoTool’s dynamic learning capability and
+its progressive optimization effect on agent performance, we
+track the execution process of Reflexion+AutoTool on the Alf-
+world dataset, which had the most severe progress rate loss.
+Figure 8 shows the evolution trends of Reflexion+AutoTool
+and the original Reflexion in terms of Progress Rate and aver-
+age LLM call counts (or Token consumption) as the number
+of executed tasks increases.
+From the Figure 8, after the experimental data converge (af-
+ter 40 tasks), our method slightly underperforms the original
+Reflexion in terms of progress rate. However, as more execu-
+tion trajectories are collected, around the 80th task execution,
+we observe that the performance of Reflexion+AutoTool be-
+gins to steadily improve. Considering the influence of the
+previous data, our method eventually maintains a compa-
+rable performance with Reflexion in the later stages of the
+experiment. More crucially, throughout the learning process,
+ReflexionAutoTool consistently demonstrates and gradually
+expands its advantage in execution efficiency. As shown in
+the Figure 8, its average LLM call counts and Token con-
+sumption were significantly lower than those of the original
+Reflexion from the start, and this gap became increasingly
+evident as the inertia graph was refined. This highlights Auto-
+Tool’s online learning capability. Even starting from scratch,
+it can build an effective inertia model through continuous in-
+teraction and feedback, significantly enhancing the execution
+efficiency of complex agents like Reflexion. This suggests
+that with more historical trajectory data, AutoTool’s perfor-
+mance potential will be further unleashed.
+F
+Theoretical Analysis
+The efficiency of AutoTool is rooted in a profound insight
+into the agent’s decision-making process, centered on the
+“tool usage inertia” phenomenon. We establish the theoretical
+foundation for this phenomenon on principles from informa-
+tion theory, cognitive science, and graph search algorithms.
+Low-Entropy Markov Process of Tool Selection: We
+model the agent’s tool selection sequence as a Markov De-
+cision Process (MDP). In this model, the set of available
+tools forms the state space S = {tool1, . . . , toolN}, and a se-
+quence of invocations is a trajectory of states (s1, s2, . . . , st)
+where st ∈S. The “tool usage inertia” observed in our work
+corresponds, in information theory, to a transition matrix
+with very low Conditional Entropy (Shannon 1948). This is
+formally expressed as the uncertainty of the next state st+1
+given the current state st:
+H(St+1|St) = −
+X
+i,j∈S
+p(si, sj) log2 p(sj|si)
+(2)
+where p(sj|si) is the transition probability from si to sj. Our
+empirical findings show that for most tools si, the distribu-
+tion p(sj|si) is highly skewed. Consequently, the system’s
+conditional entropy is significantly lower than the maximum
+possible entropy for a random selection, Hmax = log2 |S|.
+This condition, H(St+1|St) ≪log2 |S|, provides the theo-
+retical basis for why fast, non-LLM statistical prediction is
+feasible.
+Cognitive Heuristics: Priming and Habit Loops:This iner-
+tia phenomenon is analogous to concepts in cognitive sci-
+ence. The execution of a preceding tool acts as a Prim-
+ing Effect. Furthermore, AutoTool’s dynamic graph update
+mechanism mimics the Habit Loop (Cue →Routine →Re-
+ward) (Duhigg 2012). The feedback from the environment
+acts as a reward, captured by a dynamic weight update rule
+for the edge from tool si to sj in our Tool Inertia Graph
+(TIG):
+wt+1(si, sj) = wt(si, sj)+
+∆wsuccess
+if inertial call is successful
+−∆wfailure
+if inertial call fails
+(3)
+where ∆w > 0. This mechanism allows the agent to con-
+tinuously learn and reinforce effective tool sequences from
+experience.
+Graph Search as a Decisional Shortcut: An uncon-
+strained LLM, at each decision step, faces a combinatorially
+vast action space. If an agent can choose from N tools at
+each step for a sequence of length T, the number of potential
+trajectories is on the order of N T . The LLM must implicitly
+navigate this enormous space. In contrast, by constructing his-
+torical trajectories into a Dynamic Tool Inertia Graph (TIG),
+
+=== [page 16] ===
+(a) Progress Rate
+(b) LLM Calls
+(c) Token Consumption
+Figure 8: Dynamic learning process of Reflexion+AutoTool on the Alfworld dataset. Compared to the baseline Reflexion, our
+method consistently reduces (b) LLM calls and (c) token consumption, while maintaining a competitive (a) progress rate that
+improves over time as more trajectories are collected.
+Backbone
+Mode
+AlfWorld
+ScienceWorld
+Academic
+tried
+success
+tried
+success
+tried
+success
+ReAct
+PDG
+68.87%
+27.88%
+70.22%
+51.24%
+74.29%
+76.92%
+context filled
+31.13%
+29.94%
+29.78%
+45.83%
+25.71%
+66.67%
+Reflexion
+PDG
+71.42%
+22.33%
+77.03%
+55.90%
+78.12%
+76.00%
+context filled
+28.58%
+25.35%
+22.97%
+36.46%
+21.88%
+71.43%
+Table 8: Parameter Filling Statistics
+AutoTool transforms this open-ended decision problem into
+a constrained Graph Search problem.
+The agent’s choice is guided by the Comprehensive Inertia
+Potential Score (CIPS), whose decision-making philosophy
+is akin to the evaluation function in an A* search algorithm:
+CIPS(st+1|ht) = (1−α)·Scorefreq(st+1|ht)+α·Scorectx(st+1|ht)
+(4)
+While A* aims to minimize cost (f(n) = g(n) + h(n)) and
+CIPS aims to maximize a score, their core structure combines
+historical information with forward-looking heuristics. Here,
+Scorefreq acts like the known cost g(n), exploiting histori-
+cal data to evaluate a path’s proven reliability. Meanwhile,
+Scorectx functions as the heuristic h(n), predicting future suc-
+cess by evaluating a tool’s relevance to the current task. This
+A*-like mechanism allows AutoTool to balance exploita-
+tion (relying on ’habits’) and exploration (responding to the
+current ’stimulus’).
+The agent then selects the tool that maximizes this score,
+bypassing a full LLM inference call:
+s∗=
+arg max
+st+1∈Candidates
+(CIPS(st+1|ht))
+(5)
+The work by Zhuang et al. (Zhuang et al. 2023) also demon-
+strates the effectiveness of such guided search for navigating
+the LLM action space.
+G
+Limitations
+As a data-driven acceleration method, AutoTool’s perfor-
+mance relies on the quality and quantity of historical data,
+which may present cold-start challenges, particularly when
+dealing with extensive toolsets. Its inertia-based predictions
+may also be less effective in highly dynamic environments or
+tasks requiring intricate reasoning. A further consideration
+involves AutoTool’s dependency on parsing and integrating
+tool outputs. Designing targeted parsing functions for tools
+that give highly unstructured outputs may require additional
+engineering effort. Finally, the current manual approach to
+setting hyperparameters also presents an opportunity for fu-
+ture optimization. To advance AutoTool’s robustness and
+usability, future work will concentrate on exploring adaptive
+hyperparameter tuning and investigating deeper integration of
+semantic information to bolster decision-making in complex
+environments.
+H
+Parameter Filling Accuracy
+To further validate the robustness of AutoTool, we quantita-
+tively analyzed the accuracy of our parameter filling module.
+A parameter filling event is deemed successful if it leads to
+a tool call that is both syntactically valid and get successful
+environment feedback.
+Table 8 presents the proportion of attempts (tried) and suc-
+cess rates (success) for each parameter filling mode across
+different environments. We observe that the Parameter Depen-
+dency Graph (PDG) mode is predominantly utilized across
+all environments and backbones. Parameter filling success
+rates vary by environment: Academic tasks exhibit the high-
+est success rates, likely due to their structured inputs, while
+
+=== [page 17] ===
+AlfWorld consistently presents the lowest success rates for
+both PDG and context filled modes, suggesting inherent chal-
+lenges in its open-ended and linguistically diverse environ-
+ment, with ScienceWorld showing intermediate performance.
+I
+Other Baseline
+Given the sequential nature of tool calls, we implemented
+an N-gram model (n=3) as a new baseline, which also starts
+collecting data from scratch. Furthermore, we conducted sep-
+arate experiments for this baseline under two conditions: with
+and without a recovery mechanism. For parameter filling, this
+baseline reuses the parameter filling module from AutoTool.
+The final results are presented in the Table 9.
+Method
+PR
+tok-in
+tok-out LLMC
+AutoTool
+0.6698
+80 220
+1324
+18.6
+Ngram w recovery
+0.6476
+81 838
+1403
+18.9
+Ngram wo recovery 0.6140
+78 316
+1135
+18.6
+Table 9: Comparison of AutoTool with N-gram Baselines on
+the ScienceWorld Dataset with Qwen2.5-32B.
+J
+Prompt
+We have provided the instruction prompts for the agent on
+three datasets. The specific details are shown in Figures 9,
+11 , and 10. For the placeholders in the prompts, we can
+selectively fill them in. The reflection instructions are the re-
+flective messages generated by the LLM in Reflexion, and no
+reflection is provided for ReAct. Except for the Scienceworld
+dataset, all other datasets use the zero-shot method without
+providing examples. Our AutoTool method does not modify
+the system prompt, that is, it uses the same instruction prompt
+as the baseline.
+For actions generated by inertia calls, AutoTool specif-
+ically note them when encapsulating them into temporary
+memory. Specifically, the prompt is: Think: Using graph
+inertia to predict next action {predicted tool} with pa-
+rameters {filled params}. \nAction: {final action}
+You are a helpful assistant. Your task is to interact with a virtual household simulator to accomplish a specific task.
+Your MAIN GOAL is: **{goal}**
+      You MUST achieve ALL aspects of this goal. Do not simplify or ignore parts of the goal.
+      Follow the ReAct (Reasoning + Acting) paradigm:
+      1. **Think:**
+        What you think ahout the current situation and how to achieve the goal.
+      2. **Action:** Output EXACTLY ONE command from the list below based on your thought process.
+      Available Actions:
+      - **take {{{{obj}}}} from {{{{recep}}}}**: Pick up an object ('{{{{obj}}}}') from a location ('{{{{recep}}}}').
+      - **put {{{{obj}}}} in/on {{{{recep}}}}**: Place an object ('{{{{obj}}}}') into/onto a location ('{{{{recep}}}}').
+      - **open {{{{recep}}}}**: Open a container ('{{{{recep}}}}') to access its contents.
+      - **close {{{{recep}}}}**: Close an open container ('{{{{recep}}}}').
+      - **toggle {{{{target}}}}**: Toggle the state of an object or device ('{{{{target}}}}') (e.g., turn on/off a desklamp or 
+microwave).
+      - **clean {{{{obj}}}} with {{{{recep}}}}**: Clean an object ('{{{{obj}}}}') with a tool/receptacle ('{{{{recep}}}}').
+      - **cool {{{{obj}}}} with {{{{recep}}}}**: Cool an object ('{{{{obj}}}}') with a cooling device/receptacle 
+('{{{{recep}}}}') like a fridge.
+      - **heat {{{{obj}}}} with {{{{recep}}}}**: Heat an object ('{{{{obj}}}}') with a heating device/receptacle 
+('{{{{recep}}}}') like a microwave.
+      - **examine {{{{target}}}}**: Look closely at an object or receptacle ('{{{{target}}}}') to get details. Use this to fulfill 
+'look at [object]' parts of a goal.
+      - **go to {{{{recep}}}}**: Move to a specific location or receptacle ('{{{{recep}}}}').
+      - **look**: Observe your current surroundings to get a general view of the area and visible items.
+      - **use {{{{target}}}}**: Use or interact with an object or device ('{{{{target}}}}') in its default way (often similar to 
+'toggle' for devices).
+      - **{check_inventory_cmd}**: Check what objects you are currently carrying.
+      - **{check_actions_cmd}**: List all currently valid actions based on the environment's state. (Use if unsure or if standard 
+actions fail).
+      Guidelines for Action:
+      
+      **CRITICAL FORMATTING:** Your response MUST be structured EXACTLY as follows, with "Think:" and "Action:" 
+on SEPARATE lines and NO extra text before or after:
+      Think: [Your reasoning and plan here, addressing points a-d under 'Think:']
+      Action: [Your single, valid Alfworld command here from 'Available Actions']
+      **Interaction Examples:**
+      ---
+      {examples_str}
+      ---
+      Now, begin the task. Remember the MAIN GOAL: **{goal}**
+           {reflection_instructions}
+Instruction Prompt for Alfworld
+Figure 9: Instruction prompt for alfworld
+You are an intelligent agent tasked with helping users solve academic problems using specialized tools.
+Your goal is to: {goal}
+{tools_description}
+If you are finished, call the "finish" action with your final answer.
+You should follow the ReAct (Reasoning + Acting) paradigm:
+1. Think: Analyze the current situation and plan your next move
+2. Action: Execute a specific action with appropriate arguments
+Your response must be one of the following two formats:
+(1) Think: [your thinking]
+(2) Action: [action_name] with Action Input: [parameters in JSON format]
+For example:
+{examples_str}
+Remember to:
+1. Use the tools in a logical sequence to solve the problem
+2. If unsure about available actions, use 'check_valid_actions'
+3. Use precise parameter names and values as specified in the tool descriptions
+4. Format JSON parameters correctly
+5. Submit your final answer using the 'finish' action when you complete the task
+{reflection_instructions}
+Instruction Prompt for Academic
+Figure 10: Instruction prompt for academic
+
+=== [page 18] ===
+You are an intelligent scientist.
+Your MAIN GOAL is: **{goal}**
+You MUST achieve ALL aspects of this goal. Do not simplify or ignore parts of the goal.
+Follow the ReAct (Reasoning + Acting) paradigm:
+1. **Think:**
+  a. **Analyze Observation:**   b. **Assess Goal Progress:**
+  c. **Plan Action:**   d. **Analyze Failure (If Applicable):** 2. **Action:** Output EXACTLY ONE command from the 
+list below based on your thought process.
+Available Actions:
+- **Manipulation**:
+ - open {{OBJ}} / close {{OBJ}}: Interact with a container.
+ - pick up {{OBJ}}: Add an object to your inventory.
+ - put down {{OBJ}}: Remove an object from your inventory.
+ - move {{OBJ}} to {{OBJ}}: Transfer an object.
+ - pour {{OBJ}} into {{OBJ}}: Pour a substance.
+ - dunk {{OBJ}} into {{OBJ}}: Immerse a container in a liquid.
+ - mix {{OBJ}}: Chemically combine contents within a container object.
+- **Inspection**:
+ - look around: Survey your surroundings.
+ - look at {{OBJ}}: Examine an object or substance closely.
+ - look in {{OBJ}}: Peek inside a container.
+ - read {{OBJ}}: Review written content on an object.
+- **Device Operations**:
+ - activate {{OBJ}} / deactivate {{OBJ}}: Toggle a device (e.g., stove, sink, lighter).
+ - use {{OBJ}} [on {{OBJ}}]: Utilize a device or item. If 'on {{OBJ}}' is used, it specifies a target for the first OBJ. (e.g., use 
+thermometer in inventory on substance in metal pot).
+- **Movement**:
+ - go to {{LOC}}: Relocate to a new location (e.g., go to kitchen).
+- **Miscellaneous**:
+ - eat {{OBJ}}: Consume an edible item.
+ - flush {{OBJ}}: Activate a flushing mechanism (e.g., toilet).
+ - focus on {{OBJ}}: Direct attention to a particular object or substance. This is often needed before actions like 'mix' or 'examine 
+substance'.
+ - wait or wait [DURATION]: Pause for a specified period (e.g., wait 1). If DURATION is not specified, it defaults to 1.
+- **Information**:
+ - task: Recap your current objective.
+ - inventory: Display items you're carrying.
+Where:
+- {{OBJ}}: Represents an object or substance name (e.g., 'metal pot', 'water', 'thermometer').
+- {{LOC}}: Represents a location name (e.g., 'kitchen', 'hallway').
+Guidelines for Action:
+*  Use object, substance, and location names *EXACTLY* as they appear in the LATEST observation.
+*  Refer to the interaction examples below for typical patterns, but adapt to the current goal and observation.
+*  For actions requiring parameters like {{OBJ}} or {{LOC}}, replace them with specific names from the observation.
+*  Pay attention to the current focused object/substance. Some actions implicitly use the focused item.
+*  **Task Completion:** The task is considered complete by the environment ONLY when ALL conditions of the MAIN GOAL 
+are met. There is no explicit 'finish' command. If you believe all conditions are met, your final action should be the one that 
+directly achieves the last part of the goal. The environment will then typically provide a success message or end the episode. If not, 
+re-assess if all goal conditions were truly satisfied.
+**CRITICAL FORMATTING:** Your response MUST be structured EXACTLY as follows, with "Think:" and "Action:" on 
+SEPARATE lines and NO extra text before or after:
+Think: [Your reasoning and plan here, addressing points a-d under 'Think:']
+Action: [Your single, valid ScienceWorld command here from 'Available Actions']
+**Interaction Examples:**
+---
+{examples_str}
+---
+Now, begin the task. Remember the MAIN GOAL: **{goal}**
+{reflection_instructions}
+Instruction Prompt for Scienceworld
+Figure 11: Instruction prompt for scienceworld

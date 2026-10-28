@@ -1,0 +1,144 @@
+Agents.md
+
+Kilo CodeDOCS
+
+GitHubSign in
+
+Contributing
+Help
+
+agents.md
+AGENTS.md files provide a standardized way to configure AI agent behavior across different AI coding tools. They allow you to define project-specific instructions, coding standards, and guidelines that AI agents should follow when working with your codebase.
+
+📝Memory Bank Deprecation
+
+The Kilo Code memory bank feature has been deprecated in favor of AGENTS.md.
+Existing memory bank rules will continue to work.
+Legacy Memory Bank status indicators such as [Memory Bank: Active] and [Memory Bank: Missing] can still appear, but they are not guaranteed across all clients or modes.
+If you'd like to migrate your memory bank content to AGENTS.md:
+Examine the contents in .kilo/rules/memory-bank/ (or the legacy .kilocode/rules/memory-bank/)
+Move that content into your project's AGENTS.md file (or ask Kilo to do it for you)
+What is AGENTS.md?
+AGENTS.md is an open standard for configuring AI agent behavior in software projects. It's a simple Markdown file placed at the root of your project that contains instructions for AI coding assistants. The standard is supported by multiple AI coding tools, including Kilo Code, Cursor, and Windsurf.
+Think of AGENTS.md as a "README for AI agents" - it tells the AI how to work with your specific project, what conventions to follow, and what constraints to respect.
+Why Use AGENTS.md?
+Portability: Works across multiple AI coding tools without modification
+Version Control: Lives in your repository alongside your code
+Team Consistency: Ensures all team members' AI assistants follow the same guidelines
+Project-Specific: Tailored to your project's unique requirements and conventions
+Simple Format: Plain Markdown - no special syntax or configuration required
+File Location and Naming
+Project-Level AGENTS.md
+Place your AGENTS.md file at the root of your project:
+
+my-project/
+├── AGENTS.md          # Primary filename (recommended)
+├── src/
+├── package.json
+└── README.md
+
+Supported filenames (in order of precedence):
+AGENTS.md (uppercase, plural - recommended)
+AGENT.md (uppercase, singular - fallback)
+
+⚠️Case Sensitivity
+
+The filename must be uppercase (AGENTS.md), not lowercase (agents.md). This ensures consistency across different operating systems and tools.
+Per-Directory AGENTS.md Files
+You can place AGENTS.md files in subdirectories to provide context-specific instructions when the agent accesses files in those locations:
+
+my-project/
+├── AGENTS.md                    # Root-level instructions
+├── src/
+│   └── backend/
+│       └── AGENTS.md            # Backend-specific instructions (loaded when reading backend files)
+└── docs/
+    └── AGENTS.md                # Documentation-specific instructions (loaded when reading docs files)
+
+ℹ️Info
+
+Per-directory AGENTS.md files are dynamically loaded when the agent reads files in that directory - they are not pre-loaded at session start. When the agent reads a file in src/backend/, the corresponding AGENTS.md is discovered and its contents are injected into the conversation as <system-reminder> tags.
+This is useful for providing context-specific guidance for different parts of a monorepo or project.
+File Protection
+Both AGENTS.md and AGENT.md are write-protected files in Kilo Code. This means:
+The AI agent cannot modify these files without explicit user approval
+You'll be prompted to confirm any changes to these files
+This prevents accidental modifications to your project's AI configuration
+Basic Syntax and Structure
+AGENTS.md files use standard Markdown syntax. There's no required structure, but organizing your content with headers and lists makes it easier for AI models to parse and understand.
+Recommended Structure
+
+# Project Name
+
+Brief description of the project and its purpose.
+
+## Code Style
+
+- Use TypeScript for all new files
+- Follow ESLint configuration
+- Use 2 spaces for indentation
+
+## Architecture
+
+- Follow MVC pattern
+- Keep components under 200 lines
+- Use dependency injection
+
+## Testing
+
+- Write unit tests for all business logic
+- Maintain >80% code coverage
+- Use Jest for testing
+
+## Security
+
+- Never commit API keys or secrets
+- Validate all user inputs
+- Use parameterized queries for database access
+
+Best Practices
+Be specific and clear - Use concrete rules like "limit cyclomatic complexity to < 10" instead of vague guidance like "write good code"
+Include code examples - Show patterns for error handling, naming conventions, or architecture decisions
+Organize by category - Group related guidelines under clear headers (Code Style, Architecture, Testing, Security)
+Keep it concise - Use bullet points and direct language; avoid long paragraphs
+Update regularly - Review and revise as your project's conventions evolve
+How AGENTS.md Works in Kilo Code
+Loading Behavior
+When you start a task in Kilo Code:
+Kilo Code checks for AGENTS.md or AGENT.md at the project root
+If found, the content is loaded and included in the AI's context
+The AI follows these instructions throughout the conversation
+Changes to AGENTS.md take effect in new tasks (reload may be required)
+Interaction with Other Rules
+
+VSCodeCLI
+
+In the new platform, AGENTS.md is loaded alongside other instruction sources. The CLI also supports .claude/ and .agents/ directories for compatibility with other tools.
+
+SourceScopeLocationPriority
+Agent promptPer-agentagent.<name>.prompt in config1 (Highest)
+InstructionsProjectinstructions key in project kilo.jsonc2
+AGENTS.mdProjectAGENTS.md at project root3
+InstructionsGlobalinstructions key in global kilo.jsonc4
+SkillsBoth.kilo/skills/, config skills keyLoaded on demand
+Enabling/Disabling AGENTS.md
+
+VSCodeCLI
+
+AGENTS.md is loaded automatically. To disable external skill directories (.claude/skills/, .agents/skills/), set the environment variable:
+
+export KILO_DISABLE_EXTERNAL_SKILLS=true
+
+AGENTS.md itself cannot be individually disabled — it is always loaded if present. To override its instructions, use higher-priority sources like the instructions config key or agent-specific prompts.
+Related Features
+Custom Rules - Kilo Code-specific rules with more control
+Custom Modes - Specialized workflows with specific permissions
+Custom Instructions - Personal preferences across all projects
+Migrating from Cursor or Windsurf - Migration guide for other tools
+External Resources
+AGENTS.md Specification - Official standard documentation
+dotagent - Universal converter tool for agent configuration files
+awesome-cursorrules - 700+ example rules you can adapt
+
+Copy page
+

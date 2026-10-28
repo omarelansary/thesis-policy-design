@@ -1,0 +1,2962 @@
+
+=== [page 1] ===
+Evaluating Personalized Tool-Augmented LLMs from the Perspectives of
+Personalization and Proactivity
+Yupu Hao1,2, Pengfei Cao1,2, Zhuoran Jin1,2, Huanxuan Liao1,2,
+Yubo Chen1,2, Kang Liu1,2, Jun Zhao1,2,
+1The Key Laboratory of Cognition and Decision Intelligence for Complex Systems,
+Institute of Automation, Chinese Academy of Sciences, Beijing, China
+2School of Artificial Intelligence, University of Chinese Academy of Sciences, Beijing, China
+{haoyupu2023, liaohuanxuan2023}@ia.ac.cn,
+{pengfei.cao, zhuoran.jin, yubo.chen, kliu, jzhao}@nlpr.ia.ac.cn
+Abstract
+Personalized tool utilization is essential for
+aligning large language models (LLMs) with
+user preference in interaction scenarios with
+various tools.
+However, most of the cur-
+rent benchmarks primarily focus on either per-
+sonalization of text generation or direct tool-
+utilizing, without considering both.
+In this
+work, we introduce a novel benchmark ETAPP
+for evaluating personalized tool invocation, es-
+tablishing a sandbox environment, and a com-
+prehensive dataset of 800 testing cases cover-
+ing diverse user profiles. To improve the ac-
+curacy of our evaluation, we propose a key-
+point-based LLM evaluation method, mitigat-
+ing biases in the LLM-as-a-judge system by
+manually annotating key points for each test
+case and providing them to LLM as the refer-
+ence. Additionally, we evaluate the excellent
+LLMs and provide an in-depth analysis. Fur-
+thermore, we investigate the impact of differ-
+ent tool-invoking strategies on LLMs’ person-
+alization performance and the effects of fine-
+tuning in our task. The effectiveness of our
+preference-setting and key-point-based eval-
+uation method is also validated.
+Our find-
+ings offer insights into improving personal-
+ized LLM agents. Our Code is available at
+https://github.com/hypasd-art/ETAPP.
+1
+Introduction
+With the advancement of large language model
+(LLM) capabilities (Zhao et al., 2024), more re-
+searchers are shifting their alignment objectives
+from targeting the general human population to
+focusing on specific small groups or individuals
+(Chen et al., 2024; Jang et al., 2023). Personaliz-
+ing the LLMs refers to adjusting the behavior and
+output of LLMs to match the needs of individual
+users better. In this context, Li et al.(2024b) in-
+troduce the concept of the Personal LLM Agents,
+which integrates personalized user data and devices
+to provide user with comprehensive, continuous,
+and personalized service. To achieve this goal,
+the Personal LLM Agents must possess two key
+capabilities: memory (Zhang et al., 2024) and in-
+teraction (Qin et al., 2024a; Mialon et al., 2023).
+The memory capability allows the model to track
+and retain both the user’s current state and their
+historical information, enabling more personalized
+and context-aware interactions. Meanwhile, the in-
+teraction capability empowers the model to engage
+with external systems and devices, utilizing tools
+to perform tasks and support the user’s needs in
+real-time (Li et al., 2023; Qin et al., 2024b).
+Currently, Personal LLM Agent evaluations
+mainly focus on text generation (Zhao et al., 2025),
+with limited attention to external interactions. Only
+a few recent studies have begun to assess Personal
+LLM Agents in interactive scenarios involving tool
+utilization. For example, Wang et al.(2024b) con-
+structs a life-long personal agent framework and
+evaluates it using LLM. Although their work in-
+corporates tool calling by simulating the external
+API execution, it does not conduct a specialized
+evaluation of the interaction process itself. Cai
+et al.(2024) evaluates personalized tool usage in
+the specific domain of online shopping with a lim-
+ited set of tools. However, these works still fail
+to answer the following core questions: (1) Com-
+pared to normal tool-utilizing, what evaluation met-
+rics should be designed to assess personalized tool-
+utilizing? (2) How can we effectively evaluate the
+personalized tool usage capability in more realistic
+environments, beyond the narrow domain and the
+simulated scenarios?
+To answer the first question, we argue that an
+ideal personal assistant should not only provide per-
+sonalized services but also understand the user’s
+intentions and anticipate unspoken needs. It should
+offer comprehensive support by considering factors
+beyond immediate instructions, easing the user’s
+burden. From this perspective, Figure 1 illustrates
+the distinctions between traditional tool-augmented
+arXiv:2503.00771v2  [cs.CL]  12 Apr 2025
+
+=== [page 2] ===
+Tools                                                                                             ……
+Query: Help me recommend some vegetables and 
+fruits that are commonly used at home.
+To recommend vegetables and fruits that are 
+commonly used at home, I will first list 
+some popular options and then search for 
+their availability on the web.
+search_products_in_shopping_manager(query: 
+[“apple”, “banana”, “orange”, ……])
+Here are some commonly used fruits and 
+vegetables available online:………
+Let me know if you'd like to explore more 
+or need help with anything else!
+To assist user in buying vegetables and 
+fruits, I'll first gather information about 
+his recent workout and health status to 
+ensure the selection aligns with his fitness 
+goals and dietary needs.
+get_user_recent_workout_records(time: 2024-
+09-01 00:00:00)
+Now, let's check his health and mood status 
+to further tailor the selection.
+get_recent_health_and_mood_summary(time: 
+2024-09-01 00:00:00)
+User maintains a high level of physical 
+activity with a focus on cardiovascular health 
+and relaxation through yoga. He prefers a 
+Mediterranean diet, so seasonal fruits and 
+vegetables rich in antioxidants, vitamins, and 
+minerals would suit him well.
+search_products_in_shopping_manager(query: 
+["Berries", "Bananas", "Apples", "Broccoli", 
+"Bell Peppers",……])
+According to your workout, health data, and 
+Mediterranean diet, here are recommended 
+fruits and vegetables to support his fitness 
+goals:………
+If you need any additional grocery items or 
+specific recipe suggestions, feel free to ask!
+Query: Help me recommend some 
+vegetables and fruits that 
+are commonly used at home.
+Tools                 ……
+Traditional Tool-augmented Agent
+Personal Tool-augmented Agent
+Basic Information:
+  Name: Alex Johnson
+  Age: 32
+  ……
+User Preference
+Preferences:
+  Entertainment: ……       
+  Dietary Habits: Mediterranean
+  Hobbies: cycling
+  ……
+Tool Response
+Tool Response
+Tool Response
+Tool Response
+Figure 1: The difference between a traditional tool-augmented agent and a personal tool-augmented agent. Red font
+represents output reflecting personalization, while yellow background font represents output reflecting proactivity.
+LLMs and personal tool-augmented LLMs. The
+latter should exhibit two key features: personaliza-
+tion and proactivity. Personalization ensures the
+model tailors its responses and tool usage based
+on the user’s preferences and needs. For example,
+when the user asks for food recommendations, the
+personalized LLM considers that the user prefers
+a Mediterranean diet (highlighted in red font), in
+contrast to traditional agents that offer popular op-
+tions. Proactivity refers to the model anticipating
+and suggesting actions beyond the user’s request to
+help complete tasks more comprehensively. For in-
+stance, the assistant checks the user’s recent health
+status and workout records to further tailor the rec-
+ommendation (highlighted in yellow background),
+unlike traditional models, which overlook these
+factors. This action is not required by the user but
+effectively enhances the quality of services.
+Based on the two metrics mentioned above, we
+construct a new benchmark called Evaluation of
+Tool-augmented Agent from the Personalization
+and Proactivity Perspective (ETAPP) to evalu-
+ate the personalized tool invocation capabilities
+of large language models. For the tool-invoking
+framework, we build a simple sandbox to ensure
+the stability of the testing process, comprising the
+following key elements: (1) Environment Setup:
+We develop a tool-invoking system with 33 func-
+tional APIs (e.g., add_calendar, view_calendar,
+get_weather) belonging to 9 categories (e.g., Cal-
+endar, Weather), including software APIs and hard-
+ware APIs. To enhance the authenticity and stabil-
+ity of the evaluation, we design a simple sandbox
+environment where the API responses are not in-
+fluenced by external environmental changes. (2)
+Memory Building: The memory of personal LLM
+agents includes long-term user preferences and
+short-term user status. We divide user preferences
+into two categories: high-level user profiles and
+low-level tool-utilizing preferences, which help us
+to capture user needs more precisely. We gener-
+ate 16 different user profiles based on professional
+backgrounds, which serve as the foundation for
+generating diverse evaluation samples. To simu-
+late real usage scenarios, we construct 9 days of
+interaction history for each necessary tool and user.
+(3) Instruction Construction: We manually label
+50 test instructions, and combine them with 16 dif-
+ferent user profiles to create a final dataset of 800
+testing cases. This data supports our evaluation of
+personalized tool invocation capabilities from two
+perspectives: personalization and proactivity.
+To address the second question, we use LLM as
+the evaluating model to score the performance of
+the tool-invoking system (Li et al., 2025, 2024a).
+To improve the evaluation reliability, we design
+a key-point-based LLM evaluation method. Each
+testing instruction is associated with several key
+points annotated by humans, which serve as stan-
+dard indicators for task completion. These key
+points are provided to the evaluation LLM to as-
+sist in scoring. The evaluation model first analyzes
+whether each point is satisfied and provides final
+analysis and score. Experimental results demon-
+strate that these key points significantly enhance
+the evaluation accuracy.
+Finally, we evaluate current excellent LLMs with
+tool invocation capabilities on the entire set and
+some reasoning models (e.g., o1-mini, DeepSeek-
+R1) on a testing subset. The results may suggest
+that LLMs tend to answer the question directly
+without deeply reasoning why choosing this tool or
+
+=== [page 3] ===
+have insufficient consideration of the personalized
+tool-utilizing process. Furthermore, we analyze
+the impact of different tool-invoking methods on
+the performance and the results point out the im-
+portance of the reasoning process in tool-utilizing.
+Additionally, we manually label a portion of the
+testing data and fine-tune a 7B model using these
+data. The results show that fine-tuning improve
+performance on in-domain instruction data but has
+limited effect on out-of-domain instruction data.
+To summary, the contribution of our work in-
+cludes:
+• We develop a new benchmark for personalized
+tool invocation and establish a stable and con-
+sistent sandbox environment for evaluation.
+Using a dataset of 800 test cases with various
+user profiles and preferences, we evaluate the
+model’s performances from both personaliza-
+tion and proactivity perspectives.
+• We propose a key-point-based LLM evalua-
+tion method utilizing manually annotated key
+points to assist the evaluation for each testing
+data, improving the reliability compared with
+directly evaluating.
+• We specifically evaluate the effectiveness of
+our preference design and evaluation meth-
+ods. We analyze the impact of different tool-
+invoking methods and conduct an in-depth
+analysis of how fine-tuning affects model per-
+formance in different scenarios.
+2
+Dataset Construction
+As shown in Figure 2, this process includes the fol-
+lowing components: Environment Setup, Memory
+Building, and Instruction Construction.
+2.1
+Environment Setup
+To better simulate real-world application scenarios,
+we manually construct a tool-invoking environment
+comprising 33 functional APIs (e.g., add_calendar,
+get_weather) belonging to 9 categories and 2 tool
+retrieval APIs (search_tools and get_tool_doc) to
+search for usable tools. These APIs encompass a
+wide range of common software APIs (e.g. Cal-
+endar and Email) and hardware-dependent APIs
+(e.g. health monitoring through smart wristbands
+and smart home control), ensuring a broad range
+of practical use cases.
+Additionally, we develop a simple sandbox envi-
+ronment to ensure the stability and reliability of the
+API Construction
+Sandbox Construction
+Music 
+Library
+……
+……
+User Profile Construction
+Weather 
+Library
+Product 
+Library
+Tool-utilizing Preference Construction
+Interaction History Construction
+Instruction 
+Construction
+Key points 
+Annotation
+DemographicData
+(basic information)
+Summarized 
+Preferences 
+music related 
+preferences in 
+detail
+Shopping related 
+preferences in 
+detail
+……
+……
+music 
+cart
+Health 
+records
+Email 
+records
+……
+Instruction
+User Status
+Key point for 
+Personalization
+Key point for 
+Proactivity
+Environment Setup
+Instruction 
+Construction
+Memory Building
+Manual Check
+Figure 2: The process of dataset construction.
+testing process. This sandbox isolates the experi-
+ment from external environmental variables (e.g.,
+connection error or change of world), thereby pre-
+venting any external factors from influencing the
+API outputs and ensuring the accuracy of the eval-
+uations. Real-world API data is used to generate
+corresponding outputs (e.g., data from RapidAPI),
+enhancing the authenticity of the simulated scenar-
+ios. For further details, please refer to Appendix A.
+2.2
+Memory Building
+The core of personalization of LLM lies in effec-
+tively utilizing the memory of the user, which can
+be divided into long-term memory (capturing the
+user’s preferences, habits, and historical behaviors)
+and short-term memory (reflecting the user’s cur-
+rent state like position).
+2.2.1
+Long-term and Short-term Memory
+For long-term memory, we propose a novel ar-
+chitecture by subdividing user preferences into
+two categories to manage the memory more effec-
+tively: high-level preferences (User Profile) and
+low-level preferences (Tool-utilizing Preference).
+The User Profile includes basic information about
+the user (such as name, age, and occupation) and
+a summary description of their preferences, while
+the Tool-utilizing Preference includes a detailed
+description of the user’s preferences for the API
+in the corresponding category. For example, for
+APIs related to the music category, we have estab-
+lished a unified music-utilizing preference, which
+includes attributes such as favorite music, singer,
+listening habits, etc., providing more detailed guid-
+ance for the model to invoke corresponding tool
+
+=== [page 4] ===
+and generate responses. We establish eight types
+of tool-utilizing preferences for each user (with
+no preferences designed for the Weather category).
+When a corresponding tool is invoked, the relevant
+category of preference is input into the model in
+advance, serving as contextual information to assist
+the model in generating personalized outputs.
+Inputting all preferences at once is neither prac-
+tical nor efficient due to the vast amount of user
+data and context window limitations. Traditional
+methods (Zhao et al., 2025), which summarize pref-
+erences from dialogue history, often result in sparse
+and incomplete coverage, with some preferences
+not even being reflected in conversations. In con-
+trast, summarizing preferences through API per-
+spective is more comprehensive and accurate.
+In detail, we conduct the following memory con-
+struction process with the help of LLM. First, the
+LLM generates 16 different user profiles based on
+various professions. These profiles are manually
+verified for diversity and consistency to ensure they
+cover a wide range of user types. Secondly, based
+on the above profile, the LLM further generates
+8 tool-utilizing preferences for each user, which
+are then manually verified to ensure relevance and
+accuracy.
+For short-term memory, we define the user’s cur-
+rent state for each testing data, including location
+and current time, reflecting the user’s personalized
+needs more accurately.
+2.2.2
+Interaction History Construction
+It is essential to note that some tools rely on the
+user’s interaction history (e.g., retrieving recent ex-
+ercises or email records). So we need to construct
+the interaction history for specific APIs.
+To ensure the consistency of the interaction his-
+tory, we first build a 9-day arrangement for each
+user and construct an interaction history based on
+it, covering schedule arrangements, alarms, health
+status (updated hourly), exercise records, email
+records, and music collections. The specific steps
+are in Appendix A.3.
+2.3
+Instruction Construction
+We manually label 50 unique instructions, com-
+bining them with 16 predefined user profiles to
+create a total of 800 testing instructions. For each
+instruction, we provid the user status (current time
+and location of the user). To ensure the accuracy
+of the interaction history and avoid potential con-
+flicts, we further verify the 9-day interaction history
+again to ensure every instruction can get an answer.
+In addition, we manually write the key points for
+each instruction. We define these key points as the
+specific requirements that need to be met within
+our predefined environment to achieve personaliza-
+tion and proactivity. These key points are used for
+the evaluation in Section 3.3. For statistics of our
+dataset, please refer to Table 5.
+3
+Evaluation
+3.1
+Evaluation Metrics
+The evaluation process employs a large language
+model for scoring, with criteria based on three di-
+mensions, each rated on a scale of 0 to 5: (1) Pro-
+cedure (PRC): This metric assesses whether the
+model provides a complete and accurate final re-
+sponse. The scoring criteria are based on whether
+the model addresses all key aspects of the user’s
+query and delivers a clear, comprehensive solution
+without omissions. (2) Personalization (PSN):
+This metric evaluates whether the model appropri-
+ately incorporates the user’s preferences and cur-
+rent status into its response, tailoring its solution
+to the user’s historical data and requirements. (3)
+Proactivity (PTV): This metric measures whether
+the model exceeds the user’s explicit instructions
+by taking additional, meaningful steps to assist the
+user effectively, proactively identifying user needs
+and offering extra suggestions or actions, rather
+than merely reacting to the user’s request.
+3.2
+Evaluation Settings
+The evaluation involves two evaluation settings:
+(1) Tool-Given: In this setting, the tools are pre-
+specified, and the evaluation focuses on the model’s
+ability to complete the task effectively with known
+tools. (2) Tool-Retrieval: This setting mirrors real-
+world scenarios, where the model operates within
+a limited context window, searching for tools with
+their corresponding utilizing preferences based on
+task requirements and invoking them to accomplish
+the tasks.
+Based on the data and methods mentioned above,
+we construct a complete Inference framework as il-
+lustrated in the Figure 3. The framework consists of
+the following components: for user u and instruc-
+tions Q, system prompt I, available tools TQ, user
+preferences of the high-level profile P u
+h , user tool-
+utilizing preferences {P u
+t |t ∈TQ}, user state Cu
+Q,
+one-shot example (optional) E. These elements
+are provided as input to the model, which outputs
+
+=== [page 5] ===
+instruction
+API retriever &
+Tool Doc Reader
+Available Tools
+Tool Invoking 
+Process Turn 1
+Final Answer
+Evaluating
+Criteria:
+1. Procedure
+2. Personalization
+3. Proactivity
+Query and Model output 
+in uniform format
+User Profile and Tool-
+utilizing Preference
+Criteria Standard:
+The standard of 
+score 0~5 for 
+each metric
+Key-point for Procedure:
+1. Completeness; 2. Avoid Unnecessary Action; 
+3. Call the tool accurate; 4. Summary the query clearly and comprehensive
+Key-point for Personalization:
+1. Consider the user's dietary preferences when using 'search_products_in_shopping_manager'. 
+2. Consider user's occupation and budgets for shopping.
+ 
+……
+Key-point for Proactivity:
+1. Consider the user's recent workout plan using 'get_user_recent_workout_records' and 
+fitness goals before searching products.
+2. Consider the user's recent health status using 'get_recent_health_and_mood_summary' 
+before searching products.
+ 
+……
+Different Inference Setting
+Different Tool 
+Invoking Methods
+GPT-4o
+Analysis format
+Key-point for 
+analysis
+"Procedure": {
+"Keypoints for Procedure": {……},
+"Final Assessment": {"anlysis": “……", "score": 5}
+},
+"Personalization": {
+"Keypoints for Personalization": {……},
+"Final Assessment": { “analysis”: “……”, "score": 5}
+},
+“Proactivity”: {
+ 
+“Keypoints for Proactivity”: {
+ 
+"Consider the user's recent workout plan ……": {
+ 
+ 
+"analysis": "The assistant does not reference ……",
+ 
+ 
+"score": 0
+ 
+},
+ 
+……
+ 
+},
+ 
+"Final Assessment": {
+ 
+ 
+"Analysis": "The assistant demonstrates minimal 
+proactivity, missing several opportunities to ……",
+ 
+ 
+"score": 2
+ 
+}
+}
+Evaluation
+Inference
+Tool Invoking 
+Process Turn 2
+Tool Invoking 
+Process Turn N
+……
+0 if not satisfied
+1 if part satisfied
+2 if satisfied
+Figure 3: The process of Inference and Evaluation of our benchmark.
+either a tool invocation or a final response. The
+LLM processes the instruction by interacting with
+tools, terminating once the final result is obtained
+or after reaching a predefined maximum step.
+In the Tool-Given and Tool-Retrieval setting, the
+process is formalized as follows respectively:
+An : Tool_Given = LLM(I, T u
+Q, P u
+h , {P u
+t |t ∈TQ},
+Cu
+Q, E, Q,
+n−1
+X
+i=1
+(Ai, Oi))
+An : Tool_Retrieval = LLM(I, T u
+Q, P u
+h , Cu
+Q, E, Q,
+n−1
+X
+i=1
+(Ai, Oi, {P u
+t |t ∈oj
+i & aj
+i = tool_search}))
+(1)
+where, an step i, Ai is the output of LLM, aj
+i is
+the j-th tool calling in Ai, Oi represents the obser-
+vation of corresponding tool.
+3.3
+Evaluation Framework
+We propose the key-point-based LLM evaluation
+framework. Due to the non uniqueness of the so-
+lution path and the multi-dimensionality and diffi-
+culty of preference evaluation, common methods
+generally use LLMs as evaluators in evaluating
+tool utilizing ability (Qin et al., 2024b) or prefer-
+ence alignment (Zhao et al., 2025). However, we
+find that directly evaluating LLM performance is
+difficult because the evaluation model has limited
+understanding of personalization and proactivity
+and cannot easily judge whether the output meets
+the required standards. To improve this, we need
+to encourage the evaluation model E_LLM to an-
+alyze the model’s output through concrete aspects,
+so we provide the key points written manually to
+the evaluation LLM.
+As shown in Figure 3, for each instruction Q and
+user u, the criteria standard of the score from 0 ∼5
+is provided in system prompt IE. The user profile
+preference and tool-utilizing preferences, and the
+output of the model is provided to the evaluation
+model. Besides, the key points for each metric K
+and the analysis format of the output F are pro-
+vided. The evaluation model outputs the analysis
+and score (0 ∼2) for each key point and gives the
+final score for the model’s performance of instruc-
+tion. The formula is as follows:
+Analysis, Score = E_LLM(Q, IE, P u
+h ,
+{P u
+t |t ∈TQ},
+N
+X
+i=1
+(Ai, Oi), K, F)
+(2)
+4
+Experiments
+4.1
+Baselines
+We adopt two frequently used tool-invoking meth-
+ods: FC (Function Calling): After fine-tuning, the
+model calls the tool through a predefined format;
+ReAct (Yao et al., 2023): The model combines
+reasoning with tool invocation, where reasoning
+guides the model to analyze the current status and
+decide the appropriate action. The one-shot exam-
+ple is provided to ReAct in this process.
+
+=== [page 6] ===
+Model
+Method
+Tool Given
+Tool Retrieval
+Average
+PRC
+PSN
+PTV
+PRC
+PSN
+PTV
+GPT-4o
+FC
+3.95
+3.37
+1.61
+2.67
+2.19
+1.08
+2.48
+DeepSeek-V3
+3.02
+2.78
+1.47
+2.57
+2.38
+0.95
+2.20
+Llama-3.1-70B-Instruct
+2.31
+1.71
+0.55
+1.50
+1.06
+0.30
+1.24
+Qwen2.5-72B-Instruct
+3.76
+3.34
+1.5
+2.72
+2.31
+1.05
+2.45
+watt-tool-70B
+2.70
+1.97
+0.71
+0.84
+0.32
+0.12
+1.11
+GPT-4o
+ReAct
+3.97
+3.61
+1.60
+3.70
+3.43
+1.56
+2.98
+DeepSeek-V3
+4.05
+3.78
+1.84
+3.82
+3.54
+1.65
+3.11
+o1-preview *
+3.67
+3.69
+1.87
+3.28
+3.48
+1.60
+2.93
+o1-mini *
+3.63
+3.35
+1.61
+3.25
+3.14
+1.35
+2.72
+DeepSeek-R1 *
+2.41
+2.06
+1.35
+0.93
+0.40
+0.31
+1.24
+DeepSeek-R1-Distill-Qwen-32B *
+2.40
+2.57
+1.07
+1.74
+1.66
+0.62
+1.68
+QwQ-32B-Preview *
+1.01
+1.19
+0.53
+0.61
+0.48
+0.18
+0.67
+Table 1: The overall results of different LLMs under two settings. * represents testing on a subset of data. The
+evaluation model we used is GPT-4o.
+We use the excellent closed-source and open-
+source models with the function calling ability as
+baselines in two experimental settings. Addition-
+ally, we evaluate the reasoning model on a subset
+of the 100 testing data due to the budgets factors
+using ReAct method, as they do not support FC.
+For further details refer to Appendix B.
+4.2
+Evaluation Results
+The results are shown in Table 1, we can find that
+in FC result: (1) In the Tool-Retrieval scenario, the
+model’s performance is significantly lower than in
+the Tool-Given scenario, indicating that the model
+struggles more as the length and difficulty of tool-
+invoking and planning increases; (2) Currently, in
+FC setting, GPT-4o performs excellently across
+multiple metrics, while Qwen2.5-72B-Instruct out-
+performs DeepSeek-V3, demonstrating its strong
+performance; (3) Even the best-performing model
+in BFCL (Yan et al., 2024), Watt-tool-70B, strug-
+gles with this tool-invoking task. This could be due
+to two reasons: a) Not generalizing. Post-training
+may hinder its ability to fully grasp personalization
+and proactivity within the tool-planning process;
+b) Not deep reasoning. During tool learning, the
+model tends to directly invoke tools based on ex-
+plicit instructions, without deep reasoning, leading
+to difficulties in effectively handling Proactivity
+scenarios without clear instructions. This inspires
+us to not only enhance the model’s ability to use
+tools but also to think about why invoking this tool.
+The reasoning models do not show an advan-
+tage over non-reasoning models in this task, par-
+ticularly the DeepSeek-Distill and QwQ models,
+which performed poorly. The reasoning models
+may not integrate the reasoning process with the
+tool-invoking process, or may not have deep think-
+ing on Personalization and Proactivity in the spe-
+cific scenario. Some error examples can be found
+in the Appendix B.4.
+4.3
+Analysis
+4.3.1
+Tool-invoking Method Analysis
+In order to analyze the impact of different tool-
+invoking methods on model performance, we adopt
+the following three approaches: FC, ReAct and E-
+ReAct (Enhanced-ReAct). The E-ReAct method
+extends ReAct by first requiring the model to gen-
+erate key aspects of personalization, proactivity
+before invoking tools. Once these key points are
+addressed, the model proceeds with tool invocation
+using the ReAct framework to complete the task.
+As shown in Figure 4, we find that E-ReAct
+methods can effectively improve the personaliza-
+tion and proactivity capabilities of the model’s out-
+put. By incorporating a mandatory deep thinking
+and understanding process before tool invocation,
+the model better interprets user intentions and pro-
+vides more proactive services. This suggests that
+integrating more high-quality reasoning into the
+tool-learning process may lead to even better per-
+formance.
+4.3.2
+Preference Setting Analysis
+We divide the preference into the User Profile and
+Tool-utilizing Preference. Table 2 shows the dif-
+ference between inputting all preferences into the
+
+=== [page 7] ===
+FC
+ReAct
+E-ReAct
+3.0
+3.5
+4.0
+Tool-Given-PRC
+FC
+ReAct
+E-ReAct
+2.75
+3.00
+3.25
+3.50
+3.75
+4.00
+Tool-Given-PSN
+FC
+ReAct
+E-ReAct
+1.50
+1.75
+2.00
+2.25
+2.50
+Tool-Given-PTV
+FC
+ReAct
+E-ReAct
+2.5
+3.0
+3.5
+4.0
+Tool-Retrieval-PRC
+FC
+ReAct
+E-ReAct
+2.5
+3.0
+3.5
+Tool-Retrieval-PSN
+FC
+ReAct
+E-ReAct
+1.00
+1.25
+1.50
+1.75
+2.00
+Tool-Retrieval-PTV
+Performance
+gpt-4o
+DeepSeek-v3
+Qwen2.5-70B-Instruct
+Figure 4: The performance of different tool-invoking methods.
+Setting
+Tokens
+PRC
+PSN
+PTV
+All
+3444
+4.09
+3.80
+1.62
+Needed
+2393
+4.16
+3.73
+1.76
+Table 2: The results of different preference settings are
+evaluated on a subset of data. The Tokens metric repre-
+sents the average number of tokens for each instruction
+calculated by the tokenizer of Llama-3.1-70B-Instruct.
+And the performance is tested on GPT-4o.
+LLM and our method. We can find that our setting
+(Needed) reduces the context length and demon-
+strates competitive results compared to inputting
+all (All). Notably, we have only included 8 cate-
+gories of preferences, as the number of categories
+increases or the preferences become more concrete,
+the advantage of our setting is expected to become
+even more prominent.
+4.3.3
+Fine-tuning Experiments Analysis
+To validate our idea of the importance of reason-
+ing, we annotate some data in both ReAct and
+FC format respectively and conduct fine-tuning ex-
+periments on Qwen2.5-7B-Instruct using 200 data
+points. The annotating process is as follows: (1)
+Generate reference answers using the LLM. (2)
+Perform manual verification and labeling the an-
+swers to ensure quality and consistency. For data
+in FC format, one set only includes the tool-calling
+process, while the other also contains the textual
+thinking before the tool invocation.
+The results are in the Table 3. We find that:
+(1) The performance improves significantly for ID
+instructions and OOD users. However, with the
+phenomenon improvement for OOD instructions
+being significantly lower than for ID instructions,
+this indicates that for instructions within the same
+scenario, once the model learns the tool invoca-
+tion process, it can generalize and solve problems
+even when user preferences differ. However, when
+a new scenario emerges, the model struggles to
+reason effectively about how to solve the problem,
+resulting in limited improvement. (2) Compared to
+Model
+PRC
+PSN
+PTV
+U(ID)I(OOD)
+Vanilla (ReACT)
+2.76
+2.97
+1.35
+FT (ReAct)
+3.47 (↑25.8%)
+3.28 (↑10.4%)
+1.99 (↑47.4%)
+Vanilla (FC)
+3.08
+2.66
+1.07
+FT (FC)
+3.23 (↑4.9%)
+3.00 (↑12.8%)
+1.72 (↑60.7%)
+FT (FC wo r)
+2.67 (↓13.3%)
+2.68 (↑0.7%)
+1.62 (↑51.4%)
+U(OOD)I(ID)
+Vanilla (ReACT)
+3.29
+3.28
+1.57
+FT (ReAct)
+4.09 (↑24.3%)
+3.75 (↑14.3%)
+2.79 (↑77.7%)
+Vanilla (FC)
+3.33
+2.65
+1.07
+FT (FC)
+3.81 (↑14.4%)
+3.49 (↑31.7%)
+2.37 (↑121.5%)
+FT (FC wo r)
+3.48 (↑4.5%)
+3.24 (↑22.3%)
+2.19 (↑104.6%)
+U(OOD)I(OOD)
+Vanilla (ReACT)
+2.91
+3.08
+1.43
+FT (ReAct)
+3.52 (↑21.0%)
+3.43 (↑11.4%)
+2.06 (↑44.1%)
+Vanilla (FC)
+3.03
+2.64
+1.07
+FT (FC)
+3.29 (↑8.5%)
+3.14 (↑18.9%)
+1.73 (↑61.7%)
+FT (FC wo r)
+2.73 (↓9.9%)
+2.77 (↑4.9%)
+1.64 (↑53.3%)
+Table 3: The results of the Qwen2.5-7B-Instruct model
+fine-tuned on a subset of instructions. U represents the
+User, I represents the Instruction. ID indicates the users
+or instructions are seen in the training data, OOD means
+not seen in the fine-tuning. “wo r” means outputting
+without reasoning process and directly invoking tools.
+ReAct and FC models, the improvement for “wo
+r” is not significant, demonstrating that a certain
+level of reasoning process is necessary to enhance
+the model’s multi-turn tool invocation capability.
+(3) Tool-invoking methods like ReAct still show
+advantages in this model compared to FC.
+4.4
+Effectiveness of key-point-based LLM
+Evaluation
+To demonstrate the effectiveness of the key-point-
+based LLM evaluation method, we collect 16 data
+points per method in both Tool-Given and Tool-
+Retrieval settings for model GPT-4o. This result
+in a total of 96 data points. We then analyze the
+consistency with human evaluation to validate the
+method’s effectiveness.
+To quantify consistency, we use the Bland-
+Altman method, which plots the average of two
+measurements on the x-axis and their difference
+on the y-axis. Three reference lines are included:
+the mean difference (red dashed line) and the 95%
+
+=== [page 8] ===
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+Mean of Ratings
+2.0
+1.5
+1.0
+0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+Difference (Human - gpt-4o)
+ = 1.89
+ = 1.89
+Bland-Altman of metric Proactivity
+Mean = 0.01
++1.96SD = 1.90
+-1.96SD = -1.88
+5
+10
+15
+20
+25
+30
+35
+40
+45
+Frequency
+Figure 5: The Bland-Altman analysis result of Proac-
+tivity with given key points.
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+Mean of Ratings
+4
+3
+2
+1
+0
+1
+Difference (Human - gpt-4o)
+ = 2.24
+ = 2.24
+Bland-Altman of metric Proactivity
+Mean = -1.54
++1.96SD = 0.70
+-1.96SD = -3.79
+5
+10
+15
+20
+25
+30
+Frequency
+Figure 6: The Bland-Altman analysis result of Proac-
+tivity without given key points.
+limits of agreement (LoA), calculated as mean ±
+1.96 × standard deviation. If most of data points
+fall within the LoA, the methods show good con-
+sistency. The point size indicates sample count,
+and the green area highlights samples with a score
+difference within 1 point.
+The experimental results of metric Proactivity
+in Figure 5 and Figure 6 showed: (1) System Bias
+Control: Under the key-point constraint, the mean
+difference is 0.01 (95% CI: -1.88 ∼1.90), close to
+the theoretical ideal value of 0, indicating statisti-
+cal consistency between LLM and human evalua-
+tion in the total score dimension. (2) LoA Interval
+Length: Compared to the free evaluation mode,
+the key-point constraint reduces the width of the
+LoA interval (1.89 vs. 2.24). (3) Error Distribu-
+tion Characteristics: 89.6% of the samples show a
+score difference of ≤1 point (green area), repre-
+senting an improvement of over 39.6 percentage
+points compared to the control group without key
+points. These findings confirm the effectiveness
+of the key-point-based LLM evaluation strategy.
+Please refer to Appendix C for more details.
+5
+Related Works
+5.1
+Personalization of LLM
+The personalization of LLMs aims to align with in-
+dividual preferences (Zollo et al., 2025; Tseng et al.,
+2024). Current personalization tasks are typically
+focused on specific text generation (He et al., 2025;
+Zhao et al., 2025; Lee et al., 2024), recommenda-
+tion tasks (Yang et al., 2023), role-playing (Wang
+et al., 2024a; Shao et al., 2023), news headline gen-
+eration (Salemi et al., 2024), conversational tasks,
+as well as applications in education (Pratama et al.,
+2023) and healthcare (Goldenberg et al., 2021; Ab-
+basian et al., 2024), and the evaluation process typ-
+ically involves summarizing user preferences from
+the context to generate responses (Zhang, 2024).
+However, the Personal LLM Agents goes further
+by defining an ideal personal assistant that should
+possess interactive capabilities (Singh et al., 2024).
+We propose ETAPP to address the problem that the
+evaluation of Personal LLM Agents lacks criteria
+for personalized tool usage in diverse scenarios.
+5.2
+Tool-augmented LLM
+Tool-augmented LLMs aim to enable them to in-
+teract with the external world through tools (Qin
+et al., 2024a; Qu et al., 2025). Numerous bench-
+marks and methods have been proposed to eval-
+uate and improve the accuracy of tool utilization
+and task completion (Trivedi et al., 2024; Li et al.,
+2023; Hao et al., 2024; Tang et al., 2023; Zhuang
+et al., 2023). However, these datasets are designed
+for the general human population rather than for
+personalized tool invocation tailored to individual
+user preferences. Our work integrates the tool invo-
+cation process with personalization and proposes
+evaluation metrics and methods for this purpose.
+6
+Conclusion
+The paper evaluates the ability and level of large
+language models to provide personalized services
+in interactive environments. We integrate the pro-
+cess of tool invocation with personalized services
+and propose two evaluation metrics: Personaliza-
+tion and Proactivity. To address the unreliability of
+using LLMs as evaluators in this task, we introduce
+a key-point-based evaluation method for LLMs and
+validate its reliability. Finally, we analyze the per-
+formance of different models on this task and ex-
+plore the challenges and potential directions for
+improving their personalized tool utilization capa-
+bilities.
+
+=== [page 9] ===
+Limitations
+We evaluate the personalization of tool utilization
+in LLMs from the perspectives of personalization
+and proactivity, and propose a key-point-based
+LLM evaluation method. However, there are still
+challenges in this area. For example, our work
+does not consider multimodal tasks. And there
+are details that can be further refined. For exam-
+ple, during preference modeling, we could further
+model the selection preferences for similar tools
+(e.g., when two apps A and B provide the same
+functionality, users tend to prefer the API from
+App A to complete the task). In the future, we plan
+to extend our work to the multimodal domain.
+Ethics Statement
+Our work does not introduce ethical concerns. This
+paper utilized AI assistance for language polishing
+of the manuscript, including vocabulary correction
+and spell checking.
+References
+Mahyar Abbasian, Iman Azimi, Amir M. Rahmani,
+and Ramesh Jain. 2024.
+Conversational health
+agents: A personalized llm-powered agent frame-
+work. Preprint, arXiv:2310.02374.
+Hongru Cai, Yongqi Li, Wenjie Wang, Fengbin Zhu,
+Xiaoyu Shen, Wenjie Li, and Tat-Seng Chua. 2024.
+Large language models empowered personalized web
+agents. Preprint, arXiv:2410.17236.
+Jiangjie Chen, Xintao Wang, Rui Xu, Siyu Yuan, Yikai
+Zhang, Wei Shi, Jian Xie, Shuang Li, Ruihan Yang,
+Tinghui Zhu, Aili Chen, Nianqi Li, Lida Chen, Caiyu
+Hu, Siye Wu, Scott Ren, Ziquan Fu, and Yanghua
+Xiao. 2024. From persona to personalization: A
+survey on role-playing language agents. Preprint,
+arXiv:2404.18231.
+DeepSeek-AI, Daya Guo, Dejian Yang, Haowei Zhang,
+Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu,
+Shirong Ma, Peiyi Wang, Xiao Bi, Xiaokang Zhang,
+Xingkai Yu, Yu Wu, Z. F. Wu, Zhibin Gou, Zhihong
+Shao, Zhuoshu Li, Ziyi Gao, Aixin Liu, Bing Xue,
+Bingxuan Wang, Bochao Wu, Bei Feng, Chengda Lu,
+Chenggang Zhao, Chengqi Deng, Chenyu Zhang,
+Chong Ruan, Damai Dai, Deli Chen, Dongjie Ji,
+Erhang Li, Fangyun Lin, Fucong Dai, Fuli Luo,
+Guangbo Hao, Guanting Chen, Guowei Li, H. Zhang,
+Han Bao, Hanwei Xu, Haocheng Wang, Honghui
+Ding, Huajian Xin, Huazuo Gao, Hui Qu, Hui Li,
+Jianzhong Guo, Jiashi Li, Jiawei Wang, Jingchang
+Chen, Jingyang Yuan, Junjie Qiu, Junlong Li, J. L.
+Cai, Jiaqi Ni, Jian Liang, Jin Chen, Kai Dong, Kai
+Hu, Kaige Gao, Kang Guan, Kexin Huang, Kuai
+Yu, Lean Wang, Lecong Zhang, Liang Zhao, Litong
+Wang, Liyue Zhang, Lei Xu, Leyi Xia, Mingchuan
+Zhang, Minghua Zhang, Minghui Tang, Meng Li,
+Miaojun Wang, Mingming Li, Ning Tian, Panpan
+Huang, Peng Zhang, Qiancheng Wang, Qinyu Chen,
+Qiushi Du, Ruiqi Ge, Ruisong Zhang, Ruizhe Pan,
+Runji Wang, R. J. Chen, R. L. Jin, Ruyi Chen,
+Shanghao Lu, Shangyan Zhou, Shanhuang Chen,
+Shengfeng Ye, Shiyu Wang, Shuiping Yu, Shunfeng
+Zhou, Shuting Pan, S. S. Li, Shuang Zhou, Shaoqing
+Wu, Shengfeng Ye, Tao Yun, Tian Pei, Tianyu Sun,
+T. Wang, Wangding Zeng, Wanjia Zhao, Wen Liu,
+Wenfeng Liang, Wenjun Gao, Wenqin Yu, Wentao
+Zhang, W. L. Xiao, Wei An, Xiaodong Liu, Xiaohan
+Wang, Xiaokang Chen, Xiaotao Nie, Xin Cheng, Xin
+Liu, Xin Xie, Xingchao Liu, Xinyu Yang, Xinyuan Li,
+Xuecheng Su, Xuheng Lin, X. Q. Li, Xiangyue Jin,
+Xiaojin Shen, Xiaosha Chen, Xiaowen Sun, Xiaoxi-
+ang Wang, Xinnan Song, Xinyi Zhou, Xianzu Wang,
+Xinxia Shan, Y. K. Li, Y. Q. Wang, Y. X. Wei, Yang
+Zhang, Yanhong Xu, Yao Li, Yao Zhao, Yaofeng
+Sun, Yaohui Wang, Yi Yu, Yichao Zhang, Yifan Shi,
+Yiliang Xiong, Ying He, Yishi Piao, Yisong Wang,
+Yixuan Tan, Yiyang Ma, Yiyuan Liu, Yongqiang Guo,
+Yuan Ou, Yuduan Wang, Yue Gong, Yuheng Zou, Yu-
+jia He, Yunfan Xiong, Yuxiang Luo, Yuxiang You,
+Yuxuan Liu, Yuyang Zhou, Y. X. Zhu, Yanhong Xu,
+Yanping Huang, Yaohui Li, Yi Zheng, Yuchen Zhu,
+Yunxian Ma, Ying Tang, Yukun Zha, Yuting Yan,
+Z. Z. Ren, Zehui Ren, Zhangli Sha, Zhe Fu, Zhean
+Xu, Zhenda Xie, Zhengyan Zhang, Zhewen Hao,
+Zhicheng Ma, Zhigang Yan, Zhiyu Wu, Zihui Gu, Zi-
+jia Zhu, Zijun Liu, Zilin Li, Ziwei Xie, Ziyang Song,
+Zizheng Pan, Zhen Huang, Zhipeng Xu, Zhongyu
+Zhang, and Zhen Zhang. 2025. Deepseek-r1: Incen-
+tivizing reasoning capability in llms via reinforce-
+ment learning. Preprint, arXiv:2501.12948.
+DeepSeek-AI, Aixin Liu, Bei Feng, Bing Xue, Bingx-
+uan Wang, Bochao Wu, Chengda Lu, Chenggang
+Zhao, Chengqi Deng, Chenyu Zhang, Chong Ruan,
+Damai Dai, Daya Guo, Dejian Yang, Deli Chen,
+Dongjie Ji, Erhang Li, Fangyun Lin, Fucong Dai,
+Fuli Luo, Guangbo Hao, Guanting Chen, Guowei
+Li, H. Zhang, Han Bao, Hanwei Xu, Haocheng
+Wang, Haowei Zhang, Honghui Ding, Huajian Xin,
+Huazuo Gao, Hui Li, Hui Qu, J. L. Cai, Jian Liang,
+Jianzhong Guo, Jiaqi Ni, Jiashi Li, Jiawei Wang,
+Jin Chen, Jingchang Chen, Jingyang Yuan, Junjie
+Qiu, Junlong Li, Junxiao Song, Kai Dong, Kai Hu,
+Kaige Gao, Kang Guan, Kexin Huang, Kuai Yu, Lean
+Wang, Lecong Zhang, Lei Xu, Leyi Xia, Liang Zhao,
+Litong Wang, Liyue Zhang, Meng Li, Miaojun Wang,
+Mingchuan Zhang, Minghua Zhang, Minghui Tang,
+Mingming Li, Ning Tian, Panpan Huang, Peiyi Wang,
+Peng Zhang, Qiancheng Wang, Qihao Zhu, Qinyu
+Chen, Qiushi Du, R. J. Chen, R. L. Jin, Ruiqi Ge,
+Ruisong Zhang, Ruizhe Pan, Runji Wang, Runxin
+Xu, Ruoyu Zhang, Ruyi Chen, S. S. Li, Shanghao
+Lu, Shangyan Zhou, Shanhuang Chen, Shaoqing Wu,
+Shengfeng Ye, Shengfeng Ye, Shirong Ma, Shiyu
+Wang, Shuang Zhou, Shuiping Yu, Shunfeng Zhou,
+Shuting Pan, T. Wang, Tao Yun, Tian Pei, Tianyu Sun,
+W. L. Xiao, Wangding Zeng, Wanjia Zhao, Wei An,
+Wen Liu, Wenfeng Liang, Wenjun Gao, Wenqin Yu,
+
+=== [page 10] ===
+Wentao Zhang, X. Q. Li, Xiangyue Jin, Xianzu Wang,
+Xiao Bi, Xiaodong Liu, Xiaohan Wang, Xiaojin Shen,
+Xiaokang Chen, Xiaokang Zhang, Xiaosha Chen,
+Xiaotao Nie, Xiaowen Sun, Xiaoxiang Wang, Xin
+Cheng, Xin Liu, Xin Xie, Xingchao Liu, Xingkai Yu,
+Xinnan Song, Xinxia Shan, Xinyi Zhou, Xinyu Yang,
+Xinyuan Li, Xuecheng Su, Xuheng Lin, Y. K. Li,
+Y. Q. Wang, Y. X. Wei, Y. X. Zhu, Yang Zhang, Yan-
+hong Xu, Yanhong Xu, Yanping Huang, Yao Li, Yao
+Zhao, Yaofeng Sun, Yaohui Li, Yaohui Wang, Yi Yu,
+Yi Zheng, Yichao Zhang, Yifan Shi, Yiliang Xiong,
+Ying He, Ying Tang, Yishi Piao, Yisong Wang, Yix-
+uan Tan, Yiyang Ma, Yiyuan Liu, Yongqiang Guo,
+Yu Wu, Yuan Ou, Yuchen Zhu, Yuduan Wang, Yue
+Gong, Yuheng Zou, Yujia He, Yukun Zha, Yunfan
+Xiong, Yunxian Ma, Yuting Yan, Yuxiang Luo, Yuxi-
+ang You, Yuxuan Liu, Yuyang Zhou, Z. F. Wu, Z. Z.
+Ren, Zehui Ren, Zhangli Sha, Zhe Fu, Zhean Xu,
+Zhen Huang, Zhen Zhang, Zhenda Xie, Zhengyan
+Zhang, Zhewen Hao, Zhibin Gou, Zhicheng Ma, Zhi-
+gang Yan, Zhihong Shao, Zhipeng Xu, Zhiyu Wu,
+Zhongyu Zhang, Zhuoshu Li, Zihui Gu, Zijia Zhu,
+Zijun Liu, Zilin Li, Ziwei Xie, Ziyang Song, Ziyi
+Gao, and Zizheng Pan. 2024. Deepseek-v3 technical
+report. Preprint, arXiv:2412.19437.
+Dmitri Goldenberg, Kostia Kofman, Javier Albert, Sarai
+Mizrachi, Adam Horowitz, and Irene Teinemaa. 2021.
+Personalization in practice: Methods and applica-
+tions. In Proceedings of the 14th ACM International
+Conference on Web Search and Data Mining, WSDM
+’21, page 1123–1126, New York, NY, USA. Associa-
+tion for Computing Machinery.
+Yupu Hao, Pengfei Cao, Zhuoran Jin, Huanxuan Liao,
+Yubo Chen, Kang Liu, and Jun Zhao. 2024. Citi: En-
+hancing tool utilizing ability in large language models
+without sacrificing general performance. Preprint,
+arXiv:2409.13202.
+Jerry Zhi-Yang He, Sashrika Pandey, Mariah L. Schrum,
+and Anca Dragan. 2025. Cos: Enhancing person-
+alization and mitigating bias with context steering.
+Preprint, arXiv:2405.01768.
+Joel Jang, Seungone Kim, Bill Yuchen Lin, Yizhong
+Wang, Jack Hessel, Luke Zettlemoyer, Hannaneh
+Hajishirzi, Yejin Choi, and Prithviraj Ammanabrolu.
+2023. Personalized soups: Personalized large lan-
+guage model alignment via post-hoc parameter merg-
+ing. arXiv preprint arXiv:2310.11564.
+Seongyun Lee, Sue Hyun Park, Seungone Kim, and
+Minjoon Seo. 2024. Aligning to thousands of prefer-
+ences via system message generalization. Preprint,
+arXiv:2405.17977.
+Dawei Li, Bohan Jiang, Liangjie Huang, Alimohammad
+Beigi, Chengshuai Zhao, Zhen Tan, Amrita Bhat-
+tacharjee, Yuxuan Jiang, Canyu Chen, Tianhao Wu,
+Kai Shu, Lu Cheng, and Huan Liu. 2025. From gen-
+eration to judgment: Opportunities and challenges of
+llm-as-a-judge. Preprint, arXiv:2411.16594.
+Haitao Li, Qian Dong, Junjie Chen, Huixue Su, Yu-
+jia Zhou, Qingyao Ai, Ziyi Ye, and Yiqun Liu.
+2024a.
+Llms-as-judges:
+A comprehensive sur-
+vey on llm-based evaluation methods.
+Preprint,
+arXiv:2412.05579.
+Minghao Li, Yingxiu Zhao, Bowen Yu, Feifan Song,
+Hangyu Li, Haiyang Yu, Zhoujun Li, Fei Huang,
+and Yongbin Li. 2023. API-bank: A comprehensive
+benchmark for tool-augmented LLMs. In Proceed-
+ings of the 2023 Conference on Empirical Methods
+in Natural Language Processing, pages 3102–3116,
+Singapore. Association for Computational Linguis-
+tics.
+Yuanchun Li, Hao Wen, Weijun Wang, Xiangyu Li,
+Yizhen Yuan, Guohong Liu, Jiacheng Liu, Wenxing
+Xu, Xiang Wang, Yi Sun, Rui Kong, Yile Wang,
+Hanfei Geng, Jian Luan, Xuefeng Jin, Zilong Ye,
+Guanjing Xiong, Fan Zhang, Xiang Li, Mengwei Xu,
+Zhijun Li, Peng Li, Yang Liu, Ya-Qin Zhang, and
+Yunxin Liu. 2024b. Personal llm agents: Insights and
+survey about the capability, efficiency and security.
+Preprint, arXiv:2401.05459.
+Grégoire Mialon, Roberto Dessì, Maria Lomeli, Christo-
+foros Nalmpantis, Ram Pasunuru, Roberta Raileanu,
+Baptiste Rozière, Timo Schick, Jane Dwivedi-Yu,
+Asli Celikyilmaz, Edouard Grave, Yann LeCun, and
+Thomas Scialom. 2023. Augmented language mod-
+els: a survey. Preprint, arXiv:2302.07842.
+Muh. Putra Pratama, Rigel Sampelolo, and Hans Lura.
+2023. Revolutionizing education: Harnessing the
+power of artificial intelligence for personalized learn-
+ing. KLASIKAL : JOURNAL OF EDUCATION, LAN-
+GUAGE TEACHING AND SCIENCE.
+Yujia Qin, Shengding Hu, Yankai Lin, Weize Chen,
+Ning Ding, Ganqu Cui, Zheni Zeng, Xuanhe Zhou,
+Yufei Huang, Chaojun Xiao, Chi Han, Yi Ren Fung,
+Yusheng Su, Huadong Wang, Cheng Qian, Runchu
+Tian, Kunlun Zhu, Shihao Liang, Xingyu Shen,
+Bokai Xu, Zhen Zhang, Yining Ye, Bowen Li, Ziwei
+Tang, Jing Yi, Yuzhang Zhu, Zhenning Dai, Lan Yan,
+Xin Cong, Yaxi Lu, Weilin Zhao, Yuxiang Huang,
+Junxi Yan, Xu Han, Xian Sun, Dahai Li, Jason Phang,
+Cheng Yang, Tongshuang Wu, Heng Ji, Guoliang Li,
+Zhiyuan Liu, and Maosong Sun. 2024a. Tool learn-
+ing with foundation models. ACM Comput. Surv.,
+57(4).
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan
+Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang,
+Bill Qian, Sihan Zhao, Lauren Hong, Runchu Tian,
+Ruobing Xie, Jie Zhou, Mark Gerstein, Dahai Li,
+Zhiyuan Liu, and Maosong Sun. 2024b. Toolllm:
+Facilitating large language models to master 16000+
+real-world apis. In ICLR.
+Changle Qu, Sunhao Dai, Xiaochi Wei, Hengyi Cai,
+Shuaiqiang Wang, Dawei Yin, Jun Xu, and Ji-Rong
+Wen. 2025. Tool learning with large language mod-
+els: A survey.
+Frontiers of Computer Science,
+19(8):198343.
+
+=== [page 11] ===
+Alireza Salemi, Sheshera Mysore, Michael Bendersky,
+and Hamed Zamani. 2024. LaMP: When large lan-
+guage models meet personalization. In Proceedings
+of the 62nd Annual Meeting of the Association for
+Computational Linguistics (Volume 1: Long Papers),
+pages 7370–7392, Bangkok, Thailand. Association
+for Computational Linguistics.
+Yunfan Shao, Linyang Li, Junqi Dai, and Xipeng Qiu.
+2023. Character-LLM: A trainable agent for role-
+playing. In Proceedings of the 2023 Conference on
+Empirical Methods in Natural Language Process-
+ing, pages 13153–13187, Singapore. Association for
+Computational Linguistics.
+Harmanpreet Singh, Nikhil Verma, Yixiao Wang, Man-
+asa Bharadwaj, Homa Fashandi, Kevin Ferreira, and
+Chul Lee. 2024.
+Personal large language model
+agents: A case study on tailored travel planning. In
+Proceedings of the 2024 Conference on Empirical
+Methods in Natural Language Processing: Industry
+Track, pages 486–514, Miami, Florida, US. Associa-
+tion for Computational Linguistics.
+Qiaoyu Tang, Ziliang Deng, Hongyu Lin, Xianpei Han,
+Qiao Liang, Boxi Cao, and Le Sun. 2023. Toolalpaca:
+Generalized tool learning for language models with
+3000 simulated cases. Preprint, arXiv:2306.05301.
+Qwen Team. 2024a. Qwen2.5: A party of foundation
+models.
+Qwen Team. 2024b. Qwq: Reflect deeply on the bound-
+aries of the unknown.
+Harsh Trivedi, Tushar Khot, Mareike Hartmann, Ruskin
+Manku, Vinty Dong, Edward Li, Shashank Gupta,
+Ashish Sabharwal, and Niranjan Balasubramanian.
+2024. AppWorld: A controllable world of apps and
+people for benchmarking interactive coding agents.
+In Proceedings of the 62nd Annual Meeting of the
+Association for Computational Linguistics (Volume 1:
+Long Papers), pages 16022–16076, Bangkok, Thai-
+land. Association for Computational Linguistics.
+Yu-Min Tseng, Yu-Chao Huang, Teng-Yun Hsiao, Wei-
+Lin Chen, Chao-Wei Huang, Yu Meng, and Yun-
+Nung Chen. 2024. Two tales of persona in llms: A
+survey of role-playing and personalization. Preprint,
+arXiv:2406.01171.
+Noah Wang, Z.y. Peng, Haoran Que, Jiaheng Liu,
+Wangchunshu Zhou, Yuhan Wu, Hongcheng Guo,
+Ruitong Gan, Zehao Ni, Jian Yang, Man Zhang,
+Zhaoxiang Zhang, Wanli Ouyang, Ke Xu, Wenhao
+Huang, Jie Fu, and Junran Peng. 2024a. RoleLLM:
+Benchmarking, eliciting, and enhancing role-playing
+abilities of large language models. In Findings of
+the Association for Computational Linguistics: ACL
+2024, pages 14743–14777, Bangkok, Thailand. As-
+sociation for Computational Linguistics.
+Tiannan Wang, Meiling Tao, Ruoyu Fang, Huilin Wang,
+Shuai Wang, Yuchen Eleanor Jiang, and Wangchun-
+shu Zhou. 2024b. Ai persona: Towards life-long
+personalization of llms. Preprint, arXiv:2412.13103.
+Jian Xie, Kai Zhang, Jiangjie Chen, Tinghui Zhu, Renze
+Lou, Yuandong Tian, Yanghua Xiao, and Yu Su. 2024.
+Travelplanner: A benchmark for real-world planning
+with language agents. In Forty-first International
+Conference on Machine Learning.
+Fanjia Yan, Huanzhi Mao, Charlie Cheng-Jie Ji, Tianjun
+Zhang, Shishir G. Patil, Ion Stoica, and Joseph E.
+Gonzalez. 2024. Berkeley function calling leader-
+board.
+Fan Yang, Zheng Chen, Ziyan Jiang, Eunah Cho, Xi-
+aojiang Huang, and Yanbin Lu. 2023. Palr: Person-
+alization aware llms for recommendation. Preprint,
+arXiv:2305.07622.
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak
+Shafran, Karthik R Narasimhan, and Yuan Cao. 2023.
+React: Synergizing reasoning and acting in language
+models. In The Eleventh International Conference
+on Learning Representations.
+Jiarui Zhang. 2024.
+Guided profile generation
+improves personalization with llms.
+Preprint,
+arXiv:2409.13093.
+Zeyu Zhang, Xiaohe Bo, Chen Ma, Rui Li, Xu Chen,
+Quanyu Dai, Jieming Zhu, Zhenhua Dong, and Ji-
+Rong Wen. 2024. A survey on the memory mecha-
+nism of large language model based agents. Preprint,
+arXiv:2404.13501.
+Siyan Zhao, Mingyi Hong, Yang Liu, Devamanyu Haz-
+arika, and Kaixiang Lin. 2025. Do LLMs recognize
+your preferences? evaluating personalized preference
+following in LLMs. In The Thirteenth International
+Conference on Learning Representations.
+Wayne Xin Zhao, Kun Zhou, Junyi Li, Tianyi Tang,
+Xiaolei Wang, Yupeng Hou, Yingqian Min, Be-
+ichen Zhang, Junjie Zhang, Zican Dong, Yifan Du,
+Chen Yang, Yushuo Chen, Zhipeng Chen, Jinhao
+Jiang, Ruiyang Ren, Yifan Li, Xinyu Tang, Zikang
+Liu, Peiyu Liu, Jian-Yun Nie, and Ji-Rong Wen.
+2024. A survey of large language models. Preprint,
+arXiv:2303.18223.
+Yuchen Zhuang, Yue Yu, Kuan Wang, Haotian Sun, and
+Chao Zhang. 2023. Toolqa: A dataset for llm ques-
+tion answering with external tools. In Advances in
+Neural Information Processing Systems, volume 36,
+pages 50117–50143. Curran Associates, Inc.
+Thomas P Zollo, Andrew Wei Tung Siah, Naimeng Ye,
+Ang Li, and Hongseok Namkoong. 2025. Personal-
+LLM: Tailoring LLMs to individual preferences. In
+The Thirteenth International Conference on Learning
+Representations.
+
+=== [page 12] ===
+A
+Dataset Construction
+A.1
+Tools Construction
+The tools we constructed are in Table 4. Real-world
+API data are used to generate outputs for most
+of the tools. For example, the weather data are
+collected from WeatherAPI.com 1, the music data
+are collected from Genius - Song Lyrics 2 and the
+shopping products are collected from Real-Time
+Amazon Data 3 in RapidAPI. And the Navigation
+data are modified from TravelPlanner (Xie et al.,
+2024) which is also collected from Real-World. We
+change the records’ date and add dozens of data
+points generated by gpt-4o. And the News data are
+entirely generated by gpt-4o.
+A.2
+The User Preference
+We construct 16 users in our benchmark, each user
+has a User Profile and Tool-utilizing Preference.
+The User Profile example is in Example 1. The
+example of Tool-utilizing Preference is in Exam-
+ple 2. One example of the interaction history of API
+get_user_recent_workout_records of user James
+Harrington is in Example 3.
+A.3
+The Interaction History Construction
+Process
+To ensure the consistency of the interaction his-
+tory, we first build a 9-day arrangement for each
+user and construct an interaction history based on
+it, covering schedule arrangements, alarms, health
+status (updated hourly), exercise records, email
+records, and music collections. The specific con-
+struction steps for the interaction history are as
+follows: (1) Generate the user’s 9-day schedule
+based on the user profile. (2) Extend the schedule
+in detail. (3) Generate the corresponding interac-
+tion history based on the user profile and schedule.
+(4) Perform manual verification to ensure consis-
+tency and accuracy.
+A.4
+Key Points Annotation
+For manually annotated key points, they are an-
+notated and verified by two graduate students to
+ensure their comprehensiveness and reliability as
+much as possible.
+1https://rapidapi.com/weatherapi/api/weatherapi-com
+2https://rapidapi.com/Glavier/api/genius-song-lyrics1
+3https://rapidapi.com/letscrape-6bRBa3QguO5/api/real-
+time-amazon-data
+B
+Evaluation details
+B.1
+Tool-invoking Method
+The tool-invoking prompt in FC, ReAct and E-
+ReAct format in Tool-Given and Tool-Retrieval
+setting is shown in Prompt 5, Prompt 6, Prompt 7,
+Prompt 8, Prompt 9, Prompt 10. The item in “{”
+and “}” will be replaced by specific content in the
+inference process.
+B.2
+Implementation Details
+We use the following model with the function call-
+ing ability as baselines in two experimental settings:
+gpt-4o-2024-11-20, DeepSeek-V3 (DeepSeek-AI
+et al., 2024), Qwen2.5-72B-Instruct (Team, 2024a),
+Llama-3.1-70B-Instruct 4, and watt-tool-70B 5 (the
+best-performing model in BFCL). Additionally, we
+evaluate the reasoning model o1-preview-2024-09-
+12, o1-mini-2024-09-12, DeepSeek-R1 (DeepSeek-
+AI et al., 2025), DeepSeek-R1-Distill-Qwen-32B
+(DeepSeek-AI et al., 2025), and QwQ-32B-Preview
+(Team, 2024b) evaluated on a subset of the 100
+testing data due to the budgets factors using ReAct
+method, as they do not support FC.
+For the reasoning model, the reasoning content
+is not included in the tool-invoking process in our
+experiments.
+For the fine-tuning experiments, we fine-tune the
+model with LoRA. The rank r is set to 8 and the
+lora alpha is 16. While the epoch is set to 3 and
+the learning rate is 1e-4. The batch size is set to 32.
+The data is in interaction format and we divide each
+interaction turn with APIs as training data, and we
+totally divide 200 instructions we annotated into
+841 training data. The experiments are conducted
+on NVIDIA A100.
+B.3
+Prompt of Evaluation
+The Prompt of key-point-based LLM Evaluation
+is in Prompt 11. The item in “{” and “}” will
+be replaced by specific content in the evaluation
+process. One evaluation output conducted by GPT-
+4o is shown in Example 12.
+B.4
+Example of Error
+Some error examples are shown in Example 4.
+4https://huggingface.co/meta-llama/Llama-3.1-70B-
+Instruct
+5https://huggingface.co/watt-ai/watt-tool-70B
+
+=== [page 13] ===
+C
+Effectiveness of key-point-based LLM
+evaluation
+The Bland-Altman analysis results of metrics Pro-
+cedure and Personalization are in Figure 7, Fig-
+ure 8, Figure 9, Figure 10. We observe that key
+points play a crucial role in improving the align-
+ment of the evaluation process for the metrics
+of Personalization and Proactivity. Although the
+evaluation model is provided with scoring crite-
+ria, it tends to assign higher scores even without
+the key points. We think this may be because the
+model lacks sufficient knowledge and understand-
+ing of how an assistant can provide personalized
+and proactive services. Once the key points are
+input, the evaluation model can analyze whether
+each point is satisfied, which enhances the final
+analysis and the accuracy of the score. However,
+we also notice that the mean difference in the Pro-
+cedure metric performs worse when key points are
+included. This may be due to the simultaneous
+evaluation of all three metrics, where Procedure is
+influenced by the other two metrics, leading to a
+lower score overall.
+
+=== [page 14] ===
+Category
+API Name
+HealthMonitoringApp
+get_current_health_and_mood_status
+HealthMonitoringApp
+get_user_recent_workout_records
+HealthMonitoringApp
+get_recent_health_and_mood_summary
+Calendar
+add_event_in_calendar
+Calendar
+view_today_events_in_calendar
+Calendar
+view_events_in_calendar_by_providing_time_range
+Calendar
+delete_event_in_calendar
+Calendar
+add_alarm
+Calendar
+view_today_alarms
+WeatherData
+get_today_weather
+WeatherData
+get_future_weather
+ECommerce
+add_product_to_cart
+ECommerce
+search_products_in_shopping_manager
+ECommerce
+view_cart_in_shopping_manager
+Email
+send_email
+Email
+get_today_emails_until_now
+Email
+search_email_by_sender_and_receiver
+Email
+search_email_by_content
+Browser
+search_news_by_category
+Browser
+search_heat_news
+Browser
+search_from_wikipedia
+MusicStreamingApp
+play_music
+MusicStreamingApp
+get_music_list_in_favorites
+Navigation_And_Map
+find_accommodations
+Navigation_And_Map
+find_attractions
+Navigation_And_Map
+find_restaurants
+Navigation_And_Map
+find_flight
+Thermostat (Smart_Home_Devices)
+set_temperature_and_humidity_in_home
+Thermostat (Smart_Home_Devices)
+get_home_temperature_and_humidity
+Light (Smart_Home_Devices)
+control_light_in_home
+SmartAppliance (Smart_Home_Devices)
+control_curtains_in_home
+SmartAppliance (Smart_Home_Devices)
+control_bathtub_in_home
+SmartAppliance (Smart_Home_Devices)
+boil_water_in_home
+Tool_Searcher
+search_tools
+Tool_Searcher
+get_tool_doc
+Table 4: The information of APIs and their their corresponding category.
+
+=== [page 15] ===
+Statistics
+Number
+Tool Categories
+9
+APIs Number
+35
+Instruction Number
+800
+User Number
+16
+Key points Number of Personalization per query
+3.18
+Key points Number of Proactivity per query
+3.2
+Avg. Turns per query
+3.43
+Table 5: The statistics of ETAPP. The Avg. Turn is calculated by the output of GPT-4o in ReAct format using
+Tool-Given Setting.
+1
+2
+3
+4
+5
+Mean of Ratings
+3
+2
+1
+0
+1
+2
+3
+Difference (Human - gpt-4o)
+ = 1.98
+ = 1.98
+Bland-Altman of metric Procedure
+Mean = 0.43
++1.96SD = 2.40
+-1.96SD = -1.55
+10
+20
+30
+40
+50
+60
+70
+Frequency
+Figure 7: The Bland-Altman analysis result of Proce-
+dure with given key points.
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+5.0
+Mean of Ratings
+3
+2
+1
+0
+1
+2
+3
+Difference (Human - gpt-4o)
+ = 2.02
+ = 2.02
+Bland-Altman of metric Procedure
+Mean = 0.09
++1.96SD = 2.12
+-1.96SD = -1.93
+10
+20
+30
+40
+50
+60
+Frequency
+Figure 8: The Bland-Altman analysis result of Proce-
+dure without given key points.
+1
+2
+3
+4
+5
+Mean of Ratings
+3
+2
+1
+0
+1
+2
+3
+4
+Difference (Human - gpt-4o)
+ = 2.27
+ = 2.27
+Bland-Altman of metric Personalization
+Mean = 0.17
++1.96SD = 2.44
+-1.96SD = -2.11
+5
+10
+15
+20
+25
+Frequency
+Figure 9: The Bland-Altman analysis result of Person-
+alization with given key points.
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+5.0
+Mean of Ratings
+3
+2
+1
+0
+1
+2
+Difference (Human - gpt-4o)
+ = 2.45
+ = 2.45
+Bland-Altman of metric Personalization
+Mean = -0.49
++1.96SD = 1.96
+-1.96SD = -2.94
+2.5
+5.0
+7.5
+10.0
+12.5
+15.0
+17.5
+20.0
+22.5
+Frequency
+Figure 10: The Bland-Altman analysis result of Person-
+alization without given key points.
+
+=== [page 16] ===
+{
+"DemographicData ": {
+"BasicInformation ": {
+"Name": "James Harrington",
+"Age": 45,
+"Gender ": "Male",
+"Location ": "San Francisco",
+"Occupation ": "CEO of Tech Innovations Inc.",
+"Character ": "Extroverted , strategic , driven"
+},
+"SocioeconomicStatus ": {
+"IncomeLevel ": "High income (>$500 ,000 annually)",
+"EducationLevel ": "MBA from Stanford University"
+},
+"CulturalBackground ": {
+"LanguageProficiency ": "Fluent in English and Spanish",
+"CulturalPreferences ": "N/A"
+},
+"InterestActivity ": "Golf , networking events , yacht sailing"
+},
+"Preferences ": {
+"Entertainment ": {
+"MusicGenres ": "Classical , Jazz",
+"MoviesAndTVShows ": "business dramas and documentaries (e.g.,
+,→'The Social Network ')",
+"BooksAndAuthors ": "Business leadership books by authors like
+,→Michael E. Porter , biographies of tech moguls"
+},
+"Lifestyle ": {
+"DietaryHabits ": "Prefers healthy and balanced meals; organic
+,→foods; follows a Mediterranean diet , Gourmet cuisine , fine
+,→dining , wine tasting , like Western cuisine and Chinese
+,→cuisine.",
+"Hobbies ": "Collecting art , attending tech conferences , mentoring
+,→startups"
+},
+"Technology ": {
+"FavoriteApps ": "Slack , LinkedIn , Bloomberg , Evernote",
+"DevicePreferences ": "Primarily uses iOS devices , enjoys high -end
+,→tech gadgets and smart home systems"
+},
+"Exercise ": {
+"Routine ": "Daily morning workout , personal training sessions ,
+,→incorporates yoga for stress relief",
+"Preferences ": "Strength training , cardiovascular exercises ,
+,→outdoor activities , enjoys running , free weight training ,
+,→yoga , and Tabata for his workouts , engages in easy hiking ,
+,→urban cycling , trail running , golf , and sailing as his
+,→outdoor activities ."
+},
+"Shopping ": {
+"FavoriteBrands ": "Apple , Tesla , Lululemon , Rolex",
+"ShoppingPreferences ": "Prefers premium and luxury brands ,
+,→interested in luxury watches , the latest smartphones and
+,→smart home devices , high -end kitchenware , premium
+,→beverages like coffee and wine , high -quality skincare
+,→products , performance activewear , fitness equipment ,
+,→business and non -fiction books , and handcrafted goods ."
+},
+"Travel ": {
+"FavoriteTravelPlace ": "Luxury resorts , exclusive islands , major
+,→cultural cities (e.g., Paris , Tokyo , New York)",
+"TravelHabits ": "Prefers first -class flights , stays at high -end
+,→hotels , enjoys personalized travel experiences , often
+,→combines business with leisure",
+"LongTermTravel ": "Enjoys long stays in exclusive destinations
+,→with access to privacy and luxury amenities , may travel
+,→for extended periods for business events or relaxation",
+
+=== [page 17] ===
+"ShortTermWalk ": "Prefers short , energizing walks in upscale city
+,→areas , parks , or along the coast , seeking new dining spots
+,→and local attractions"
+}
+}
+}
+Example 1: User Profile Example
+HealthMonitoringAPP:
+{
+"HealthMetrics ": {
+"RecentHealthStatus ": "Heart rate: 85 bpm , Steps count: 8,500
+,→steps",
+"Trends ": "Consistently active with a mix of running , yoga , and
+,→cycling. Higher activity levels observed in the mornings
+,→and evenings ."
+},
+"MoodPatterns ": {
+"RecentMoodStatus ": "Calm and relaxed after an active day",
+"Trends ": "Generally calm with occasional excitement. Stress
+,→levels are low , with slight increases during physical
+,→activities ."
+},
+"WorkoutPreferences ": {
+"Frequency ": "4 times a week",
+"Types": "Running , yoga , cardio , cycling",
+"Duration ": "30 to 60 minutes per session"
+},
+"WellnessPriorities ": {
+"FocusAreas ": "Maintaining cardiovascular health , improving
+,→flexibility",
+"LifestyleFactors ": "Prioritizes regular physical activity ,
+,→values relaxation and mindfulness through yoga , maintains
+,→a balanced lifestyle ."
+}
+}
+Browser:
+{
+"NewsAndBookmarkPreferences ": {
+"NewsCategoryPreferences ": {
+"PreferredCategories ": [
+"business",
+"technology",
+"world",
+"science"
+],
+"Frequency ": "daily"
+},
+"BookmarkingHabits ": {
+"FrequentBookmarks ": [
+"TechCrunch",
+"Harvard Business Review",
+"The Wall Street Journal",
+"Bloomberg Technology",
+"Forbes"
+]
+}
+}
+}
+Example 2: Tool-utilizing Preferences Example
+
+=== [page 18] ===
+Activity Type ,Start Time ,End Time ,Duration ,Average Heart Rate ,Maximum Heart
+,→Rate ,Calories Burned ,Exercise Effect Analysis ,System
+,→Suggestion ,Average Pace ,Cadence ,Route ,Speed Curve ,Heart Rate
+,→Curve ,Breathing Rate ,Relaxation State ,Pose Count ,Focus
+,→Area ,Distance ,Average Speed ,Elevation Gain
+Running ,2024 -09 -02 06:30:00 ,2024 -09 -02 07:15:00 ,45 ,140 ,165 ,400 , Aerobic
+,→endurance improved ,Increase interval training to boost
+,→speed ,6:45 ,158.0 , GPS Track 1,Speed Curve 1,Heart Rate Curve 1,,,,,,,
+Yoga ,2024 -09 -02 07:15:00 ,2024 -09 -02 07:45:00 ,30 ,95 ,110 ,100 , Relaxation
+,→achieved ,Focus on deep breathing
+,→techniques ,,,,,12,85%,15,Flexibility ,,,,
+Cardio ,2024 -09 -04 06:30:00 ,2024 -09 -04 07:30:00 ,60 ,140 ,160 ,500 , Cardiovascular
+,→endurance improved ,Incorporate more interval training ,,,,,,,,,,,,
+Yoga ,2024 -09 -04 21:00:00 ,2024 -09 -04 21:30:00 ,30 ,95 ,110 ,100 , Relaxation
+,→achieved ,Focus on deep breathing
+,→techniques ,,,,,12,80%,8,Flexibility ,,,,
+Running ,2024 -09 -05 06:30:00 ,2024 -09 -05 07:15:00 ,45 ,140 ,165 ,400 , Aerobic
+,→endurance improved ,Increase interval training to boost
+,→speed ,6:45 ,158.0 , GPS Track Golden Gate Park ,Speed Curve 1,Heart Rate
+,→Curve 1,,,,,,,
+Yoga ,2024 -09 -05 09:00:00 ,2024 -09 -05 09:20:00 ,20 ,95 ,110 ,80 , Relaxation
+,→achieved ,Focus on deep breathing techniques ,,,,,Breathing Curve
+,→1,Relaxation Data 1,8,Mindfulness ,,,,
+Cycling ,2024 -09 -07 06:30:00 ,2024 -09 -07 07:30:00 ,60 ,130 ,150 ,450 , Cardiovascular
+,→endurance improved ,Incorporate interval sprints for speed
+,→enhancement ,,,,,Urban Cycling Route ,Speed Curve 1,Heart Rate Curve
+,→1 , , ,15.0 ,15.0 ,100.0
+Example 3: Interaction History Example
+o1-preview:
+{
+"role": "assistant",
+"content": "After reviewing your calendar, I confirm that you have no events scheduled
+,→after 16:00 tomorrow. I will proceed to send an email to Alice to notify her
+,→about the dinner arrangement.",
+"tool_calls": [
+{
+"name": "send_email",
+"arguments": "```json\n{ \"receiver\": \"Alice@email.com\", \"subject\":
+,→\"Dinner Tomorrow Evening\", \"content\": \"Dear Alice,\\n\\nI hope
+,→this message finds you well. I'd like to invite you to join me for
+,→dinner tomorrow evening in San Francisco. Please let me know if you're
+,→available.\\n\\nBest regards,\\nJames Harrington\"\n}\n```"
+}
+]
+}
+QwQ:
+{
+"role": "assistant",
+"content": "Understood. I'll make sure to follow the specified format and call only
+,→one tool at a time, waiting for feedback before proceeding with further
+,→actions or reasoning.\n\n## Final Solution\nAs per the user's request to boil
+,→hot water and prepare for a shower upon arriving home, the following steps
+,→should be taken, adhering to the specified format:\n\n### Step 1: Boil
+,→Water\n\n**Thought:** \nTo start, I need to boil hot water as requested by the
+,→user. I should use the available tool for boiling water in the home, ensuring
+,→that it's set to the correct temperature and maintained until needed.\n\n**",
+"tool_calls": [
+{
+"name": "**\nboil_water_in_home\n\n**",
+"arguments": "**\n```json\n{ \"temperature\": 100, \"keep_temperature\":
+,→\"yes\"\n}\n```\n\n### Step 2: Prepare Shower\n\n**Thought:** \nAfter
+,→boiling the water, the next task is to prepare the shower. I need to
+,→set the shower water temperature to the user's preference and ensure
+
+=== [page 19] ===
+,→it's ready by the time they arrive
+,→home.\n\n**Action:**\ncontrol_bathtub_in_home\n\n**Action
+,→Input:**\n```json\n{ \"fill\": false, \"water_level\": null,
+,→\"temperature\": 39, \"keep_temperature\": \"yes\"\n}\n```\n\n###
+,→Explanation\n\n- **Boiling Water:** By calling the `boil_water_in_home`
+,→function with a temperature of 100\u00b0C and keeping it maintained, we
+,→ensure that the water is ready and at the correct temperature when
+,→needed.\n\n- **Preparing Shower:** Using the `control_bathtub_in_home`
+,→function, we set the shower water temperature to 39\u00b0C without
+,→filling the bathtub, as it's only for shower preparation. Maintaining
+,→the temperature ensures that the shower will be ready upon the user's
+,→arrival.\n\nThese steps efficiently utilize the available tools to
+,→fulfill the user's requests, ensuring a seamless experience upon their
+,→return home."
+}
+]
+}
+Example 4: Error Output Example
+
+=== [page 20] ===
+System:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+#### **specific and detailed preferences of user:**
+{preferences}
+#### **User Status:**
+{user_status}
+---
+### **Available Tools and Resources:**
+{available_tool_descriptions}
+---
+### **Response Format:**
+Provide the appropriate input for the selected action to execute it effectively.
+Thought: Clearly articulate your reasoning and evaluate the information or tools needed
+,→to accomplish the task effectively.
+Action: Specify the action to take, should be chosen from one of the list of available
+,→tools or resources.
+Action Input: Provide the appropriate input for the selected action to execute it
+,→effectively.
+If you believe that you have obtained enough information (which can be judge from the
+,→history observations) that can answer the task, please call:
+Thought: I now know the final answer
+Final Answer: Once sufficient information or progress has been made, conclude with a
+,→clear and concise response that addresses the original question or task.
+Attention:
+When a tool is needed, specify the action and input for the tool but do not proceed with
+,→reasoning until feedback from the tool is received.
+
+=== [page 21] ===
+The assistant should never generate the tool's output; this must always come from
+,→external feedback.
+**One Tool Call at a Time:** You must only call one tool at a time. Wait for feedback
+,→from the tool before initiating any further actions or reasoning.
+---
+### **EXAMPLE:**
+Here is an example conversation between user and Personal LLM agent.
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+Thought: To provide a personalized and proactive fruit recommendation for user, I need to
+,→consider his dietary habits, health metrics, and recent activities. By
+,→understanding his current health and mood status, as well as his recent workout
+,→records, I can tailor the fruit suggestions to align with his wellness priorities
+,→and lifestyle.
+Action: get_recent_health_and_mood_summary
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent health and mood records]
+ASSISTANT:
+Thought: I will attempt to retrieve the recent workout records in order to recommend
+,→fruits that are appropriate for the user.
+Action: get_user_recent_workout_records
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent workout records]
+ASSISTANT:
+Thought: I now know the final answer.
+Final Answer:
+Based on your current health and mood, which are [user's health status] after a day with
+,→moderate activity. His recent workout included [recent workout categories],
+,→focusing on [health concern and psychological requirements]. Considering the diet
+,→preference of you like [dietary preferences] and wellness priorities like [user's
+,→haelth goal], I recommend the following fruits that align with your wellness
+,→goals:
+1. **[Fruit_1]**: [The reasons for recommending fruit 1].
+2. **[Fruit_2]**: [The reasons for recommending fruit 2].
+These fruits not only fit your diet preference of [dietary preferences] but also support
+,→your goals of [user's health goal]. Enjoy them as part of your balanced,
+,→wellness-oriented diet! If you are interested in other fruits, let me know!
+User:
+{query}
+Prompt 5: ReAct (Tool-Given)
+Assistant:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+
+=== [page 22] ===
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+#### **specific and detailed preferences of user:**
+{preferences}
+#### **User Status:**
+{user_status}
+User:
+{query}
+Prompt 6: FC (Tool-Given)
+Assistant:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+
+=== [page 23] ===
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+#### **specific and detailed preferences of user:**
+{preferences}
+#### **User Status:**
+{user_status}
+---
+### **Available Tools and Resources:**
+{available_tool_descriptions}
+---
+To help with this, before interacting with the external APIs. Your job is to write a
+,→keypoint on how to solve the task and provide personal and proactive assistant
+,→given access to this executor.
+Note that you need to generate 'personal' and 'proactive' answer, please think the
+,→keypoint about 'personal' and 'proactive' respectively related to this query in
+,→json format.
+For example,
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+To provide a personalized and proactive fruit recommendation for user, I need to consider
+,→his dietary habits, health metrics, and recent activities. By understanding his
+,→current health and mood status, as well as his recent workout records, I can
+,→tailor the fruit suggestions to align with his wellness priorities and lifestyle.
+{{
+"keypoint for personalized":
+[
+"Consider the user's fruit preferences (e.g., apple, banana) and dietary habits
+,→when recommending fruits.",
+"Consider user's recent health status, workout records and user's wellness
+,→priorities."
+]
+"keypoint for proactive":
+[
+"Ask if the user is interested in other fruits besides the recommended ones."
+]
+}}
+User:
+{query}
+Assistant:
+<The output of the assistant>
+User:
+Based on your plan above, complete the question with following format:
+Thought: Clearly articulate your reasoning and evaluate the information or tools needed
+,→to accomplish the task effectively.
+Action: Specify the action to take, should bechosen from one of the list of available
+,→tools or resources.
+Action Input: Provide the appropriate input for the selected action to execute it
+,→effectively.
+
+=== [page 24] ===
+If you believe that you have obtained enough information (which can be judge from the
+,→history observations) that can answer the task, please call:
+Thought: I now know the final answer
+Final Answer: Once sufficient information or progress has been made, conclude with a
+,→clear and concise response that addresses the original question or task.
+Attention:
+When a tool is needed, specify the action and input for the tool but do not proceed with
+,→reasoning until feedback from the tool is received.
+The assistant should never generate the tool's output; this must always come from
+,→external feedback.
+**One Tool Call at a Time:** You must only call one tool at a time. Wait for feedback
+,→from the tool before initiating any further actions or reasoning.
+---
+### **EXAMPLE:**
+Here is an example conversation between user and Personal LLM agent.
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+Thought: To provide a personalized and proactive fruit recommendation for user, I need to
+,→consider his dietary habits, health metrics, and recent activities. By
+,→understanding his current health and mood status, as well as his recent workout
+,→records, I can tailor the fruit suggestions to align with his wellness priorities
+,→and lifestyle.
+Action: get_recent_health_and_mood_summary
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent health and mood records]
+ASSISTANT:
+Thought: I will attempt to retrieve the recent workout records in order to recommend
+,→fruits that are appropriate for the user.
+Action: get_user_recent_workout_records
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent workout records]
+ASSISTANT:
+Thought: I now know the final answer.
+Final Answer:
+Based on your current health and mood, which are [user's health status] after a day with
+,→moderate activity. His recent workout included [recent workout categories],
+,→focusing on [health concern and psychological requirements]. Considering the diet
+,→preference of you like [dietary preferences] and wellness priorities like [user's
+,→haelth goal], I recommend the following fruits that align with your wellness
+,→goals:
+1. **[Fruit_1]**: [The reasons for recommending fruit 1].
+2. **[Fruit_2]**: [The reasons for recommending fruit 2].
+These fruits not only fit your diet preference of [dietary preferences] but also support
+,→your goals of [user's health goal]. Enjoy them as part of your balanced,
+,→wellness-oriented diet! If you are interested in other fruits, let me know!
+Prompt 7: E-ReAct (Tool-Given)
+
+=== [page 25] ===
+Assistant:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+#### **User Status:**
+{user_status}
+---
+### **Available Tools and Resources:**
+{available_tool_descriptions}
+You can use ``search_tools`` to search the relevant tools.
+If you need more detailed information about a specific tool, you can use ``get_tool_doc``
+,→to access its documentation. This documentation provides guidance on how to
+,→properly invoke and use the tool.
+You need to use ``get_tool_doc`` to get the document before invoking tools.
+---
+### **Response Format:**
+Provide the appropriate input for the selected action to execute it effectively.
+Thought: Clearly articulate your reasoning and evaluate the information or tools needed
+,→to accomplish the task effectively.
+Action: Specify the action to take, should be chosen from one of the list of available
+,→tools or resources.
+Action Input: Provide the appropriate input for the selected action to execute it
+,→effectively.
+If you believe that you have obtained enough information (which can be judge from the
+,→history observations) that can answer the task, please call:
+Thought: I now know the final answer
+Final Answer: Once sufficient information or progress has been made, conclude with a
+,→clear and concise response that addresses the original question or task.
+Attention:
+
+=== [page 26] ===
+When a tool is needed, specify the action and input for the tool but do not proceed with
+,→reasoning until feedback from the tool is received.
+The assistant should never generate the tool's output; this must always come from
+,→external feedback.
+**One Tool Call at a Time:** You may only call one tool at a time. Wait for feedback from
+,→the tool before initiating any further actions or reasoning.
+---
+### **EXAMPLE:**
+Here is an example conversation between user and Personal LLM agent.
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+Thought: First I need to check the available tools that I can use.
+Action: search_tools
+Action Input: {"keywords": ["health status"]}
+USER:
+{'status': 'success', 'input': {'keywords': ['health status']}, 'output':
+,→['get_recent_health_and_mood_summary', 'get_current_health_and_mood_status',
+,→'get_user_recent_workout_records'], 'exception': None}
+ASSISTANT:
+Thought: I need to check the recent health status and workout records of the user to
+,→provide comprehensive recommendation for user.
+Action: get_tool_doc
+Action Input: {"tools_name": ["get_recent_health_and_mood_summary",
+,→"get_user_recent_workout_records"]}
+USER:
+{'status': 'success', 'data': {'get_user_recent_workout_records': {'type': 'function',
+,→'function': {'name': 'get_user_recent_workout_records', 'description': 'Retrieves
+,→the most recent workout record after the specified timestamp until now.',
+,→'parameters': {'type': 'object', 'properties': {'time': {'type': 'string',
+,→'description': "The timestamp after which to retrieve the workout record. The
+,→format should be '%Y-%m-%d %H:%M:%S', indicating the starting point of the time
+,→range for fetching records until now."}}, 'required': ['time']}, 'return':
+,→{'type': 'object', 'description': 'A dictionary containing the status of the
+,→operation and the most recent workout record.'}}},
+,→'get_recent_health_and_mood_summary': {'type': 'function', 'function': {'name':
+,→'get_recent_health_and_mood_summary', 'description': 'Retrieves the most recent
+,→health and mood records after the specified timestamp until now.', 'parameters':
+,→{'type': 'object', 'properties': {'time': {'type': 'string', 'description': "The
+,→timestamp after which to retrieve the health and mood summary record. The format
+,→should be '%Y-%m-%d %H:%M:%S', indicating the starting point of the time range
+,→for fetching records until now."}}, 'required': ['time']}, 'return': {'type':
+,→'object', 'description': 'A dictionary containing the status of the operation and
+,→the most recent health and mood records.'}}}}}
+Corresponding preferences related to the tools you retrieve:
+[User's preference related to ``get_recent_health_and_mood_summary`` and
+,→``get_user_recent_workout_records``]
+ASSISTANT:
+Thought: To provide a personalized and proactive fruit recommendation for user, I need to
+,→consider his dietary habits, health metrics, and recent activities. By
+,→understanding his current health and mood status, as well as his recent workout
+,→records, I can tailor the fruit suggestions to align with his wellness priorities
+,→and lifestyle.
+Action: get_recent_health_and_mood_summary
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent health and mood records]
+ASSISTANT:
+
+=== [page 27] ===
+Thought: I will attempt to retrieve the recent workout records in order to recommend
+,→fruits that are appropriate for the user.
+Action: get_user_recent_workout_records
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent workout records]
+ASSISTANT:
+Thought: I now know the final answer.
+Final Answer:
+Based on your current health and mood, which are [user's health status] after a day with
+,→moderate activity. His recent workout included [recent workout categories],
+,→focusing on [health concern and psychological requirements]. Considering the diet
+,→preference of you like [dietary preferences] and wellness priorities like [user's
+,→haelth goal], I recommend the following fruits that align with your wellness
+,→goals:
+1. **[Fruit_1]**: [The reasons for recommending fruit 1].
+2. **[Fruit_2]**: [The reasons for recommending fruit 2].
+These fruits not only fit your diet preference of [dietary preferences] but also support
+,→your goals of [user's health goal]. Enjoy them as part of your balanced,
+,→wellness-oriented diet! If you are interested in other fruits, let me know!
+User:
+{query}
+Prompt 8: ReAct (Tool-Retrieval)
+Assistant:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+
+=== [page 28] ===
+#### **User Status:**
+{user_status}
+---
+You can use ``search_tools`` to search the relevant tools.
+If you need more detailed information about a specific tool, you can use ``get_tool_doc``
+,→to access its documentation. This documentation provides guidance on how to
+,→properly invoke and use the tool.
+You need to use ``get_tool_doc`` to get the document before invoking tools.
+User:
+{query}
+Prompt 9: FC (Tool-Retrieval)
+Assistant:
+You are a personal and proactive assistant that deeply integrates personal data and
+,→personal devices for personal assistance, and are more explicitly designed to
+,→assist people rather than replace them. Specifically, the main way to assist
+,→users is to reduce repetitive, tedious, and low value labor in daily work,
+,→allowing users to focus on more interesting and valuable things.
+As a helpful personal AI Agent, You are able to utilize external tools and resources as
+,→needed to answer user's questions or help user accomplish tasks based on their
+,→preferences and environment.
+---
+### **Key Principles:**
+#### **1. Personalized Assistance:**
+- Tailor your actions and recommendations to align with the user's preferences,
+,→lifestyle, and unique context.
+- When answering question or utilizing tools, ensure they reflect the user's habits,
+,→priorities, and values.
+#### **2. Proactive Support:**
+- Go beyond fulfilling explicit instructions by considering additional factors or
+,→opportunities that might improve task outcomes or add value.
+- If a task is completed, identify potential related needs or provide further insights to
+,→ensure a comprehensive, thoughtful service.
+---
+### **User Information:**
+#### **User Profile:**
+{user_profile}
+#### **User Status:**
+{user_status}
+### **Available Tools and Resources:**
+{available_tool_descriptions}
+You can use ``search_tools`` to search the relevant tools.
+If you need more detailed information about a specific tool, you can use ``get_tool_doc``
+,→to access its documentation. This documentation provides guidance on how to
+,→properly invoke and use the tool.
+You need to use ``get_tool_doc`` to get the document before invoking tools.
+---
+
+=== [page 29] ===
+To help with this, before interacting with the external APIs. Your job is to write a
+,→keypoint on how to solve the task and provide personal and proactive assistant
+,→given access to this executor.
+Note that you need to generate 'personal' and 'proactive' answer, please think the
+,→keypoint about 'personal' and 'proactive' respectively related to this query in
+,→json format.
+For example,
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+To provide a personalized and proactive fruit recommendation for user, I need to consider
+,→his dietary habits, health metrics, and recent activities. By understanding his
+,→current health and mood status, as well as his recent workout records, I can
+,→tailor the fruit suggestions to align with his wellness priorities and lifestyle.
+{{
+"keypoint for personalized":
+[
+"Consider the user's fruit preferences (e.g., apple, banana) and dietary habits
+,→when recommending fruits.",
+"Consider user's recent health status, workout records and user's wellness
+,→priorities."
+]
+"keypoint for proactive":
+[
+"Ask if the user is interested in other fruits besides the recommended ones."
+]
+}}
+User:
+{query}
+Assistant:
+<The output of the assistant>
+User:
+Based on your plan above, complete the question with following format:
+Thought: Clearly articulate your reasoning and evaluate the information or tools needed
+,→to accomplish the task effectively.
+Action: Specify the action to take, should bechosen from one of the list of available
+,→tools or resources.
+Action Input: Provide the appropriate input for the selected action to execute it
+,→effectively.
+If you believe that you have obtained enough information (which can be judge from the
+,→history observations) that can answer the task, please call:
+Thought: I now know the final answer
+Final Answer: Once sufficient information or progress has been made, conclude with a
+,→clear and concise response that addresses the original question or task.
+Attention:
+When a tool is needed, specify the action and input for the tool but do not proceed with
+,→reasoning until feedback from the tool is received.
+The assistant should never generate the tool's output; this must always come from
+,→external feedback.
+**One Tool Call at a Time:** You may only call one tool at a time. Wait for feedback from
+,→the tool before initiating any further actions or reasoning.
+---
+### **EXAMPLE:**
+Here is an example conversation between user and Personal LLM agent.
+
+=== [page 30] ===
+USER:
+Recommend some fruit to me.
+ASSISTANT:
+Thought: First I need to check the available tools that I can use.
+Action: search_tools
+Action Input: {"keywords": ["health status"]}
+USER:
+{'status': 'success', 'input': {'keywords': ['health status']}, 'output':
+,→['get_recent_health_and_mood_summary', 'get_current_health_and_mood_status',
+,→'get_user_recent_workout_records'], 'exception': None}
+ASSISTANT:
+Thought: I need to check the recent health status and workout records of the user to
+,→provide comprehensive recommendation for user.
+Action: get_tool_doc
+Action Input: {"tools_name": ["get_recent_health_and_mood_summary",
+,→"get_user_recent_workout_records"]}
+USER:
+{'status': 'success', 'data': {'get_user_recent_workout_records': {'type': 'function',
+,→'function': {'name': 'get_user_recent_workout_records', 'description': 'Retrieves
+,→the most recent workout record after the specified timestamp until now.',
+,→'parameters': {'type': 'object', 'properties': {'time': {'type': 'string',
+,→'description': "The timestamp after which to retrieve the workout record. The
+,→format should be '%Y-%m-%d %H:%M:%S', indicating the starting point of the time
+,→range for fetching records until now."}}, 'required': ['time']}, 'return':
+,→{'type': 'object', 'description': 'A dictionary containing the status of the
+,→operation and the most recent workout record.'}}},
+,→'get_recent_health_and_mood_summary': {'type': 'function', 'function': {'name':
+,→'get_recent_health_and_mood_summary', 'description': 'Retrieves the most recent
+,→health and mood records after the specified timestamp until now.', 'parameters':
+,→{'type': 'object', 'properties': {'time': {'type': 'string', 'description': "The
+,→timestamp after which to retrieve the health and mood summary record. The format
+,→should be '%Y-%m-%d %H:%M:%S', indicating the starting point of the time range
+,→for fetching records until now."}}, 'required': ['time']}, 'return': {'type':
+,→'object', 'description': 'A dictionary containing the status of the operation and
+,→the most recent health and mood records.'}}}}}
+Corresponding preferences related to the tools you retrieve:
+[User's preference related to ``get_recent_health_and_mood_summary`` and
+,→``get_user_recent_workout_records``]
+ASSISTANT:
+Thought: To provide a personalized and proactive fruit recommendation for user, I need to
+,→consider his dietary habits, health metrics, and recent activities. By
+,→understanding his current health and mood status, as well as his recent workout
+,→records, I can tailor the fruit suggestions to align with his wellness priorities
+,→and lifestyle.
+Action: get_recent_health_and_mood_summary
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent health and mood records]
+ASSISTANT:
+Thought: I will attempt to retrieve the recent workout records in order to recommend
+,→fruits that are appropriate for the user.
+Action: get_user_recent_workout_records
+Action Input: {"time": "2024-09-01 00:00:00"}
+USER:
+[The tool-invoking response, including user's recent workout records]
+ASSISTANT:
+Thought: I now know the final answer.
+Final Answer:
+
+=== [page 31] ===
+Based on your current health and mood, which are [user's health status] after a day with
+,→moderate activity. His recent workout included [recent workout categories],
+,→focusing on [health concern and psychological requirements]. Considering the diet
+,→preference of you like [dietary preferences] and wellness priorities like [user's
+,→haelth goal], I recommend the following fruits that align with your wellness
+,→goals:
+1. **[Fruit_1]**: [The reasons for recommending fruit 1].
+2. **[Fruit_2]**: [The reasons for recommending fruit 2].
+These fruits not only fit your diet preference of [dietary preferences] but also support
+,→your goals of [user's health goal]. Enjoy them as part of your balanced,
+,→wellness-oriented diet! If you are interested in other fruits, let me know!
+Prompt 10: E-ReAct (Tool-Retrieval)
+I need you to evaluate whether the solution provided by my artificial intelligence assistant
+,→completes user instructions and meets user preferences.
+---
+### **Evaluation Metrics:**
+The analysis should assess the assistant's performance based on the following criteria:
+- **Procedure**: Whether the process is correct and a complete and accurate final response
+,→was provided.
+- **Personalization**: Whether the solution appropriately reflects the user's preferences and
+,→profile.
+- **Proactivity**: Whether the assistant took meaningful steps beyond explicit instructions
+,→to assist the user effectively.
+---
+### **Evaluation Guidelines:**
+1. **Procedure Analysis**:
+Assess the AI assistant's **entire solution process** (including tool usage, logic, and
+,→responses) and its **final output**. Determine if the solution:
+- Accurately completes the task based on the user's instructions.
+- Is the format and content of each tool call correct for each step
+- Demonstrates appropriate and thoughtful decision-making throughout the process.
+- Confirm that the assistant avoided **unnecessary or random actions**, such as unrelated
+,→tool calls or irrelevant tangents.
+- Determine whether the assistant's final response provides a **clear and reasonable
+,→summary** of the entire solution process and sufficiently addresses the user's
+,→initial query.
+Score Criteria:
+5 Points (Excellent):
+Fully resolves the issue, no errors/omissions, rigorous logic, precise and relevant tool
+,→usage, concise yet comprehensive content.
+4 Points (Good):
+Mostly correct with minor errors/omissions, tools generally accurate, relevant but lacks
+,→depth.
+3 Points (Adequate):
+Partial accuracy, noticeable omissions/errors, occasional tool misuse, content relevant
+,→but unclear.
+2 Points (Poor):
+Fails key requirements, major errors, frequent tool misuse, vague/irrelevant content.
+1 Points (Unacceptable):
+Irrelevant/severe errors, incorrect tool usage, content lacks value.
+0 Points (Invalid):
+No meaningful response, completely irrelevant/harmful, tools unused or grossly misapplied,
+,→zero value or violates guidelines.
+
+=== [page 32] ===
+2. **Personalization Assessment**:
+Evaluate whether the assistant meets the **"personal"** criterion:
+- Did the assistant consider the user's specific preferences, profile details, and context
+,→when calling tools or generating the response?
+- Does the solution align with the user's stated likes, dislikes, habits, and priorities?
+Score Criteria:
+5 Points (Excellent):
+Perfectly aligns with user preferences/context, integrates unique details flawlessly,
+,→thoughtful and precise customization.
+4 Points (Good):
+Closely aligned with core needs, covers key preferences, minor gaps in depth or
+,→specificity.
+3 Points (Adequate):
+Basic personalization, misses critical details (e.g., specific scenarios), requires
+,→stronger tailoring.
+2 Points (Poor):
+Generic response, ignores major preferences, lacks relevance to user's unique context.
+1 Points (Unacceptable):
+No user context considered, entirely generic/irrelevant, provides no practical value.
+0 Points (Invalid):
+No personalization, irrelevant/harmful content, ignores user context, or violates
+,→guidelines.
+3. **Proactivity Behavior Assessment**:
+Evaluate whether the assistant meets the **"proactive"** criterion:
+- Did the assistant anticipate additional needs, explore further helpful insights, or
+,→propose actions that go beyond the user's explicit instructions?
+- Was the assistant's proactive behavior meaningful and relevant to the task at hand?
+Score Criteria:
+5 Points (Excellent):
+Anticipates **unstated needs**, provides critical insights (e.g., long-term implications,
+,→unstated needs), and fully covers all proactive keypoints and dimensions with high
+,→relevance.
+4 Points (Good):
+Identifies **most** key proactive needs and keypoints (e.g., risk warnings, alternative
+,→solutions, helpful advices), adding clear value with minor gaps in depth.
+3 Points (Adequate):
+Addresses **some** proactive points (e.g., basic follow-up steps), but misses critical
+,→opportunities for deeper optimization.
+2 Points (Poor):
+Minimal proactivity; suggestions are superficial, incomplete, or lack relevance (e.g.,
+,→generic tips unrelated to the context).
+1 Point (Unacceptable):
+Strictly passive; only fulfills explicit instructions with **zero** added insights,
+,→actions, or anticipation of needs.
+0 Points (Invalid):
+No proactive effort, provides harmful/irrelevant suggestions (e.g., dangerous advice), or
+,→completely misinterprets the task.
+---
+### **Analysis Format:**
+Your analysis should follow this JSON structure:
+```json
+{output_format}
+```
+---
+### **Evaluation Input:**
+The evaluation will consider the following inputs:
+
+=== [page 33] ===
+1. **User Query**:
+{query}
+2. **User Profile**:
+{profile}
+3. **Personal LLM Assistant Solution**:
+{output}
+---
+### **Analysis and Results:**
+Using the provided inputs and guidelines, generate the following JSON analysis and results:
+1. Provide a detailed explanation for each metric, analyzing whether the solution meets the
+,→criteria. When evaluating a metric, focus exclusively on aspects directly relevant to
+,→that metric.
+2. Assign a score (0~5) for each metric.
+3. Ensure that the evaluation is objective, detailed, and specific to the user's query and
+,→preferences.
+**Note:**
+The format for the model's response is: {{"role": "assistant", "content": "", "tool_calls":
+,→[{{"name": "", "arguments": ""}}]}}
+A successful tool call must include feedback from the tool, rather than the model inferring
+,→or answering its own questions. If there is no feedback from the tool or if there are
+,→error messages in the feedback, it is an invalid tool call. The format for tool
+,→feedback is: {{"role": "tool", "content": ""}}
+If there is the user feedback in the conversation, check if there is possible tool-invoking
+,→format error or invalid tool utilizing. If exists, it indicates the error or
+,→unnecessary tool calling.
+Prompt 11: Evaluation Prompt of key-point-based LLM Evaluation
+{
+"Procedure ": {
+"Keypoints for Procedure ": {
+"Completeness ": {
+"analysis ": "The assistant successfully identified the user 's
+,→preferences for jazz and classical music , selected a
+,→track ('So What ' by Miles Davis) from the user 's
+,→frequently played tracks , and set the volume to the
+,→user 's preferred level of 40%. The assistant also
+,→provided a final answer summarizing the task
+,→completion. However , there was an unnecessary user
+,→prompt due to the assistant 's failure to finalize the
+,→response earlier , which required the user to intervene
+,→and request a proper conclusion .",
+"score": 1
+},
+"Avoid Unnecessary Action ": {
+"analysis ": "The assistant made an unnecessary tool call
+,→after the music was already playing ('tool_calls ':
+,→[{'name ': '', 'arguments ':
+'{}'}]). This action did
+,→not contribute to the task and caused confusion.
+,→Additionally , the assistant failed to finalize the
+,→response initially , leading to unnecessary user
+,→feedback.",
+"score": 1
+},
+"Call the tool accurate ": {
+"analysis ": "The tool calls were mostly accurate. The
+,→assistant correctly used 'get_music_list_in_favorites '
+
+=== [page 34] ===
+,→to retrieve the user 's favorite tracks and
+,→'play_music ' to play the selected track at the
+,→specified volume. However , the unnecessary tool call
+,→('tool_calls ': [{'name ': '', 'arguments ':
+'{}'}])
+,→after the music was already playing detracts from the
+,→accuracy of tool usage.",
+"score": 1
+},
+"Summary the query clearly and comprehensive ": {
+"analysis ": "The assistant provided a clear and concise final
+,→answer summarizing the task ('So What ' by Miles Davis
+,→is now playing at a volume level of 40. Enjoy your
+,→relaxing morning!'). However , this summary was delayed
+,→and only provided after the user prompted the
+,→assistant to finalize the response.",
+"score": 1
+}
+},
+"Final Assessment ": {
+"anlysis ": "The assistant partially completed the task but
+,→exhibited issues with unnecessary actions , delayed
+,→finalization , and redundant tool calls. While the task was
+,→eventually completed , these errors detract from the
+,→overall performance .",
+"score": 3
+}
+},
+"Personalization ": {
+"Keypoints for Personalization ": {
+"Consider user 's preferred genre or artists for music
+,→('MusicPreferences ') when using
+,→'get_music_list_in_favorites '.": {
+"analysis ": "The assistant correctly considered the user 's
+,→preferred genres (jazz and classical) and selected a
+,→track ('So What ' by Miles Davis) from the user 's
+,→frequently played tracks. This aligns with the user 's
+,→preferences .",
+"score": 2
+},
+"Consider user 's usual music preferences and listening habits
+,→('ListeningHabits ') based on the time of day .": {
+"analysis ": "The assistant acknowledged the user 's preference
+,→for jazz and classical music for relaxation and
+,→selected a track suitable for the morning routine.
+,→This demonstrates consideration of the user 's
+,→listening habits.",
+"score": 2
+},
+"Consider user 's preferred volume level ('PreferredVolumeLevel ')
+,→for music when using 'play_music '.": {
+"analysis ": "The assistant set the volume to 40%, which
+,→aligns with the user 's preferred volume level for
+,→immersive listening .",
+"score": 2
+}
+},
+"Final Assessment ": {
+"analysis ": "The assistant demonstrated excellent personalization
+,→by considering the user 's preferred genres , listening
+,→habits , and volume preferences. The solution was
+,→well -tailored to the user 's profile.",
+"score": 5
+}
+},
+"Proactivity ": {
+"Keypoints for Proactivity ": {
+"Provide other music suggestions besides the music you recommend
+,→and play .": {
+
+=== [page 35] ===
+"analysis ": "The assistant did not provide additional music
+,→suggestions beyond the selected track ('So What ' by
+,→Miles Davis). This was a missed opportunity to enhance
+,→the user 's experience .",
+"score": 0
+},
+"Ask if user prefers a new recommendation of different music
+,→category ": {
+"analysis ": "The assistant did not ask the user if they would
+,→like a recommendation from a different music category.
+,→This was another missed opportunity to proactively
+,→engage with the user.",
+"score": 0
+},
+"Consider the time of the day when you recommend music and
+,→determine volume .": {
+"analysis ": "The assistant considered the time of day
+,→(morning) and selected a relaxing jazz track while
+,→setting the volume to 40%, which aligns with the
+,→user 's preferences for immersive listening during this
+,→time.",
+"score": 2
+}
+},
+"Final Assessment ": {
+"Analysis ": "The assistant demonstrated limited proactivity.
+,→While it considered the time of day when selecting music
+,→and setting the volume , it missed opportunities to provide
+,→additional suggestions or ask about alternative
+,→preferences .",
+"score": 2
+}
+}
+}
+Example 12: Evaluation Result Example

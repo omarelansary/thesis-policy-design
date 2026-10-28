@@ -1,0 +1,64 @@
+Research
+
+# Memory systems should be measured in public.
+
+Our reports document the datasets, evaluation methods, architecture, and results behind supermemory’s performance.
+
+Public benchmarks
+
+## State of the art across agent memory.
+
+97%
+
+### LongMemEval-S
+
+Recall@20 across 500 questions and six categories.
+
+#1
+
+### LoCoMo
+
+Long-horizon conversational recall across single-hop, multi-hop, temporal, and adversarial questions.
+
+#1
+
+### ConvoMem
+
+Personalization and preference learning across extended conversations.
+
+Evaluation report · May 2026
+
+## LongMemEval-S
+
+[Read the full report](https://supermemory.ai/research/longmembench/)
+
+supermemory reaches 97% overall Recall@20 with aggregation and leads the strongest baseline in every category.
+
+__LongMemEval-S Recall@20 with aggregation__
+| Category                       | supermemory | Zep   | Full context |
+| ------------------------------ | ----------- | ----- | ------------ |
+| SSUSingle-session — User       | 97%         | 92.9% | 81.4%        |
+| SSASingle-session — Assistant  | 100%        | 80.4% | 94.6%        |
+| SSPSingle-session — Preference | 95%         | 56.7% | 20%          |
+| KUKnowledge Update             | 100%        | 83.3% | 78.2%        |
+| TRTemporal Reasoning           | 95%         | 62.4% | 45.1%        |
+| MSMulti-session                | 96%         | 57.9% | 44.3%        |
+| ALLOverall                     | 97%         | 71.2% | 60.2%        |
+
+DatasetLongMemEval-S · 500 questions · six categories
+
+RetrievalRecall@20 with aggregation
+
+Judgegpt-4o with the benchmark’s question-specific prompts
+
+Systems research
+
+## Memory as a filesystem.
+
+SMFS · xAFS benchmark
+
+### Less context, better answers.
+
+SMFS cuts cumulative token usage by 3× on Claude and 1.75× on Codex while improving task accuracy across 110 questions.
+
+[Read the SMFS research](https://smfs.ai/)
