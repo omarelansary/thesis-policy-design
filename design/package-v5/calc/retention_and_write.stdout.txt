@@ -1,0 +1,47 @@
+Part 1. Paid retention: returns per write (each after the short lifetime, within the long one) needed to pay the premium
+  provider                           w_short w_long      r     N*
+  Anthropic 5 min -> 1 h                1.25    2.0    0.1   0.65
+  Anthropic 5 min -> 1 h                1.25    2.0   0.05   0.62
+  Anthropic 5 min -> 1 h                1.25    2.0  0.025   0.61
+  OpenAI 30 min -> 12 h                 1.25    2.5    0.1   1.09
+  OpenAI 30 min -> 12 h                 1.25    2.5   0.05   1.04
+  Reading: on Anthropic one such return in about two of three sessions (N* 0.61-0.65) pays for the 1 h write; on OpenAI
+  a single return never pays for the 12 h write (N* 1.04-1.09); the user must come back more than once within 12 hours.
+
+Part 1b. Keep-alive pings: longest gap over which pinging is cheaper than a cold rewrite (minutes)
+  lifetime               w_short      r    g_max
+  Anthropic 5 min           1.25    0.1       58
+  Anthropic 5 min           1.25   0.05      120
+  Anthropic 5 min           1.25  0.025      245
+  OpenAI 30 min [A]         1.25    0.1      345
+  OpenAI 30 min [A]         1.25   0.05      720
+  Reading: at r = 0.1 pinging pays for gaps up to about an hour on Anthropic; cheaper reads stretch it to two or four hours.
+
+Part 1c. Explicit cache priced per hour: longest gap over which holding is cheaper than rewriting [A: w = 1.0]
+  model               input $  read $  store $/h     r  sigma/h  g_max (h)
+  Gemini 3.8 Flash       0.75   0.075       0.50  0.10     0.67       1.35
+  Gemini 2.5 Flash       0.30   0.030       1.00  0.10     3.33       0.27
+  Reading: holding a cache pays only for short gaps: about 1.35 h (3.8 Flash, 2026 price) and about 16 minutes (2.5 Flash).
+  Prices per token-hour make storage, not the gap distribution alone, decide; these are list prices of one provider.
+
+Part 2. University route: no paid retention; observed lifetime brackets (single runs, `10` section 9)
+  warm at ~75 min (all three models); cold at ~5 h on gpt-oss-120b and MiniMax-M3; warm at >5.5 h on GLM-5.3.
+  A returning session within ~75 min may start warm; after ~5 h it starts cold on two of three models. Narrower
+  brackets need the probe's lifetime mode (`p0_api_probe_v3.py --mode lifetime`, not yet run).
+
+Part 3. Cost of the memory write and of carrying the memory block, against one avoided client-side search
+      r     S     C_W  search  C_W/search   C_M(T) for B = 500, w = 1.25: T=3 / 10 / 30
+   0.02   100     731     881        0.83   645 / 715 / 915
+   0.02   200    1231     881        1.40   645 / 715 / 915
+   0.02   400    2231     881        2.53   645 / 715 / 915
+    0.1   100    1255    1405        0.89   725 / 1075 / 2075
+    0.1   200    1755    1405        1.25   725 / 1075 / 2075
+    0.1   400    2755    1405        1.96   725 / 1075 / 2075
+    0.5   100    3875    4025        0.96   1125 / 2875 / 7875
+    0.5   200    4375    4025        1.09   1125 / 2875 / 7875
+    0.5   400    5375    4025        1.34   1125 / 2875 / 7875
+  Reading: a summary call of 100-400 output tokens costs about 0.8 to 2.5 avoided searches (output dominates at low r);
+  carrying a 500-token memory block costs about 0.7 to 0.8 searches' worth in a 10-request session (all three r).
+  In P1, V5-R's arm carries C_W + C_M on every returning session; the rule-based tool record adds nothing; whether
+  memory pays is then: avoided searches (from seeds) minus unneeded-seed carry minus C_W minus C_M, all measured.
+  NOT varied: H, P, q, I, B; the minimum cacheable length (a 500-token block may fall below it and not cache).
