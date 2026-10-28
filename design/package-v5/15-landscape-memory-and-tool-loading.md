@@ -122,6 +122,20 @@ Cursor's Memories were removed, or their management UI was, in 2.1.x; one staff 
 | PL-7 | New in P1 beyond `03`/`05` (which already have ATRBench's design and an oracle ablation): report memory construction cost beside the per-session bill; express break-even in turns; measure over-calling of seeded tools against an unseeded arm; and run seeds that point to tools changed since they were recorded | P1 | E9, F27, E22, G24 |
 | PL-8 | Seed per user first; per-role pooled seeding lets one user's sessions shape another's seeds. The weight of this risk is limited by G4 and G7 (leads); it is a reason for order, not a prohibition | M2 | G5, G9, G10; G4, G7 (leads) |
 
+### 6.1 The human's decision (INT-T-016, REQ-U28-01, 2026-10-28)
+Rule stated by the human: adopt only what is a proven mechanism or trick already used by people who built something similar, where it worked for them. The lead's split, accepted as is:
+
+| Proposal | Shipped or shown elsewhere? | Decision | Applied as |
+|---|---|---|---|
+| PL-1 | Yes (Codex fix, Anthropic alerting, OpenAI guide) | REUSE, adopted | V5-R12 |
+| PL-2 | Half: gated, append-only writes are shipped; a rule-based record of tools used is not | REUSE part adopted; tool record OURS, tested in P1 | V5-R13 |
+| PL-3 | Half: check-before-use and expiry are shipped for remembered facts (Copilot); the tool-specific rules are the lead's reasoning | REUSE part adopted; seed checks and seed-independent renewal OURS, tested in P1 | V5-R14 |
+| PL-4 | No change needed | none | `04` section 7 note |
+| PL-5 | Research only (Tool2Vec), not found shipped | Not in the policy; optional comparison arm in P1 | `05` P1 |
+| PL-6 | Accounting with the vendors' official prices | REUSE, adopted; arithmetic not yet run | V5-R16 |
+| PL-7 | Measures copied from published benchmarks | REUSE, adopted | `05` P1 |
+| PL-8 | Yes (Copilot, Claude Code, Codex scope memory per user or project) | REUSE, adopted | V5-R15 |
+
 ## 7. What stays unchanged, and limits
 - **Examined here and not changed:** append-only discovery and the never-edit-the-tools-array rule (4.1), the deployment filter S1 (4.1, 4.5), plain Markdown memory first (4.2, per REQ-O21-09). **Not examined here, so neither confirmed nor changed (CH-0134):** the regimes and break-evens of D-01 (only the price grid is touched, PL-6), deferral's own bill (F5 is noted, P5 remains open), observation masking (the scouts' leads F8, F30, B23 and B25 were not checked), and the order of `05`.
 - **Memory services (Mem0, Zep, Letta, Hindsight and similar):** not proposed as components. They target conversational recall, their LoCoMo-type numbers are disputed (C9, C10, leads), and none of the pages read records which tools to offer (scout C). This is a judgement of fit, not evidence that they are worse: retrieval-backed memory did as well as or better than plain baselines in several results (C11, C6, E25 above), so whether V5's memory should retrieve rather than inject is left to the loop.

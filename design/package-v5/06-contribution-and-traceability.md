@@ -35,6 +35,11 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R09 | `05` section 1 |
 | V5-R10 | `09` EX-2; L/v5-openai-tool-search-20261022.md:22; L/v5-executor-docs-mcp-20261022.md:28-31; L/v5-sciagentskills-2609.00065.txt:131-136; D-03 |
 | V5-R11 | `09` EX-9, BR-8, BR-1; L/v5-anthropic-tool-use-caching-20261022.md:57-63 |
+| V5-R12 | `15` PL-1, 4.1; L/v5-ls-b05-github-pull-2611.txt; L/v5-ls-f04-claude-blog-lessons-from-building-claude-code-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt (SUM-0056, SUM-0057); REQ-U28-01 |
+| V5-R13 | `15` PL-2, 4.3; L/v5-ls-b06-chatgpt-customization-memories.txt; L/v5-ls-a10-geminicli-cli-auto-memory.txt; L/v5-ls-c04-mem0-blog-mem0-the-token-efficient-memory-algorithm.txt; L/v5-ls-g01-arxiv-pdf-2605.24941.txt (SUM-0058, SUM-0059, SUM-0061); REQ-O21-03; REQ-U28-01 |
+| V5-R14 | `15` PL-3, 4.5; L/v5-ls-g07-github-github-copilot-building-an-agentic-memory-system-for.txt; L/v5-ls-g08-github-agents-copilot-memory.txt:149-155; L/v5-ls-e02-arxiv-pdf-2602.11988.txt (SUM-0060, SUM-0063); REQ-U28-01 |
+| V5-R15 | `15` PL-8, 4.5; L/v5-ls-g08-github-agents-copilot-memory.txt; L/v5-ls-f25-claude-en-memory.txt (SUM-0056, SUM-0060); REQ-U28-01 |
+| V5-R16 | `15` PL-6, 4.6; L/v5-ls-f03-claude-build-with-claude-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt; L/v5-ls-f12-google-docs-pricing.txt (SUM-0057); REQ-U28-01 |
 | D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
 | D-03 | `calc/compact_tiers.py`, `calc/compact_tiers.stdout.txt` |
 | D-04 | `calc/price_sensitivity.py`, `calc/price_sensitivity.stdout.txt`; `11` |
