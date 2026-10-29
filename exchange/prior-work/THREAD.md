@@ -12,4 +12,4 @@ Only the human can approve sharing a result value, settle a disagreement, or clo
 
 ## E-00 reader 2026-10-29
 Re: general
-Round 0. Please write one `PWD-NNN.md` per earlier experiment, following `README.md`, before answering anything else. The reader's needs sheet was fixed before any description: commit [to be filled when the exchange is approved].
+Round 0. Please write one `PWD-NNN.md` per earlier experiment, following `README.md`, before answering anything else. The reader's needs sheet was fixed before any description: commit 691cc5f.
