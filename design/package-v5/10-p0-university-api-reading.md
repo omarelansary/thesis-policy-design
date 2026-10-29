@@ -103,4 +103,25 @@ Cached tokens (of the prompt) per variant; the number of tokens rewritten is the
 - **What it means for V5 [I].** V5-R02 (never change the tools array in a session) is now supported on two models by controlled variants, with the cost of a change equal to everything after it. Where the tools sit in the prompt differs by model, so the safe rule does not depend on the layout: keep the system text and tools identical and put everything that changes (seeds, discoveries, memory) at the end, as V5-R06 already does.
 
 ## 10. What the three probes still do not show
-No prices; no accuracy; one prompt shape; single runs. gpt-oss-120b's cache behaviour is unexplained. The lifetime needs a gap-run mode result (the third probe's `--mode lifetime`, not yet run). Whether `cached_tokens` is billed at a lower price on this service is not stated.
+No prices; no accuracy; one prompt shape; single runs. gpt-oss-120b's cache behaviour is unexplained. The lifetime needs a gap-run mode result (the third probe's `--mode lifetime`; run 2026-10-28, section 11). Whether `cached_tokens` is billed at a lower price on this service is not stated.
+
+## 11. Lifetime ladder (run by the human 2026-10-28 18:22 UTC to 2026-10-29 02:21 UTC)
+Files (UTF-8 JSON lines, one base request per round with no marker, no key material): `inputs/p0-api-lifetime.jsonl` (gpt-oss-120b, SHA-256 `be8b1958d0d5b866296d98464f205b1d0efc8c33093be9edf857d9812e95326e`), `inputs/p0-api-minmax-lifetime.jsonl` (MiniMax-M3, `afbea393441d8ce2b3c2c0bb87aab5ab22bb3d3b44547ed5f05602885b235d0a`), `inputs/p0-api-glm-lifetime.jsonl` (GLM-5.3, `44f81df656deaf9b9241f3e527b79f1f7fbb92645e5bbb9f4c0fdd01b1af1c51`). The first two rounds were run by hand (18:22 and 18:33 UTC); the rest by `tools/p0_lifetime_ladder.py`, started by the human at about 18:50 UTC, each gap measured from the previous round because a warm read may renew the cache. **Caveat stated by the human before the results:** the script started about 17 minutes after the last manual round, so the first real gap is about 48 minutes, not the planned 30; every gap below is read from the files' timestamps, never from the planned values. The 30-minute point was therefore not measured; it carries little information because the 48-minute point is warm on all three models.
+
+Cached tokens of the base prompt per round; the gap is the time since the previous round of the same model [O]:
+
+| Round (UTC) | Gap | gpt-oss-120b (of 4,479) | MiniMax-M3 (of 5,359) | GLM-5.3 (of 5,027) |
+|---|---|---|---|---|
+| 28 Oct 18:22 | first | 80 (cold, written) | 0 (cold, written) | not run |
+| 28 Oct 18:33 | 11 min | 4,464 warm | 5,120 warm | 0 (cold, written) |
+| 28 Oct 19:21 | 48 min | 4,464 warm | 5,120 warm | 4,928 warm |
+| 28 Oct 20:21 | 60 min | 4,464 warm | 5,120 warm | 4,928 warm |
+| 28 Oct 22:21 | 120 min | 4,464 warm | 5,120 warm | 4,928 warm |
+| 29 Oct 02:21 | 240 min | **48 (cold)** | 5,120 warm | 4,928 warm |
+
+- **Brackets [O, single ladder, assuming nobody else sent the same prefix in between].** gpt-oss-120b: survives 2 hours, gone after 4 hours, so between 2 and 4 hours. MiniMax-M3: survives 4 hours; on 2026-10-27 it was gone after about 5 hours (section 9), so between about 4 and 5 hours if the lifetime is fixed. GLM-5.3: survives 4 hours, and survived about 5.5 hours on 2026-10-27, so at least 4 hours (over 5.5 hours once).
+- **No conflict with the earlier observations [O].** Every point agrees with sections 7 and 9 (warm at about 75 minutes everywhere; cold at about 5 hours on gpt-oss-120b and MiniMax-M3; warm at 5.5 hours on GLM-5.3); the ladder narrows them.
+- **The cold counts are multiples of 16 (48, 64, 80) [O]**, which fits a cache that stores full blocks of 16 tokens, as vLLM does by default (`13`, WD-050), with only a short common start of the chat template left from other traffic [I].
+- **Clock or memory pressure [U].** Whether entries expire after a fixed time or are evicted when the server's cache memory fills is not stated for this service. If eviction follows load, the brackets hold for the load of these hours (the 240-minute gap ran from 23:21 to 03:21 Berlin time, a quiet period [S]) and may be shorter during the day.
+- **What it means for V5 [I].** A returning user within about 2 hours met a warm cache on all three models; after about 4 hours it depends on the model (cold on gpt-oss-120b). For the end-to-end study's session-pattern axis (`05` section 3, REQ-U21-10) this gives concrete gaps: returns within 1-2 hours (expected warm) and after 5-6 hours or the next day (expected cold on at least two models). For D-05 Part 2 the bracket is now 2 hours (all three warm) to 4-5 hours (model-dependent). Nothing in V5 changes: the policy does not assume a lifetime, and the loop logs the cached-token counter per request (V5-R12), so warm or cold starts are read, not predicted.
+- **Not shown.** One ladder per model; one prompt shape and size; no repeat at other times of day; no price for cached tokens on this service.

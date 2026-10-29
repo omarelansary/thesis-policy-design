@@ -24,10 +24,14 @@ Part 1c. Explicit cache priced per hour: longest gap over which holding is cheap
   Reading: holding a cache pays only for short gaps: about 1.35 h (3.8 Flash, 2026 price) and about 16 minutes (2.5 Flash).
   Prices per token-hour make storage, not the gap distribution alone, decide; these are list prices of one provider.
 
-Part 2. University route: no paid retention; observed lifetime brackets (single runs, `10` section 9)
-  warm at ~75 min (all three models); cold at ~5 h on gpt-oss-120b and MiniMax-M3; warm at >5.5 h on GLM-5.3.
-  A returning session within ~75 min may start warm; after ~5 h it starts cold on two of three models. Narrower
-  brackets need the probe's lifetime mode (`p0_api_probe_v3.py --mode lifetime`, not yet run).
+Part 2. University route: no paid retention; observed lifetime brackets (single runs, `10` sections 9 and 11)
+  model           warm up to  cold at   bracket
+  gpt-oss-120b           2 h      4 h   2-4 h
+  MiniMax-M3             4 h     ~5 h   ~4-5 h
+  GLM-5.3             ~5.5 h        -   at least 4 h (5.5 h once)
+  Reading: a returning session within about 2 hours may start warm on all three models; after about 4 hours it
+  depends on the model. Whether eviction follows a clock or the server's load is not known; the loop reads warm or
+  cold starts from the cached-token counter (V5-R12) instead of predicting them.
 
 Part 3. Cost of the memory write and of carrying the memory block, against one avoided client-side search
       r     S     C_W  search  C_W/search   C_M(T) for B = 500, w = 1.25: T=3 / 10 / 30
