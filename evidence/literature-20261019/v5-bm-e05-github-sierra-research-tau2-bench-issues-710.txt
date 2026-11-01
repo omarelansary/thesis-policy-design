@@ -1,0 +1,101 @@
+
+
+  [Bug] Text runs on 2.0: the default English caller persona makes gpt-oss-120b (as user simulator) write several turns in one message · Issue #710 · sierra-research/tau2-bench · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+[Bug] Text runs on 2.0: the default English caller persona makes gpt-oss-120b (as user simulator) write several turns in one message #710
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+[Bug] Text runs on 2.0: the default English caller persona makes gpt-oss-120b (as user simulator) write several turns in one message#710
+
+Copy link
+
+Description
+
+nilay007hckkr
+opened on Oct 31, 2026
+
+Issue body actions
+
+What happens
+
+On 2.0 (7aad81c), a plain text run (tau2 run --domain retail ..., no persona flag) gives the user simulator the English pack's caller persona from data/tau2/multilingual/en/pack.yaml (DEFAULT_LANGUAGE = "en"): a gender line plus attitude clauses such as "Short punchy sentences are natural to this variety..." and "When you open and get right to it, natural forms are 'Yeah, hi, so here's the problem'...". With groq/openai/gpt-oss-120b as the user simulator (temperature 0, default reasoning effort), the user often writes several turns in one message, sometimes including the agent's lines, and often ends it with ###STOP###. Example, the first user message of retail task 9:
+
+Yeah, hi. I need to exchange two things. The water bottle—want a bigger size. And the desk lamp—need a brighter one, preferably with an AC adapter.My order number is 8020‑MEI‑2023.Can you confirm the exchange?Actually, never mind the bottle. Just the desk lamp—brighter, AC adapter if possible. No water bottle exchange.###STOP###
+
+The sentences are joined without a space, which looks like several separate messages joined into one.
+
+Evidence
+
+Replaying task 9's first user turn with the exact logged request (--verbose-logs): broken in 2 of 4 calls with the persona, 0 of 3 with only the ## Persona Guidelines section removed.
+
+Same pattern on the tau-multilingual branch (8ff48b8) with the English pack persona lisa_en_v1: 6 of 8 first turns broken. At a failing later turn, 0 of 8 without the persona block (vs 5 of 8 with it); keeping only the persona's first (language-profile) clause reduced the rate but did not remove it.
+
+In a two-simulator run on 2.0 that is still in progress (with and without fix(user): text simulator waits for an agreed action to be completed #702), the first two retail test tasks gave merged turns in 5 of 12 gpt-oss-120b runs (###STOP### in the very first message in 2 of them), and 0 of 12 with qwen3.8-27b. The same tasks never merged on 1.0.1 (4ce7c03), where the text prompt has no persona.
+
+Why it matters
+
+A merged message often ends the call before the agent can act, so these runs fail because of the simulator, and how often that happens depends on which model plays the user. That affects comparisons across user simulators, and it overlaps with what #702 is trying to fix.
+
+Possible directions (happy to help test any of them)
+
+A way to run text mode without the default caller persona, or with only its gender and language-profile lines.
+
+Keeping the attitude clauses out of the English text prompt.
+
+The check I use to find merged turns is cheap: a sentence end glued to the next sentence (e.g. handy.Okay) or text after ###STOP### (merged_turn_cue in https://github.com/nilay007hckkr/whose-noise, src/whose_noise/fidelity.py). Details are in that repo's docs/RESULTS_LOG.md (entries of 2026-10-26 and 2026-10-31).
+
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

@@ -1,0 +1,2065 @@
+
+
+MCPEvol-Bench: Benchmarking LLM Agent Performance Across Dynamic Evolutions of MCP Servers
+
+Skip to main content
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    Why HTML?
+
+      Report Issue
+
+      Back to Abstract
+
+      Download PDF
+
+      Contents
+
+      Reading mode
+
+      Colour theme
+
+    License: CC BY 4.0
+
+arXiv:2607.14642v1 [cs.AI] 16 Jul 2026
+
+MCPEvol-Bench: Benchmarking LLM Agent Performance Across Dynamic Evolutions of MCP Servers
+
+Huanxi Liu
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Kun Hu
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Jiaqi Liao
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Qiang Wang
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Pengfei Qian
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+YuanZhao Zhai
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Dawei Feng
+††thanks: Correspondence to: dafeng@nudt.edu.cn
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Bo Ding
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Huaimin Wang
+
+Affiliation:  College of Computer Science and Technology, National University of Defense Technology
+
+Affiliation:  State Key Laboratory of Complex & Critical Software Environment
+
+Affiliation:  National Key Laboratory of Parallel and Distributed Computing
+
+Abstract
+
+As Model Context Protocol (MCP) servers emerge as the core infrastructure for connecting LLMs with external tools, existing benchmarks leverage real-world MCP servers to evaluate LLM agents’ tool-using capabilities.
+However, these benchmarks overlook the continuous evolution of tool interfaces and functionalities within MCP servers, resulting in flawed assessments that fail to capture the agent’s adaptability in changing tool landscapes.
+To bridge this gap, we introduce MCPEvol-Bench, a novel benchmark for evaluating the task-solving capabilities of LLM agents under dynamic toolset evolution.
+Inspired by large-scale empirical study, we propose 11 mutation operators to simulate realistic tool evolution within 123 MCP servers.
+We benchmark 12 state-of-the-art LLMs on multiple versions of MCP servers, revealing that even frontier models struggle to adapt to evolving tools.
+For instance, GPT-5.4 and Claude-Sonnet-4-6 exhibit performance declines of 13.7% and 14.4% in evolved MCP servers, respectively, accompanied by substantial increases in planning and reasoning errors.
+These findings highlight the vulnerability of LLM-driven workflows, establishing MCPEvol-Bench as a standard for evaluating agent adaptability in dynamic tool environments.
+
+1 Introduction
+
+Recent advances in large language models (LLMs) have inspired widespread efforts to develop tool-using agents capable of comprehending natural language instructions, planning multi-step workflows, and interacting with external tools to solve complex tasks Wang et al. (2024); Qu et al. (2025); Plaat et al. (2025).
+These agents have been widely adopted in various real-world domains, such as software development Wang et al. (2025a), system automation Wu et al. (2025), and scientific research Tang et al. (2025), where LLM agents address user tasks by chaining multiple tools and orchestrating interdependent operations.
+
+Despite significant progress, existing benchmarks for evaluating LLM agents’ tool-using capabilities remain fundamentally limited.
+Early efforts Qin et al. (2024); Tang et al. (2023); Haiyang et al. (2025) provided unstable evaluations by assessing agents through interactions with real-world APIs, which suffered from frequent endpoint changes and service deprecations Guo et al. (2024).
+Recently, the Model Context Protocol (MCP) Anthropic (2024) has emerged as a unified standard for connecting LLMs with external tools, leveraging dynamic server discovery to overcome the inflexibility of prior API-based integration.
+However, as summarized in Table 1, current MCP-based benchmarks overlook the continuous evolution of tool interfaces and functionalities within MCP servers.
+Consequently, these benchmarks cannot accurately evaluate the adaptability of LLM agents in preserving the integrity of original workflow under real-world tool changes.
+
+Figure 1: 
+The framework of MCPEvol-Bench.
+(A) Empirical Study of MCP Server Evolution: Validates the prevalence of evolution and identifies predominant evolution patterns.
+(B) LLM-Driven MCP Server Evolution: Simulates developer behavior to adaptively select mutation operators for source code modification, generating evolved toolsets.
+(C) MCP Agent Evolution Evaluation: Assesses the task performance of LLM agents across multiple versions of MCP servers.
+
+Table 1: Comparison of representative tool-using benchmarks.
+
+Benchmark
+# Domain
+# Tool/API
+
+MCP Ecosystem
+
+Real-World
+
+Toolset
+
+Multi-Tool
+
+Collaboration
+
+Dynamic
+
+Evolution
+
+ToolBench Qin et al. (2024)
+19
+3451
+×{\color[rgb]{1,0,0}\times}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+
+SHORTCUTSBENCH Haiyang et al. (2025)
+50
+426
+×{\color[rgb]{1,0,0}\times}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+
+APIGen Liu et al. (2024b)
+49
+3673
+×{\color[rgb]{1,0,0}\times}
+×{\color[rgb]{1,0,0}\times}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+
+MCP-Flow Wang et al. (2025b)
+10
+11536
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+×{\color[rgb]{1,0,0}\times}
+
+MCPEval Liu et al. (2025b)
+5
+19
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+
+MCP-Bench Wang et al. (2025c)
+28
+250
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+×{\color[rgb]{1,0,0}\times}
+
+MCPEvol-Bench (Ours)
+9
+1272
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+✓{\color[rgb]{0,0.6,0}\checkmark}
+
+To bridge this gap, we introduce MCPEvol-Bench, a novel benchmark for evaluating the task-solving capabilities of LLM agents under dynamic toolset evolution, as illustrated in Figure 1.
+We first conduct a comprehensive empirical study of MCP servers by analyzing temporal changes in remotely hosted servers and version histories of public code repositories.
+This study reveals the prevalence and patterns of MCP server evolution, with 20.7% of remote servers unavailable and 54.6% of tools in repository deleted or replaced.
+From the collected repositories, we curate 123 MCP servers with 1,272 tools across diverse domains (e.g., software development, data analytics), and automatically generate cross-server tasks via an LLM-based pipeline.
+While historical versions of MCP servers provide rich evolution data, frequent failures due to broken dependencies make them unsuitable for benchmarking.
+To address this, we extract 11 mutation operators covering the Tool, Parameter, and Description levels from observed evolution patterns.
+Leveraging these operators as prompt instructions, we implement LLM-Driven MCP Server Evolution, where LLMs automatically select appropriate modifications and iteratively modify tools, thereby generating a series of evolved MCP servers.
+Finally, in MCP Agent Evolution Evaluation, LLM agents execute tasks across multiple versions of MCP servers, measuring their task performance under dynamic toolset evolution.
+
+In this research, we evaluate 12 representative LLMs on the benchmark, revealing that most widely used frontier models exhibit significant performance degradation on the evolved MCP servers. Notably, GPT-5.4 and Claude-Sonnet-4-6 suffer 13.7% and 14.4% drops in task fulfillment, respectively.
+Analysis of agent trajectories shows that evolution primarily increases planning errors by 34.1% and reasoning errors by 35.6%.
+By analyzing mutation operators, we find that the evolution involving tool additions or modifications severely impair agent performance, whereas removing redundant tools or parameters has negligible effect on original workflow execution.
+The reliability of our benchmark is validated by the high semantic similarity between simulated evolutions and real-world version updates, along with the strong agreement with human experts in evaluations.
+Further experiments demonstrate that incorporating reflection, planning and memory modules enhances the adaptability of LLM agent systems, which highlights the critical role of cognitive components in evolving scenarios.
+
+Our contributions can be summarized as follows:
+
+• 
+
+We conduct a large-scale empirical study that validates the prevalence of MCP server evolution and uncovers its dominant patterns.
+Inspired by these patterns, we propose 11 mutation operators that empower LLMs to autonomously and iteratively perform precise MCP server evolution.
+
+• 
+
+We introduce MCPEvol-Bench, a novel benchmark comprising 123 multi-version MCP servers, which evaluates the task-solving capabilities of LLM agents under dynamic toolset evolution.
+
+• 
+
+Our extensive evaluation of 12 state-of-the-art LLMs across 201 challenging tasks reveals persistent weaknesses in dynamically evolving tool-using scenarios, highlighting the necessity of cognitive components to enhance LLM agent adaptability.
+
+Table 2: An example from MCPEvol-BENCH, comparing original and evolved server configurations.
+
+Task
+
+Original Servers & Tools
+
+Evolved Servers & Tools
+
+I need to plan a business trip from Beijing to Shanghai for next Wednesday. 
+
+Please check the availability of high-speed train tickets in the morning, and then add them to my travel planning list in work.md.
+
+Servers: mcp-tasks, 12306-mcp 
+
+Tools:
+
+• 
+
+tasks_setup …
+
+• 
+
+tasks_add …
+
+• 
+
+get-current-date …
+
+• 
+
+get-station-code-of-citys …
+
+• 
+
+get-tickets: {“fromStation”: the name or the station_code of the departure location; …}
+
+• 
+
+......
+
+Servers: mcp-tasks, 12306-mcp 
+
+Tools:
+
+• 
+
+tasks_setup (unchanged);
+
+• 
+
+tasks_add (unchanged);
+
+• 
+
+get-current-date (unchanged);
+
+• 
+
+get-station-code-of-citys (unchanged);
+
+• 
+
+get-tickets (changed): {“fromStation”: the name or the station_code, which can be queried by the get-station-code-of-citys… , “minPrice”(new): … };
+
+• 
+
+......
+
+2 Related Work
+
+2.1 Tool-Use Benchmarks
+
+Integrating LLMs with external tools has emerged as a critical research direction for extending model capabilities beyond parametric knowledge.
+Early tool-use benchmarks, such as APIGEN Liu et al. (2024b) and ToolACE Liu et al. (2025a), address API data scarcity through automated synthesis, while ToolBench Qin et al. (2024) and SHORTCUTSBENCH Haiyang et al. (2025) aggregate numerous APIs from the web to enhance evaluation realism.
+However, real-world APIs are prone to frequent endpoint modifications and service deprecations, compromising evaluation stability Guo et al. (2024).
+The emergence of the MCP provides a standardized invocation schema and stable service interfaces for building toolsets, facilitating the development of recent benchmarks like MCP-Bench Wang et al. (2025c), MCPEval Liu et al. (2025b), and MCP-Flow Wang et al. (2025b).
+Despite this progress, existing MCP-based benchmarks assume a static tool environment, overlooking the dynamic nature of MCP servers, which undergo continuous evolution through version iterations.
+This limitation necessitates tool-use benchmarks that evaluate model performance under evolving server states.
+
+2.2 Evaluating LLM Agent Capability
+
+LLM agents are autonomous systems that leverage LLMs as their cognition core for decision-making, engaging in multi-turn tool interactions with external environments to accomplish complex user tasks Wang et al. (2024).
+Existing evaluations typically target distinct agent capabilities: MCP-Bench Wang et al. (2025c) assesses the handling of ambiguous instructions, ToolBench Qin et al. (2024) focuses on multi-step reasoning, and BFCL v4 Patil et al. (2025) evaluates proficiency in multi-turn interactions.
+To assess domain-specific abilities, representative benchmarks such as WebArena Zhou et al. (2024), SWE-bench Jimenez et al. (2024), and OSWorld Xie et al. (2024) evaluate agent performance in web navigation, software development, and operating system environments, respectively. However, these benchmarks operate in static environments, contrasting sharply with the dynamic and evolving nature of real-world settings.
+This discrepancy creates a critical gap in evaluating the adaptability of LLM agents to continuous environmental changes.
+
+3 Empirical Study of MCP Server Evolution 
+
+To validate the existence of real-world MCP server evolution and characterize its dynamics, we conducted a large-scale empirical study from two dimensions: the temporal dynamics of remotely deployed servers and the evolutionary history of publicly released versions.
+
+3.1 MCP Server Collection
+
+Our data acquisition process comprises two parallel streams: remote server monitoring and released repository collection.
+For remote services, we used Smithery Pajo (2025), a mainstream MCP server hosting platform as our data source. We used functional keywords such as “browser-automation” to identify 1,869 repositories hosting remotely accessible MCP servers. Each service endpoint was subjected to continuous availability monitoring for three months, with weekly testing intervals.
+For code repositories, we aggregated server names from Smithery, GitHub GitHub, Inc. (2026), and ModelScope Alibaba Group (2026) and traced their publication histories via the NPM package manager npm, Inc. (2026).
+After validation through actual deployment, we curated a dataset of 515 independent MCP servers, containing 9,273 historical versions with 6,436 distinct tools. Detailed collection process is provided in Appendix E.1.
+
+3.2 Analysis of MCP Server Evolution
+
+Remote Service Availability Decay. Figure 3 illustrates the validity of remote MCP servers decreased significantly from 72.7% (week 1) to 52.0% (week 12) over three months.
+This decline is primarily driven by Bad Request (18.9%) and Internal Server Error (16.7%), both attributable to deployment failures arising from compatibility conflicts in the evolution process.
+
+Growth of Toolset Complexity. Following the release sequence, we analyzed the evolution trends of MCP servers in terms of average tool count, parameter count, and description length. As shown in Figure 9, all three metrics exhibit an overall upward trend across version iterations, showing an expansion in toolset scale and increasing structural complexity.
+Additionally, we find that 54.6% of the initial tools were either modified (32.5%) or deprecated (22.1%) in the latest versions, reflecting the intense evolutionary activity of MCP servers.
+
+Figure 2: Availability of remote MCP servers.
+
+Figure 3: The distribution of evolution patterns.
+
+Analysis of Evolution Patterns.
+We analyzed tool evolution across version iterations in NPM-published MCP servers and along the temporal timeline in Smithery-deployed servers.
+Figure 3 presents the distribution of these evolution patterns, with types such as P1 (TOOL-DESC_CHANGE) for tool description modifications and P2 (TOOL-ADD) for new tool additions; full definition of these patterns are available in Appendix E.3.
+We observe two main characteristics: 1) Consistency, where the top six patterns (P1–P6) are identical across both data sources, suggesting that these evolution patterns are platform-independent and accurately reflect the prevailing evolution dynamics; and 2) Divergence, where Smithery-deployed servers prefer parameter-level adjustments (P3, P4), in contrast to the tool-level modifications (P1, P2) dominant in NPM repositories. This divergence likely stems from minimizing tool-level changes to ensure remote service continuity.
+
+In summary, our findings reveal the current landscape of MCP server evolution and also highlight the critical need for benchmarks that evaluate LLM agents’ adaptability in evolving environments.
+
+4 MCPEvol-Bench Formalization
+
+The agent task with environment feedback is formalized as a Partially Observable Markov Decision Process (POMDP). Each task in our benchmark is defined by a POMDP tuple (𝒰,𝒮,𝒜,𝒪,T,R,Σ)(\mathcal{U},\mathcal{S},\mathcal{A},\mathcal{O},T,R,\Sigma), where: 𝒰\mathcal{U} denotes the task instruction space; 𝒮\mathcal{S} is the state space; 𝒜\mathcal{A} is the action space including both reasoning content and tool invocations; 𝒪\mathcal{O} is the observation space containing tool execution results and internal signals; T:𝒮×𝒜→𝒮×𝒪T:\mathcal{S}\times\mathcal{A}\rightarrow\mathcal{S}\times\mathcal{O} is the state transition function; R:𝒮→[0,1]R:\mathcal{S}\rightarrow[0,1] is the reward function; Σ={v1,v2,…,vn}\Sigma=\{v_{1},v_{2},\dots,v_{n}\} is the set of available MCP servers.
+Unlike most benchmarks Wang et al. (2025c); Mo et al. (2025); Liu et al. (2025b) that rely on dynamic tool retrieval, we maintain fixed MCP server selection for each task to isolate and evaluate the impact of server evolution on agent workflows.
+Each server vi∈Σv_{i}\in\Sigma exposes a set of tools 𝒯i\mathcal{T}_{i}, defining the complete toolset 𝒯=⋃i=1n𝒯i\mathcal{T}=\bigcup_{i=1}^{n}\mathcal{T}_{i}. A structured tool invocation is written as atool=⟨vi,tool_name,parameters⟩a_{\text{tool}}=\langle v_{i},\texttt{tool\_name},\texttt{parameters}\rangle. The full action space is 𝒜=𝒜reasoning∪𝒜tools\mathcal{A}=\mathcal{A}_{\text{reasoning}}\cup\mathcal{A}_{\text{tools}}, and the observation space is 𝒪=𝒪tools∪𝒪state\mathcal{O}=\mathcal{O}_{\text{tools}}\cup\mathcal{O}_{\text{state}}.
+
+Algorithm 1  Multi-turn Tool Invocation and Observation
+
+            1:
+
+          Task instruction uu, maximum steps TmaxT_{\text{max}}, MCP server cluster Σ\Sigma
+
+            2:
+
+          Final answer answer, execution trajectory trajectory
+
+            3:
+
+          function MULTITURNEXECUTE(u,Tmax,Σu,T_{\text{max}},\Sigma)
+
+            4:
+
+            trajectory←{}\texttt{trajectory}\leftarrow\{\}, s0←Update​(u,Φ⁡(Σ))s_{0}\leftarrow\textsc{Update}(u,\Phi(\Sigma)) ⊳\triangleright Initialize initial trajectory and state
+
+            5:
+
+            for t=0t=0 to TmaxT_{\text{max}} do
+
+            6:
+
+             (continuet,at)←π​(st)(\texttt{continue}_{t},a_{t})\leftarrow\pi_{\text{}}(s_{t}) ⊳\triangleright Generate current tool invocation
+
+            7:
+
+             if continuet=False\texttt{continue}_{t}=\texttt{False} then
+
+            8:
+
+               answer←at\texttt{answer}\leftarrow a_{t} ⊳\triangleright Obtain the final answer from agent
+
+            9:
+
+               break ⊳\triangleright Stop if agent signals termination
+
+            10:
+
+             end if
+
+            11:
+
+             ot←Σ⁡(at)o_{t}\leftarrow\Sigma(a_{t}) ⊳\triangleright Execute tools in MCP servers
+
+            12:
+
+             trajectory←trajectory∪{(at,ot)}\texttt{trajectory}\leftarrow\texttt{trajectory}\cup\{(a_{t},o_{t})\} ⊳\triangleright Log tool invocation and observation
+
+            13:
+
+             st+1←Update​(st,ot)s_{t+1}\leftarrow\textsc{Update}(s_{t},o_{t}) ⊳\triangleright Update agent internal state
+
+            14:
+
+            end for
+
+            15:
+
+            return (answer,trajectory)(\texttt{answer},\texttt{trajectory})
+
+            16:
+
+          end function
+
+For the workflow of the agent, we adopt a multi-round decision process Yao et al. (2023), as detailed in Algorithm 1.
+The agent initializes its execution trajectory and initial state s0s_{0} with a server description function Φ:Σ→𝒟\Phi:\Sigma\rightarrow\mathcal{D}. The description space 𝒟\mathcal{D} includes essential metadata such as tool input schemas and semantic descriptions.
+At each step tt, the agent’s policy π\pi generates an action ata_{t} that integrates reasoning with multiple tool calls, based on the current state sts_{t} (Line 4).
+Upon detecting a completion signal in ata_{t}, the termination signal continuet\texttt{continue}_{t} is set False, and the reasoning content ata_{t} is returned as the final answer (Lines 5-8).
+Otherwise, the MCP server cluster Σ\Sigma executes the action ata_{t} to obtain the tool output as observation oto_{t} (Line 9).
+This observation is logged into trajectory, and the agent state sts_{t} is updated accordingly (Lines 10-11). The loop continues TmaxT_{\text{max}} is reached or the task is completed. Finally, the full execution trajectory and answer are returned for evaluation. The prompt used for the agent execution can be found in Appendix H.3.
+
+5 MCPEvol-Bench Construction
+
+We present MCPEvol-Bench, a benchmark designed to evaluate the task-solving capabilities of LLM agents under dynamic toolset evolution, as illustrate in Figure 1.
+In this section, we first detail our task construction process.
+Then, we describe how LLMs simulate human developers modifying and updating MCP toolsets.
+Finally, through multi-round iterative evolution, we generate multi-version MCP servers, thereby establishing a realistic and dynamic environment for evaluating LLM agents.
+
+5.1 Task Synthesis.
+
+MCP Servers. The majority of MCP servers rely on proprietary API keys or third-party integrations, hindering plug-and-play deployment. To address this, we filtered our empirically collected MCP servers with an LLM-assisted process to exclude key-dependent instances.
+Besides accessibility, we ensure the toolset’s representativeness through structured curation and expert annotation.
+The resulting collection comprises 123 MCP servers providing 1,272 tools and is taxonomically organized into nine functional categories: Knowledge (13.8%), Research (7.3%), Software Development (19.5%), UI Design (6.5%), Media & Documentation (16.3%), Data & Analytics (8.1%), Business & Commerce (10.6%), AI & Machine Learning (14.6%), Cloud & Infrastructure (3.3%). To ensure reproducibility, we bundled the MCP servers into an NPM package, thereby providing a stable tooling environment.
+
+Task Instructions. Constructing high-quality benchmarks for tool-using agents requires transforming real-world MCP servers into realistic and solvable tasks. To this end, we propose an automated task synthesis pipeline.
+First, we employed random sampling to select 2–5 MCP servers from the same category, simulating cross-server scenarios.
+Based on these servers, the LLM generated initial task instructions requiring multi-tool collaboration, without explicitly specifying the required servers and tools.
+Following the methodology of MCP-Bench Wang et al. (2025c), each task underwent a rigorous two-dimensional quality assessment: 1) Solvability, which evaluates whether the task can be successfully completed using the available tools; and 2) Practical Utility, which determines whether the task addresses genuine user needs rather than contrived scenarios.
+Tasks failing to meet strict thresholds (Solvability ≥\geq 9.0/10; Utility ≥\geq 6.0/10) were discarded.
+Finally, the remaining tasks were validated through LLM agent rollouts, where execution trajectories were assessed via both LLM judging and human review. Leveraging DeepSeek-Chat Liu et al. (2024a) as the task synthesis LLM, we constructed a final dataset of 201 high-quality tasks. On average, each sample involves 25.90 distinct tools within its task context, necessitating 4.37 tool invocations and the utilization of 3.76 servers for successful task completion. The prompt used for task synthesis can be found in Appendix H.2. Table 2 presents an example of a synthesized task and its associated MCP servers.
+
+Figure 4: 
+The 11 evolution mutation operators are categorized into “TOOL”, “PARAM”, and “DESC” levels. These operators have a blue background, with associated evolution patterns (Figure 3) in gray.
+Arrows denote a hierarchical relationship, where higher-level mutations encompass lower-level ones.
+
+5.2 MCP Server Evolution
+
+Evolution Mutation Operators.
+Figure 4 presents the 11 MCP server evolution operators derived from our empirical study, organized into three hierarchical levels: TOOL (tool), PARAM (parameter), and DESC (description). These operators are encapsulated as specialized prompts to guide LLMs in performing precise source code modifications for MCP tools.
+The evolution targets for each level are detailed below:
+1) “TOOL”: This level includes four operators, namely Tool Addition, Tool Replacement, Tool Deletion, and Tool Integration. These operators implement functional changes by adding, removing, or substituting tools, and by simultaneously coordinating the functional logic of existing tools to ensure consistency.
+2) “PARAM”: Comprising Flexible Expansion, Constraint Mutation, Parameter Pruning, and Interface Refactoring, these operators optimize parameter structures, constraints, data types, and required attributes, while preserving the core functionality of tools.
+3) “DESC”: three operators function at this level, which are Tool Description Update, Parameter Description Update, and Joint Description Update. They serve to refine natural language descriptions, eliminating ambiguity and clarifying functional boundaries to ensure efficient agent invocation.
+The numerical labels (e.g., P1, P2) within each operator correspond to the evolution patterns identified in our empirical study (Figure 3).
+Collectively, these operators cover all identified evolution patterns and can be composed to model more complex evolutionary scenarios, thereby showing the completeness of our approach.
+Definitions and prompts of operators are detailed in the Appendix F.3 and H.1.
+
+Figure 5: An example of LLM-Driven MCP Server Evolution.
+
+LLM-Driven Mutation Mechanism.
+Real-world legacy MCP servers often quickly become non-functional due to invalid URLs and breaking changes in external dependencies or runtime environments. To address this, we propose an LLM-driven evolution mechanism that simulate realistic MCP server evolution by directly modifying source code repositories.
+This mechanism follows a structured workflow, starting with Abstract Syntax Tree (AST)-based code anchoring (Appendix F.2), which utilizes the registration syntax (server.tool) to extract snippets of tool definitions and implementations, effectively filtering out irrelevant contextual noise.
+Based on these anchored segments, an LLM (Claude-Opus-4-5) autonomously selects appropriate mutation operators and mutates the source code, preserving backward compatibility and original functionality.
+Upon passing syntax checks, the mutated code repository is deployed as an MCP server for Functional Integrity Validation. In this phase, an LLM (DeepSeek-Chat) generates multiple test cases to perform comprehensive coverage testing on the mutated tools, validating their compliance with the mutation requirements and ensuring functional correctness.
+This evolution process can be iterated over multiple rounds, with a single mutation operator applied per round, ultimately generating multi-version MCP servers.
+
+Figure 5 illustrates this process, where the LLM applies Operator 5 (O5) to augment the get-tickets tool with minPrice and maxPrice parameters. This enhancement enables users to filter results by fare range and is subsequently verified through multi-case validation.
+
+6 Experiments
+
+6.1 Experimental Setup
+
+Benchmark Configurations. To evaluate LLM agents’ task-solving capabilities under tool evolution, MCPEvol-Bench pairs each task with three MCP server configurations representing different evolution stages: Early Stage (original, non-evolved server), Middle Stage (evolved for 3 rounds), and Late Stage (evolved for 5 rounds).
+Prior studies Qin et al. (2024); Mo et al. (2025) show that the primary source for agent failures is retrieving wrong task-required tools.
+To analyze the impact of server evolution, we bypass the dynamic retrieval process and employ a set of fixed candidate MCP servers to support task completion.
+
+Evaluated Models. We evaluated 12 representative LLMs, including commercial models GPT-5.4 OpenAI (2026a), GPT-5.1 OpenAI (2026b), GPT-4o Achiam et al. (2023), Claude-Opus-4-6 Anthropic (2026a), Claude-Sonnet-4-6 Anthropic (2026c), and Gemini-2.5-Pro Comanici et al. (2025); long-reasoning models o3 OpenAI (2026c) and Claude-Sonnet-4-5-thinking Anthropic (2026b); as well as open-source models Llama-3.3-70B AI@Meta (2024), Gemma-4-31B-it Google DeepMind (2026), Qwen3.5-27B, and Qwen3.5-9BQwen Team (2026).
+
+Evaluation Method and Metrics.
+We adopt the evaluation framework of MCP-Bench Wang et al. (2025c), leveraging the robustness of rubric-based LLM judges Tan et al. (2025); Wang et al. (2025d); Wang et al. (2025c).
+LLM agents are assessed on a 1–10 scale with two dimensions: Task Fulfillment and Planning Effectiveness.
+Evaluations are grounded solely in observable evidence from the task instruction, final answer, and execution trajectory. By default, the judge model used here is DeepSeek-Chat Liu et al. (2024a).
+To further evaluate the model’s adaptability, we propose the Evolutionary Competency Score (ECS), which explicitly integrates performance with cross-version stability.
+Specifically, for each task u∈𝒰u\in\mathcal{U}, let {Su,iTF}i=1N\{S_{u,i}^{\text{TF}}\}_{i=1}^{N} be the Task Fulfillment scores at ii-th version. The ECS is defined as:
+
+ECS=1|𝒰|​∑u∈𝒰(μ⁡({Su,iTF}i=1N)−σ⁡({Su,iTF}i=1N))\text{ECS}=\frac{1}{|\mathcal{U}|}\sum_{u\in\mathcal{U}}\left(\mu(\{S_{u,i}^{\text{TF}}\}_{i=1}^{N})-\sigma(\{S_{u,i}^{\text{TF}}\}_{i=1}^{N})\right)
+
+(1)
+
+where N=3N=3, σ\sigma and μ\mu denote the standard deviation and mean, respectively.
+The effectiveness of ECS metric and other evaluation details are provided in Appendix D.1.
+
+Table 3: Performance comparison of LLM agents across three evolution stages of MCP configuration, the early stage with the original servers, the middle stage after three evolution iterations, and the late stage after five evolution iterations.
+
+Model
+Early Stage
+Middle Stage
+Late Stage
+ECS ↑\uparrow
+
+Task
+
+Fulfillment
+  ↑\Big\uparrow
+
+Planning
+
+Effectiveness
+  ↑\Big\uparrow
+
+Task
+
+Fulfillment
+  ↑\Big\uparrow
+
+Planning
+
+Effectiveness
+  ↑\Big\uparrow
+
+Task
+
+Fulfillment
+  ↑\Big\uparrow
+
+Planning
+
+Effectiveness
+  ↑\Big\uparrow
+
+Qwen3.5-9B
+3.38
+4.89
+3.21
+4.45
+3.41
+4.86
+3.20
+
+Llama-3.3-70B
+3.84
+3.56
+3.88
+3.74
+3.93
+3.94
+3.56
+
+Qwen3.5-27B
+4.46
+5.57
+4.55
+5.97
+4.13
+5.12
+3.78
+
+GPT-4o
+5.24
+2.85
+5.03
+2.74
+4.43
+2.78
+3.80
+
+Gemini-2.5-pro
+5.73
+4.62
+5.20
+4.03
+4.96
+3.71
+3.84
+
+o3
+5.79
+3.79
+5.23
+3.21
+5.07
+3.10
+4.24
+
+GPT-5.1
+6.28
+4.35
+5.94
+3.43
+5.32
+3.50
+4.32
+
+Gemma-4-31B-it
+5.05
+6.67
+5.19
+6.69
+5.16
+6.68
+4.45
+
+Claude-Sonnet-4-5-thinking
+6.40
+6.17
+6.13
+5.56
+5.72
+4.98
+4.52
+
+GPT-5.4
+7.23
+5.71
+6.74
+5.52
+6.24
+3.87
+5.20
+
+Claude-Sonnet-4-6
+7.22
+6.76
+6.61
+6.42
+6.18
+6.17
+5.22
+
+Claude-Opus-4-6
+7.15
+6.70
+6.93
+6.18
+6.77
+6.03
+6.09
+
+6.2 Main Results
+
+Table 3 reports the task performance of LLM agents across three MCP server evolution stages.
+
+The evolution of MCP servers induces substantial performance degradation and reduced execution efficiency across advanced LLMs.
+For instance, the task fulfillment scores for GPT-5.4 and Claude-Sonnet-4-6 exhibited a consistent decline from 7.23 and 7.22 in the early stage to 6.24 and 6.18 in the late stage, corresponding to degradation of 13.7% and 14.4%, respectively.
+Concurrently, the execution efficiency of LLM agents decreases universally; notably, Claude outperformed the GPT series, which suffered a sharp drop in planning effectiveness, as evidenced by the fall in GPT-5.4’s score from the initial 5.71 to 3.87.
+
+Cross-version performance stability is crucial for the reliability of LLM agents.
+Although Claude-Opus-4-6, Claude-Sonnet-4-6, and GPT-5.4 exhibited comparable scores on the original server, only Claude-Opus maintained robust workflow execution during server evolution, achieving the highest ECS of 6.09.
+In contrast, the other two models showed significant performance degradation on the evolved MCP servers.
+Similarly, while GPT-5.1 started with a higher task fulfillment score of 6.28 compared to Gemma-4-31B-it’s 5.06, Gemma exhibited superior stability throughout subsequent evolution rounds, ultimately surpassing GPT-5.1 with an ECS of 4.45 versus 4.32.
+
+Models with limited capabilities are insensitive to environmental changes.
+For instance, Qwen3.5-9B and Llama-3.3-70B exhibited consistently low task fulfillment scores (<4.0), reflecting a failure to execute expected workflows.
+The ECS metric effectively captures this by penalizing low performance despite minimal variance, clearly separating true adaptability from mere invariance.
+
+6.3 In-depth Analysis
+
+Our analysis focus on three frontier models: Claude-Opus-4-6, Claude-Sonnet-4-6, and GPT-5.4.
+
+(a) Error Distribution.
+
+(b) Evolution Operator Impact.
+
+Figure 6: Diagnostic Analysis of MCP Server Dynamic Evolution. (a) Universal increase in error types across evolution stages. (b) The impact of each evolution operator on task fulfillment metric.
+
+Impact of Evolution on Agent Behavior.
+We assessed the impact of evolution on agent behavior by analyzing the error distribution in task trajectories.
+Building upon prior work Qin et al. (2024); Barke et al. (2026); Liu et al. (2026), we identified six primary categories of failures: 1) Syntax Violation: violations of the tool-calling protocol, such as invalid parameter names or schema violations; 2) Tool Misalignment: selection of inappropriate tools that fail to align with the user’s intent or current sub-task; 3) Execution Error: provision of semantically incorrect parameter values; 4) Planning Error: errors in multi-step workflow orchestration, such as missing preconditions, infinite loops, or premature termination; 5) Reasoning Error: failure to correctly interpret or react to tool outputs; and 6) Redundancy: inefficient execution paths by repeated identical calls or unnecessary actions.
+Figure 6 (a) shows the distribution of error types on MCP servers at various stages of evolution.
+It is observed that MCP server evolution leads to increased erroneous behaviors in LLM agents.
+Specifically, the increase in agent errors was concentrated in reasoning and planning errors, which rely heavily on context understanding, rising by 34.1% and 35.6%, respectively.
+Conversely, errors from tool misalignment and syntax violations did not increase significantly. This suggests that the context drift introduced by the evolution of MCP servers did not impair the model’s intrinsic tool-calling capability, but rather disrupted its previously stable workflow, causing LLM agents to generate many redundant errors through trial-and-error.
+
+Impact of Evolution Mutation Operators.
+We recorded the evolution operators selected by LLM developers for MCP servers over multiple rounds of evolution.
+By comparing task fulfillment scores of the same task at different evolution stages, we analyzed each operator’s impact on task completion.
+Figure 6 (b) presents the operator-specific contributions, revealing three key insights:
+1) Evolution operations predominantly degrade LLM agents’ performance. The majority of operators (9 out of 11) exhibited a negative impact, showing that the evolution process tends to disrupt established workflows.
+2) Modifying tool descriptions and adding new tools resulted in the most negative effect. Operators such as O1 (Tool Addition, -0.96), O4 (Tool Integration, -0.90), and O9 (Tool Description Update, -0.81) substantially lowered scores. Such extensive changes often disrupt the agent’s tool orchestration logic, thereby hindering execution accuracy.
+3) Subtractive operations are relatively neutral. Operators for removal or pruning had minimal negative or positive effects, as seen in O2 (Tool Replacement, +0.10), O7 (Parameters Pruning, +0.08), and O3 (Tool Removal, -0.13).
+When executing these updates, developers usually eliminate redundancies while preserving core MCP server functionalities, which reduces the workflow complexity and facilitates task completion.
+
+Experiments on real evolution and agent modules.
+We curated a subset of 50 historical versions of real-world MCP servers, covering 86 tasks, by excluding undeployable or non-functional instances.
+
+Table 4: Performance gains from agent modules.
+
+Method
+
+Task
+
+Fulfillment
+  ↑\Big\uparrow
+
+Planning
+
+Effectiveness
+  ↑\Big\uparrow
+
+Vanilla
+6.24
+3.87
+
++ Reflection Shinn et al. (2023)
+6.60
+4.12
+
++ Plan Erdogan et al. (2025)
+6.52
+4.23
+
++ Memory Wang et al. (2025e)
+6.71
+5.04
+
+Table 6 shows apparent declines in task fulfillment across all models.
+This confirms that our simulated evolution-induced issues also persist in real-world scenarios.
+Furthermore, we enhanced GPT-5.4 with agent modules, including reflection, planning, and memory, and tested them on the late stage of MCP Servers. Table  4 demonstrates that these methods effectively alleviated performance drops due to tool evolution, outperforming the vanilla model in both evaluation metrics.
+
+Reliability of MCPEvol-Bench.
+We compared the cosine similarity of code change embeddings for a single mutation or version update under three settings: Evol vs. Real, which measures the similarity between our simulated evolutions and real-world updates; Real vs. Real, which compares consecutive real-world versions; and Random, a baseline established by randomly pairing updates from different servers.
+As shown in Table 6, while Evol vs. Real scored slightly lower than Real vs. Real on the general BGE-M3 model, it surpassed Real vs. Real on the code-specific CodeT5 and StarCoder2 models.
+This demonstrates that our method effectively simulates human developer behavior.
+Furthermore, as shown in Table 8, the high consistency between human experts and LLM-judges in ranking trajectories across evolution stages validated the effectiveness of our assessment.
+
+Table 5: Performance drop on historical MCP server.
+
+Model
+Current
+Historical
+
+GPT-5.4
+7.56
+6.63 -12.3%
+
+Claude-Sonnet-4-6
+7.33
+6.47 -11.7%
+
+Claude-Opus-4-6
+7.40
+7.10 -4.1%
+
+Table 6: Semantic similarity of code changes.
+
+Setting
+BGE-M3 Chen et al. (2024)
+CodeT5 Wang et al. (2021)
+StarCoder2 Lozhkov et al. (2024)
+
+Random
+0.42
+0.32
+0.30
+
+Real vs. Real
+0.71
+0.46
+0.45
+
+Evol vs. Real
+0.63
+0.52
+0.53
+
+Figure 7: Case Study: Impact of MCP Server Evolution. Table 2 lists the original and evolved toolset configurations. Areas highlighted in yellow show changes compared to the original workflow.
+
+6.4 Case Study
+
+Figure 7 present a case study on workflow degradation from server evolution.
+The original workflow (green) achieved a perfect score by directly calling get-tickets for all train tickets data between cities.
+Evolved parameter description in tool get-tickets (Table 2) indicate first to retrieve station codes by calling get-station-code-of-citys.
+This perturbation resulted in the evolved workflow (red) only querying tickets for two stations, VNP and SHH, causing the score to degrade to 5.
+
+7 Conclusion
+
+In this paper, we introduced MCPEvol-Bench, a novel benchmark for evaluating the task-solving capabilities of LLM agents under dynamic toolset evolution. This benchmark bridges the gap in existing static evaluations that fail to capture agent adaptability in evolving tool environments.
+Guided by our empirical study on MCP server evolution, we developed 11 mutation operators enabling LLMs to automatically and iteratively modify tools within 123 real-world MCP servers, thereby simulating realistic server evolution.
+Experiments on 12 state-of-the-art LLMs reveal that even frontier models, such as GPT-5.4 and Claude-Sonnet-4-6 suffer significant performance degradation, highlighting the critical need for LLM agents capable of constructing stable workflows in dynamic environments.
+
+References
+
+Abdi (2010)
+H. Abdi
+
+Coefficient of variation.
+
+Encyclopedia of research design 1 (5), pp. 169–171.
+
+Cited by: §D.1.
+
+Achiam et al. (2023)
+J. Achiam, S. Adler, S. Agarwal, L. Ahmad, I. Akkaya, F. L. Aleman, D. Almeida, J. Altenschmidt, S. Altman, S. Anadkat, et al.
+
+Gpt-4 technical report.
+
+arXiv preprint arXiv:2303.08774.
+
+Cited by: §6.1.
+
+AI@Meta (2024)
+AI@Meta
+
+The llama 3 herd of models.
+
+arXiv preprint arXiv:2407.21783.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Alibaba Group (2026)
+Alibaba Group
+
+ModelScope platform.
+
+Note: Accessed: 2026-04-19. URL: https://www.modelscope.cn/.
+
+External Links: Link
+
+Cited by: §3.1.
+
+Anthropic (2024)
+Anthropic
+
+Model context protocol (mcp).
+
+Note: https://github.com/modelcontextprotocol/specificationAccessed: 2026-04-23. URL: https://github.com/modelcontextprotocol/specification.
+
+Cited by: §1.
+
+Anthropic (2026a)
+Anthropic
+
+Introducing claude opus 4.6.
+
+Note: Accessed: 2026-04-19. URL: https://www.anthropic.com/news/claude-opus-4-6.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Anthropic (2026b)
+Anthropic
+
+Introducing claude sonnet 4.5.
+
+Note: Accessed: 2026-04-19. URL: https://www.anthropic.com/news/claude-sonnet-4-5.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Anthropic (2026c)
+Anthropic
+
+Introducing claude sonnet 4.6.
+
+Note: Accessed: 2026-04-19. URL: https://www.anthropic.com/news/claude-sonnet-4-6.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Barke et al. (2026)
+S. Barke, A. Goyal, A. Khare, A. Singh, S. Nath, and C. Bansal
+
+AgentRx: diagnosing ai agent failures from execution trajectories.
+
+arXiv preprint arXiv:2602.02475.
+
+Cited by: §6.3.
+
+Chen et al. (2024)
+J. Chen, S. Xiao, P. Zhang, K. Luo, D. Lian, and Z. Liu
+
+BGE m3-embedding: multi-lingual, multi-functionality, multi-granularity text embeddings through self-knowledge distillation.
+
+External Links: 2402.03216
+
+Cited by: §D.2,
+Table 6.
+
+Comanici et al. (2025)
+G. Comanici, E. Bieber, M. Schaekermann, I. Pasupat, N. Sachdeva, I. Dhillon, M. Blistein, O. Ram, D. Zhang, E. Rosen, et al.
+
+Gemini 2.5: pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities.
+
+arXiv preprint arXiv:2507.06261.
+
+Cited by: §6.1.
+
+Erdogan et al. (2025)
+L. E. Erdogan, N. Lee, S. Kim, S. Moon, H. Furuta, G. Anumanchipalli, K. Keutzer, and A. Gholami
+
+Plan-and-act: improving planning of agents for long-horizon tasks.
+
+In International Conference on Machine Learning,
+
+pp. 15419–15462.
+
+Cited by: Table 4.
+
+GitHub, Inc. (2026)
+GitHub, Inc.
+
+GitHub.
+
+Note: Accessed: 2026-04-19. URL: https://github.com/.
+
+External Links: Link
+
+Cited by: §3.1.
+
+Google DeepMind (2026)
+Google DeepMind
+
+Gemma 4.
+
+Note: Accessed: 2026-04-19. URL: https://deepmind.google/models/gemma/gemma-4/.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Guo et al. (2024)
+Z. Guo, S. Cheng, H. Wang, S. Liang, Y. Qin, P. Li, Z. Liu, M. Sun, and Y. Liu
+
+Stabletoolbench: towards stable large-scale benchmarking on tool learning of large language models.
+
+In Findings of the Association for Computational Linguistics: ACL 2024,
+
+pp. 11143–11156.
+
+Cited by: §1,
+§2.1.
+
+Haiyang et al. (2025)
+S. Haiyang, Y. Li, D. Meng, D. Cai, S. Qi, L. Zhang, M. Xu, and Y. Ma
+
+ShortcutsBench: a large-scale real-world benchmark for api-based agents.
+
+In The Thirteenth International Conference on Learning Representations,
+
+Cited by: Table 1,
+§1,
+§2.1.
+
+Jimenez et al. (2024)
+C. E. Jimenez, J. Yang, A. Wettig, S. Yao, K. Pei, O. Press, and K. R. Narasimhan
+
+SWE-bench: can language models resolve real-world github issues?.
+
+In The Twelfth International Conference on Learning Representations,
+
+External Links: Link
+
+Cited by: §2.2.
+
+Liu et al. (2024a)
+A. Liu, B. Feng, B. Xue, B. Wang, B. Wu, C. Lu, C. Zhao, C. Deng, C. Zhang, C. Ruan, et al.
+
+Deepseek-v3 technical report.
+
+Cited by: §5.1,
+§6.1.
+
+Liu et al. (2025a)
+W. Liu, X. Huang, X. Zeng, S. Yu, D. Li, S. Wang, W. Gan, Z. Liu, Y. Yu, Z. WANG, et al.
+
+ToolACE: winning the points of llm function calling.
+
+In The Thirteenth International Conference on Learning Representations,
+
+Cited by: §2.1.
+
+Liu et al. (2026)
+Y. Liu, C. Zhang, Z. Han, H. Liu, Y. Wang, Y. Yu, X. Wang, and Y. Yin
+
+TrajAD: trajectory anomaly detection for trustworthy llm agents.
+
+arXiv preprint arXiv:2602.06443.
+
+Cited by: §6.3.
+
+Liu et al. (2025b)
+Z. Liu, J. Qiu, S. Wang, J. Zhang, Z. Liu, R. Ram, H. Chen, W. Yao, S. Heinecke, S. Savarese, et al.
+
+Mcpeval: automatic mcp-based deep evaluation for ai agent models.
+
+In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing: System Demonstrations,
+
+pp. 373–402.
+
+Cited by: Table 1,
+§2.1,
+§4.
+
+Liu et al. (2024b)
+Z. Liu, T. Hoang, J. Zhang, M. Zhu, T. Lan, S. Kokane, J. Tan, W. Yao, Z. Liu, Y. Feng, R. Murthy, L. Yang, S. Savarese, J. C. Niebles, H. Wang, S. Heinecke, and C. Xiong
+
+APIGen: automated pipeline for generating verifiable and diverse function-calling datasets.
+
+In Advances in Neural Information Processing Systems,  A. Globerson, L. Mackey, D. Belgrave, A. Fan, U. Paquet, J. Tomczak, and C. Zhang (Eds.),
+
+Vol. 37, pp. 54463–54482.
+
+External Links: Document,
+Link
+
+Cited by: Table 1,
+§2.1.
+
+Lozhkov et al. (2024)
+A. Lozhkov, R. Li, L. B. Allal, F. Cassano, J. Lamy-Poirier, N. Tazi, A. Tang, D. Pykhtar, J. Liu, Y. Wei, et al.
+
+Starcoder 2 and the stack v2: the next generation.
+
+arXiv preprint arXiv:2402.19173.
+
+Cited by: Table 6.
+
+Mo et al. (2025)
+G. Mo, W. Zhong, J. Chen, X. Chen, Y. Lu, H. Lin, B. He, X. Han, and L. Sun
+
+Livemcpbench: can agents navigate an ocean of mcp tools?.
+
+Cited by: §4,
+§6.1.
+
+npm, Inc. (2026)
+npm, Inc.
+
+Npm registry.
+
+Note: Accessed: 2026-04-19. URL: https://www.npmjs.com/.
+
+External Links: Link
+
+Cited by: §3.1.
+
+OpenAI (2026a)
+OpenAI
+
+Introducing gpt-5.4.
+
+Note: Accessed: 2026-04-19. URL: https://openai.com/index/introducing-gpt-5-4/.
+
+External Links: Link
+
+Cited by: §6.1.
+
+OpenAI (2026b)
+OpenAI
+
+Introducing gpt-5.
+
+Note: Accessed: 2026-04-19. URL: https://openai.com/gpt-5/.
+
+External Links: Link
+
+Cited by: §6.1.
+
+OpenAI (2026c)
+OpenAI
+
+Introducing openai o3 and o4-mini.
+
+Note: Accessed: 2026-04-19. URL: https://openai.com/index/introducing-o3-and-o4-mini/.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Pajo (2025)
+P. Pajo
+
+Smithery. ai: a model context protocol for enhanced large language model integration and cross-industry applications.
+
+Note: URL: https://smithery.ai.
+
+Cited by: §3.1.
+
+Patil et al. (2025)
+S. G. Patil, H. Mao, F. Yan, C. C. Ji, V. Suresh, I. Stoica, and J. E. Gonzalez
+
+The berkeley function calling leaderboard (bfcl): from tool use to agentic evaluation of large language models.
+
+In International Conference on Machine Learning,
+
+pp. 48371–48392.
+
+Cited by: §2.2.
+
+Plaat et al. (2025)
+A. Plaat, M. van Duijn, N. Van Stein, M. Preuss, P. van der Putten, and K. J. Batenburg
+
+Agentic large language models, a survey.
+
+Journal of Artificial Intelligence Research 84.
+
+Cited by: §1.
+
+Qin et al. (2024)
+Y. Qin, S. Liang, Y. Ye, K. Zhu, L. Yan, Y. Lu, Y. Lin, X. Cong, X. Tang, B. Qian, S. Zhao, L. Hong, R. Tian, R. Xie, J. Zhou, M. Gerstein, D. Li, Z. Liu, and M. Sun
+
+ToolLLM: facilitating large language models to master 16000+ real-world apis.
+
+In The Twelfth International Conference on Learning Representations,
+ICLR 2024, Vienna, Austria, May 7-11, 2024,
+
+External Links: Link
+
+Cited by: Table 1,
+§1,
+§2.1,
+§2.2,
+§6.1,
+§6.3.
+
+Qu et al. (2025)
+C. Qu, S. Dai, X. Wei, H. Cai, S. Wang, D. Yin, J. Xu, and J. Wen
+
+Tool learning with large language models: a survey.
+
+Frontiers of Computer Science 19 (8).
+
+Cited by: §1.
+
+Qwen Team (2026)
+Qwen Team
+
+Qwen3.5: towards native multimodal agents.
+
+Note: Accessed: 2026-04-19. URL: https://qwen.ai/blog?id=qwen3.5.
+
+External Links: Link
+
+Cited by: §6.1.
+
+Sedgwick (2014)
+P. Sedgwick
+
+Spearman’s rank correlation coefficient.
+
+Bmj 349.
+
+Cited by: §D.2.
+
+Shinn et al. (2023)
+N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao
+
+Reflexion: language agents with verbal reinforcement learning.
+
+Advances in neural information processing systems 36, pp. 8634–8652.
+
+Cited by: Table 4.
+
+Tan et al. (2025)
+S. Tan, S. Zhuang, K. Montgomery, W. Y. Tang, A. Cuadron, C. Wang, R. A. Popa, and I. Stoica
+
+JUDGEBENCH: a benchmark for evaluating llm-based judges.
+
+In 13th International Conference on Learning Representations, ICLR 2025,
+
+pp. 37400–37426.
+
+Cited by: §6.1.
+
+Tang et al. (2023)
+Q. Tang, Z. Deng, H. Lin, X. Han, Q. Liang, and L. Sun
+
+ToolAlpaca: generalized tool learning for language models with 3000 simulated cases.
+
+CoRR abs/2306.05301.
+
+External Links: Link,
+Document,
+2306.05301
+
+Cited by: §1.
+
+Tang et al. (2025)
+X. Tang, T. Hu, M. Ye, D. Shao, X. Yin, S. Ouyang, W. Zhou, P. Lu, Z. Zhang, Y. Zhao, A. Cohan, and M. Gerstein
+
+ChemAgent: self-updating memories in large language models improves chemical reasoning.
+
+In International Conference on Learning Representations,  Y. Yue, A. Garg, N. Peng, F. Sha, and R. Yu (Eds.),
+
+Vol. 2025, pp. 100922–100958.
+
+External Links: Link
+
+Cited by: §1.
+
+Wang et al. (2025a)
+H. Wang, Z. Ni, S. Zhang, S. Lu, S. Hu, Z. He, C. Hu, J. Lin, Y. Guo, Y. Du, et al.
+
+RepoMaster: autonomous exploration and understanding of github repositories for complex task solving.
+
+In The Thirty-ninth Annual Conference on Neural Information Processing Systems,
+
+Cited by: §1.
+
+Wang et al. (2024)
+L. Wang, C. Ma, X. Feng, Z. Zhang, H. Yang, J. Zhang, Z. Chen, J. Tang, X. Chen, Y. Lin, et al.
+
+A survey on large language model based autonomous agents.
+
+Frontiers of Computer Science 18 (6), pp. 186345.
+
+Cited by: §1,
+§2.2.
+
+Wang et al. (2025b)
+W. Wang, P. Niu, Z. Xu, Z. Chen, J. Du, Y. Du, X. Pang, K. Huang, Y. Wang, Q. Yan, and S. Chen
+
+MCP-flow: facilitating llm agents to master real-world, diverse and scaling mcp tools.
+
+External Links: 2510.24284,
+Link
+
+Cited by: Table 1,
+§2.1.
+
+Wang et al. (2021)
+Y. Wang, W. Wang, S. Joty, and S. C. Hoi
+
+Codet5: identifier-aware unified pre-trained encoder-decoder models for code understanding and generation.
+
+In Proceedings of the 2021 conference on empirical methods in natural language processing,
+
+pp. 8696–8708.
+
+Cited by: Table 6.
+
+Wang et al. (2025c)
+Z. Wang, Q. Chang, H. Patel, S. Biju, C. Wu, Q. Liu, A. Ding, A. Rezazadeh, A. Shah, Y. Bao, et al.
+
+Mcp-bench: benchmarking tool-using llm agents with complex real-world tasks via mcp servers.
+
+In International Conference on Learning Representations (ICLR),
+
+Cited by: §D.1,
+Table 1,
+§2.1,
+§2.2,
+§4,
+§5.1,
+§6.1.
+
+Wang et al. (2025d)
+Z. Wang, S. Hu, S. Zhao, X. Lin, F. Juefei-Xu, Z. Li, L. Han, H. Subramanyam, L. Chen, J. Chen, et al.
+
+Mllm-as-a-judge for image safety without human labeling.
+
+In Proceedings of the Computer Vision and Pattern Recognition Conference,
+
+pp. 14657–14666.
+
+Cited by: §6.1.
+
+Wang et al. (2025e)
+Z. Z. Wang, J. Mao, D. Fried, and G. Neubig
+
+Agent workflow memory.
+
+In International Conference on Machine Learning,
+
+pp. 63897–63911.
+
+Cited by: Table 4.
+
+Wu et al. (2025)
+Z. Wu, Z. Wu, F. Xu, Y. Wang, Q. Sun, C. Jia, K. Cheng, Z. Ding, L. Chen, P. P. Liang, and Y. Qiao
+
+OS-ATLAS: foundation action model for generalist GUI agents.
+
+In The Thirteenth International Conference on Learning Representations,
+ICLR 2025, Singapore, April 24-28, 2025,
+
+External Links: Link
+
+Cited by: §1.
+
+Xie et al. (2024)
+T. Xie, D. Zhang, J. Chen, X. Li, S. Zhao, R. Cao, T. J. Hua, Z. Cheng, D. Shin, F. Lei, et al.
+
+Osworld: benchmarking multimodal agents for open-ended tasks in real computer environments.
+
+Advances in Neural Information Processing Systems 37, pp. 52040–52094.
+
+Cited by: §2.2.
+
+Yao et al. (2023)
+S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan, and Y. Cao
+
+ReAct: synergizing reasoning and acting in language models.
+
+In International Conference on Learning Representations (ICLR),
+
+Cited by: §4.
+
+Zhou et al. (2024)
+S. Zhou, F. F. Xu, H. Zhu, X. Zhou, R. Lo, A. Sridhar, X. Cheng, T. Ou, Y. Bisk, D. Fried, U. Alon, and G. Neubig
+
+WebArena: A realistic web environment for building autonomous agents.
+
+In The Twelfth International Conference on Learning Representations,
+ICLR 2024, Vienna, Austria, May 7-11, 2024,
+
+External Links: Link
+
+Cited by: §2.2.
+
+Appendix
+
+Appendix A Impact Statement
+
+MCPEvol-Bench highlights the vulnerability of LLM agents to evolving toolsets. By exposing how performance drops when MCP servers change (e.g., updated parameters or descriptions), our work drives the development of more adaptive and robust agents. This paves the way for more stable automation workflows, reducing errors and boosting productivity in software development and daily tasks. Furthermore, by focusing on the open-source Model Context Protocol (MCP), we support a more open and interoperable AI ecosystem. However, as agents integrate more seamlessly with external tools, vulnerabilities or misleading inputs could lead to the unintended leakage of sensitive data (such as financial records or codebases). Additionally, frequent interface changes may create security blind spots that bypass traditional static checks, requiring greater attention to data privacy and security in dynamic environments.
+
+Appendix B Safeguarding Statement
+
+MCPEvol-Bench instructs LLM agents to operate within isolated directories, though potential risks of harmful operations on the host system remain. We mitigate this by enforcing strict file permissions to prevent unauthorized modification or deletion of critical files during evaluation. None of the 123 MCP servers included rely on proprietary API keys, ensuring no personal information is exposed. Furthermore, evolution is simulated via LLM-driven code mutations on locally stored NPM packages within a closed, sandboxed environment, rather than interacting with live production services. This eliminates the risk of disrupting real-world software services. These measures ensure the benchmark can be safely deployed for research without posing security or privacy threats.
+
+Appendix C Limitation and Future Work
+
+The MCP servers included in our benchmark are constrained. To ensure plug-and-play deployment, we excluded instances requiring external API key authorization. These servers usually have more frequent updates due to maintenance by dedicated companies or institutions. However, this exclusion does not compromise the validity of our benchmark or the generalizability of our conclusions. Specifically, the observed inadequacy of current models in adapting to dynamically evolving tool-using scenarios. In future work, we plan to incorporate additional officially maintained MCP servers with greater practical utility and functionality, such as those for Hugging Face and Google Maps.
+
+Appendix D Details of Experiments
+
+D.1 Effectiveness of Evaluation Metrics
+
+In our experiments, we adopted the evaluation metrics Task Fulfillment and Planning Effectiveness from MCP-Bench Wang et al. (2025c). Both metrics are evaluated using rubric-based LLM judges, with prompt shuffling employed to ensure the robustness of assessments (prompts detailed in H.3).
+The main experimental results in Table 3 are averaged over five independent evaluations. The corresponding variances are reported in Table 7. The observed low variance (all <0.2<0.2) shows the stability and effectiveness of these two metrics.
+
+Table 7: Variance (σ2\sigma^{2}) of performance metrics across three evolution stages. 
+
+Model
+Early Stage
+Middle Stage
+Late Stage
+
+Task
+
+Fulfillment
+  σ2\sigma^{2}
+
+Planning
+
+Effectiveness
+  σ2\sigma^{2}
+
+Task
+
+Fulfillment
+  σ2\sigma^{2}
+
+Planning
+
+Effectiveness
+  σ2\sigma^{2}
+
+Task
+
+Fulfillment
+  σ2\sigma^{2}
+
+Planning
+
+Effectiveness
+  σ2\sigma^{2}
+
+Qwen3.5-9B
+0.04
+0.12
+0.08
+0.03
+0.11
+0.07
+
+Llama-3.3-70B
+0.15
+0.02
+0.09
+0.14
+0.05
+0.18
+
+Qwen3.5-27B
+0.07
+0.16
+0.11
+0.06
+0.13
+0.09
+
+GPT-4o
+0.03
+0.11
+0.17
+0.04
+0.08
+0.15
+
+Gemini-2.5-pro
+0.12
+0.05
+0.06
+0.13
+0.10
+0.02
+
+o3
+0.09
+0.14
+0.03
+0.10
+0.16
+0.07
+
+GPT-5.1
+0.18
+0.08
+0.12
+0.05
+0.04
+0.11
+
+Gemma-4-31B-it
+0.06
+0.13
+0.15
+0.09
+0.07
+0.14
+
+Claude-Sonnet-4-5-thinking
+0.11
+0.04
+0.10
+0.17
+0.06
+0.12
+
+GPT-5.4
+0.05
+0.10
+0.14
+0.08
+0.13
+0.03
+
+Claude-Sonnet-4-6
+0.13
+0.07
+0.04
+0.11
+0.15
+0.09
+
+Claude-Opus-4-6
+0.10
+0.15
+0.08
+0.06
+0.12
+0.16
+
+The proposed Evolutionary Competency Score (ECS) effectively evaluates agent adaptability during the evolution of MCP Server tools.
+Let 𝒰\mathcal{U} denote the set of evaluation tasks. For each task u∈𝒰u\in\mathcal{U}, let 𝐒u={Su,1TF,…,Su,NTF}\mathbf{S}_{u}=\{S_{u,1}^{\text{TF}},\dots,S_{u,N}^{\text{TF}}\} be the sequence of Task Fulfillment scores across NN MCP server versions. We define the mean performance μu\mu_{u} and standard deviation σu\sigma_{u} as:
+
+μu=1N​∑i=1NSu,iTF,σu=1N−1​∑i=1N(Su,iTF−μu)2.\mu_{u}=\frac{1}{N}\sum_{i=1}^{N}S_{u,i}^{\text{TF}},\quad\sigma_{u}=\sqrt{\frac{1}{N-1}\sum_{i=1}^{N}\left(S_{u,i}^{\text{TF}}-\mu_{u}\right)^{2}}.
+
+(2)
+
+Although the Coefficient of Variation Abdi (2010) (C​Vu=σu/μuCV_{u}=\sigma_{u}/\mu_{u}) is frequently used to measure stability, it is insufficient for assessing adaptability as it decouples stability from absolute performance magnitude (e.g., a low-performing stable model may have the same C​VuCV_{u} as a high-performing one).
+To construct a comprehensive adaptability metric, we formulate a utility function JuJ_{u} that maximizes mean performance μu\mu_{u} while penalizing relative instability.
+By applying a linear penalty factor kk to C​VuCV_{u}, we obtain Ju=μu​(1−k⋅C​Vu)J_{u}=\mu_{u}(1-k\cdot CV_{u}). Substituting the definition of C​VuCV_{u} yields Ju=μu−k​σuJ_{u}=\mu_{u}-k\sigma_{u}.
+This derivation establishes that penalizing relative volatility is mathematically equivalent to subtracting a scaled absolute standard deviation from the mean. The ECS simplifies this relationship by setting k=1k=1:
+
+ECS=1|𝒰|​∑u∈𝒰(μu−σu)\text{ECS}=\frac{1}{|\mathcal{U}|}\sum_{u\in\mathcal{U}}(\mu_{u}-\sigma_{u})
+
+(3)
+
+The efficacy of ECS in assessing adaptability stems from its sensitivity to performance regression. In our benchmark (N=3N=3), consider two models on task uu:
+
+• 
+
+Model A (Low adaptability): Scores {0.9,0.5,0.9}\{0.9,0.5,0.9\} yield μA≈0.77\mu_{A}\approx 0.77 and σA≈0.23\sigma_{A}\approx 0.23, resulting in ECSA≈0.54\text{ECS}_{A}\approx 0.54.
+
+• 
+
+Model B (High adaptability): Scores {0.8,0.8,0.8}\{0.8,0.8,0.8\} yield μB=0.80\mu_{B}=0.80 and σB=0.00\sigma_{B}=0.00, resulting in ECSB=0.80\text{ECS}_{B}=0.80.
+
+Despite similar mean performance, the single performance drop in Model A significantly penalizes its ECS, resulting in a score substantially lower than that of Model B.
+For N=3N=3 with integer scores in [1,10][1,10], the ECS ranges from 4−27≈−1.204-\sqrt{27}\approx-1.20 to 1010.
+
+D.2 Reliability Analysis of Benchmark
+
+In Section 6.3, we compare the semantic similarity between code modifications generated by simulated evolution and those from real-world MCP server version updates. Results presented in Table 6 demonstrate the effectiveness of our evolution. Specifically, for real-world version updates (Real vs. Real), we analyze the code differences between consecutive versions (e.g., between v0.3.2 and v0.3.1, or v0.3.1 and v0.3.0). For encoder model BGE-M3 Chen et al. (2024), we directly compute the cosine similarity of word embedding vectors. For the other two decoder-only models, we extract the feature vectors from the final layer for cosine similarity calculation.
+
+While human experts often struggle with absolute scoring, they excel at relative ranking.
+Leveraging this insight, we evaluated the alignment between LLM-based evaluations and human expert judgments.
+We analyzed task trajectories generated by three advanced models: Claude-Sonnet-4-6, Claude-Opus-4-6, and GPT-5.4.
+Let 𝒰\mathcal{U} denote the set of all task instances.
+For each task u∈𝒰u\in\mathcal{U}, we established a ground truth ranking vector 𝐑uH=[ru,e​a​r​l​yH,ru,m​i​d​d​l​eH,ru,l​a​t​eH]\mathbf{R}^{H}_{u}=[r^{H}_{u,early},r^{H}_{u,middle},r^{H}_{u,late}] by averaging the ranks assigned by three human experts, where r∈[1,2,3]r\in[1,2,3].
+For instance, if 𝐑uH=[1,3,2]\mathbf{R}^{H}_{u}=[1,3,2], it implies that the trajectory in early stage is ranked best, and that in late stage is second.
+Simultaneously, we employed three LLM evaluators (DeepSeek-Chat, GPT-4o-mini, and Gemini-2.5-pro) to compute Task Fulfillment scores. These scores were converted into rank vectors 𝐑uE\mathbf{R}^{E}_{u}.
+The consistency between each LLM evaluator and the human ground truth was quantified using the average of spearman’s rank correlation coefficient ρ¯\bar{\rho} Sedgwick (2014):
+
+ρ¯=∑u∈𝒰ρu/|𝒰|=∑u∈𝒰(1−6​𝐝u⊤​𝐝uN⁡(N2−1))/|𝒰|\bar{\rho}=\sum_{u\in\mathcal{U}}\rho_{u}/|\mathcal{U}|=\sum_{u\in\mathcal{U}}(1-\frac{6\mathbf{d}_{u}^{\top}\mathbf{d}_{u}}{N(N^{2}-1)})/|\mathcal{U}|
+
+(4)
+
+where 𝐝u=𝐑uH−𝐑uE\mathbf{d}_{u}=\mathbf{R}^{H}_{u}-\mathbf{R}^{E}_{u} is the difference in ranks in task uu, and N=3N=3.
+
+Table 8 presents the correlation results. The high correlation scores across all evaluators demonstrate that our evaluations closely align with human perception of trajectory quality.
+
+Table 8: ρ¯\bar{\rho} between LLM evaluators and human expert rankings. The ranked items are task trajectories generated by Claude-Sonnet-4-6, Claude-Opus-4-6, and GPT-5.4.
+
+LLM Evaluator
+Trajectory
+
+Claude-Sonnet-4-6
+Claude-Opus-4-6
+GPT-5.4
+
+DeepSeek-Chat
+0.82
+0.73
+0.85
+
+Gemini-2.5-pro
+0.80
+0.75
+0.85
+
+GPT-4o-mini
+0.79
+0.75
+0.84
+
+D.3 Implementation Details
+
+During the benchmark construction phase, we primarily employed the DeepSeek-Chat model for task synthesis, executing these tasks via the corresponding MCP Server to generate multi-tool invocation trajectories. For the evolution mutation of the MCP Server, we utilized the Claude-Opus-4-5 model, while test case generation continued to rely on DeepSeek-Chat.
+
+To ensure workflow stability and strict adherence to tool invocation formatting standards, the temperature parameter for all model evaluations was set to 0.2.
+The file cleanup script will automatically run after each evaluation to ensure that previous runs do not affect subsequent results.
+All experiments were conducted on a server equipped with dual Intel(R) Xeon(R) Platinum 8358P CPUs @ 2.60GHz (totaling 64 logical cores), running CentOS 7.9. The software environment was built upon Python 3.12.12, Node.js 24.13.0, and npm 11.6.2.
+The cost for a single evaluation is approximately 0.26$, calculated using DeepSeek-V3.2 pricing rates (0.14$ per million input tokens and 0.28$ per million output tokens).
+
+For the experiments involving Figure 6(b), an MCP server may be subject to multiple operators simultaneously. We evenly distribute the resulting impact on the score among each operator to calculate their contribution scores.
+
+Appendix E Details of the Empirical Study
+
+E.1 Details of Empirical Data Collection
+
+The empirical analysis draws on two primary sources: 1) deployment metadata of MCP servers periodically crawled from Smithery platform, and 2) versioned code repositories published on NPM.
+
+We crawled remotely deployed MCP servers from Smithery platform by combining the keywords listed in Table 9 with the filter is:remote. After deduplication, we obtained 1,869 unique endpoints of MCP servers.
+
+Table 9: Functional keywords of MCP servers crawled from Smithery.
+
+Keywords
+
+Aggregators
+Art & Culture
+Architecture & Design
+Browser Automation
+
+Bio
+Cloud Platforms
+Code Execution
+Coding Agents
+
+Command Line
+Communication
+Customer Data Platforms
+Databases
+
+Data Platforms
+Delivery
+Developer Tools
+Data Science Tools
+
+Embedded System
+File Systems
+Finance & FinTech
+Gaming
+
+Knowledge & Memory
+Legal
+Location Services
+Marketing
+
+Monitoring
+Multimedia Process
+Research
+Search
+
+Security
+Social Media
+Sports
+Support & Service Mgmt.
+
+Translation Services
+Text-to-Speech
+Travel & Transportation
+Version Control
+
+Workplace & Productivity
+Other Tools & Integrations
+
+To complement the Smithery dataset, we also aggregated MCP servers from three additional sources.
+
+• 
+
+ModelScope (12 keywords): browser-automation, search, communication, developer -tools, entertainment-and-media, file-systems, finance, knowledge-and-memory, location-services, art-and-culture, research-and-data, calendar-management.
+
+• 
+
+GitHub (2 repositories): https://github.com/punkpeye/awesome-mcp-servers, https://github.com/wong2/awesome-mcp-servers.
+
+• 
+
+NPM (14 keywords): mcp server, model context protocol, modelcontext -protocol, mcp-server, mcp_server, create mcp server, mcp, mcp ai, mcp agent, @modelcontextprotocol, @modelcontextprotocol/server, mcp tools, mcp ai agent, mcp protocol implementation.
+
+We initially crawled 906, 1,040, and 1,912 servers from GitHub, Smithery, and ModelScope, respectively. By matching these names against the NPM registry, we download 1,461 repositories with their historical versions. After the removal of undeployable instances, 515 servers with 9273 historical versions remained for analysis.
+
+E.2 Analysis of Tool Evolution Stages
+
+To analyze tool evolution trends, we sorted the versions of the 515 collected MCP servers by release date and calculated their current evolution stage via normalization (e.g., version 8 out of 10 corresponds to 80%). As shown in Figure 9, all three metrics exhibit significant growth.
+
+Figure 8: Growth of toolset complexity.
+
+Figure 9: Function classification of MCP servers.
+
+E.3 Analysis of Evolution Patterns
+
+The identified patterns capture the diverse ways in which MCP servers evolve over time, as shown in Table 10.
+These changes range from simple semantic updates, such as modifying tool or parameter descriptions (P1, P3), to structural modifications like adding, removing, or replacing tools and parameters (P2, P4, P5, P10–P11, P14, P17). Additionally, servers often undergo complex composite changes (P6–P9, P12, P15–P16, P18) that simultaneously alter interface structures and semantic constraints. Understanding these patterns is crucial for developing agents that can robustly adapt to the dynamic nature of real-world tool environments.
+
+Table 10: Taxonomy of MCP Server Evolution Patterns
+
+ID
+Pattern Name
+Description
+
+P1
+TOOL-DESC_CHANGE
+Update to the tool’s natural language description.
+
+P2
+TOOL-ADD
+Introduction of a new tool.
+
+P3
+PARAM-DESC_CHANGE
+Update to a specific parameter’s description.
+
+P4
+PARAM-ADD(OPTIONAL)
+Addition of a new optional parameter.
+
+P5
+TOOL-REPLACE
+Replacement of an existing tool with a new implementation.
+
+P6
+TOOL-DESC_CHANGE + PARAM-ADD(OPTIONAL)
+Tool description update combined with optional parameter addition.
+
+P7
+TOOL-DESC_CHANGE + PARAM-DESC_CHANGE
+Concurrent updates to both tool and parameter descriptions.
+
+P8
+PARAM-STRICT/RELEX
+Modification of parameter validation constraints (strictness or relaxation).
+
+P9
+PARAM-STRICT/RELEX + PARAM-DESC_CHANGED
+Constraint modification accompanied by description update.
+
+P10
+PARAM-ADD(REQUIRED)
+Addition of a new mandatory parameter.
+
+P11
+PARAM-REMOVE(OPTIONAL)
+Removal of an existing optional parameter.
+
+P12
+PARAM-ADD(OPTIONAL) + PARAM-DESC_CHANGE
+Optional parameter addition with other parameters description update.
+
+P13
+PARAM-PROMOTE/DEMOTE
+Change in parameter status between optional and required.
+
+P14
+PARAM-REMOVE(REQUIRED)
+Removal of a previously mandatory parameter.
+
+P15
+PARAM-REMOVE(OPTIONAL) + PARAM-DESC_CHANGE
+Optional parameter removal with remaining parameters description updates.
+
+P16
+TOOL-DESC_CHANGE + PARAM-ADD(OPTIONAL)
+Tool description update combined with optional parameter addition.
+
+P17
+TOOL-REMOVE
+Deprecation and removal of an existing tool.
+
+P18
+TOOL-ADD + TOOL-DESC_CHANGE
+New tool addition accompanied by other tool’s description updates.
+
+Appendix F Details of Benchmark
+
+F.1 Statistics of MCPEvolBench
+
+Figures 9, 11 and 11 present the functional classification of MCP servers, the number of tool calls required to complete each task, and the number of tools included in the context of each task, respectively.
+
+Figure 10: Distribution of tool number for task completion.
+
+Figure 11: Distribution of involved tool number.
+
+F.2 AST-based Code Anchoring
+
+It is impractical to directly inject the entire codebase of an MCP server into the model’s context window, as it introduces excessive redundant information. Therefore, we localize the registration and implementation snippets corresponding to each tool. In practice, we observe that the collected tool implementations in MCP Servers predominantly fall into four categories: Register Handler (Listing 1, 29.77%), Switch Handler (Listing 2, 26.97%), Cross-File Handler (Listing 3, 16.03%), and If-Block Handler (Listing 4, 3.56%). The percentages indicate the proportion of each category. The remaining cases are identified through human annotation.
+
+⬇
+
+server.tool(’get-station-code-of-citys’, ’Retrieve the station_code for a city in sea-rail intermodal transport using its Chinese name’, {
+
+  citys: z.string().describe(’The city to query, e.g., "Beijing". For multiple cities, separate with "|", e.g., "Beijing|Shanghai".’),
+
+}, async ({ citys }) => {
+
+  let result = {};
+
+  for (const city of citys.split(’|’)) {
+
+    if (!(city in CITY_CODES)) {
+
+      result[city] = { error: ’City not found.’ };
+
+    } else {
+
+      result[city] = CITY_CODES[city];
+
+    }
+
+  }
+
+  return {
+
+    content: [{ type: ’text’, text: JSON.stringify(result) }],
+
+  };
+
+});
+
+Listing 1: Code Example of Register Handler
+
+⬇
+
+export function handleToolCall(request) {
+
+  const { name, arguments: args = {} } = request.params;
+
+  switch (name) {
+
+    case ’find_component’:
+
+      return handleFindComponent(args);
+
+    case ’get_component_props’:
+
+      return handleGetComponentProps(args);
+
+    case ’get_usage_examples’:
+
+      return handleGetUsageExamples(args);
+
+    case ’search_docs’:
+
+      return handleSearchDocs(args);
+
+    case ’list_components’:
+
+      return handleListComponents(args);
+
+    case ’get_ires_tokens’:
+
+      return handleGetIresTokens(args);
+
+    case ’get_ires_component_info’:
+
+      return handleGetIresComponentInfo(args);
+
+    case ’analyze_component’:
+
+      return handleAnalyzeComponentMentions(args);
+
+    case ’get_design_guidelines’:
+
+      return handleGetDesignGuidelines(args);
+
+    default:
+
+      throw new Error(‘Unknown tool: ${name}‘);
+
+  }
+
+}
+
+Listing 2: Code Example of Switch Handler
+
+⬇
+
+// cross two files: A.ts and B.ts
+
+// A.ts:
+
+const memoryBankTools = {
+
+  list_projects: {
+
+    name: "list_projects",
+
+    description: "List all projects in the memory bank",
+
+    inputSchema: {
+
+      type: "object",
+
+      properties: {},
+
+      required: []
+
+    }
+
+  }
+
+};
+
+// B.ts:
+
+async handleCommand(command) {
+
+  try {
+
+    if (command.operation === "list_projects") {
+
+      const contents = await this.listDirectoryContents(this.rootPath);
+
+      return {
+
+        success: true,
+
+        content: JSON.stringify(contents),
+
+      };
+
+    }
+
+  } catch (error) {
+
+    // Optional: Add error handling here
+
+    console.error("Error in handleCommand:", error);
+
+    return {
+
+      success: false,
+
+      content: ‘Failed to list projects: ${error.message}‘,
+
+    };
+
+  }
+
+}
+
+Listing 3: Code Example of Cross-File Handler
+
+⬇
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+
+  if (request.params.name === "analyze_file") {
+
+    const rawPath = String(request.params.arguments?.path);
+
+    const targetPath = path.resolve(rawPath);
+
+    try {
+
+      await fs.access(targetPath);
+
+    } catch (_e) {
+
+      return {
+
+        content: [
+
+          {
+
+            type: ’text’,
+
+            text: ‘File not found at path: ${targetPath}. Please provide a valid absolute or relative path from the project root.‘
+
+          }
+
+        ]
+
+      };
+
+    }
+
+    return {
+
+      content: [
+
+        {
+
+          type: ’text’,
+
+          text: ‘Successfully accessed file at: ${targetPath}‘
+
+        }
+
+      ]
+
+    };
+
+  }
+
+  throw new Error(‘Unknown tool: ${request.params.name}‘);
+
+});
+
+Listing 4: Code Example of If-Block Handler
+
+Table 11: Overview of 11 mutation operators for MCP server evolution
+
+Level
+Name
+
+Description
+
+TOOL
+Operator 1: Tool Addition
+
+Adds a new tool to extend the server’s functionality. Existing tools are kept unchanged to reduce regression risk and preserve backward compatibility.
+
+TOOL
+Operator 2: Tool Replacement
+
+Replaces an existing tool with an updated version to improve capability or design. The new tool should cover the original tool’s main use cases, while other tools remain unaffected.
+
+TOOL
+Operator 3: Tool Removal
+
+Removes an obsolete tool and transfers its essential behavior into another existing tool. The aim is to reduce the number of tools while retaining key functionality.
+
+TOOL
+Operator 4: Tool Integration
+
+Adds a new tool and refines related tool descriptions to improve overall consistency. The goal is clearer tool roles, less overlap, and easier discovery for users.
+
+PARAM
+Operator 5: Flexible Expansion
+
+Extends a tool interface by adding a small number of optional parameters. These parameters increase flexibility while keeping existing calls working as before.
+
+PARAM
+Operator 6: Constraint Mutation
+
+Changes parameter constraints, required/optional status, or data types to make the interface contract more accurate. The aim is better alignment between the specification and actual usage.
+
+PARAM
+Operator 7: Parameter Pruning
+
+Simplifies the interface by removing redundant or low-value parameters. It reduces maintenance cost and should acknowledge compatibility risks when required inputs are removed.
+
+PARAM
+Operator 8: Interface Refactoring
+
+Updates the tool description together with parameter additions/removals. Its purpose is to keep documentation consistent with the current interface.
+
+DESC
+Operator 9: Tool Description Update
+
+Edits the tool description to better reflect what the tool does. It improves clarity and accuracy without changing behavior.
+
+DESC
+Operator 10 Parameter Description Update
+
+Edits parameter descriptions to make their meaning and intended usage clearer. It improves documentation while keeping the parameter set unchanged.
+
+DESC
+Operator 11: Joint Description Update
+
+Improves both tool and parameter descriptions to present a consistent and accurate specification. It reduces ambiguity without changing behavior.
+
+F.3 Definition of Mutation Operators
+
+The definitions of the mutation operators are presented in Table 11, and their corresponding prompts are detailed in Appendix H.1.
+
+Appendix G Supplementary Case Study
+
+In this section, we first present case study illustrating three mutation operators across distinct levels used for MCP server evolution. For brevity, we omit parameter types and their constraints. Subsequently, we provide two examples where original workflows fail due to tool evolution.
+
+G.1 Case Study of Mutation Operators
+
+Figure 12: Case Study: Application of the Tool Addition operator to the MCP server @guanxiong/mcp-server-time, introducing the convert_timezone tool.
+
+Figure 13: Case Study: Application of the Flexible Expansion operator to the MCP server mcp-weather-demo, introducing the unit and days parameters in existing get-forecast tool.
+
+Figure 14: Case Study: Application of the Joint Description Update operator to the MCP server @puchunjie/doc-tools-mcp, introducing the new description for open_document tool.
+
+G.2 Case Study of Workflow Failure
+
+Figure 15: Case Study from GPT-5.4’s Trajectory: Reasoning error from parameter evolution. Two new parameters minPrice and maxPrice filter the tickets price in the get-tickets tool. The agent failed to utilize the new parameters, setting them to zero and resulting in no available tickets.
+Areas highlighted in yellow show changes compared to the original workflow.
+
+Figure 16: Case Study from Claude-Sonnet-4-6’s Trajectory: Planning error from tool description evolution. A change in the fetch_url tool description led the agent to use invalid parameters (abstracts=show and size=5). This caused the retrieval of latest papers to fail, forcing the agent to publish a webpage containing outdated literature from 2023.
+Areas highlighted in yellow show changes compared to the original workflow.
+
+Appendix H Prompts for MCPEvol-Bench
+
+In this section, we detail all prompts utilized by LLMs in our framework.
+Placeholders enclosed in curly braces (e.g., {server_name}, {task}) are replaced with actual text at runtime.
+We first introduce the prompts for operator selection and 11 mutation operators employed in LLM-Driven MCP Server Evolution, which guide the LLM to perform precise code mutations.
+Subsequently, we present the prompts used for the LLM-assisted process during benchmark construction.
+Finally, we present the prompts used for agent execution and evaluation.
+
+H.1 Prompts for MCP Server Evolution Mutation
+
+The following outlines the prompts for selecting mutation operators, defining mutation operators, and generating test cases. The mutation operator prompts consist of three components: code modification examples, the operator’s function, and file modification instruction.
+
+H.2 Prompts for Benchmark Construction
+
+Presented below are the prompts utilized for three key tasks: extracting MCP server installation configurations, server function classification, multi-server task generation.
+
+H.3 Prompts for Benchmark Evaluation
+
+We provide prompts for LLM-based task execution, rubric-based trajectory evalution and trajectory error type identification.
+

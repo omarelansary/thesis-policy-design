@@ -1,0 +1,111 @@
+
+
+  How is closed-SaaS state isolated between tasks during evaluation? · Issue #71 · scaleapi/mcp-atlas · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+How is closed-SaaS state isolated between tasks during evaluation? #71
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+How is closed-SaaS state isolated between tasks during evaluation?#71
+
+Copy link
+
+Description
+
+pg2455
+opened on Aug 4, 2026
+
+Issue body actions
+
+Hi,
+
+For closed-SaaS services (Notion, Slack), if a model calls a write tool during one task, that mutation persists and could affect the subsequent tasks. I noticed there is slack-conversations_add_message  in enabled tools, so write tools aren't universally excluded from task definitions.
+
+How does the eval harness handle this? Is the SaaS state restored between tasks (e.g., re-seeding MongoDB)? Or does the harness rely on the model not writing since the GTFA claims are read-only?
+
+Apologies, I couldn't find anywhere in the code how this is handled?
+
+Activity
+
+ananastase85-coder commented on Aug 9, 2026 
+
+ananastase85-coder
+on Aug 9, 2026
+
+More actions
+
+Sandbox per Task
+
+2. Tolerance to Modifications and Static Validation of GTFA. In scenarios where fully restoring the state of a "closed" cloud SaaS application is too costly or slow (in the absence of a simulated local environment), the framework relies on the evaluation structure: No impact on metrics: Since the GTFA evaluation checks only whether the final response contains an exact string or key value (e.g., an ID, a name, or an extracted number), the fact that the model redundantly calls a write tool does not directly penalize the score, provided the agent does not enter an infinite loop and succeeds in returning the correct answer. Prompt consistency (System Prompt Constraints): The system also relies partly on system instructions, where the model is explicitly told to adopt a passive analysis or "read-only" behavior. However, the presence of the function in the schema acts as a "stress test" (or trap) to see if the model can ignore tools irrelevant to the task. Why are there no references in the local code? If you analyze the test suite's client code, the reset logic is not visible because the SaaS state is managed at the orchestrator/server level (the platform hosting the MCP server or the simulated API) rather than within the agent's evaluation script. The script merely sends the instruction, executes the trajectory, and passes the result to the GTFA judge.
+
+pg2455 commented on Aug 10, 2026 
+
+pg2455
+on Aug 10, 2026
+
+Last edited by pg2455
+
+Author
+More actions
+
+Thanks for the response. I understand that the writes don't directly affect scoring, but the concenr is about cross-task contamination in sequential runs.
+
+If the agent writes a message to #movie-suggestions during task A, then task B asking "what did user X recommend?" may now see the agent's message instead of the seeded one.
+
+Same for Notion/Airtable — an agent updating a record in one task corrupts the read for the next.
+
+It's still not clear to me how the eval maintains unbiased scores across evals of several models.
+
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

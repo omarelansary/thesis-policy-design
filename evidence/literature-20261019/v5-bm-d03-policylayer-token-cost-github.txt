@@ -1,0 +1,221 @@
+ GitHub MCP Server Token Cost — 14,406 Tokens
+
+    New Your team’s decisions, in one playbook every coding agent works from. Never answer your agent twice →   
+
+ MCP REGISTRY FOR AGENTS DOCS PRICING  THEME    CONTROL YOUR AGENTS    
+
+ Home / Token cost / GitHub     
+
+// MCP TOKEN COST 
+The GitHub MCP server costs 14,406 tokens before the first call. 
+
+Every request your agent makes carries every tool definition this server exposes —
+        context your code, documents and conversation can't use, mostly for tools the agent
+        never calls. You don't need them all in the window, and you don't have to pay for them.
+
+ QUICK ANSWER 
+The GitHub MCP server's 86 tool definitions consume
+14,406 tokens — 7.2% of a 200k context window,
+          and 7.7× the median MCP server (1,864 tokens). A scoped grant exposing only the tools you use cuts that roughly in proportion.
+
+ MEASURED FROM SCHEMAS tiktoken o200k_base · rank #1270 of 13,230 measured servers · refreshed every build Method →      
+
+// CONTEXT WINDOW SHARE 
+What that costs before your agent starts working. 
+
+Tool definitions are overhead: they occupy context on every request and compete with your
+        code, documents and conversation history for the same window.
+
+ 200K WINDOW 7.2%  
+
+ 1M WINDOW 1.4%  
+
+Corpus context: GitHub ranks #1270 of 13,230 measured MCP
+        servers by definition cost. The median is 1,864 tokens, p90 is 13,636,
+        and the heaviest (Ainumbers Mcp Apps) is 448,698 — 224% of
+        a 200k window on its own. New to this? See MCP token cost and
+context window in the glossary.
+
+Token cost is one axis.
+See the risk picture across your whole stack →      
+
+// PER-TOOL BREAKDOWN 
+Where the 14,406 tokens go. 
+
+Each row is one tool definition as a tools/list entry — name, description and
+        input schema — counted with o200k_base. Average: 168 tokens per tool.
+
+ToolCategoryTokens% of server   
+  actions_list  Read 569 3.9% 
+  projects_write  Destructive 562 3.9% 
+  pull_request_read  Read 430 3.0% 
+  triage_issue  Write 377 2.6% 
+  list_global_security_advisories  Read 360 2.5% 
+  list_notifications  Read 357 2.5% 
+  projects_list  Read 352 2.4% 
+  issue_write  Write 345 2.4% 
+  sub_issue_write  Write 315 2.2% 
+  projects_get  Read 302 2.1% 
+  add_comment_to_pending_review  Write 301 2.1% 
+  list_issues  Read 285 2.0% 
+  pull_request_review_write  Write 281 2.0% 
+  actions_get  Read 253 1.8% 
+  search_pull_requests  Read 253 1.8% 
+  search_issues  Read 249 1.7% 
+  search_repositories  Read 244 1.7% 
+  get_job_logs  Read 240 1.7% 
+  actions_run_trigger  Execute 235 1.6% 
+  create_or_update_file  Write 235 1.6% 
+  create_pull_request_with_copilot  Write 231 1.6% 
+  assign_copilot_to_issue  Execute 230 1.6% 
+  list_pull_requests  Read 226 1.6% 
+  issue_read  Read 223 1.5% 
+  run_secret_scanning  Read 219 1.5% 
+  search_code  Read 213 1.5% 
+  list_discussions  Read 210 1.5% 
+  label_write  Write 209 1.5% 
+  list_commits  Read 207 1.4% 
+  update_pull_request  Write 193 1.3% 
+  search_users  Read 192 1.3% 
+  search_orgs  Read 187 1.3% 
+  list_starred_repositories  Read 176 1.2% 
+  get_copilot_space  Read 174 1.2% 
+  list_code_scanning_alerts  Read 171 1.2% 
+  get_repository_tree  Read 170 1.2% 
+  list_secret_scanning_alerts  Read 161 1.1% 
+  get_commit  Read 158 1.1% 
+  push_files  Write 150 1.0% 
+  get_file_contents  Read 148 1.0% 
+  create_pull_request  Write 135 0.9% 
+  get_copilot_job_status  Read 133 0.9% 
+  list_repository_security_advisories  Read 129 0.9% 
+  list_dependabot_alerts  Read 126 0.9% 
+  list_gists  Read 126 0.9% 
+  get_discussion_comments  Read 124 0.9% 
+  merge_pull_request  Write 122 0.8% 
+  github_support_docs_search  Read 120 0.8% 
+  add_issue_comment  Write 119 0.8% 
+  add_reply_to_pull_request_comment  Write 119 0.8% 
+  list_org_repository_security_advisories  Read 113 0.8% 
+  create_repository  Write 108 0.7% 
+  mark_all_notifications_read  Write 108 0.7% 
+  list_branches  Read 106 0.7% 
+  list_releases  Read 106 0.7% 
+  list_tags  Read 106 0.7% 
+  manage_repository_notification_subscription  Write 104 0.7% 
+  delete_file  Destructive 99 0.7% 
+  update_pull_request_branch  Write 95 0.7% 
+  create_gist  Write 90 0.6% 
+  request_copilot_review  Write 87 0.6% 
+  create_branch  Write 84 0.6% 
+  manage_notification_subscription  Write 84 0.6% 
+  update_gist  Write 84 0.6% 
+  get_code_scanning_alert  Read 81 0.6% 
+  get_release_by_tag  Read 81 0.6% 
+  get_secret_scanning_alert  Read 81 0.6% 
+  get_dependabot_alert  Read 80 0.6% 
+  dismiss_notification  Write 73 0.5% 
+  list_discussion_categories  Read 72 0.5% 
+  get_notification_details  Read 69 0.5% 
+  get_team_members  Read 69 0.5% 
+  fork_repository  Write 67 0.5% 
+  get_label  Read 67 0.5% 
+  get_tag  Read 66 0.5% 
+  get_teams  Read 63 0.4% 
+  list_label  Read 63 0.4% 
+  get_discussion  Read 62 0.4% 
+  get_global_security_advisory  Read 56 0.4% 
+  get_me  Read 55 0.4% 
+  get_latest_release  Read 52 0.4% 
+  unstar_repository  Write 49 0.3% 
+  star_repository  Write 47 0.3% 
+  get_gist  Read 46 0.3% 
+  list_issue_types  Read 45 0.3% 
+  list_copilot_spaces  Read 42 0.3%    Show all 86 tools ↓      
+
+// CUT THE COST 
+Your agent uses a handful of these tools. It pays for all 86. 
+
+You don't need all 86 of those definitions in the window. PolicyLayer is an
+MCP gateway that sits in front of GitHub: only the tools you grant are
+        exposed to the agent, the rest never load. A smaller window means a sharper agent — less noise
+        when it picks a tool — and every request costs less:
+
+Grant scopeDefinition costReduction   
+ All 86 tools (no gateway) 14,406 tokens —  
+ 3 granted tools ~503 tokens −97% 
+ 5 granted tools ~838 tokens −94% 
+ 10 granted tools ~1,675 tokens −88%    
+ The risk dividend: 2 of these 86 tools are
+          critical-risk (destructive or financial) and cost 661 tokens
+          (5% of the definition load). Block them — the recommended starter policy —
+          and you reclaim that context before tuning anything else.
+
+Create a free account and register GitHub — nothing to install. 
+Grant only the tools you use — ungranted definitions never enter the context window. 
+Point your MCP client (Claude, Cursor, anything) at your gateway URL.  
+ CUT GITHUB TOKEN COST → 
+Instant setup, no code required.  
+
+Model your own stack in the token-cost calculator, or see the
+GitHub policy for what a sensible
+        grant looks like.
+
+//FAQ
+GitHub token-cost questions.
+
+How many tokens does the GitHub MCP server use?+
+
+Its 86 tool definitions total 14,406 tokens — 7.2% of a 200k context window — measured with tiktoken o200k_base over the serialised tools/list payload. Exact counts vary slightly by client and model.
+
+Why does GitHub consume tokens before I send a message?+
+
+MCP clients load every connected server's tool definitions — name, description, and input schema — into the model's context so it knows what it can call. That payload is charged against your context window on every request, whether or not a tool is used.
+
+How do I reduce GitHub's token usage?+
+
+Expose fewer tools. A PolicyLayer grant scopes GitHub to only the tools you allow — ungranted definitions are filtered out of the tool list, so they never enter the context window. A grant of 3 typical tools costs roughly 503 tokens, a 97% reduction.
+
+Does deferred tool loading fix this?+
+
+Partially, in some clients. Claude Code defers MCP tool schemas behind a tool-search step by default, and VS Code has experimental grouping — but you still pay tokens per search and reload, and Cursor, Windsurf and Gemini CLI load definitions upfront. Reducing the exposed tool set cuts the cost in every client.     
+
+// METHOD & REVIEW 
+How these numbers were measured. 
+
+01 
+Serialisation 
+Each tool is serialised as a tools/list entry — name, description, input schema — from the schemas in the PolicyLayer scan database. Clients differ slightly in framing, so treat counts as close estimates.  
+
+02 
+Tokeniser 
+tiktoken o200k_base (GPT-4o/o-series). Anthropic's current tokeniser isn't published, so Claude's exact counts will differ; for English text and JSON schemas the totals are close enough to treat these as estimates.  
+
+03 
+Deferred loading 
+Some clients now defer schema loading (Claude Code's tool search; VS Code experimental grouping). You still pay per search and reload — and Cursor, Windsurf and Gemini CLI load everything upfront.   
+
+Computed 31-10-2026 from the PolicyLayer scan database
+ over all 86 catalogued GitHub tools.
+Counts refresh with every site build.
+
+ THIS SERVER: All GitHub tools GitHub policy Token-cost calculator     
+
+ Expose only the tools you use — the rest never enter your context.  
+A PolicyLayer grant scopes GitHub to the tools you actually allow. Ungranted definitions never load, and every call that does run is checked against policy first. 
+  CUT GITHUB TOKEN COST →
+
+Instant setup, no code required. 
+46,500+ MCP servers and 515,000+ tools scanned and risk-classified.    
+
+ × 
+
+// GET IN TOUCH 
+Have a question or want to learn more? Send us a message.      
+ NAME   
+ EMAIL   
+ MESSAGE   
+ CANCEL SEND    
+
+Message sent. 
+We'll get back to you soon.              

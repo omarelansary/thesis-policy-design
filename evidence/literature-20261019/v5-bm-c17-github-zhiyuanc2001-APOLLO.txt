@@ -1,0 +1,217 @@
+
+
+  GitHub - zhiyuanc2001/APOLLO · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+APOLLOPublic
+
+NotificationsYou must be signed in to change notification settings
+Fork0 (0)
+Star1 (1)You must be signed in to star a repository
+
+About
+No description, website, or topics provided.
+Resources
+Readme
+
+Activity
+
+Stars
+1 star
+Watchers
+0 watching
+Forks
+0 forks
+Report repository
+
+main
+
+BranchesTags
+
+Go to fileCode
+Open more actions menu
+
+Latest commit
+
+History3 Commits
+
+3 Commits
+Folders and files
+
+NameName
+Last commit message
+Last commit date
+
+bench
+
+bench
+
+verl_train
+
+verl_train
+
+.gitignore
+
+.gitignore
+
+readme.md
+
+readme.md
+
+requirements.txt
+
+requirements.txt
+
+tsne.jpg
+
+tsne.jpg
+
+View all files
+
+Repository files navigation
+
+ 🌓APOLLO 
+
+This repository contains the code for our paper Towards Preference Following in Tool Calling Language Agents.
+
+t-SNE of MultiWOZ and APOLLO
+
+The figure shows that our sessions form multiple well-separated semantic clusters, consistent with diverse domains, whereas MultiWOZ concentrates into a small number of dense clusters.
+
+Code Structure
+
+Our code structure is as follows:
+
+├── /bench/
+│  ├── /agents/
+│  ├── /database/
+│  ├── /tools/
+│  ├── /task_data/
+│  ├── ...
+├── /verl_train/
+│  ├── /data/
+│  ├── /verl/
+│  ├── ...
+
+Here are descriptions for the bench and verl_train directories:
+
+bench: Directory for evaluating models on APOLLO
+
+agents: Experiments with various agent frameworks, including Function Calling, Reflexion, Reminder, and RAG
+
+database: The constructed local database
+
+tools: The constructed tools in APOLLO
+
+task_data: APOLLO data (e.g., task_tool8_turn4.json, which represents interaction history with 4 sessions, corresponding to an average context length of $4k$)
+
+verl_train: Code for RL-based model training used in the paper
+
+data: Data used for training models in experiments
+
+verl: Our customized verl training code
+
+Evaluate Models on APOLLO
+
+For models deployed locally using vllm, first start the vllm server.
+
+BASE_PATH="your model dir"
+
+export CUDA_VISIBLE_DEVICES=0
+export VLLM_LOGGING_LEVEL=WARNING
+
+vllm serve ${BASE_PATH}/Qwen/Qwen3-8B \
+    --served-model-name Qwen3-8B \
+    --enable-auto-tool-choice \
+    --tool-call-parser hermes \
+    --reasoning-parser deepseek_r1 \
+    --gpu-memory-utilization 0.9 \
+    --tensor-parallel-size 1 \
+    --port 8000
+
+--serverd-model-name corresponds to the MODEL variable in the script below.
+
+Evaluate the models and corresponding frameworks on APOLLO.
+
+BASE_PATH="your dir"
+export PYTHONPATH=${BASE_PATH}/bench
+
+AGENT_TYPE=tool-calling
+MODEL=Qwen3-8B
+#   (Add -think for reasoning mode, e.g., Qwen-8B-think)
+
+for TURN in 4; do
+    echo "Running TURN: ${TURN}"
+    DATA_PATH=${BASE_PATH}/bench/task_data/task_tool8_turn${TURN}.json
+
+    for TASK_DOMAIN in commute travel entertainment food; do
+        echo "Running task domain: ${TASK_DOMAIN}"
+
+        python3 ${BASE_PATH}/bench/run.py \
+            --model ${MODEL} \
+            --agent-strategy ${AGENT_TYPE} \
+            --max-num-steps 10 \
+            --max-concurrency 5 \
+            --task-path ${DATA_PATH} \
+            --task-domain ${TASK_DOMAIN} \
+            --log-dir ${BASE_PATH}/bench/results/results/${AGENT_TYPE}/${MODEL}/turn${TURN}
+    done
+done
+
+Calculate the Accuracy and F1 Score
+
+python cal_reward.py --model Qwen3-8B --agent_type tool-calling
+
+Train Models by RL
+
+Our training bash script is located at verl_train/run.sh. We have customized the verl code, and you can use the script to train the model. Our model was trained on 8 A100-80G GPUs.
+
+You need to specify the path to the database in APOLLO at Line 104 of apollow.py.
+
+database_dir = "your dir/bench/database"
+
+About
+No description, website, or topics provided.
+Resources
+Readme
+
+Activity
+
+Stars
+1 star
+Watchers
+0 watching
+Forks
+0 forks
+Report repository
+
+Releases
+
+Packages
+
+Contributors
+
+Languages
+
+    You can’t perform that action at this time.
+

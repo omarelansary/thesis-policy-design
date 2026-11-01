@@ -1,0 +1,495 @@
+
+
+		mangopy/ToolRet-Tools · Datasets at Hugging Face
+
+ Hugging Face 
+
+ Datasets:  
+
+   mangopy  
+/ 
+ToolRet-Tools      
+  Like  6  
+
+Modalities: 
+  Text   
+Formats: 
+  parquet   
+Size: 
+  10K - 100K   
+ArXiv: 
+
+  arxiv: 2503.01763  
+
+Libraries: 
+  Datasets  
+  pandas  
+
+  Croissant  
+     + 1
+
+  Dataset card   Data Studio   Files Files and versions  
+ xet  Community 
+2    
+
+Dataset Viewer   Auto-converted to Parquet API Embed  Duplicate  Data Studio 
+
+Subset (3) 
+code · 3.79k rows  code (3.79k rows)customized (3.37k rows)web (37.3k rows) 
+Split (1) 
+tools · 3.79k rows  tools (3.79k rows)  
+
+SQL Console 
+
+id   
+stringlengths 
+
+14 
+28  
+
+documentation   
+stringlengths 
+
+128 
+4.26k  
+
+ gorilla_tensor_tool_0  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Detect objects in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2')", "api_arguments": ["model_id"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "import tensorfl...  
+
+ gorilla_tensor_tool_1  
+
+ {"domain": "Text embedding", "framework": "TensorFlow Hub", "functionality": "Embed text data", "api_call": "hub.load('https://tfhub.dev/google/universal-sentence-encoder/4')", "api_arguments": ["input_text"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "import tensorflow as tf\...  
+
+ gorilla_tensor_tool_2  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract image features", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"input_shape": "(224, 224, 3)"}, "python_environment_requirements": {"tensorflow": ">=2....  
+
+ gorilla_tensor_tool_3  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction from images", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v3_small_100_224/feature_vector/5')", "api_arguments": {"input_image": "A 224x224x3 image tensor", "output_feature_vector": "A 1x1024 fe...  
+
+ gorilla_tensor_tool_4  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Converts images into feature vectors", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v3_large_100_224/feature_vector/5')", "api_arguments": {"input_shape": "[224, 224, 3]", "output_shape": "[1280]"}, "python_e...  
+
+ gorilla_tensor_tool_5  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Loading pre-trained models for image classification", "api_call": "hub.load('https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4')", "api_arguments": "URL of the pre-trained model", "python_environment_requirements": "ten...  
+
+ gorilla_tensor_tool_6  
+
+ {"domain": "Image Frame Interpolation", "framework": "TensorFlow Hub", "functionality": "Generate intermediate frames between two input frames", "api_call": "hub.load('https://tfhub.dev/google/two-frame-vgg/1')", "api_arguments": {"inputs": "A list of two input frames"}, "python_environment_requirements": ["tensorflow"...  
+
+ gorilla_tensor_tool_7  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract feature vector from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4', output_shape=[1280])", "api_arguments": {"handle": "https://tfhub.dev/google/tf2-preview/mobilenet_v2...  
+
+ gorilla_tensor_tool_8  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained models for image classification", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v1_050_160/classification/4')", "api_arguments": "URL of the pre-trained model", "python_environment_requirements": "Tensor...  
+
+ gorilla_tensor_tool_9  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4"...  
+
+ gorilla_tensor_tool_10  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Pre-trained model for image classification", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"input": "image_tensor", "output": "feature_vector"}, "python_environment_...  
+
+ gorilla_tensor_tool_11  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/feature_vector/4')", "api_arguments": {"input_shape": "[None, 224, 224, 3]", "output_shape": "[None, 1024]"}, "python_e...  
+
+ gorilla_tensor_tool_12  
+
+ {"domain": "Image pose detection", "framework": "TensorFlow Hub", "functionality": "Detect human poses in images", "api_call": "hub.load('https://tfhub.dev/google/movenet/singlepose/lightning/4')", "api_arguments": {"input_image": "A single image or batch of images with shape [batch_size, height, width, 3]"}, "python_e...  
+
+ gorilla_tensor_tool_13  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Image classification using pre-trained models", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_130_224/classification/5')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/mobilenet_v2_130_224/cl...  
+
+ gorilla_tensor_tool_14  
+
+ {"domain": "Text preprocessing", "framework": "TensorFlow Hub", "functionality": "Loading", "api_call": "hub.load('https://tfhub.dev/google/universal-sentence-encoder/4')", "api_arguments": ["URL"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "import tensorflow as tf\nimport ten...  
+
+ gorilla_tensor_tool_15  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/feature_vector/1')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/feature_vector/1", "trainable": "False"}, "python_environment_requireme...  
+
+ gorilla_tensor_tool_16  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Loading pre-trained models", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4')", "api_arguments": "URL of the pre-trained model", "python_environment_requirements": "tensorflow, tensorflow_...  
+
+ gorilla_tensor_tool_17  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Object detection in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/fpnlite_640x640/1')", "api_arguments": {"image": "Input image tensor", "num_detections": "Number of detected objects", "detection_boxes"...  
+
+ gorilla_tensor_tool_18  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Detect objects in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2_fpnlite_640x640_coco17_tpu-8/1')", "api_arguments": {"image": "A tensor of shape [1, height, width, 3] containing a batch of images"}, "py...  
+
+ gorilla_tensor_tool_19  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Object detection and localization in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8/1')", "api_arguments": "image_input", "python_environment_requirements": "tensorflow, tens...  
+
+ gorilla_tensor_tool_20  
+
+ {"domain": "Audio Speech-to-Text", "framework": "TensorFlow Hub", "functionality": "Convert audio speech to text", "api_call": "hub.load('https://tfhub.dev/vasudevgupta7/wav2vec2/1')", "api_arguments": {"audio_input": "wav file"}, "python_environment_requirements": {"tensorflow": ">=2.5.0", "tensorflow_hub": ">=0.12.0"...  
+
+ gorilla_tensor_tool_21  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract image features", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4"}, "pyth...  
+
+ gorilla_tensor_tool_22  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained model for image classification", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v2_130_224/classification/4')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/mobilenet_v2_130_224/classificat...  
+
+ gorilla_tensor_tool_23  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_050_224/feature_vector/4')", "api_arguments": {"input_shape": "[224, 224, 3]", "output_shape": "[1280]"}, "python_environment_r...  
+
+ gorilla_tensor_tool_24  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained image classification model", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4')", "api_arguments": "URL of the pre-trained model", "python_environment_requirements": "tenso...  
+
+ gorilla_tensor_tool_25  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained model", "api_call": "tf.keras.Sequential([hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v3_large_100_224/classification/5')])", "api_arguments": "URL to pre-trained model", "python_environment_requirements": "t...  
+
+ gorilla_tensor_tool_26  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Object detection", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2')", "api_arguments": {"model_id": "URL of the model from TensorFlow Hub"}, "python_environment_requirements": {"tensorflow": ">=2.0.0", "tensorf...  
+
+ gorilla_tensor_tool_27  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Image classification using pre-trained models", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4')", "api_arguments": {"module_url": "https://tfhub.dev/google/imagenet/mobilenet_v2_100...  
+
+ gorilla_tensor_tool_28  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extracts feature vectors from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"input_shape": "(224, 224, 3)", "output_shape": "(1280,)"}, "python_enviro...  
+
+ gorilla_tensor_tool_29  
+
+ {"domain": "Video classification", "framework": "TensorFlow Hub", "functionality": "Video classification", "api_call": "hub.load('https://tfhub.dev/google/Video_Classification_Model/1')", "api_arguments": ["video_url"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "import tensorf...  
+
+ gorilla_tensor_tool_30  
+
+ {"domain": "Video classification", "framework": "TensorFlow Hub", "functionality": "Video classification", "api_call": "hub.load('https://tfhub.dev/google/kinetics-i3d/1')", "api_arguments": {"model_url": "https://tfhub.dev/google/kinetics-i3d/1"}, "python_environment_requirements": {"tensorflow": ">=2.0.0", "tensorflo...  
+
+ gorilla_tensor_tool_31  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"input_shape": "(224, 224, 3)", "output_shape": "(1280,)"}, "python_environment_requirements...  
+
+ gorilla_tensor_tool_32  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Loading", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/inception_v3/classification/5')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/inception_v3/classification/5"}, "python_environment_requirements": {...  
+
+ gorilla_tensor_tool_33  
+
+ {"domain": "Audio embedding", "framework": "TensorFlow Hub", "functionality": "Generate embeddings for audio files", "api_call": "hub.load('https://tfhub.dev/google/yamnet/1')", "api_arguments": {"audio_inputs": "Tensor of shape [batch_size, num_samples] containing audio signals"}, "python_environment_requirements": {"...  
+
+ gorilla_tensor_tool_34  
+
+ {"domain": "Image segmentation", "framework": "TensorFlow Hub", "functionality": "Image segmentation model", "api_call": "hub.load('https://tfhub.dev/tensorflow/deeplabv3_257_mv_gpu/1')", "api_arguments": {"url": "https://tfhub.dev/tensorflow/deeplabv3_257_mv_gpu/1"}, "python_environment_requirements": {"tensorflow": "...  
+
+ gorilla_tensor_tool_35  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract image features", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v3_small_100_224/feature_vector/5')", "api_arguments": {"input_shape": "[batch_size, 224, 224, 3]", "output_shape": "[batch_size, 1024]"},...  
+
+ gorilla_tensor_tool_36  
+
+ {"domain": "Video classification", "framework": "TensorFlow Hub", "functionality": "Video classification model", "api_call": "hub.load('https://tfhub.dev/google/Video_classification_model_id/1')", "api_arguments": [], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "", "performance"...  
+
+ gorilla_tensor_tool_37  
+
+ {"domain": "Audio embedding", "framework": "TensorFlow Hub", "functionality": "Feature extraction from audio", "api_call": "hub.load('https://tfhub.dev/google/yamnet/1')", "api_arguments": [], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "", "performance": {"dataset": "", "accura...  
+
+ gorilla_tensor_tool_38  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extracts feature vectors from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"input_shape": "[None, 224, 224, 3]", "output_shape": "[None, 1280]"}, "py...  
+
+ gorilla_tensor_tool_39  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4')", "api_arguments": {"feature_vector_url": "URL of the pre-trained model", "input_image": "Input image tensor"}, ...  
+
+ gorilla_tensor_tool_40  
+
+ {"domain": "Image segmentation", "framework": "TensorFlow Hub", "functionality": "Image segmentation model", "api_call": "hub.load('https://tfhub.dev/tensorflow/deeplabv3/1')", "api_arguments": {"input": "tensor", "output": "tensor"}, "python_environment_requirements": {"tensorflow": ">=2.0.0", "tensorflow_hub": ">=0.1...  
+
+ gorilla_tensor_tool_41  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Image classification model", "api_call": "hub.KerasLayer('https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4')", "api_arguments": {"url": "https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4", "input_shape...  
+
+ gorilla_tensor_tool_42  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Detect objects in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/faster_rcnn/resnet50_v1_640x640/1')", "api_arguments": {"url": "https://tfhub.dev/tensorflow/faster_rcnn/resnet50_v1_640x640/1"}, "python_environment_requi...  
+
+ gorilla_tensor_tool_43  
+
+ {"domain": "Text preprocessing", "framework": "TensorFlow Hub", "functionality": "Loading", "api_call": "hub.KerasLayer('https://tfhub.dev/google/nnlm-en-dim128/2')", "api_arguments": {"handle": "A string, the handle of the Hub module to load", "kwargs": "Optional keyword arguments"}, "python_environment_requirements":...  
+
+ gorilla_tensor_tool_44  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extracts feature vector from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4')", "api_arguments": {"input_shape": "[224, 224, 3]", "output_shape": "[140]"}, "python_environme...  
+
+ gorilla_tensor_tool_45  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Detect objects in images", "api_call": "hub.load('https://tfhub.dev/tensorflow/ssd_mobilenet_v2_fpnlite_640x640/1')", "api_arguments": {"input_tensor": "4D image tensor", "output_tensor": "list of tensors representing bounding boxes, ...  
+
+ gorilla_tensor_tool_46  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract image features", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/5')", "api_arguments": "input_shape, batch_size, dtype", "python_environment_requirements": "tensorflow, tensorflow_hub"...  
+
+ gorilla_tensor_tool_47  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Image classification model", "api_call": "hub.KerasLayer('https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4')", "api_arguments": {"handle": "https://tfhub.dev/google/tf2-preview/mobilenet_v2/classification/4", "input_sh...  
+
+ gorilla_tensor_tool_48  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained image classification model", "api_call": "hub.load('https://tfhub.dev/google/imagenet/mobilenet_v2_130_224/classification/5')", "api_arguments": ["image_url"], "python_environment_requirements": ["tensorflow", "tensorflow_hu...  
+
+ gorilla_tensor_tool_49  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Pre-trained image classification model", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4')", "api_arguments": {"url": "https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classific...  
+
+ gorilla_tensor_tool_50  
+
+ {"domain": "Image object detection", "framework": "TensorFlow Hub", "functionality": "Detect objects in images", "api_call": "hub.load('https://tfhub.dev/google/faster_rcnn/inception_resnet_v2/atrous/oid_v4/1')", "api_arguments": {"image_tensor": "A tensor of shape [batch_size, height, width, 3] containing the input im...  
+
+ gorilla_tensor_tool_51  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Feature extraction from images", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/5')", "api_arguments": ["url"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_co...  
+
+ gorilla_tensor_tool_52  
+
+ {"domain": "Image feature vector", "framework": "TensorFlow Hub", "functionality": "Extract feature vector from images", "api_call": "hub.load('https://tfhub.dev/google/imagenet/inception_v3/feature_vector/1')", "api_arguments": ["module_name"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "exam...  
+
+ gorilla_tensor_tool_53  
+
+ {"domain": "Image classification", "framework": "TensorFlow Hub", "functionality": "Loading", "api_call": "hub.KerasLayer('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4')", "api_arguments": ["URL"], "python_environment_requirements": ["tensorflow", "tensorflow_hub"], "example_code": "import te...  
+
+ gorilla_tensor_tool_54  
+
+ {"domain": "Audio Speech-to-Text", "framework": "TensorFlow Hub", "functionality": "Speech Recognition", "api_call": "hub.KerasLayer('https://tfhub.dev/vasudevgupta7/wav2vec2/1')", "api_arguments": "", "python_environment_requirements": "tensorflow, tensorflow_hub", "example_code": "", "performance": {"dataset": "Libri...  
+
+ gorilla_pytorch_tool_0  
+
+ {"domain": "Video Classification", "framework": "PyTorch", "functionality": "3D ResNet", "api_call": "torch.hub.load(repo_or_dir='facebookresearch/pytorchvideo', model='slow_r50', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": ["torch", "json", "urllib", "pytorchvideo", "...  
+
+ gorilla_pytorch_tool_1  
+
+ {"domain": "Object Detection", "framework": "PyTorch", "functionality": "Traffic Object Detection, Drivable Area Segmentation, Lane Detection", "api_call": "torch.hub.load(repo_or_dir='datvuthanh/hybridnets', model='hybridnets', pretrained=True)", "api_arguments": "pretrained", "python_environment_requirements": "Pytho...  
+
+ gorilla_pytorch_tool_2  
+
+ {"domain": "Object Detection", "framework": "PyTorch", "functionality": "Object Detection, Drivable Area Segmentation, Lane Detection", "api_call": "torch.hub.load(repo_or_dir='hustvl/yolop', model='yolop', pretrained=True)", "api_arguments": "pretrained", "python_environment_requirements": "pip install -qr https://git...  
+
+ gorilla_pytorch_tool_3  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Computing relative depth from a single image", "api_call": "torch.hub.load(repo_or_dir='intel-isl/MiDaS', model='MiDaS_small', pretrained=True)", "api_arguments": {"repo_or_dir": "intel-isl/MiDaS", "model": "model_type"}, "python_environment_require...  
+
+ gorilla_pytorch_tool_4  
+
+ {"domain": "Audio Separation", "framework": "PyTorch", "functionality": "Music Source Separation", "api_call": "torch.hub.load(repo_or_dir='sigsep/open-unmix-pytorch', model='umxhq', pretrained=True)", "api_arguments": ["model_name"], "python_environment_requirements": ["PyTorch >=1.6.0", "torchaudio"], "example_code":...  
+
+ gorilla_pytorch_tool_5  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Fine-grained image classifier", "api_call": "torch.hub.load(repo_or_dir='nicolalandro/ntsnet-cub200', model='ntsnet', pretrained=True, **{'topN': 6, 'device':'cpu', 'num_classes': 200})", "api_arguments": {"pretrained": "True", "topN": "6", "device"...  
+
+ gorilla_pytorch_tool_6  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Speech-To-Text", "api_call": "torch.hub.load(repo_or_dir='snakers4/silero-models', model='silero_stt', pretrained=True)", "api_arguments": {"repo_or_dir": "snakers4/silero-models", "model": "silero_stt", "language": ["en", "de", "es"], "device": "de...  
+
+ gorilla_pytorch_tool_7  
+
+ {"domain": "Text-To-Speech", "framework": "PyTorch", "functionality": "Text-To-Speech", "api_call": "torch.hub.load(repo_or_dir='snakers4/silero-models', model='silero_tts', pretrained=True)", "api_arguments": {"repo_or_dir": "snakers4/silero-models", "model": "silero_tts", "language": "language", "speaker": "speaker"}...  
+
+ gorilla_pytorch_tool_8  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Voice Activity Detection", "api_call": "torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=True)", "api_arguments": {"repo_or_dir": "snakers4/silero-vad", "model": "silero_vad", "force_reload": "True"}, "python_enviro...  
+
+ gorilla_pytorch_tool_9  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Semi-supervised and semi-weakly supervised ImageNet Models", "api_call": "torch.hub.load(repo_or_dir='facebookresearch/semi-supervised-ImageNet1K-models', model='resnet18_swsl', pretrained=True)", "api_arguments": {"repository": "facebookresearch/se...  
+
+ gorilla_pytorch_tool_10  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Generative Adversarial Networks", "api_call": "torch.hub.load(repo_or_dir='facebookresearch/pytorch_GAN_zoo:hub', model='DCGAN', pretrained=True, useGPU=use_gpu)", "api_arguments": {"pretrained": "True", "useGPU": "use_gpu"}, "python_environment_req...  
+
+ gorilla_pytorch_tool_11  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='facebookresearch/WSL-Images', model='resnext101_32x48d_wsl', pretrained=True)", "api_arguments": [{"name": "resnext101_32x48d_wsl", "type": "str", "description": "ResNeXt-101 32x48d WSL...  
+
+ gorilla_pytorch_tool_12  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Generative Adversarial Networks (GANs)", "api_call": "torch.hub.load(repo_or_dir='facebookresearch/pytorch_GAN_zoo:hub', model='PGAN', pretrained=True)", "api_arguments": {"repo_or_dir": "facebookresearch/pytorch_GAN_zoo:hub", "model": "PGAN", "mode...  
+
+ gorilla_pytorch_tool_13  
+
+ {"domain": "Semantic Segmentation", "framework": "PyTorch", "functionality": "Biomedical Image Segmentation", "api_call": "torch.hub.load(repo_or_dir='mateuszbuda/brain-segmentation-pytorch', model='unet', in_channels=3, out_channels=1, init_features=32, pretrained=True)", "api_arguments": {"in_channels": 3, "out_chann...  
+
+ gorilla_pytorch_tool_14  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_resnet50', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": ["pip install validators m...  
+
+ gorilla_pytorch_tool_15  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_resneXt', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": ["torch", "torchvision", "v...  
+
+ gorilla_pytorch_tool_16  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_se_resnext101_32x4d', pretrained=True)", "api_arguments": "N/A", "python_environment_requirements": "validators, matplotlib", "examp...  
+
+ gorilla_pytorch_tool_17  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='alexnet', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": {"torch": ">=1.9.0", "torchvision": ">=0.10.0"}, "exampl...  
+
+ gorilla_pytorch_tool_18  
+
+ {"domain": "Text-to-Speech", "framework": "PyTorch", "functionality": "Speech Synthesis", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_waveglow', pretrained=True)", "api_arguments": {"repo_or_dir": "NVIDIA/DeepLearningExamples:torchhub", "model": "nvidia_waveglow", "mode...  
+
+ gorilla_pytorch_tool_19  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Dense Convolutional Network", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='densenet161', pretrained=True)", "api_arguments": [{"name": "densenet161", "type": "str", "description": "Densenet-161 model"}], "python_environment_requi...  
+
+ gorilla_pytorch_tool_20  
+
+ {"domain": "Semantic Segmentation", "framework": "PyTorch", "functionality": "Fully-Convolutional Network", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='fcn_resnet50', pretrained=True)", "api_arguments": [{"name": "pretrained", "type": "boolean", "description": "If True, returns a model pre-trained ...  
+
+ gorilla_pytorch_tool_21  
+
+ {"domain": "Semantic Segmentation", "framework": "PyTorch", "functionality": "Fully-Convolutional Network", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='fcn_resnet101', pretrained=True)", "api_arguments": [{"name": "pretrained", "type": "boolean", "description": "If True, returns a model pre-trained...  
+
+ gorilla_pytorch_tool_22  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='PingoLH/Pytorch-HarDNet', model='hardnet85', pretrained=True)", "api_arguments": [{"name": "hardnet85", "type": "str", "description": "HarDNet-85 model"}], "python_environment_requireme...  
+
+ gorilla_pytorch_tool_23  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Efficient networks by generating more features from cheap operations", "api_call": "torch.hub.load(repo_or_dir='huawei-noah/ghostnet', model='ghostnet_1x', pretrained=True)", "api_arguments": ["pretrained"], "python_environment_requirements": ["torc...  
+
+ gorilla_pytorch_tool_24  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='googlenet', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": {"torch": ">=1.0.0", "torchvision": ">=0.2.2"}, "examp...  
+
+ gorilla_pytorch_tool_25  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='inception_v3', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": {"torch": "1.9.0", "torchvision": "0.10.0"}, "examp...  
+
+ gorilla_pytorch_tool_26  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='zhanghang1989/ResNeSt', model='resnest269', pretrained=True)", "api_arguments": "resnest269", "python_environment_requirements": {"torch": "1.0.0", "torchvision": "0.2.2"}, "example_cod...  
+
+ gorilla_pytorch_tool_27  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "ProxylessNAS", "api_call": "torch.hub.load(repo_or_dir='mit-han-lab/ProxylessNAS', model='proxylessnas_mobile', pretrained=True)", "api_arguments": [{"name": "proxylessnas_mobile", "type": "str", "description": "ProxylessNAS optimized for Mobile"}],...  
+
+ gorilla_pytorch_tool_28  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='mobilenet_v2', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": ["torch", "torchvision", "PIL", "urllib"], "example...  
+
+ gorilla_pytorch_tool_29  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Deep Residual Networks", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='resnet152', pretrained=True)", "api_arguments": [{"name": "pretrained", "type": "bool", "default": "False", "description": "If True, returns a model pre-traine...  
+
+ gorilla_pytorch_tool_30  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='resnext101_32x4d', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": ["torch", "torchvision", "PIL"], "example_code"...  
+
+ gorilla_pytorch_tool_31  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='huawei-noah/Efficient-AI-Backbones', model='snnmlp_b', pretrained=True)", "api_arguments": [{"name": "snnmlp_b", "type": "str", "description": "SNNMLP Base model"}], "python_environment...  
+
+ gorilla_pytorch_tool_32  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='squeezenet1_1', pretrained=True)", "api_arguments": {"version": "v0.10.0", "model": ["squeezenet1_1"], "pretrained": "True"}, "python_environment_requirements": ...  
+
+ gorilla_pytorch_tool_33  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='shufflenet_v2_x1_0', pretrained=True)", "api_arguments": {"pretrained": "True"}, "python_environment_requirements": {"torch": "torch", "torchvision": "torchvisio...  
+
+ gorilla_pytorch_tool_34  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Recognition", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='vgg19_bn', pretrained=True)", "api_arguments": [{"name": "vgg19_bn", "type": "str", "description": "VGG19 model with batch normalization"}], "python_environment_req...  
+
+ gorilla_pytorch_tool_35  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Wide Residual Networks", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='wide_resnet50_2', pretrained=True)", "api_arguments": "pretrained", "python_environment_requirements": "torch, torchvision", "example_code": ["import torch", "...  
+
+ gorilla_pytorch_tool_36  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Wide Residual Networks", "api_call": "torch.hub.load(repo_or_dir='pytorch/vision', model='wide_resnet101_2', pretrained=True)", "api_arguments": "pretrained", "python_environment_requirements": "torch, torchvision", "example_code": ["import torch", ...  
+
+ gorilla_pytorch_tool_37  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Natural Language Processing", "api_call": "torch.hub.load(repo_or_dir='huggingface/pytorch-transformers')", "api_arguments": ["pretrained_model_or_path", "output_attention", "output_hidden_states", "config", "from_tf"], "python_environment_requireme...  
+
+ gorilla_pytorch_tool_38  
+
+ {"domain": "Semantic Segmentation", "framework": "PyTorch", "functionality": "Neural Machine Translation", "api_call": "torch.hub.load(repo_or_dir='pytorch/fairseq')", "api_arguments": ["model_name", "tokenizer", "bpe", "beam", "sampling", "sampling_topk"], "python_environment_requirements": ["bitarray", "fastBPE", "hy...  
+
+ gorilla_pytorch_tool_39  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_efficientnet_b0', pretrained=True)", "api_arguments": ["model_name", "pretrained"], "python_environment_requirements": ["validators"...  
+
+ gorilla_pytorch_tool_40  
+
+ {"domain": "Object Detection", "framework": "PyTorch", "functionality": "Single Shot MultiBox Detector", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_ssd', pretrained=True)", "api_arguments": ["model_name"], "python_environment_requirements": ["numpy", "scipy", "scikit-i...  
+
+ gorilla_pytorch_tool_41  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Text-to-Speech", "api_call": "torch.hub.load(repo_or_dir='NVIDIA/DeepLearningExamples:torchhub', model='nvidia_tacotron2', model_math='fp16')", "api_arguments": {"model_math": "fp16"}, "python_environment_requirements": ["numpy", "scipy", "librosa",...  
+
+ gorilla_pytorch_tool_42  
+
+ {"domain": "Classification", "framework": "PyTorch", "functionality": "Image Classification", "api_call": "torch.hub.load(repo_or_dir='szq0214/MEAL-V2', 'meal_v2', model='mealv2_efficientnet_b0', pretrained=True)", "api_arguments": {"model_name": "mealv2_efficientnet_b0"}, "python_environment_requirements": "!pip insta...  
+
+ craft_Vqa_tool_0  
+
+ {"name": "check_object_in_area(image_patch: ImagePatch, area_name: str, object_name: str) -> str", "description": "def check_object_in_area(image_patch: ImagePatch, area_name: str, object_name: str) -> str:\n    '''Check the presence of a certain object in a specific area.\n    \n    Args:\n        image_patch (ImagePa...  
+
+ craft_Vqa_tool_1  
+
+ {"name": "identify_object_clothing(image_patch: ImagePatch, object_name: str) -> str", "description": "def identify_object_clothing(image_patch: ImagePatch, object_name: str) -> str:\n    '''Identify what a specific object is wearing.\n    \n    Args:\n        image_patch (ImagePatch): The image patch to check.\n      ...   
+End of preview. Expand in Data Studio      
+
+🔧 Retrieving useful tools from a large-scale toolset is an important step for Large language model (LLMs) in tool learning. This project (ToolRet) contribute to (i) the first comprehensive tool retrieval benchmark to systematically evaluate existing information retrieval (IR) models on tool retrieval tasks; and (ii) a large-scale training dataset to optimize the expertise of IR models on this tool retrieval task.
+
+This ToolRet-Tools contains the toolset corpus of our tool retrieval benchmark.
+
+		Citation
+
+@article{shi2025retrieval,
+  title={Retrieval Models Aren't Tool-Savvy: Benchmarking Tool Retrieval for Large Language Models},
+  author={Shi, Zhengliang and Wang, Yuhan and Yan, Lingyong and Ren, Pengjie and Wang, Shuaiqiang and Yin, Dawei and Ren, Zhaochun},
+  journal={arXiv preprint arXiv:2503.01763},
+  year={2025}
+}
+
+ Copy to bucket    
+
+ Use this dataset      
+
+ Downloads last month 
+ 4,477  
+
+Number of rows: 
+44,453 
+Total file size: 
+9.32 MB    
+
+ Spaces using mangopy/ToolRet-Tools 3 
+
+ Collection including mangopy/ToolRet-Tools 
+
+Tool-Retrieval 
+ Collection 
+The first large-scale and diverse tool retrieval benchmark. See our homepage for more details: https://github.com/mangopy/tool-retrieval-benchmark. • 8 items • Updated Jun 26, 2025 •  4 
+
+ Paper for mangopy/ToolRet-Tools 
+
+Retrieval Models Aren't Tool-Savvy: Benchmarking Tool Retrieval for
+  Large Language Models 
+ Paper • 2503.01763 • Published Mar 3, 2025 •  4   
+

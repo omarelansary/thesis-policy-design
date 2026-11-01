@@ -1,0 +1,174 @@
+
+
+  Reward extraction is extremely untrustworthy · Issue #9 · icip-cas/LiveMCPBench · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Reward extraction is extremely untrustworthy #9
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+#13
+
+Open
+
+Reward extraction is extremely untrustworthy#9
+
+#13
+
+Copy link
+
+Description
+
+snova-jorgep
+opened on Dec 16, 2025
+
+Issue body actions
+
+in evaluator/llm_as_judge_baseline.py main this is the current logic to get te reward score
+
+...
+            res = chat_model.chat_with_retry(message=messages)
+            res_text = res.choices[0].message.content
+            pattern = r"Thoughts:\s*(.+?)\s*Status:\s*(\w+)"
+            match = re.search(pattern, res_text, re.DOTALL)
+            if match:
+                thoughts = match.group(1).strip()
+                judge = match.group(2).strip()
+            else:
+                thoughts = "Thoughts extract failed."
+                judge = res_text
+            reward = 1
+            if "success" in judge.lower():
+                reward *= 1
+            elif "failure" in judge.lower():
+                reward *= 0
+            else:
+                reward *= 0
+            judge_results.append(
+                {
+...
+
+Note that when regex doesn't find matches (that actually happens a lot of times), the way to get the reward is to check if the full judge text response contains the string success and only if there is not success, then it searched for the failure string in the full judge text response
+
+now see this case:
+
+Judge response:
+
+"Thoughts: The agent did not provide the departure time or ticket price for the earliest high-speed train. Tool call history shows only a get-current-date call (used to resolve \"tomorrow\") and no calls to station-code lookup or schedule/price APIs; the agent explicitly stated it could not retrieve station codes and therefore could not query schedules. Per evaluation criterion 1, required information must come from tool calls (not internal knowledge), and here no schedule or price data was obtained from tools. Criterion 2 (file creation) is not applicable. Because none of the required outputs (earliest train departure time and ticket price) were produced from the tool data, the task was not completed successfully.  \nStatus: \"failure\""
+
+Reward = 1    (?)
+
+in this case the regex pattern doesn't find any match (very common), so the success or failure is gotten from the full text, and the model said ... the task was not completed successfully ..., which contains the substring success, so it is marked as successful when the model is clearly telling that the task failed
+
+And having the success substring, word in some part of the full answer is extremely common when you are asking a model to evaluate if a task succeeded or failed, this reward extraction mechanism is clearly insufficient and adds a lot of false positives, making Reward extraction and results extremely untrustworthy
+
+😕React with 😕1Reacted by Luis Felipe Salazar Ucros
+
+Activity
+
+hysyyds commented on Dec 18, 2025 
+
+hysyyds
+on Dec 18, 2025
+
+Collaborator
+More actions
+
+Thank you for the reminder. This was an early implementation bug on our side, and we have fixed this issue. The fix logic is as follows:
+
+            judge_pattern = r"Status:\s*([\S]+)"
+            thoughts_pattern=r"Thoughts:([\s\S]+)Status"
+            judge_match = re.search(judge_pattern, res_text, re.DOTALL)
+            thoughts_match = re.search(thoughts_pattern, res_text, re.DOTALL)
+            if judge_match:
+                judge = judge_match.group(1).strip()
+            else:
+                judge = res_text
+            if thoughts_match:
+                thoughts = thoughts_match.group(1).strip()
+            else:
+                thoughts = "Thoughts extract failed."
+
+snova-jorgep commented on Dec 18, 2025 
+
+snova-jorgep
+on Dec 18, 2025
+
+Author
+More actions
+
+@hysyyds thanks I see the change, however I think this approach is still problematic in cases where the new regex does not match, you still do judge = res_text  searching in the full text for the success substring.
+
+hysyyds commented on Dec 18, 2025 
+
+hysyyds
+on Dec 18, 2025
+
+Collaborator
+More actions
+
+@hysyyds thanks I see the change, however I think this approach is still problematic in cases where the new regex does not match, you still do judge = res_text searching in the full text for the success substring.
+
+Yes, this works fine with deepseek-v3 as the judge. But I agree there are still edge cases.
+
+When the regex fails to match, falling back to judge = res_text and searching the full text may introduce noise. Would it make sense to assign a fixed reward for non-extractable cases instead?
+
+snova-jorgep commented on Dec 22, 2025 
+
+snova-jorgep
+on Dec 22, 2025
+
+Author
+More actions
+
+I think this will require a more involved solution. I'm thinking of actual JSON schema structured outputs to guarantee the score and thoughts are always extracted from the thoughts and score keys in the schema
+
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

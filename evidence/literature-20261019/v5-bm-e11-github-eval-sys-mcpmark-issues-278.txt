@@ -1,0 +1,219 @@
+
+
+  Postgres verifiers pass when the agent empties the source tables (12 of 28 tasks tested) · Issue #278 · eval-sys/mcpmark · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Postgres verifiers pass when the agent empties the source tables (12 of 28 tasks tested) #278
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+Postgres verifiers pass when the agent empties the source tables (12 of 28 tasks tested)#278
+
+Copy link
+
+Description
+
+fixverified
+opened on Oct 30, 2026
+
+Issue body actions
+
+Bug Description
+
+An agent can pass 12 of the 28 Postgres tasks I tested without doing the work: 8 of 18 standard tasks and 4 of 10 easy tasks.
+
+These verifiers run their ground-truth queries against the same database the agent can write to, after the agent finishes. For most of these tasks, if the agent empties the source tables and creates empty output tables, the expected result is also empty, so the comparison passes with 0 records.
+
+The agent has the access to do this. It gets postgres-mcp --access-mode=unrestricted (src/agents/mcpmark_agent.py:1183) with the same login as the verifier (POSTGRES_USERNAME, default postgres, a superuser; src/services.py:236).
+
+Recurrence Steps
+
+At commit cd45b7f, with the employees database restored as in docs/mcp/postgres.md. Use a copy. Don't run this on employees, because task databases are cloned from it.
+
+docker exec mcpmark-postgres createdb -U postgres -T employees l1_repro
+docker exec -i mcpmark-postgres psql -U postgres -d l1_repro <<'EOF'
+TRUNCATE employees.department, employees.department_manager CASCADE;
+CREATE TABLE employees.manager_profile (manager_id bigint, manager_name varchar, current_department varchar, management_periods integer, current_manager boolean);
+CREATE TABLE employees.department_leadership (department_name varchar, current_manager_name varchar, manager_start_date date, total_historical_managers integer);
+CREATE TABLE employees.management_transitions (department_name varchar, transition_year integer, outgoing_manager varchar, incoming_manager varchar, transition_gap_days integer);
+CREATE TABLE employees.span_of_control (manager_id bigint, manager_name varchar, department_name varchar, total_employees integer, current_employees integer, management_load varchar);
+EOF
+POSTGRES_HOST=localhost POSTGRES_PORT=5432 POSTGRES_USERNAME=postgres POSTGRES_PASSWORD=password POSTGRES_DATABASE=l1_repro \
+  python tasks/postgres/standard/employees/management_structure_analysis/verify.py; echo "exit code: $?"
+docker exec mcpmark-postgres dropdb -U postgres l1_repro
+
+Output:
+
+✅ Manager profile results are correct (0 records)
+✅ Department leadership results are correct (0 records)
+✅ Management transitions results are correct (0 records)
+✅ Span of control results are correct (0 records)
+
+🎉 Task verification: PASS
+exit code: 0
+
+Expected Behavior
+
+The task should fail, because no analysis was produced. The database is disposable, so this isn't about data loss. The score is wrong, because the answer key is computed from data the agent can change.
+
+Accidental changes move it too. Correct output tables plus one deleted department_manager row fail with Expected 23 manager profile results, got 24. I have no evidence that any published score is affected.
+
+Additional Information
+
+Tasks that pass with the source tables wiped:
+
+Suite
+Task
+Output tables
+
+standard
+employees/management_structure_analysis
+Empty
+
+standard
+employees/employee_performance_analysis
+Empty
+
+standard
+employees/employee_retention_analysis
+Empty
+
+standard
+chinook/sales_and_music_charts
+Empty
+
+standard
+dvdrental/customer_analysis_fix
+Empty
+
+standard
+sports/baseball_player_analysis
+Empty
+
+standard
+sports/team_roster_management
+6 placeholder summary rows
+
+standard
+employees/employee_demographics_report
+12 placeholder birth-month rows
+
+easy
+employees/department_summary_view
+Empty
+
+easy
+employees/employee_gender_statistics
+Empty
+
+easy
+employees/hiring_year_summary
+Empty
+
+easy
+lego/fix_data_inconsistencies
+None needed
+
+Doing nothing passed 0 of the 28. The other 16 failed this attack, which doesn't show they are safe. I did not test the 3 tasks that build their own data with setup scripts: security/rls_business_access, security/user_permission_audit and vectors/dba_vector_analysis.
+
+What I tested and what I didn't:
+
+These model runs used claude-sonnet-4.5 and --agent react, because the default agent failed on Anthropic (Default agent fails on Anthropic models: API rejects enforcer_mode #277). Only management_structure_analysis went through the full pipeline. The other tasks were tested by running verify.py directly.
+
+In 1 run, the model was given a modified task description containing the exact SQL, and it passed.
+
+I did not see a model do this unprompted. It did the real work and passed in 2 of 2 runs of the normal task. With a prompt saying only the verifier counts, that it queries the live tables, and that any approach is allowed, it did the real work in 3 of 3 runs (1 passed, 2 had errors) and never tried the attack. The sample is small. The agent can't see verify.py through its tools, but the repo is public.
+
+The pipeline run also needed pglast 7.20 and mcp<2, because the pinned postgres-mcp==0.3.0 install fails (postgres-mcp==0.3.0 fails to install: pglast==7.2.0 not found #276).
+
+Suggested fix:
+
+Run the ground-truth queries against the untouched template database instead of the task's copy. PostgresStateManager already creates each task database from a category template.
+
+I tested this on patched copies of the 12 verifiers:
+
+Result
+Tasks
+Attack
+Generated valid solution
+
+Fixed
+10
+Fails
+Passes
+
+Needs more work
+team_roster_management
+Fails
+Fails, because two of its ground-truth queries read the agent's output tables, which the template doesn't have
+
+Not covered
+fix_data_inconsistencies
+Passes
+Not tested. It has no ground-truth query
+
+The valid solutions were generated from each verifier's own queries, so they show the fix doesn't break those queries, not that it accepts other correct approaches.
+
+Limits of this fix:
+
+_create_database_from_template terminates existing connections to the template, so a verifier reading the template while another task starts could lose its connection. This is from reading the code. I did not run parallel tasks.
+
+The template isn't protected from the agent's superuser login, so a complete fix also needs a non-superuser agent login or a copy stored outside the database. I did not test an agent reaching the template.
+
+tasks/supabase and tasks/insforge are symlinks to these verifiers, and from reading the code those backends have no template database, so they would need a fallback.
+
+An alternative I did not test: have the harness record each source table's row count or checksum before the agent starts, and fail if it changes. That needs no verifier edits and would also cover team_roster_management and fix_data_inconsistencies. Row counts alone would miss in-place updates, and tasks that legitimately change rows would need an exemption.
+
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

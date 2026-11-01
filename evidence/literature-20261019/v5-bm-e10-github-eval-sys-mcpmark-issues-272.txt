@@ -1,0 +1,157 @@
+
+
+  Run-to-run noise in the v1-0905 logs: about 11 points between single runs on each service · Issue #272 · eval-sys/mcpmark · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Run-to-run noise in the v1-0905 logs: about 11 points between single runs on each service #272
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+Run-to-run noise in the v1-0905 logs: about 11 points between single runs on each service#272
+
+Copy link
+
+Description
+
+Universeyi
+opened on Oct 3, 2026
+
+Issue body actions
+
+Hi, thanks for publishing per-run logs and for running four repeats per configuration.
+
+I computed the run-to-run noise floor from the v1-0905 logs on Hugging Face (Jakumetsu/mcpmark-trajectory-log). No new runs. For the 67 configurations with four complete rounds and a non-zero score:
+
+On each service, two single runs of the same configuration must differ by about 11 points (median; 14.9 on Postgres) before the gap is outside what repetition alone produces, at 95%. With 21 to 30 tasks per service, most of this is sample size.
+
+For two four-run averages, which is what the leaderboard compares, the threshold is about half: 5.4 to 6.0 points per service, 7.4 on Postgres.
+
+A median of 22% of tasks flip between identical runs.
+
+Per-configuration tables: https://github.com/Universeyi/evidence-manifest/tree/main/results/mcpmark
+
+I know these logs are from a deprecated task version and Verified is now the default. Two things from this that might help with Verified:
+
+In these logs, 559 of 11,314 runs ended in a harness or API error and carry no verdict, and pass@1 counts them as failures. Reporting them separately would keep infrastructure errors out of the score.
+
+A short note next to the ± on which gaps between two entries it can resolve.
+
+Also worth saying: meta.json records actual_model_name read back from the API response. Among the public logs I surveyed, MCPMark's is the only one that does this.
+
+Are per-run logs for the Verified set published? I would run the same analysis and post it here.
+
+The analysis code is MIT licensed: https://github.com/Universeyi/evidence-manifest
+
+Activity
+
+saad-aamir commented on Oct 5, 2026 
+
+saad-aamir
+on Oct 5, 2026
+
+More actions
+
+We see the same thing from a different angle, and it gets bigger when you look per task.
+
+I ran MCPMark's easy filesystem and postgres tasks (20 total) with my own agent loop, gpt-oss-120b and gpt-oss-20b via OpenRouter pinned to one provider, temperature 1.0, 5 attempts per task:
+
+pass@1
+pass^5 (all 5 attempts pass)
+
+gpt-oss-120b
+87% [75, 96]
+65% [45, 85]
+
+gpt-oss-20b
+77% [62, 90]
+50% [30, 70]
+
+(95% intervals from a bootstrap over tasks.)
+
+Two observations that might be useful here:
+
+pass@1 was stable across two independent runs a day apart (87% both times for 120b), but pass^5 moved from 75% to 65%. Averages can look steady while per-task consistency is low.
+
+Part of the variance came from the serving stack, not the model: about 1 to 2% of model replies came back empty with a tool call lost by the provider's parser. Counting those as failures (as your agent does) drops 120b's pass^5 from 65% to 45%.
+
+So reporting pass^k, or several runs with task-level intervals, might help separate model noise from run noise. Different agent loop and models from your logs, so not directly comparable, but the code and data are here if useful: https://github.com/saad-aamir/gomjabbar
+
+Universeyi commented on Oct 5, 2026 
+
+Universeyi
+on Oct 5, 2026
+
+Author
+More actions
+
+Thanks, the empty replies are the interesting part: a parser dropping a tool call gets scored as the model's failure. I saw something similar in MobileWorld, where the pinned endpoint changed behaviour mid-run. Did the empty replies cluster in time or on particular tasks?
+
+saad-aamir commented on Oct 6, 2026 
+
+saad-aamir
+on Oct 6, 2026
+
+More actions
+
+On particular tasks, not clustered in time. 21 empty replies landed across 9 of the 10 tasks, and when I replayed the exact conversations the same prompt came back empty at a consistent rate rather than in bursts, so it looked like a property of specific (task, step) prompts, not a drift over the run.
+
+Two things that might match your MobileWorld case:
+
+It reproduced on two different providers for the same model at similar rates (27% and 23% at temperature 1.0), so it looks like a model-output-format issue (gpt-oss Harmony) that each provider's parser handles imperfectly, rather than one endpoint changing behaviour.
+
+There seem to be two kinds. In some, the tool call was generated but dropped: on one provider the call is visible as JSON at the end of the reasoning text, and the reply is billed output tokens about the size of a tool call, but content is empty and tool_calls is empty. In others the model just stops after its reasoning with nothing following.
+
+Replay script and the full breakdown are in docs/notes/empty-replies.md in the repo if useful.
+
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

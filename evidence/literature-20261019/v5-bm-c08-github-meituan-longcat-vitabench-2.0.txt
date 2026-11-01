@@ -1,0 +1,454 @@
+
+
+  GitHub - meituan-longcat/VitaBench-2.0 · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+VitaBench-2.0Public
+
+NotificationsYou must be signed in to change notification settings
+Fork10 (10)
+Star77 (77)You must be signed in to star a repository
+
+About
+No description, website, or topics provided.
+Resources
+Readme
+MIT license
+
+Activity
+Custom properties
+
+Stars
+77 stars
+Watchers
+1 watching
+Forks
+10 forks
+Report repository
+
+main
+
+BranchesTags
+
+Go to fileCode
+Open more actions menu
+
+Latest commit
+
+History9 Commits
+
+9 Commits
+Folders and files
+
+NameName
+Last commit message
+Last commit date
+
+figure
+
+figure
+
+scripts
+
+scripts
+
+src/vita
+
+src/vita
+
+tests
+
+tests
+
+.gitignore
+
+.gitignore
+
+LICENSE
+
+LICENSE
+
+README.md
+
+README.md
+
+pyproject.toml
+
+pyproject.toml
+
+View all files
+
+Repository files navigation
+
+    🌱VitaBench 2.0: Evaluating Personalized and Proactive
+
+    Agents in Long-Term User Interactions
+
+  📃 Paper • 🌐 Website • 🤗 Dataset • 🌱 VitaBench 1.0
+
+  🌍 English version benchmark coming soon.
+
+🔔 News
+
+[2026-06] VitaBench 2.0 is released — extending VitaBench from one-shot tasks to long-term, multi-session user interactions, with an extensible memory interface and a personalization leaderboard. 🚀
+
+[2026-01] VitaBench has been accepted to ICLR 2026! 🎉
+
+[2025-10] The original VitaBench suite is released, including the codebase, dataset and evaluation pipeline.
+
+📖 Introduction
+
+Large language models (LLMs) have evolved into interactive agents that collaborate with users in real-world tasks. Effective collaboration increasingly depends on understanding the user beyond what is explicitly stated: user intent is often reflected in fragmented daily interactions and requires both personalized modeling and proactive interaction. We introduce VitaBench 2.0, a benchmark for evaluating personalized and proactive agent behavior in long-term user interactions.
+
+VitaBench 2.0 extends VitaBench from one-shot tasks to long-term, multi-session user interactions, where an agent must infer, utilize, and update user preference across fragmented conversations and behaviors that span days, weeks, or months. While VitaBench 1.0 measures whether an agent can complete a single complex life-serving request, VitaBench 2.0 further asks: can an agent understand the user from daily interactions, anticipate their evolving needs, and act on their behalf — over time?
+
+Concretely, each evaluation is a single user with a sequence of subtasks drawn from the three life-service domains of VitaBench (food delivery, in-store consumption, and online travel / OTA). Between subtasks the agent's memory module is updated from the prior interaction; at the start of each subtask the memory is injected into the system prompt. The benchmark's core question is: which memory backend lets the agent answer personalized queries correctly?
+
+To support systematic analysis, we provide an extensible memory interface that enables controlled comparison across representative memory architectures:
+
+Full Context — the entire interaction history is appended to the prompt, an upper bound on what the model can possibly leverage.
+
+Agentic / Rewrite Memory — the agent maintains a single consolidated memory store, deciding what to write and read across subtasks.
+
+RAG Memory — past interactions are chunked, embedded, and retrieved on demand.
+
+Our results show that even SOTA models reach only ~50% Avg@4 under Full Context and degrade further under realistic memory settings, indicating that long-horizon personalization and proactivity remain open challenges for current LLM agents.
+
+The name "Vita" derives from the Latin word for "Life", reflecting our focus on life-serving applications.
+
+🌱 Benchmark Details
+
+VitaBench 2.0 reuses the three life-service environments of VitaBench and recomposes them into per-user, multi-subtask sequences. Each task represents a single user, and each subtask within it provides:
+
+An instruction — what the user is asking for in this subtask.
+
+The user's ground-truth preferences — the correct personalized preferences the agent is expected to have learned and applied, used as the reference for scoring.
+
+Prior interaction history — the user's earlier conversations and behaviors that the agent can draw on to infer those preferences.
+
+A rubric — the criteria used to judge whether the agent's response is correct.
+
+A candidate environment — a pool of real-world entities (restaurants, shops, hotels, trains, flights, or attractions, depending on the domain) that mixes the correct target with plausible distractors, so the agent must select the right one rather than guess.
+
+Personalization dataset
+
+Users (tasks)
+56
+
+Subtasks (total)
+771
+
+Subtasks per user (avg)
+~14
+
+Domains covered
+delivery · instore · ota
+
+Within a task, the agent works through the user's subtasks one at a time. Before each subtask (except the first), the agent's memory is updated from the previous interaction and injected into its context, so knowledge about the user accumulates over time. The agent then handles the current subtask by conversing with the user and calling tools in the relevant domain, and its response is scored against that subtask's rubric. Once all subtasks are done, the per-subtask scores are aggregated into an overall result for the user.
+
+🛠️ Quick Start
+
+1. Install
+
+git clone https://github.com/meituan-longcat/VitaBench-2.0.git
+cd VitaBench-2.0
+pip install -e .
+
+This installs the vita CLI.
+
+2. Download the dataset
+
+VitaBench 2.0 tasks are hosted on Hugging Face: meituan-longcat/VitaBench-2.0.
+
+pip install -U "huggingface_hub[cli]"
+huggingface-cli download meituan-longcat/VitaBench-2.0 \
+  --repo-type dataset \
+  --local-dir data/vita/domains/personalization
+
+After downloading you should have data/vita/domains/personalization/tasks.json (56 users, 771 subtasks).
+
+The original VitaBench domains (delivery, instore, ota, cross-domain) are still supported — download them from the VitaBench 1.0 dataset and place each under data/vita/domains/<domain>/tasks.json.
+
+3. Configure the LLM
+
+cp src/vita/models.yaml.example src/vita/models.yaml
+export OPENAI_API_KEY=sk-...
+
+src/vita/models.yaml supports any OpenAI-compatible endpoint — change default.base_url to point at Azure, vLLM, Together, llama.cpp, etc. The YAML supports ${VAR} placeholders expanded from your shell at startup; an unset variable raises a clear error. To relocate the file, set VITA_MODEL_CONFIG_PATH:
+
+export VITA_MODEL_CONFIG_PATH=/path/to/your/models.yaml
+
+For RAG / embeddings, optionally override the embedding provider:
+
+Env var
+Default
+Purpose
+
+VITA_EMBEDDING_URL
+models.yaml default.base_url
+Embedding endpoint
+
+VITA_EMBEDDING_KEY
+models.yaml default.api_key
+Embedding API key
+
+VITA_EMBEDDING_MODEL
+text-embedding-3-large
+Embedding model name
+
+VITA_EMBEDDING_MAX_CONCURRENCY
+64
+Per-event-loop semaphore size
+
+4. Run a personalization evaluation
+
+vita run \
+  --domain personalization \
+  --memory-type rewrite \           # null | rewrite | rag | rag_cache | full_context | groundtruth
+  --agent-llm gpt-4.1 \
+  --user-llm gpt-4.1 \
+  --evaluator-llm gpt-4.1 \
+  --max-steps 50 \
+  --max-concurrency 50 \
+  --save-to mytest/rewrite.json \   # resolved under data/simulations/
+  --log-level INFO
+
+Subset the run with --num-tasks N or --task-ids <user_id> …. Results are written under data/simulations/.
+
+5. Run all memory backends in parallel
+
+scripts/run_memory_benchmark.sh launches one vita run per memory type concurrently, holding --max-steps, --max-concurrency and the agent/user/evaluator LLMs identical across runs (the only fair way to compare backends):
+
+bash scripts/run_memory_benchmark.sh full_context rewrite
+
+Logs and per-backend results land in data/simulations/memory_benchmark_<timestamp>/, with a reward summary table printed on completion.
+
+Memory backends
+
+--memory-type
+Behaviour
+
+null
+No memory (baseline lower bound)
+
+groundtruth
+Injects the canonical preference memory directly (oracle upper bound)
+
+full_context
+Appends every prior interaction, token-truncated from the head
+
+rewrite
+LLM rewrites a single consolidated memory string each update (agentic)
+
+rag
+Async vector retrieval (text-embedding-3-large by default)
+
+rag_cache
+Same retrieval as rag, but embeddings are precomputed (see scripts/precompute_rag_cache.py)
+
+Per-backend defaults (RAG top_k / similarity_threshold / chunk_size, Rewrite / FullContext max_tokens) live in src/vita/memory.yaml; constructor kwargs override the YAML. Plug in a custom backend with --memory-class my_pkg.MyMemory (takes precedence over --memory-type).
+
+Re-evaluate existing simulations
+
+vita run \
+  --re-evaluate-file <simulation file> \
+  --evaluation-type <trajectory | trajectory_full_traj_rubric | trajectory_sliding_wo_rubric | trajectory_full_traj_wo_rubric> \
+  --evaluator-llm gpt-4.1 \
+  --save-to <new file>
+
+View results
+
+vita view --file <simulation file>
+
+Other CLI knobs worth knowing
+
+Flag
+Effect
+
+--enable-think
+Enable agent thinking mode
+
+--enable-outcome-reward
+Personalization only: combine trajectory reward with action-level outcome reward via min()
+
+--num-trials N
+Repeat each task N times (for Avg@N / Pass@N / Pass^N)
+
+--language chinese|english
+Prompt / task language (default chinese)
+
+--max-errors N
+Max consecutive tool errors before aborting a task
+
+--csv-output <path>
+Append per-task results to a CSV
+
+🏆 Leaderboard
+
+Performance of non-thinking and thinking models under three memory settings, sorted by Avg@4 under Full Context. Best results in each column are in bold.
+
+Non-thinking Models
+
+Model
+
+Full Context
+
+Agentic Memory
+
+RAG Memory
+
+      Avg@4Pass@4Pass^4
+      Avg@4Pass@4Pass^4
+      Avg@4Pass@4Pass^4
+
+GPT-4o-mini0.0670.1800.0060.0840.2290.0080.0940.2270.011
+
+GPT-3.5-Turbo0.1400.3140.0190.2310.4670.0560.2050.4090.059
+
+LongCat-Flash-Chat0.2980.5100.1230.3020.5370.1050.2900.4710.136
+
+GLM-4.50.3070.5290.1270.3300.5690.1120.3160.5230.152
+
+Doubao-Seed-1.60.3260.5120.1710.3400.5760.1290.3510.5430.174
+
+GLM-4.60.3420.6120.1130.3360.6230.0840.3170.5550.123
+
+Kimi-K2.60.3780.6320.1470.3970.6740.1450.3830.6210.163
+
+GLM-5.10.4200.6540.2040.4230.6640.1820.3830.5850.200
+
+Doubao-Seed-2.0-pro0.4280.6490.2180.4260.6650.1980.4060.6250.208
+
+DeepSeek-V4-Pro0.4560.6520.2670.4270.6580.2070.4240.6180.247
+
+Thinking Models
+
+Model
+
+Full Context
+
+Agentic Memory
+
+RAG Memory
+
+      Avg@4Pass@4Pass^4
+      Avg@4Pass@4Pass^4
+      Avg@4Pass@4Pass^4
+
+o4-mini0.2100.4330.0470.2700.5330.0730.2610.4520.091
+
+Gemini-2.5-Flash0.2820.5560.0630.3120.5670.0980.3090.5440.107
+
+Qwen3-Max0.2840.4990.1050.3240.5990.0910.3150.5190.134
+
+Gemini-2.5-Pro0.3310.6050.1090.3780.6380.1380.3200.5790.109
+
+MiniMax-M2.70.3490.5850.1360.3760.6290.1500.3350.5340.148
+
+GLM-4.60.3590.6120.1160.3510.6250.1070.3360.5740.135
+
+GLM-4.50.3690.6200.1570.3300.5810.1140.3430.5590.160
+
+Doubao-Seed-1.60.3730.5990.1760.3830.6460.1230.3750.5910.179
+
+DeepSeek-R1-05280.3960.6910.1310.4120.7120.1180.3900.6430.153
+
+o30.4030.6530.1690.4010.6690.1540.3620.5870.158
+
+Claude-4.5-Sonnet0.4170.6580.1970.3970.6420.1780.3740.5730.186
+
+GPT-50.4410.6580.2260.4210.6470.2040.4100.5910.236
+
+GLM-5.10.4500.6500.2700.4530.6800.2390.3830.5400.226
+
+DeepSeek-V4-Pro0.4720.6490.2950.4490.6560.2550.4300.5840.271
+
+Doubao-Seed-2.0-pro0.4740.6830.2700.4280.6500.2250.3390.4960.205
+
+Kimi-K2.60.4810.6850.2660.4500.6960.2230.4340.6110.253
+
+Claude-Opus-4.60.5030.6640.3370.4540.6450.2590.4300.5660.299
+
+Avg@4 — mean success rate over 4 independent rollouts per task (single-attempt success).
+Pass@4 — fraction of tasks solved in at least one of 4 rollouts (best-of-4).
+Pass^4 — fraction of tasks solved in all 4 rollouts (consistency).
+
+🔎 Citation
+
+If you use VitaBench 2.0 in your research, please cite:
+
+@article{chen2026vitabench,
+  title={VitaBench 2.0: Evaluating Personalized and Proactive Agents in Long-Term User Interactions},
+  author={Chen, Yuxin and Zhang, Yi and Cai, Zhengzhou and Shi, Yaorui and Yao, Zhiyuan and Cui, Chenhang and Zheng, Jingnan and Huo, Yaqi and Su, Xi and Gu, Qi and others},
+  journal={arXiv preprint arXiv:2605.27141},
+  year={2026}
+}
+
+And the original VitaBench paper this work builds on:
+
+@article{he2025vitabench,
+  title={VitaBench: Benchmarking LLM Agents with Versatile Interactive Tasks in Real-world Applications},
+  author={He, Wei and Sun, Yueqing and Hao, Hongyan and Hao, Xueyuan and Xia, Zhikang and Gu, Qi and Han, Chengcheng and Zhao, Dengchang and Su, Hui and Zhang, Kefeng and Gao, Man and Su, Xi and Cai, Xiaodong and Cai, Xunliang and Yang, Yu and Zhao, Yunke},
+  journal={arXiv preprint arXiv:2509.26490},
+  year={2025}
+}
+
+🤗 Acknowledgement
+
+VitaBench 2.0 is built on top of VitaBench, which itself adapted part of tau2-bench's codebase. We greatly appreciate their contributions to the agent community.
+
+📜 License
+
+This project is licensed under the MIT License — see the LICENSE file for details.
+
+📪 Support
+
+For questions and support, please open an issue on GitHub or contact the maintainers.
+
+About
+No description, website, or topics provided.
+Resources
+Readme
+MIT license
+
+Activity
+Custom properties
+
+Stars
+77 stars
+Watchers
+1 watching
+Forks
+10 forks
+Report repository
+
+Releases
+
+Packages
+
+Contributors
+
+Languages
+
+    You can’t perform that action at this time.
+

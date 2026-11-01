@@ -1,0 +1,1171 @@
+
+
+MCPToolBench++: A Large Scale AI Agent Model Context Protocol MCP Tool Use Benchmark
+
+Skip to main content
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    Why HTML?
+
+      Report Issue
+
+      Back to Abstract
+
+      Download PDF
+
+      Contents
+
+      Reading mode
+
+      Colour theme
+
+    License: CC BY 4.0
+
+arXiv:2508.07575v1 [cs.AI] 11 Aug 2025
+
+MCPToolBench++: A Large Scale AI Agent Model Context Protocol MCP Tool Use Benchmark
+
+Shiqing Fan
+
+Xichen Ding
+
+Liang Zhang
+
+Linjian Mo
+
+Affiliation: Ant Group
+
+Email: {zuoran.fsq,xichen.dxc,zhuyue.zl,linyi01}@antgroup.com
+
+Abstract
+
+LLMs’ capabilities are enhanced by using function calls to integrate various data sources or API results into the context window. Typical tools include search, web crawlers, maps, financial data, file systems, and browser usage, etc. Integrating these data sources or functions requires a standardized method. The Model Context Protocol (MCP) provides a standardized way to supply context to LLMs. However, the evaluation of LLMs and AI Agents’ MCP tool use abilities suffer from several issues. First, there’s a lack of comprehensive datasets or benchmarks to evaluate various MCP tools. Second, the diverse formats of response from MCP tool call execution further increase the difficulty of evaluation. Additionally, unlike existing tool-use benchmarks with high success rates in functions like programming and math functions, the success rate of real-world MCP tool is not guaranteed and varies across different MCP servers. Furthermore, the LLMs’ context window also limits the number of available tools that can be called in a single run, because the textual descriptions of tool and the parameters have long token length for an LLM to process all at once.
+
+To help address the challenges of evaluating LLMs’ performance on calling MCP tools, we propose MCPToolBench++11
+          1
+
+        https://github.com/mcp-tool-bench/MCPToolBenchPP22
+          2
+
+        https://huggingface.co/datasets/MCPToolBench/MCPToolBenchPP, a large-scale, multi-domain AI Agent tool use benchmark. As of July 2025, this benchmark is build upon marketplace of over 4k MCP servers from more than 40 categories, collected from the MCP marketplaces and GitHub communities. The datasets consist of both single-step and multi-step tool calls across different categories. We evaluated SOTA LLMs with agentic abilities on this benchmark and reported the results.
+
+1 Introduction
+
+Figure 1: Distribution of MCP Servers Count by Category
+
+Modern LLMs (Anthropic (2025b); OpenAI (2025); Google DeepMind (2025); Yang et al. (2025)) are transforming from pure language-based models to models with more complicated reasoning and agentic tool use capabilities (OpenAI Deep Research (2025a); Gemini Deep Research (2024); Anthropic (2025a); Moonshot AI (2025)). Many state-of-the-art LLMs are trained on function-calling capabilities, such as searching, planning, and browse use, to access real-time information (e.g., weather, financial data) and perform complicated tasks like deep research, planning, and API usage (e.g., making reservations). To handle various data sources and function-calling results, Model Context Protocol (2025) (MCP) provides a standardized way to provide context to LLMs and integrate data sources and tools from various MCP servers. A growing number of MCP servers and clients are available in the marketplaces. However, despite the standardized protocol for LLM context, evaluating the performance of MCP Tool Function Calls remains very difficult due to several aspects:
+
+Lack of comprehensive benchmarks and datasets: Unable to cover highly diverse MCP tools and schemas. Calling MCP tools requires LLMs to select from multiple available tools, which include JSON schemas for tools’ descriptions, parameter types, and value schemas. There is a lack of a unified index for data source, tool schemas and server configurations across the marketplace.
+
+Parameter Reasoning Capabilities Many tool descriptions and schemas help LLMs select the best tool and decide appropriate parameter values. However, existing parameters require LLMs to reason about parameter value codes and acronyms, such as stock ticker symbols (MSFT→Microsoft\text{MSFT}\to\text{Microsoft}, 9988→Alibaba in HKEX\text{9988}\to\text{Alibaba in HKEX}), driving modes (flight/train), and geocodes.
+
+Difficulty in evaluating diverse responses The diverse nature of MCP API responses and user queries goes beyond simple text or images, further increasing the complexity of evaluating the results. For example, when using browser-use MCPs, the take_screenshot tool will fulfill a task and save the screenshot image to local storage. Similarly, PayPal’s create_invoice tool will create an invoice according to user input and send the URL for downloading the invoice to customers. For these task-fulfillment tools, a message indicating the status of the task and related files and supplements are usually provided.
+
+Varied tool success rate and potential risks Some MCPs registered in communities, particularly those provided by large corporations, offer guaranteed services, while others are less reliable or safe and pose potential risks of prompt attacks and privacy leakage.
+
+To overcome these issues and help scale the evaluation of MCP tool function call abilities, we introduce a new comprehensive benchmark, MCPToolBench++, which consists of 1.5K question-answer pairs covering 6 domains of MCP servers, including search, map, finance, pay, automatic browser usage, file system and more. This benchmark has the following characteristics, making it easy to use and evaluate:
+
+Combination of Single-Step and Challenging Multiple-Steps Questions The dataset combines single-step questions with more complicated and challenging multi-step tool usage questions. Solving multi-step problems requires a sequence of tool call chains, with some utilizing up to 10 tools in a single user request.
+
+Diverse and General Agent Capabilities Evaluation This benchmark dataset evaluates the highly diverse and general capabilities of LLM models and agent systems. These capabilities vary greatly and are invoked through MCP server integration, such as search, planning, browser usage, crawling, API usage, and order creation/processing.
+
+Multiple Domains and Multilingual Support To cover more domains of tasks and scale the size of dataset, the benchmarks are prepared using a pipeline process, which involves selecting MCP tools from over 40 categories in the marketplace as in Figure 1, cleaning MCP configurations and tool schemas, and retaining high-quality MCP servers and tools. Typical categories include browser use, file system, finance, pay, etc. Additionally, agents and LLMs should have multilingual ability, making decision on which tool to choose considering the preferred language the question is using automatically. We prepared several multilingual datasets, such as finding routes using maps world-wide, seeking financial data from global financial markets, etc.
+
+MCP Tool Call Run Environment and Success Rate Evaluation
+Most official and community MCP servers require specific environments to execute tool calls, such as MCP Clients to initiate the service and agents’ workflow to process queries and start the tool calls. We have thoroughly analyzed all tools in the benchmark and verified that those we utilize are tested and offer either free access or sufficient free call quotas from the MCP service provider to enable reproduction of our results on the benchmarks.
+
+2 MCPToolBench++ Framework
+
+Figure 2: Overview of the MCPToolBench++ Data Preparation Process
+
+2.1 Overview
+
+In this section, we will give an overview of the MCPToolBench++ benchmark preparation process in Figure 2. Firstly, we will discuss the data preparation process, including how we collect the MCP servers’ meta-information, MCP configuration files, and tool schemas from various MCP marketplaces. Secondly, based on the MCP tool schema, a tool sampler will sample tools from the schema index, covering both single-step tool calls and multi-step tool calls (or chain of tool calls). For example, query “Get real-time stock prices of Tesla and Microsoft, plot the chart, and calculate todays’ change” requires usage of tools getting_stock_data, plot_chart, and calculator. An LLM will generate meaningful prompt templates with slot values (origin, destination, mode), as well as candidates for these slots, e.g., {”origin”: ”JFK Airport”, ”destination”: ”Times Square”}. The top-K valid slot values will be selected according to the description of the parameters. Thirdly, a Query Generator will take the sampled tools, the prompt template and parameters’ value are generated from the sampled tools’ schema. After slot-filling the queries will be further rewritten. Finally, after several reasonability filtering steps in the post-processing, rewrite and validation process, the generated queries are filtered, and a valid query set and the ground-truth labels in JSON format are generated.
+
+2.2 MCP Servers and Tools Schema Collection
+
+MCP servers are gathered from the open MCP marketplace across various websites, including smithery.ai33
+              3
+
+            https://smithery.ai, deepnlp.org44
+              4
+
+            https://www.deepnlp.org/store/ai-agent/mcp-server, pulsemcp.com55
+              5
+
+            https://www.modelscope.cn/mcp, and modelscope.cn66
+              6
+
+            https://www.pulsemcp.com. Some of these marketplaces offer direct API support. For schema JSON files, we utilize the mcp-marketplace Python SDK77
+              7
+
+            https://github.com/AI-Agent-Hub/mcp-marketplace to search and filter relevant MCPs by categories such as map and browser-related MCPs. We collected three types of MCP schemas: mcp_config.json, server_meta.json, and tool_schema.json, and indexed them locally for listing and retrieval. For detailed definitions of these MCP server JSON files, please refer to the appendix A.1.
+
+2.3 Tool Sampler
+
+After collecting tool schemas from the marketplace, we apply the Tool Sampler to generate single-step tool calls (e.g., sampling the get_weather tool) and multi-step tool calls (e.g., navigate→screenshot\text{navigate}\to\text{screenshot}).
+
+Given a total of NN tools collected from MM MCP servers and CC categories, we let NcN_{c} denote the number of tool schemas collected from the cc-th category. We apply different sampling strategies for single-step and multi-step tool calls.
+
+For single-step tool calls, we sample tool tit_{i} from NcN_{c} candidates. We use a sampling with replacement strategy, where each tool is sampled with equal probability pip_{i}.
+
+For multi-step tool calls, which require multiple tool calls to fulfill a user’s request, we divide the tool call generation into different bins. Each bin represents a different number of tool calls, ranging from count=2\text{count}=2 to count=K\text{count}=K (we set the maximum count KK to 10).
+
+Within the same category cc, we use a sampling without replacement strategy to obtain a non-duplicated list of sampled tools [t1,…,tk,…,tK][t_{1},\dots,t_{k},\dots,t_{K}], where tkt_{k} denotes the kk-th sampled tool up to KK. The distribution of queries in different bins is illustrated in the evaluation section.
+
+Cross-categories multi-step tool calls: Sometimes, a user’s query requires tool calls with different features from various categories. For example, the prompt ”get the stock price from magnificent 7 stocks within last week and plot a time-series chart” requires a financial tool call and a chart plotting tool. We first use a Large Language Model (LLM) to generate meaningful category combinations, such as […,cs,ct,…][\dots,c_{s},c_{t},\dots] (e.g., (finance, plot), (search, map), etc.). We then apply the same sampling without replacement strategy used for within-category sampling to the tools from these generated category combinations.
+
+2.4 Query Generator
+
+The query generator process contains several consecutive steps: Tool Call Template generation, Parameter Values Generation, Slot Filling, and Query Rewriting. We will use the tool maps_directions(origin, destination, mode) as an example to illustrate this process.
+
+Tool Call Template generation: A template is generated from sampled tool list [t1,…,tk,…,tK][t_{1},\dots,t_{k},\dots,t_{K}]. For example, for the single-step tool maps_directions from Google Maps, a diverse batch of templates like ”Can you help me plan the best route from {origin} to {destination}?” are generated by an LLM.
+
+Parameters Value Generation: To fill the parameters in the template, valid and meaningful parameters values are generated according to the field description in the tool schema JSON file. For instance, {”origin”:”JFK Airport”} and {”destination”:”Times Square”} are Point of Interest (POI) names generated by the inherent knowledge of the LLM.
+
+Code Dictionaries are feed to the context of the LLM to help generate the desired parameters. Some MCP tools require specific codes as input to the functions instead of natural language, such as geo code, stock symbols, acronyms, etc. For example, the weather tool takes input of city and state as geo-code (CA→California\text{CA}\to\text{California}), global stock data API requires correct symbols ( TSLA→Tesla,700→Tencent,600519→Kweichow Moutai\text{TSLA}\to\text{Tesla},\text{700}\to\text{Tencent},\text{600519}\to\text{Kweichow Moutai}), etc.
+
+Slot Filling: The generated parameter values are filled into the template to complete a query.
+
+Query Rewrite: The generated queries sometimes have grammatical issues and need to pass through a query rewrite stage to become meaningful queries. For example, a generated query after slot filling might be ”Compare today’s stock price change of MSFT and TSLA,” where the stock ticker is generated and filled. This would then be rewritten to ”Compare today’s stock price change of Microsoft and Tesla.”
+
+2.5 Post Processing & Validation
+
+Post-processing and validation steps are crucial for the synthetic dataset. In our MCPToolBench++ benchmark, we applied several post-processing steps to filter out low-quality queries.
+
+Semantic check: Queries that are not properly rewritten will be removed in the semantic check step. For example, ”Find good restaurants near 40.7°, 70.3°” would be removed because the tools require raw (longitude, latitude) coordinates as input, and the query rewrite steps were unable to convert the coordinates to a POI name.
+
+Reasonableness check: The reasonableness of the generated queries is checked. Any counterfactual queries will cause the API to fail and need to be removed from the dataset. For example, ”How can I travel from New York to Tokyo by train?” is counterfactual because Japan is an island, and there is no way to travel from New York to Tokyo by train.
+
+3 Dataset Diversity & Analysis
+
+3.1 Tool Schema Complexity Analysis
+
+Table 1: Statistics of Dataset Instance MCP Tools Count and Tokens
+
+Category
+Number Instance
+MCP Tool Count
+Tokens Per Tool
+Total Tokens
+
+Browser
+187
+32
+107.4
+3.4 K
+
+File System
+241
+11
+143.8
+1.6 K
+
+Search
+181
+5
+555.6
+2.8 K
+
+Map
+500
+32
+401.3
+13 K
+
+Finance
+90
+1
+505.0
+0.5 K
+
+Pay
+310
+6
+656.5
+3.9 K
+
+Total
+1509
+87
+288.3
+25 K
+
+We conducted complexity analysis of the MCP function calls that LLM needs to process.
+
+In the formulation, M{M} denotes number of MCP servers installed on AI Agent systems, Nt{N_{t}} denotes the average number of tools that the server provides, and Tt​o​o​lT_{tool} denotes the average token length of the schema description of the tool and parameters. The tokens that each function call LLM needs to process have complexity 𝒪⁡(M​Nt​Tt​o​o​l)\mathcal{O}(MN_{t}T_{tool}). And Tt​o​o​l​sT_{tools} usually has magnitude ranging from 0.1​K0.1K to 1​K1K. The total number of available tools has the magnitude of a few hundreds before ranking or relevance filtering. The statistics of some MCP servers from various domains are listed in Table 1.
+
+Tool Dispatcher Retrieval and Relevant Tools Selection
+Tools Dispatcher is needed to retrieve relevant tools from the tool schema description to avoid the explosion of unnecessary tools to LLMs. Tool Dispatcher aims to select relevant tools given users’ original query, which can help reduce the average number of tools consumed by LLM from Nt(∼100){N_{t}}(\sim 100) to Nk(∼10){N_{k}}(\sim 10), usually from a few hundreds to the magnitude of 10. The overall complexity becomes 𝒪⁡(M​Nk​Tt​o​o​l)\mathcal{O}(MN_{k}T_{tool}), which can remove unnecessary tools schema and help increase the overall accuracy performance.
+
+4 Evaluation
+
+We evaluated the MCPs’ function calling abilities across a wide range of models on the MCPToolBench++ benchmark, including models from the OpenAI OpenAI et al. (2024), Claude Anthropic (2025a), Qwen Yang et al. (2025), Kimi Moonshot AI (2025) and others. The benchmark datasets are further characterized by multilingual support (English, Chinese, French, Russion, etc), different steps of tool calls (single-step vs. multi-steps), and various categories (search, browse, map, etc.) to reflect performance across different levels of task difficulty.
+
+4.1 Metrics
+
+4.1.1 Accuracy Evaluation
+
+Abstract Syntax Tree AST
+To evaluate the accuracy of MCP tool calls by LLMs, we adopted the Abstract Syntax Tree (AST) metric. This metric compares the predicted output with ground truth labels for function match, required parameters match, parameter type and value match (Patil et al. (2024)).
+
+Multi-Step AST DAG Accuracy: For multi-step tool executions, we apply a modified metric of AST, and proposed the metric AST DAG Accuracy. The metric AST DAG-Accuracy denotes the Directed Acyclic Graph (DAG) evaluation of AST score between the predicted multi-steps tool call execution plan with the ground-truth tool call execution plan. This metric is useful because tool call executions have dependencies on previous tool call results. Some prompts have the DAG structure, for example in prompt ”Find the top 10 stocks with highest price increase from market of NASDAQ, NYSE and DOW and London Stock Exchange, and then plot the stock and in a chart.”. The execution plans looks like: get_top_change_stocks(”NASDAQ”)→plot_chart\textit{\text{get\_top\_change\_stocks("NASDAQ")}}\to\textit{\text{plot\_chart}}, get_top_change_stocks(”NYSE”)→plot_chart\textit{\text{get\_top\_change\_stocks("NYSE")}}\to\textit{\text{plot\_chart}}, get_top_change_stocks(”DOW”)→plot_chart\textit{\text{get\_top\_change\_stocks("DOW")}}\to\textit{\text{plot\_chart}}, get_top_change_stocks(”LSE”)→plot_chart\textit{\text{get\_top\_change\_stocks("LSE")}}\to\textit{\text{plot\_chart}}. The get_top_change_stocks tool runs in parallel and the plot_chart tool depends on the previous 4 tool call results. Note that for AST DAG Accuracy metric, l​a​b​e​l=1label=1 denote the children nodes (last execution nodes of each task) should match between the prediction and the ground-truth, and l​a​b​e​l=0label=0 denotes otherwise. We also notice the phenomena that different models tend to choose different paths of tool calls to finish the same tasks. For example the route planning task, some LLMs tend to choose one step of direct tool call that takes in address as input to the tool  plan_route(origin_address, destination_address), and other LLMs tend to divide the task into three steps, converting the origin and destination address to geocodes or coordinates first and then call the plan_route(origin_geocodes, destination_geocodes).
+
+AST DAG Accuracy=calculate_dag_accuracy​(DAGp​r​e​d​i​c​t,DAGg​r​o​u​n​d​_​t​r​u​t​h)\text{AST DAG Accuracy}=\text{calculate\_dag\_accuracy}(\text{DAG}_{predict},\text{DAG}_{ground\_truth})
+
+4.1.2 Tool Call Evaluation
+
+Pass@K Accuracy: To measure whether the execution result from the MCP tool call is correctly aligned with the expected output, we use Pass@K to evaluate the accuracy of the MCP function call. A successful MCP tool call run has many conditions, including the input parameters should be correct, the tool call should be successful, the execution results should not be empty and align with the expected ground-truth, etc. To evaluate whether the MCP tool call (API calling) succeeded or failed with errors, we evaluate the response status of each MCP tool call. Sometimes, the MCP server return a 200 success status code, but the detailed message is showing an internal parameter error, such as {”success”: false, ”data”: null, ”error”: ”[’type’: ’text’, ’text’: ’Geocoding failed… ’]”}. To evaluate the detailed message and whether the expected output is aligned, we use an LLM as judge to label the success status of each response. Some root-cause analysis of errors and related prompts are provided in the appendix 4.
+
+Figure 3: MCP Tool Call Abstract Syntax Tree Score Performance
+
+Figure 4: MCP Tool Call Pass@K Score Performance
+
+Table 2: Evaluation of MCP Tool Call Abstract Syntax Tree (AST) and Pass@K
+
+Browser
+File System
+Search
+
+Model
+AST
+Pass@1
+AST
+Pass@1
+AST
+Pass@1
+
+GPT-4o
+0.6524
+0.2182
+0.8863
+0.8232
+0.5200
+0.4720
+
+Qwen2.5-max
+0.7262
+0.2749
+0.9419
+0.8871
+0.6280
+0.4600
+
+Claude-3.7-Sonnet
+0.6503
+0.1840
+0.8415
+0.8183
+0.7280
+0.6200
+
+Kimi-K2-Instruct
+0.8182
+0.2524
+0.9062
+0.8772
+0.7320
+0.3680
+
+Qwen3-coder
+0.8866
+0.2925
+0.9080
+0.8680
+0.7180
+0.5227
+
+Map
+Pay
+Finance
+
+Model
+AST
+Pass@1
+AST
+Pass@1
+AST
+Pass@1
+
+GPT-4o
+0.6120
+0.3616
+0.7077
+0.5742
+0.7200
+0.2889
+
+Qwen2.5-max
+0.7372
+0.2272
+0.6684
+0.5277
+0.7511
+0.2556
+
+Claude-3.7-Sonnet
+0.5820
+0.2748
+0.7058
+0.5574
+0.7400
+0.2311
+
+Kimi-K2-Instruct
+0.6088
+0.2008
+0.8071
+0.6761
+0.7156
+0.2378
+
+Qwen3-coder
+0.7830
+0.3054
+0.7240
+0.5440
+0.7320
+0.2860
+
+Figure 5: MCP Tool Run Success Rate By Category
+
+Tool Call Success Rate
+The tool call success rate is a dynamic metric that measures the ratio of successful tool call runs to total runs for each MCP tool. In the MCP tool call scenario, this metric is defined as whether the tool call is successfully executed, which is measured by several conditions including whether the response status code contains success status codes (e.g., 200) and whether the ”success” key of the result dictionary in the MCP JSON RPC response is ”true”, etc. It is important to note that the Tool Call Success Rate and Pass@K are closely related metrics. The key difference between them lies in the following: Tool Call Success Rate only measures whether the tool call run is successful without any errors, whereas Pass@K not only measures the success of the tool call run but also the correctness of input parameters and whether the returned results (both the result data and system messages) align with the expected ground truths.
+
+4.2 Results
+
+We reported the MCP tool call Abstract Syntax Tree (AST) and Pass@K scores on the evaluated MCPToolBench++ benchmark in Table 2. We illustrate the AST results in Figure 3, Pass@K results in Figure 4 and Tool Call Success Rate in Figure 5. From the result of Abstract Syntax Tree score (function call tool choosing and parameters inferences), we can see that Qwen3-coder achieved top AST accuracy performance in categories including Browser and Map. And Qwen2.5-max achieved top AST accuracy performance in categories including File System and Finance. And Kimi-K2-Instruct achieved top AST accuracy performance in categories of Search and Pay. To analyze the Pass@1 tool call execution performance, Qwen3-coder achieved top Pass@1 score in the Browser category. Qwen2.5-max achieved top Pass@1 score in the File System category. Claude-3.7-Sonnet achieved top Pass@1 in Search category. GPT-4o achieved top Pass@1 in Map and Finance categories. And Kimi-K2-Instruct achieved the top Pass@1 in the Pay category.
+
+4.2.1 AST Score vs. Pass@K
+
+The AST score evaluates how well models choose among tools and make function calls by filling parameters according to the tool schema and descriptions. After the LLM’s function call, Pass@1 further evaluates how well we actually run the MCP tool using the parameters inferred by the model. We notice that the Tool Call Success Rate of MCP tool is one of the key variables influencing the overall Pass@1 score, especially when the tools require API connections. To get more accurate Pass@K score, we repeat the experiments multiple times and run multiple trials per each tool call. In the experiments, we set the hyper-parameter of trials per tool call as 5.
+
+Furthermore, we notice that the rankings of AST scores and Pass@K scores are not always positively correlated. For example, in the Search category, Claude-3.7-Sonnet achieved second place in the AST score (0.728) after Kimi-K2-Instruct (0.732). However, after actual tool call runs, Claude-3.7-Sonnet achieved first place in Pass@1 (0.620) compared to Kimi-K2-Instruct (0.368). The results showed that the Google Custom Search Tool (google-search) has a higher success rate than other MCP search tool providers such as Tavily, etc. Additionally, Claude-3.7-Sonnet selects google-search more frequently than other tools compared to other models. This highlights situations, when multiple tools with similar features (web-search, web-crawling, location-based map services) are available, agent models may choose either of the tools and match the ground-truth labels for abstract syntax tree scores, but have large gaps in final results after actually running the tools.
+
+Figure 6: MCP Tool Call Errors Root Cause Analysis
+
+4.3 ERROR ROOT CAUSE ANALYSIS
+
+We have done a detailed analysis of MCP tool call execution logs and categorize the error codes and messages for each domain. The top ranked root causes of MCP tool call failures are summarized in Figure 6, including ”Parameter Errors”, ”API Error”, ”Empty Result”, ”Session & Runtime Errors”, etc. Also, each domain also has some specific errors. For example, the MCPs in ”MAP” domain have errors ”parameters errors range invalid”, indicating the longitude and latitude values inferred by LLM function calls are out of range, MCPs in ”Browser Use” domain have errors of ”No Such File or Directory” when taking screenshots of webpage and saving to non-exist local filepaths, etc. MCPs in ”Search” domain have URL processing errors from fetching and extracting the invalid URL or URL needs second-time authentification of web contents, etc. We also list more detailed examples of root causes of MCP tool call errors in the Appendix 4.
+
+5 Related Work
+
+5.1 Tool Use Agent
+
+Tool use agents have accelerated the productivity and increase performance of many real-world tasks. Coding agents88
+              8
+
+            https://www.deepnlp.org/store/ai-agent/coding-agent (Gemini CLI (2025); OpenAI Codex (2025); Claude Code (2025)) apply agentic function calls to manage, edit, generate codes using command lines to fulfill tasks. Deep research agents (Gemini Deep Research (2025); OpenAI Deep Research (2025b)) utilize multiple steps of tool uses including searching and crawling to generate detailed analysis of users’ complex questions. Moreover, with the development of standardized model context protocol, more tools such as search, browser use, location services can be integrated to LLM based systems.
+
+5.2 Function Call and MCP Benchmarks
+
+Function call benchmarks are crucial in evaluating tool use and function call capabilities of LLMs and AI agent systems Mialon et al. (2023); Patil et al. (2024). GAIA is a benchmark to test Agent tool use abilities of prompting and search Mialon et al. (2023). Berkeley Function Calling Leaderboard (BFCL) Patil et al. (2024) is a benchmark to test functions call of various programming languages, and uses Abstract Syntax Tree (AST) metric to evaluate the static accuracy of serial and parallel functions. ComplexFuncBench Zhong et al. (2025) focus on the multi-step user constrained function calling under long-context scenario. Some other research focus on generating high quality datasets using pipelines from API repos (Liu et al. (2024)), and testing various capabilities such as the browser use (Wei et al. (2025)).
+
+With the adoption of model-context protocol, more MCP benchmarks are proposed (Luo et al. (2025); Gao et al. (2025)) on different domain such as math, coding, etc.
+
+6 Conclusion
+
+In this paper, we introduce MCPToolBench++ benchmark to evaluate LLM and AI Agents’ abilities to use MCP tools correctly. The benchmark covers wide range categories of real world tools, which provide multi-domains and multilingual supports. To scale the MCP tool benchmark preparation, we introduce an automatic pipeline build upon mcp configs and tool schemas collected from open MCP marketplaces. Additionally, multiple SOTA models are evaluated on the benchmarks. And detailed success rate and root cause analysis of MCP tool call errors are conducted to highlight future improvements.
+
+References
+
+Anthropic (2025a)
+
+Anthropic.
+
+Introducing claude 4, 2025a.
+
+URL https://www.anthropic.com/news/claude-4.
+
+Anthropic (2025b)
+
+Anthropic.
+
+System Card: Claude Opus 4 & Claude Sonnet 4.
+
+Technical report, Anthropic, 2025b.
+
+URL https://www-cdn.anthropic.com/4263b940cabb546aa0e3283f35b686f4f3b2ff47.pdf.
+
+Accessed: July 4, 2025.
+
+Claude Code (2025)
+
+Claude Code.
+
+Claude Code: An agentic coding tool that lives in your terminal.
+
+https://github.com/anthropics/claude-code, 2025.
+
+Accessed: 2025-07-24.
+
+Gao et al. (2025)
+
+Xuanqi Gao, Siyi Xie, Juan Zhai, Shqing Ma, and Chao Shen.
+
+Mcp-radar: A multi-dimensional benchmark for evaluating tool use capabilities in large language models, 2025.
+
+URL https://arxiv.org/abs/2505.16700.
+
+Gemini CLI (2025)
+
+Gemini CLI.
+
+gemini-cli: An open-source ai agent that brings the power of gemini directly into your terminal.
+
+https://github.com/google-gemini/gemini-cli, 2025.
+
+Accessed: 2025-07-24.
+
+Gemini Deep Research (2024)
+
+Gemini Deep Research.
+
+Gemini deep research overview, 2024.
+
+URL https://gemini.google/overview/deep-research/.
+
+Gemini Deep Research (2025)
+
+Gemini Deep Research.
+
+Gemini Deep Research: Save hours of work with deep research as your personal research assistant.
+
+https://gemini.google/overview/deep-research, 2025.
+
+Accessed: 2025-07-24.
+
+Google DeepMind (2025)
+
+Google DeepMind.
+
+Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities.
+
+Technical report, Google DeepMind, 2025.
+
+URL https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf.
+
+Accessed: July 4, 2025.
+
+Liu et al. (2024)
+
+Zuxin Liu, Thai Hoang, Jianguo Zhang, Ming Zhu, Tian Lan, Shirley Kokane, Juntao Tan, Weiran Yao, Zhiwei Liu, Yihao Feng, Rithesh Murthy, Liangwei Yang, Silvio Savarese, Juan Carlos Niebles, Huan Wang, Shelby Heinecke, and Caiming Xiong.
+
+Apigen: Automated pipeline for generating verifiable and diverse function-calling datasets, 2024.
+
+URL https://arxiv.org/abs/2406.18518.
+
+Luo et al. (2025)
+
+Zhiling Luo, Xiaorong Shi, Xuanrui Lin, and Jinyang Gao.
+
+Evaluation report on mcp servers, 2025.
+
+URL https://arxiv.org/abs/2504.11094.
+
+Mialon et al. (2023)
+
+Grégoire Mialon, Clémentine Fourrier, Craig Swift, Thomas Wolf, Yann LeCun, and Thomas Scialom.
+
+Gaia: a benchmark for general ai assistants, 2023.
+
+Model Context Protocol (2025) (MCP)
+Model Context Protocol (MCP).
+
+Model Context Protocol: Open protocol that standardizes how applications provide context to llms.
+
+https://modelcontextprotocol.io/introduction, 2025.
+
+Accessed: 2025-07-24.
+
+Moonshot AI (2025)
+
+Moonshot AI.
+
+Kimi k2 instruct, 2025.
+
+URL https://huggingface.co/moonshotai/Kimi-K2-Instruct.
+
+OpenAI (2025)
+
+OpenAI.
+
+o3 and o4-mini System Card.
+
+System card, OpenAI, 2025.
+
+URL https://cdn.openai.com/pdf/2221c875-02dc-4789-800b-e7758f3722c1/o3-and-o4-mini-system-card.pdf.
+
+Accessed July 4, 2025.
+
+OpenAI et al. (2024)
+
+OpenAI, Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, Red Avila, Igor Babuschkin, Suchir Balaji, Valerie Balcom, Paul Baltescu, Haiming Bao, Mohammad Bavarian, Jeff Belgum, Irwan Bello, Jake Berdine, Gabriel Bernadett-Shapiro, Christopher Berner, Lenny Bogdonoff, Oleg Boiko, Madelaine Boyd, Anna-Luisa Brakman, Greg Brockman, Tim Brooks, Miles Brundage, Kevin Button, Trevor Cai, Rosie Campbell, Andrew Cann, Brittany Carey, Chelsea Carlson, Rory Carmichael, Brooke Chan, Che Chang, Fotis Chantzis, Derek Chen, Sully Chen, Ruby Chen, Jason Chen, Mark Chen, Ben Chess, Chester Cho, Casey Chu, Hyung Won Chung, Dave Cummings, Jeremiah Currier, Yunxing Dai, Cory Decareaux, Thomas Degry, Noah Deutsch, Damien Deville, Arka Dhar, David Dohan, Steve Dowling, Sheila Dunning, Adrien Ecoffet, Atty Eleti, Tyna Eloundou, David Farhi, Liam Fedus, Niko Felix, Simón Posada Fishman, Juston Forte, Isabella Fulford, Leo
+Gao, Elie Georges, Christian Gibson, Vik Goel, Tarun Gogineni, Gabriel Goh, Rapha Gontijo-Lopes, Jonathan Gordon, Morgan Grafstein, Scott Gray, Ryan Greene, Joshua Gross, Shixiang Shane Gu, Yufei Guo, Chris Hallacy, Jesse Han, Jeff Harris, Yuchen He, Mike Heaton, Johannes Heidecke, Chris Hesse, Alan Hickey, Wade Hickey, Peter Hoeschele, Brandon Houghton, Kenny Hsu, Shengli Hu, Xin Hu, Joost Huizinga, Shantanu Jain, Shawn Jain, Joanne Jang, Angela Jiang, Roger Jiang, Haozhun Jin, Denny Jin, Shino Jomoto, Billie Jonn, Heewoo Jun, Tomer Kaftan, Łukasz Kaiser, Ali Kamali, Ingmar Kanitscheider, Nitish Shirish Keskar, Tabarak Khan, Logan Kilpatrick, Jong Wook Kim, Christina Kim, Yongjik Kim, Jan Hendrik Kirchner, Jamie Kiros, Matt Knight, Daniel Kokotajlo, Łukasz Kondraciuk, Andrew Kondrich, Aris Konstantinidis, Kyle Kosic, Gretchen Krueger, Vishal Kuo, Michael Lampe, Ikai Lan, Teddy Lee, Jan Leike, Jade Leung, Daniel Levy, Chak Ming Li, Rachel Lim, Molly Lin, Stephanie Lin, Mateusz Litwin, Theresa Lopez, Ryan
+Lowe, Patricia Lue, Anna Makanju, Kim Malfacini, Sam Manning, Todor Markov, Yaniv Markovski, Bianca Martin, Katie Mayer, Andrew Mayne, Bob McGrew, Scott Mayer McKinney, Christine McLeavey, Paul McMillan, Jake McNeil, David Medina, Aalok Mehta, Jacob Menick, Luke Metz, Andrey Mishchenko, Pamela Mishkin, Vinnie Monaco, Evan Morikawa, Daniel Mossing, Tong Mu, Mira Murati, Oleg Murk, David Mély, Ashvin Nair, Reiichiro Nakano, Rajeev Nayak, Arvind Neelakantan, Richard Ngo, Hyeonwoo Noh, Long Ouyang, Cullen O’Keefe, Jakub Pachocki, Alex Paino, Joe Palermo, Ashley Pantuliano, Giambattista Parascandolo, Joel Parish, Emy Parparita, Alex Passos, Mikhail Pavlov, Andrew Peng, Adam Perelman, Filipe de Avila Belbute Peres, Michael Petrov, Henrique Ponde de Oliveira Pinto, Michael, Pokorny, Michelle Pokrass, Vitchyr H. Pong, Tolly Powell, Alethea Power, Boris Power, Elizabeth Proehl, Raul Puri, Alec Radford, Jack Rae, Aditya Ramesh, Cameron Raymond, Francis Real, Kendra Rimbach, Carl Ross, Bob Rotsted, Henri Roussez,
+Nick Ryder, Mario Saltarelli, Ted Sanders, Shibani Santurkar, Girish Sastry, Heather Schmidt, David Schnurr, John Schulman, Daniel Selsam, Kyla Sheppard, Toki Sherbakov, Jessica Shieh, Sarah Shoker, Pranav Shyam, Szymon Sidor, Eric Sigler, Maddie Simens, Jordan Sitkin, Katarina Slama, Ian Sohl, Benjamin Sokolowsky, Yang Song, Natalie Staudacher, Felipe Petroski Such, Natalie Summers, Ilya Sutskever, Jie Tang, Nikolas Tezak, Madeleine B. Thompson, Phil Tillet, Amin Tootoonchian, Elizabeth Tseng, Preston Tuggle, Nick Turley, Jerry Tworek, Juan Felipe Cerón Uribe, Andrea Vallone, Arun Vijayvergiya, Chelsea Voss, Carroll Wainwright, Justin Jay Wang, Alvin Wang, Ben Wang, Jonathan Ward, Jason Wei, CJ Weinmann, Akila Welihinda, Peter Welinder, Jiayi Weng, Lilian Weng, Matt Wiethoff, Dave Willner, Clemens Winter, Samuel Wolrich, Hannah Wong, Lauren Workman, Sherwin Wu, Jeff Wu, Michael Wu, Kai Xiao, Tao Xu, Sarah Yoo, Kevin Yu, Qiming Yuan, Wojciech Zaremba, Rowan Zellers, Chong Zhang, Marvin Zhang, Shengjia
+Zhao, Tianhao Zheng, Juntang Zhuang, William Zhuk, and Barret Zoph.
+
+Gpt-4 technical report, 2024.
+
+URL https://arxiv.org/abs/2303.08774.
+
+OpenAI Codex (2025)
+
+OpenAI Codex.
+
+OpenAI Codex: Lightweight coding agent that runs in your terminal.
+
+https://github.com/openai/codex, 2025.
+
+Accessed: 2025-07-24.
+
+OpenAI Deep Research (2025a)
+
+OpenAI Deep Research.
+
+Openai introducing deep research, 2025a.
+
+URL https://openai.com/index/introducing-deep-research/.
+
+OpenAI Deep Research (2025b)
+
+OpenAI Deep Research.
+
+OpenAI Deep Research: A new agentic capability that conducts multi-step research on the internet for complex tasks.
+
+https://openai.com/index/introducing-deep-research, 2025b.
+
+Accessed: 2025-07-24.
+
+Patil et al. (2024)
+
+Shishir G. Patil, Huanzhi Mao, Charlie Cheng-Jie Ji, Fanjia Yan, Vishnu Suresh, Ion Stoica, and Joseph E. Gonzalez.
+
+The berkeley function calling leaderboard (bfcl): From tool use to agentic evaluation of large language models.
+
+In Advances in Neural Information Processing Systems, 2024.
+
+Wei et al. (2025)
+
+Jason Wei, Zhiqing Sun, Spencer Papay, Scott McKinney, Jeffrey Han, Isa Fulford, Hyung Won Chung, Alex Tachard Passos, William Fedus, and Amelia Glaese.
+
+Browsecomp: A simple yet challenging benchmark for browsing agents, 2025.
+
+URL https://arxiv.org/abs/2504.12516.
+
+Yang et al. (2025)
+
+An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, Chujie Zheng, Dayiheng Liu, Fan Zhou, Fei Huang, Feng Hu, Hao Ge, Haoran Wei, Huan Lin, Jialong Tang, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jing Zhou, Jingren Zhou, Junyang Lin, Kai Dang, Keqin Bao, Kexin Yang, Le Yu, Lianghao Deng, Mei Li, Mingfeng Xue, Mingze Li, Pei Zhang, Peng Wang, Qin Zhu, Rui Men, Ruize Gao, Shixuan Liu, Shuang Luo, Tianhao Li, Tianyi Tang, Wenbiao Yin, Xingzhang Ren, Xinyu Wang, Xinyu Zhang, Xuancheng Ren, Yang Fan, Yang Su, Yichang Zhang, Yinger Zhang, Yu Wan, Yuqiong Liu, Zekun Wang, Zeyu Cui, Zhenru Zhang, Zhipeng Zhou, and Zihan Qiu.
+
+Qwen3 technical report.
+
+arXiv preprint arXiv:2505.09388, 2025.
+
+Zhong et al. (2025)
+
+Lucen Zhong, Zhengxiao Du, Xiaohan Zhang, Haiyi Hu, and Jie Tang.
+
+Complexfuncbench: Exploring multi-step and constrained function calling under long-context scenario, 2025.
+
+URL https://arxiv.org/abs/2501.10132.
+
+Appendix A Appendix
+
+A.1 Examples of MCP Configs and Schemas
+
+In this section, we will use google-maps MCP to show you the format of the schema of servers, tools and configurations.
+
+⬇
+
+              1
+
+            {
+
+              2
+
+              "mcpServers" {
+
+              3
+
+                "googlemaps" {
+
+              4
+
+                  "command" "npx",
+
+              5
+
+                  "args" ["y", "@modelcontextprotocol/servergooglemaps"],
+
+              6
+
+                  "env" {
+
+              7
+
+                    "Maps\_API\_KEY" "<YOUR\_API\_KEY>"
+
+              8
+
+                  }
+
+              9
+
+                }
+
+              10
+
+              }
+
+              11
+
+            }
+
+⬇
+
+              1
+
+            {
+
+              2
+
+                "id" "modelcontextprotocol/servers/googlemaps",
+
+              3
+
+                "content_name" "Google Maps",
+
+              4
+
+                "category" "MAP",
+
+              5
+
+                "description" "The Google Maps MCP Server offers various tools for interacting with the Google Maps API, including geocoding, place searching, distance calculations, elevation data, and directions, requiring a Google Maps API key for setup and usage with platforms like Claude Desktop or VS Code.",
+
+              6
+
+                "website" "https//github.com/modelcontextprotocol/serversarchived",
+
+              7
+
+                "content" " .. README.md ...",
+
+              8
+
+                "github" "https//github.com/modelcontextprotocol/serversarchived"
+
+              9
+
+            }
+
+⬇
+
+              1
+
+            {
+
+              2
+
+                "tools" [{
+
+              3
+
+                    "name" "maps_directions",
+
+              4
+
+                    "description" "Get directions between two points",
+
+              5
+
+                    "input_schema" {
+
+              6
+
+                        "type" "object",
+
+              7
+
+                        "properties" {
+
+              8
+
+                            "origin" {
+
+              9
+
+                                "type" "string",
+
+              10
+
+                                "description" "Starting point address or coordinates"
+
+              11
+
+                            },
+
+              12
+
+                            "destination" {
+
+              13
+
+                                "type" "string",
+
+              14
+
+                                "description" "Ending point address or coordinates"
+
+              15
+
+                            },
+
+              16
+
+                            "mode" {
+
+              17
+
+                                "type" "string",
+
+              18
+
+                                "description" "Travel mode (driving, walking, bicycling, transit)",
+
+              19
+
+                                "enum" [
+
+              20
+
+                                    "driving",
+
+              21
+
+                                    "walking",
+
+              22
+
+                                    "bicycling",
+
+              23
+
+                                    "transit"
+
+              24
+
+                                ]
+
+              25
+
+                            }
+
+              26
+
+                        },
+
+              27
+
+                        "required" [
+
+              28
+
+                            "origin",
+
+              29
+
+                            "destination"
+
+              30
+
+                        ]
+
+              31
+
+                    }
+
+              32
+
+                }]
+
+              33
+
+            }
+
+A.2 MCP Servers and Tools By Categories
+
+In this section, we will list some of the top selected MCP servers and their tools by categories in the MCPToolBench++ benchmark.
+
+Table 3: MCP Servers By Various Categories
+
+Category
+
+Server
+
+Tools
+
+BROWSER
+
+puppeteer/puppeteer
+
+puppeteer_navigate
+
+puppeteer_screenshot
+
+puppeteer_click
+
+puppeteer_fill
+
+puppeteer_select
+
+puppeteer_hover
+
+puppeteer_evaluate
+
+executeautomation/playwright
+
+playwright_navigate
+
+playwright_screenshot
+
+playwright_click
+
+playwright_iframe_click
+
+playwright_iframe_fill
+
+playwright_fill
+
+playwright_select
+
+playwright_hover
+
+playwright_get
+
+playwright_post
+
+playwright_put
+
+playwright_press_key
+
+playwright_save_as_pdf
+
+playwright_click_and_switch_tab
+
+FILE SYSTEM
+
+modelcontextprotocol/filesystem
+
+read_file
+
+read_multiple_files
+
+write_file
+
+edit_file
+
+create_directory
+
+list_directory
+
+list_directory_with_sizes
+
+directory_tree
+
+search_files
+
+get_file_info
+
+list_allowed_directories
+
+SEARCH
+
+adenot/mcp-google-search
+
+search
+
+read_webpage
+
+tavily/mcp_tavily-mcp
+
+tavily-search
+
+tavily-extract
+
+tavily-crawl
+
+tavily-map
+
+mendableai/firecrawl-mcp-server
+
+firecrawl_search
+
+firecrawl_scrape
+
+firecrawl_map
+
+firecrawl_crawl
+
+firecrawl_check_crawl_status
+
+firecrawl_extract
+
+firecrawl_deep_research
+
+firecrawl_generate_llmstxt
+
+MAP
+
+google-maps/google-maps
+
+maps_directions
+
+maps_geocode
+
+maps_reverse_geocode
+
+maps_search_places
+
+maps_place_details
+
+maps_distance_matrix
+
+maps_elevation
+
+amap-amap-sse/amap-amap-sse
+
+maps_direction_bicycling
+
+maps_direction_driving
+
+maps_direction_transit_integrated
+
+maps_direction_walking
+
+maps_distance
+
+maps_geo
+
+maps_regeocode
+
+maps_ip_location
+
+maps_schema_personal_map
+
+maps_around_search
+
+maps_search_detail
+
+maps_text_search
+
+maps_schema_navi
+
+maps_schema_take_taxi
+
+maps_weather
+
+baidu-maps/baidu-maps
+
+map_geocode
+
+map_reverse_geocode
+
+map_search_places
+
+map_place_details
+
+map_directions_matrix
+
+map_directions
+
+map_weather
+
+map_ip_location
+
+map_road_traffic
+
+map_poi_extract
+
+PAY
+
+paypal/paypal
+
+create_invoice
+
+create_product
+
+create_subscription_plan
+
+create_shipment_tracking
+
+create_order
+
+create_refund
+
+alipay/alipay
+
+create-mobile-alipay-payment
+
+create-web-page-alipay-payment
+
+query-alipay-payment
+
+refund-alipay-payment
+
+query-alipay-refund
+
+FINANCE
+
+AI-Hub-Admin/finance-agent-mcp-server
+
+get_stock_price_global_market
+
+A.3 MCP Tool Call Failure Root Cause Analysis
+
+In this section, we will analyze the MCP Tool Call failure messages and summarize the results and give the root cause analysis of the reasons MCP tool call failures.
+
+Table 4: MCP Errors Root Causes Typical Examples
+
+Category
+
+Errors
+
+Logs
+
+BROWSER
+
+Browser Executable Missing
+
+Failed to initialize browser: browserType.launch:
+Executable doesn’t exist at ./xxx/ms-playwright/
+
+chromium-1179/chrome-mac/Chromium.app/
+
+Contents/MacOS/Chromium
+
+Session Not Found
+
+Failed to end codegen session:
+Session sessionXYZ not found
+
+Parameters Error
+
+all values empty, missing values
+
+FILE SYSTEM
+
+Edit File Error
+
+Error: Could not find exact match for edit: Project Overview
+
+Parameters Error
+
+all values empty, missing values []
+
+No Such File or Directory
+
+Error: ENOENT: no such file or directory, open
+
+’./test_project_root/data/test_file_txt_1.txt’
+
+Runtime Error
+
+read() called while another coroutine
+is already waiting for incoming data
+
+SEARCH
+
+API Error
+
+Tavily API error: Request failed with status code 432
+
+Error during query to tavily-mcp: Separator
+is not found, and chunk exceed the limit
+
+Internal error: Error calling tool ’tavily_crawl’: 400
+
+Error during query to tavily-mcp: Separator
+is found, but chunk is longer than limit
+
+Parameters Error
+
+Input validation error: ’url’ is a required property
+
+Empty Result
+
+””
+
+MAP
+
+Parameters Error Value Invalid
+
+origin or destination is invalid
+
+Geocoding API error: input ‘origin‘ invaild,
+please reinput more detail address
+
+API Error
+
+API response error: unkown error
+
+Parameters Error Range Invalid
+
+The range of input latitude and longitude is invalid
+
+Http Request Fail
+
+Error: request to https://maps.googleapis.com/maps
+/api/geocode/json?xxxx failed, reason: Client
+network socket disconnected before secure
+TLS connection was established
+
+PAY
+
+API Error
+
+PayPal API error (404): [object Object]
+
+PayPal API error (400): [object Object]
+
+Http Request Fail
+
+Request failed with status code 400, type: paypal_error
+
+Parameters Error
+
+Converting circular structure to JSON
+
+Resource Not Found
+
+The specified resource does not exist
+
+Finance
+
+API Error
+
+Connection Timeout
+
+Empty Result
+
+”data”: []
+
+Parameters Error
+
+{”symbol_list”: [”NSE_INDIA.RELIANCE”],
+”market”: ”NSE_INDIA”}
+
+{”symbol_list”: [”3690.HK”],
+”market”: ”HK”}
+
+A.4 Prompt
+

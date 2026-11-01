@@ -1,0 +1,1550 @@
+
+
+    Your GitHub MCP server costs 55,000 tokens before your agent reads a single word. - DEV Community
+
+  Skip to content
+
+                Powered by Algolia
+
+              Log in
+
+            Create account
+
+DEV Community
+
+        Add reaction
+
+      Like
+
+      Unicorn
+
+      Exploding Head
+
+      Raised Hands
+
+      Fire
+
+      Jump to Comments
+
+      Save
+
+      Boost
+
+Picked as gem
+
+              Copy link
+
+Copied to Clipboard
+
+              Share to X
+
+              Share to LinkedIn
+
+              Share to Facebook
+
+              Share to Mastodon
+
+            Share Post via...
+
+          Report Abuse
+
+                    Rudratosh Shastri
+
+                        Posted on Sep 28
+
+                Your GitHub MCP server costs 55,000 tokens before your agent reads a single word.
+
+                      #mcp
+                      #ai
+                      #llm
+                      #cost
+
+Prompt caching softens the brutal dollar cost
+
+Here's a cost most people connecting MCP servers never see on a dashboard, because it's spent before their agent says anything.
+
+Connect the GitHub MCP server and it exposes ~93 tools. The client serializes every one of them — name, description, full JSON parameter schema, enum values, example text — into the model's context. That's about 55,000 tokens. Before you type a word.
+
+Now connect Slack and Sentry too. Community measurements put a three-server setup around 143,000 tokens of a 200k window — spent on tool definitions the agent may never call. You paid for a 200k context and got ~57k to actually work in.
+
+  Why MCP is expensive by design
+
+It's not a bug in one server. It's the shape of the protocol:
+
+Every tool's full schema loads up front. MCP hands the model the complete menu so it can reason about what's available. Great for capability, brutal for tokens.
+
+It re-enters context every single turn. This isn't a one-time load. Those 55k tokens ride along on each message in the conversation. A 20-turn session pays the tax 20 times.
+
+One tool ≈ ~1,000 tokens. Field descriptions (~400), type definitions (~300), nested parameter structure (~300) — for a tool a human would describe in two sentences. Multiply by 93.
+
+So the "hidden context tax" isn't hidden because it's sneaky. It's hidden because it's charged in the one place nobody's looking: the system prompt, on every turn.
+
+  The CLI comparison that stings
+
+The reason "I deleted my MCP servers and my agent got faster" keeps trending is that a CLI + on-demand tools flips the model. Instead of pre-loading 93 schemas, the agent runs gh (or a 40-line script) and learns the one command it needs when it needs it. Same result, a tiny fraction of the tokens, because the tool definition never sits in context bloating every turn.
+
+Fewer tokens per turn also means: cheaper, faster (less to process), and often smarter — a model drowning in 55k tokens of irrelevant schemas has less attention for your actual task.
+
+  But MCP isn't dead — three cases where it wins
+
+The "MCP sucks" takes overcorrect. The protocol earns its overhead when you need what it uniquely provides:
+
+Auth and credential isolation. MCP servers hold the token so your agent (and your prompt) never see it. Rolling your own CLI wrapper means the secret lives closer to the model. For anything sensitive, that isolation is worth tokens.
+
+Multi-user / multi-tenant. One governed server serving many agents with per-user scoping beats every agent shelling out with its own creds. Governance centralizes; scripts scatter.
+
+Discovery across a big, changing tool surface. When you genuinely don't know which of 200 tools you'll need, structured discovery beats hard-coding — if you pair it with lazy loading.
+
+And that last word matters: MCP Tool Search (protocol-level, since January) defers loading schemas until they exceed ~10% of your context, then discovers tools on demand. If your client supports it, turn it on — it's the difference between paying the 55k tax and paying for what you use.
+
+  The rule of thumb
+
+Count the tokens your tools cost before your agent runs. If it's a big slice of your window and you only use a handful of tools, you're paying MCP's convenience tax for tools you never call. Use a CLI, or turn on lazy tool loading. Keep MCP for auth, multi-user, and genuine large-surface discovery.
+
+MCP is a real standard solving real problems. It's just not free, and the price is charged in the currency your agent needs most — context.
+
+Have you actually measured what your connected MCP servers cost per turn? Run the count and drop the number — I'm curious how bloated the median setup really is. 👇
+
+I write about building with AI and the honest costs of it. Follow me here if that's your lane. 👋
+
+          Top comments (34)
+
+          Subscribe
+
+        Personal
+        Trusted User
+
+        Create template
+
+Templates let you quickly answer FAQs or store snippets for re-use.
+
+      Submit
+      Preview
+      Dismiss
+
+      Noah Berg
+
+      Noah Berg
+
+      Noah Berg
+
+  Follow
+
+    noah berg · contentstudio team, social ops, approvals, agents. learning in public.
+
+          Joined
+
+          Sep 25, 2026
+
+  •
+
+    Oct 1
+
+Copy link
+
+                Hide
+
+yeah the tool schema dump is brutal. we started keeping a thin "gateway" mcp that only exposes 4-5 tools and pulls the rest on demand, otherwise a single turn eats the whole context before you even ask a question.
+
+curious if anyone has a clean pattern for lazy tool discovery that still works with Claude Desktop / Cursor without custom client glue.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 1
+
+Copy link
+
+                Hide
+
+curious if anyone has a clean pattern for lazy tool discovery that still works with Claude Desktop / Cursor without custom client glue
+
+The thin-gateway instinct is right, and the no-glue constraint is the real problem — most lazy-discovery demos cheat by owning the client. Two patterns that stay client-agnostic:
+
+Expose a single search_tools(intent) tool that returns a shortlist + their schemas on demand. The full catalog never enters context, and it works anywhere that speaks plain MCP.
+
+Or namespace by server and keep each tiny (your 4–5 tools), so the client's own server toggle is the discovery UI — crude, but zero glue.
+
+Anthropic's newer Tool Search / code-execution-over-MCP is the native version of your gateway, but it still leans on client support. For Claude Desktop/Cursor today, the search_tools meta-tool is the most portable.
+
+Which did you land on — one gateway with a search tool, or many small servers?
+
+      Edward Izgorodin
+
+      Edward Izgorodin
+
+      Edward Izgorodin
+
+  Follow
+
+    Building persistent memory for AI agents at Mnemoverse. 
+I write about the unglamorous half: forgetting, contradiction, and the moment an agent confidently repeats a fact you retracted.
+
+          Joined
+
+          Jun 17, 2026
+
+  •
+
+    Oct 2
+
+Copy link
+
+                Hide
+
+One step is missing from the search_tools pattern for Claude Desktop and Cursor. The client builds the model's tool list from tools/list, so schemas that come back inside a tool result reach the model as text, and the client has no route for a call to a tool that is not on that list. With a fixed list, the gateway also needs a generic call tool that takes a tool name and its arguments, and that has two costs. The client, and any strict schema mode on the provider side, see only the generic tool's loose argument schema, so checking arguments against the found schema falls entirely to the server. And the client's per-tool confirmation, along with annotations such as destructiveHint, now attaches to the generic tool, so one standing approval of it can cover every tool behind it.
+
+Changing the list instead depends on the protocol revision. Under 2025-11-25 a server that declares listChanged can add the found tools and send a list changed notification, and the client may fetch the list again. The 2026-07-28 revision closes that route: tools/list must not vary per connection or as a side effect of other requests on the connection, so a conforming server cannot widen the list in response to a search. On an older revision, whether a client picks up new tools in the middle of a conversation is its own choice, so it is worth one test before relying on it: add a tool after the first turn and see whether the model can call it.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+the client has no route for a call to a tool that is not on that list
+
+Right — search_tools alone only gives the model knowledge of a tool, not a way to call it. On a stock client you also need a generic call_tool(name, args), and that carries the two costs you named: validation moves entirely to the server (the client only sees the loose generic schema), and per-tool consent collapses — one standing "allow" on the generic tool covers everything behind it, and destructiveHint no longer attaches to the real tool.
+
+That second one is a security regression, not just a rough edge. Given the 2026-07-28 revision closes the listChanged route too, the cleanest compromise might be two generic tools — one read-only, one destructive — so approval at least keeps that line. Your "add a tool after turn one and test if the client picks it up" is the right thing to verify before trusting any of it.
+
+      Edward Izgorodin
+
+      Edward Izgorodin
+
+      Edward Izgorodin
+
+  Follow
+
+    Building persistent memory for AI agents at Mnemoverse. 
+I write about the unglamorous half: forgetting, contradiction, and the moment an agent confidently repeats a fact you retracted.
+
+          Joined
+
+          Jun 17, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+The split holds only if the server enforces it. The model chooses both the generic tool and the name it passes, so a call to a destructive tool can still arrive through the read-only one unless the server looks up the tool that name points to and refuses the call when its class does not match the route. With that check, the read-only tool can carry readOnlyHint honestly, the hint the schema defines as meaning the tool "does not modify its environment", and a standing approval of it no longer reaches any tool that writes. The client cannot see that check from outside, though, so the line is only as good as its trust in the server, which is what the schema already says: clients should never base tool use decisions on annotations from untrusted servers.
+
+If you split further, the annotation that cuts across your line is openWorldHint, which marks a tool that may interact with an open world of external entities, and the schema's example is a web search tool, open, against a memory tool, closed. A read-only tool of the open kind sends its arguments out, so it can carry data from the conversation with it, and it can deserve its own approval even though it modifies nothing.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+The split holds only if the server enforces it.
+
+Agreed — the two generic tools are a client-side convenience, not a security boundary. The model picks both the tool and the name it passes, so a write can arrive through the read-only route unless the server resolves the name, checks its class, and refuses on mismatch. Only then can the read-only tool carry readOnlyHint honestly and a standing approval stay contained.
+
+And the spec already says the quiet part: clients must not base tool-use decisions on annotations from untrusted servers — so the line is only as strong as trust in the server, which collapses it back to "who enforces it."
+
+openWorldHint is the axis I under-weighted. A read-only-but-open tool still exfiltrates — it ships conversation data outward even though it writes nothing locally. So the real grid isn't one line, it's two: writes / doesn't × open / closed world, and an approval has to respect both. Better decomposition than mine — going in the follow-up.
+
+      Taras Hanych
+
+      Taras Hanych
+
+      Taras Hanych
+
+  Follow
+
+    Creator of Semitexa, an open-source PHP framework built for AI agents. 18+ years in PHP. Writing about agents that follow the architecture instead of breaking it.
+
+            Location
+
+            Ukraine
+
+          Joined
+
+          Sep 18, 2026
+
+  •
+
+    Sep 30
+
+Copy link
+
+                Hide
+
+Good to have these numbers in one place. On the other side, when exposing a project to agents rather than consuming servers, the pattern that helped me is two levels: a small index the agent always sees, and details it fetches on demand. A short capabilities manifest says what exists; one call returns the full schema of the thing it actually needs. It's the same lazy loading we'd apply to any payload, just for context. Have you seen a client that loads tool schemas lazily yet, or is everyone still front-loading the whole menu?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Sep 30
+
+Copy link
+
+                Hide
+
+a small index the agent always sees, and details it fetches on demand… the same lazy loading we'd apply to any payload, just for context.
+
+That's exactly the right server-side design, and it's the mirror image of what has to happen client-side. Your thin capabilities manifest + fat schema-on-demand is what a well-behaved MCP server should expose — most today just dump all 93 full schemas because the protocol let them.
+
+To your question — is anyone loading tool schemas lazily yet? It's finally emerging, but adoption is uneven:
+
+MCP Tool Search (protocol-level, since ~January) is the sanctioned answer: it defers loading a server's schemas until they'd exceed ~10% of the context window, then discovers/loads tools on demand. If a client supports it, it turns your "front-loaded menu" back into "index now, details later" automatically.
+
+Cloudflare's "Code Mode" takes a different route to the same goal — the agent writes code against a tool API rather than having every schema pre-injected, so the schemas never sit in context at all.
+
+But the default in most clients is still front-load-the-whole-menu. Tool Search exists; it's just not on by default everywhere, so the median setup still pays the full tax.
+
+The nice part is your two levels and client-side lazy loading are complementary, not either/or: even a lazy client works far better against a server that ships a real index than against one exposing 93 fat tools with no summary layer. The servers that hurt are the ones with neither.
+
+Question back: for your manifest, do you keep the always-visible index to just names + one-line intents, or do you include minimal args too? I keep going back and forth on how much the agent needs to route correctly before it's worth spending a second call to fetch the full schema.
+
+      Taras Hanych
+
+      Taras Hanych
+
+      Taras Hanych
+
+  Follow
+
+    Creator of Semitexa, an open-source PHP framework built for AI agents. 18+ years in PHP. Writing about agents that follow the architecture instead of breaking it.
+
+            Location
+
+            Ukraine
+
+          Joined
+
+          Sep 18, 2026
+
+  •
+
+    Oct 1
+
+Copy link
+
+                Hide
+
+Names plus a one-line intent, and in our case two more fields that turned out to matter more than args. The closest thing Semitexa ships today is a capability index for agents, and each entry carries use_when and avoid_when (plus what it replaces), with no arguments at all. The routing mistakes I saw were rarely "wrong args"; they were "right tool, wrong situation", and a sentence about when not to use something fixes that better than a schema does. Args can wait for the second call. Thanks for the pointers to MCP Tool Search and Code Mode, that's the client half I was missing.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+The routing mistakes I saw were rarely "wrong args"; they were "right tool, wrong situation"
+
+That changes how I think about the index. Schemas answer "how do I call this?", but the expensive mistake is "should I call this at all?", and a JSON schema can't express that.
+
+So the always-loaded part should be:
+
+Name and a one-line intent
+
+use_when
+
+avoid_when, plus what it replaces
+
+No args, since those can wait for the second call
+
+avoid_when is the interesting one. Most tool descriptions are pure sales copy, so every tool sounds right for everything.
+
+Did you write the avoid_when lines up front, or add them after watching the agent misroute?
+
+      Taras Hanych
+
+      Taras Hanych
+
+      Taras Hanych
+
+  Follow
+
+    Creator of Semitexa, an open-source PHP framework built for AI agents. 18+ years in PHP. Writing about agents that follow the architecture instead of breaking it.
+
+            Location
+
+            Ukraine
+
+          Joined
+
+          Sep 18, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+avoid_when being the interesting one is the right instinct: a tool description written by its author describes when the tool shines, never when it's the wrong pick. I'd tie avoid_when to the moment a second tool with an overlapping intent is added. That's when the boundary between them becomes a real decision, and the person adding the new tool knows why the old one didn't fit. Writing it later, after watching misroutes, works too, but then you're reverse-engineering a decision someone already made. A separate "replaces" field is worth it as well, so a deprecated tool points at its successor instead of competing with it. Do you see misroutes more between overlapping tools on one server, or across servers?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+Do you see misroutes more between overlapping tools on one server, or across servers?
+
+Across servers, and it's not close. On one server the author at least namespaces the tools and writes the descriptions as a set, so overlap is visible and usually intentional. Across servers nobody's coordinating — two search tools from different vendors, same intent, no shared vocabulary, and the client flattens them into one undifferentiated list. The model has nothing to pick on but the sales copy. That's exactly where "right tool, wrong situation" lives.
+
+Your trigger for avoid_when is better than mine: write it the moment a second overlapping-intent tool is added, while the person adding it still knows why the old one didn't fit. Writing it later means reverse-engineering a decision someone already made. And replaces is the clean primitive — a deprecated tool should point at its successor, not compete with it in the list. Stealing both.
+
+      Taras Hanych
+
+      Taras Hanych
+
+      Taras Hanych
+
+  Follow
+
+    Creator of Semitexa, an open-source PHP framework built for AI agents. 18+ years in PHP. Writing about agents that follow the architecture instead of breaking it.
+
+            Location
+
+            Ukraine
+
+          Joined
+
+          Sep 18, 2026
+
+  •
+
+    Oct 6
+
+Copy link
+
+                Hide
+
+Across servers makes sense: nobody owns the overlap, so nobody writes the avoid_when. That points at the client as the only place that can fix it: when two servers expose tools with overlapping intent, it could flag the pair once and ask for a routing note instead of flattening everything into one list. Have you seen a client that groups or dedupes tools by intent, or is it always one flat list?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 11
+
+Copy link
+
+                Hide
+
+Have you seen a client that groups or dedupes tools by intent, or is it always one flat list?
+
+Honestly: always one flat list, in every client I've looked at. The model receives the union of every server's tools/list as a single array — nothing reads intent, nothing flags overlap, nothing writes the avoid_when.
+
+And the protocol is actively making the clean fix harder, not easier:
+
+Under 2025-11-25, a server that declares listChanged can at least grow/shrink its own list and notify the client — so within one server you can lazy-load.
+
+2026-07-28 closes even that for cross-server routing: tools/list must not vary per connection, so no server can widen the list in response to a search.
+
+Which lands exactly where you did — the client is the only place that sees all servers at once, so it's the only place that could flag an overlapping pair and ask for a routing note. The closest thing today is a hand-rolled gateway MCP that re-exposes a curated subset, but that's you doing the dedupe by hand, not the client doing it by intent. If you've seen anything that groups automatically I'd genuinely like the link.
+
+      Max Quimby
+
+      Max Quimby
+
+      Max Quimby
+
+  Follow
+
+    Tech lead in computeleap.com
+
+            Location
+
+            Washington
+
+          Joined
+
+          Mar 14, 2026
+
+  •
+
+    Sep 29
+
+Copy link
+
+                Hide
+
+The per-turn framing is the part people miss, so glad you led with it. One nuance worth adding: because those 93 schemas are byte-stable across a session, they cache extremely well — if your provider bills cached input tokens at a fraction of fresh ones, the dollar cost of the tax is a lot softer than the raw 55k suggests. What doesn't get discounted is the attention cost. A model wading through 55k of mostly-irrelevant JSON schema has measurably less room to reason about the actual task, and that degradation doesn't show up on any dashboard at all.
+
+The lazy-loading / tool-search direction is the right lever. The thing I'd add from running agents in production: even with on-demand loading, be deliberate about descriptions — a terse, example-free schema for a tool the agent calls constantly can beat a verbose one that's technically "discovered later." Curious whether you've measured the crossover point where discovery latency starts to cost more than the tokens it saves?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Sep 29
+
+Copy link
+
+                Hide
+
+That’s a really good point. I haven’t measured the exact crossover point yet, so I don’t want to guess.
+
+My intuition is that discovery starts paying off once the inactive-tool schema overhead is large enough that you’re carrying tens of thousands of tokens across turns, but the break-even probably depends heavily on provider-side caching and how frequently the same tools are reused.
+
+The part I’m most interested in measuring next is exactly what you mentioned: token savings vs. discovery latency vs. reasoning quality. Saving 40k input tokens isn’t necessarily a win if the agent spends another 500–1000ms discovering tools or loses task accuracy because of a poorer tool description.
+
+I’m planning to benchmark that tradeoff rather than just optimize for raw token count. That should give a much more useful answer.
+
+      Skillselion
+
+      Skillselion
+
+      Skillselion
+
+  Follow
+
+    Independent directory of the Claude Code skills, MCP servers & marketplaces worth installing. 86,000+ tools indexed daily, ranked by real installs. Not affiliated with Anthropic.
+
+            Location
+
+            United States
+
+          Joined
+
+          Jul 1, 2026
+
+  •
+
+    Sep 29
+
+Copy link
+
+                Hide
+
+One correction on the Tool Search line: it is a client feature, not part of the MCP protocol. The server still answers tools/list with every schema; Claude Code decides whether to put them in the prompt. Its MCP docs describe tool search as on by default and list cases where it is off, including ENABLE_TOOL_SEARCH=false, a non-first-party ANTHROPIC_BASE_URL, and pre-4.5 models on Google Cloud's Agent Platform. So the 55k figure depends on the client and its config, not the server alone. Separately, while the prompt cache stays warm, the repeated definitions bill as cache reads at about a tenth of the input price after the first write, so a 20-turn session costs far less than 20 full loads, although the window space is still gone.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Sep 29
+
+Copy link
+
+                Hide
+
+Absolutely — good catch. The 55k figure is really a client/configuration-dependent context cost, not something the MCP server or protocol inherently forces in every setup.
+
+In my example, I was describing the eager-loading behavior: the server exposes its tools via tools/list, and the client can choose to serialize those schemas into the model context. Claude Code’s current Tool Search behavior can defer those definitions and discover them on demand, with configuration/model/provider conditions affecting whether that happens.
+
+And your prompt-caching point is important too: repeated tool definitions don't necessarily mean paying the full input-token price on every turn. Once the prompt cache is warm, those tokens can be billed as cache reads, while still consuming context-window space. So I’d revise the article’s wording from “MCP costs 55k every turn” to “an eagerly loaded GitHub MCP toolset can occupy ~55k tokens of context, with the actual cost depending on the client, configuration, caching, and provider.”
+
+Thanks for calling this out — that distinction makes the argument much more precise.
+
+      hao li
+
+      hao li
+
+      hao li
+
+  Follow
+
+    CS student building dev tools for AI coding agents. 💼 Open for freelance: Chrome extensions, Python automation, MVPs → Fiverr: fiverr.com/haoli_builds
+
+          Joined
+
+          Sep 30, 2026
+
+  •
+
+    Oct 2
+
+Copy link
+
+                Hide
+
+55K before the first word is a great headline number. I built mcp-tax (audits per-server schema cost from your config, lets you launch Claude Code with the expensive ones switched off per-session) and then subagent-tax for the per-call side: the same 55K gets re-sent on every request of every subagent you fan out. The combo that worked for me: mcp-tax to find the fattest server, subagent-tax to see which Task() calls actually needed it. Genuine question: did you measure whether the GitHub server's 93 tools arrive in one tools/list call, or does the client page them? It changes whether the tax is truly unavoidable.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+did you measure whether the GitHub server's 93 tools arrive in one tools/list call, or does the client page them?
+
+I didn't inspect the wire. The 55K is the size of the definitions once they're in context, not a count of tools/list round trips.
+
+I don't think paging changes the tax, though:
+
+Pagination is a transport detail. tools/list can return a cursor, but the client still walks every page.
+
+The cost is in what the client does next: it puts every tool it found into the model's tool list, on every request.
+
+So only two things avoid it: the client not loading a server, or the client deferring schemas until they're needed.
+
+Your subagent point is the part I under-counted. Every subagent in a fan-out resends the same definitions, so the per-turn tax gets multiplied by the fan-out.
+
+When you switched off the fattest server per session, how often did a task turn out to need it after all?
+
+      hao li
+
+      hao li
+
+      hao li
+
+  Follow
+
+    CS student building dev tools for AI coding agents. 💼 Open for freelance: Chrome extensions, Python automation, MVPs → Fiverr: fiverr.com/haoli_builds
+
+          Joined
+
+          Sep 30, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+Good question, and the honest answer is no — I never captured the wire traffic, so I can't tell you whether the GitHub server sent all 93 tools in a single tools/list response or paginated them with cursors.
+
+My suspicion is that it doesn't change the number that matters. The 55K I reported is the size of the tool definitions once they're sitting in the model's context, which is what you pay for on every request. Whether the client fetched them in one call or walked several pages following cursors, it still ends up holding all 93 definitions and injecting them into the tool list each turn. Pagination saves round trips, not context.
+
+That said, you're pointing at a real measurement gap in the post: I measured what's in context, not how it got there. Per-page counts from the tools/list exchange would be genuinely useful data — e.g. whether some servers page aggressively, and whether clients walk cursors efficiently or refetch. If you ever add that to mcp-tax, I'd love to see the numbers.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+Pagination saves round trips, not context.
+
+Exactly — and that's the honest correction to the post: I measured what sits in context, not how it got there. Both are real taxes; they're just different ones.
+
+The wire-level data you're describing fills the gap context-size can't: whether clients walk cursors efficiently or refetch, and whether any server pages aggressively enough to matter. If mcp-tax ever grows a tools/list round-trip counter, I'd genuinely like to see the numbers across a few servers — that's the measurement I hand-waved. Thanks for building the tooling that can actually capture it.
+
+      hao li
+
+      hao li
+
+      hao li
+
+  Follow
+
+    CS student building dev tools for AI coding agents. 💼 Open for freelance: Chrome extensions, Python automation, MVPs → Fiverr: fiverr.com/haoli_builds
+
+          Joined
+
+          Sep 30, 2026
+
+  •
+
+    Oct 3
+
+Copy link
+
+                Hide
+
+Great distinction — and you're right that I was only measuring the context tax, not the wire tax. Pagination fixes what the model sees per request, but every page turn still hauls the full page over the wire, so total bytes barely move. On your MCP question: the spec does have cursor-based pagination for tools/list, but in practice servers return everything in one shot and clients don't bother paginating — which is exactly the 55K-tokens-upfront behavior I measured. Delta-only returns aren't in the spec at all. Your 'split by problem, not by page' framing is the deeper fix, and honestly it's where the ecosystem seems headed: lazy-load tool definitions per task instead of front-loading the whole toolbox. That's a better article than mine — thanks for pushing on this.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+lazy-load tool definitions per task instead of front-loading the whole toolbox
+
+That's the fix, and you put it cleaner than I did. Pagination moves bytes, not the tax; the tax only dies when the toolbox loads per task. Really appreciate you pushing on the context-vs-wire distinction — it made the whole thing sharper. If mcp-tax ever grows that per-page wire counter, ping me; I want to see the numbers.
+
+      hao li
+
+      hao li
+
+      hao li
+
+  Follow
+
+    CS student building dev tools for AI coding agents. 💼 Open for freelance: Chrome extensions, Python automation, MVPs → Fiverr: fiverr.com/haoli_builds
+
+          Joined
+
+          Sep 30, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+Will do — the per-page wire counter is going on the mcp-tax backlog. Really enjoyed this thread; the context-vs-wire distinction made both tools' stories sharper.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+Likewise — one of the better threads I've had on here. The context-vs-wire split is yours as much as mine now. Ping me when the per-page counter lands; I'll run my setup through it and we'll finally have the wire number the post was missing. 🙏
+
+      Mudassir Khan
+
+      Mudassir Khan
+
+      Mudassir Khan
+
+  Follow
+
+    I write about Next.js + TypeScript + AI engineering, with a focus on making sites discoverable to LLMs and AI search. Long-form notes at mudassirkhan.me
+
+            Location
+
+            Islamabad, Pakistan
+
+              Education
+
+              AI Engineer
+
+              Pronouns
+
+              He/Him
+
+              Work
+
+              CTO
+
+          Joined
+
+          Sep 6, 2025
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+the 55k baseline is the number i wish someone had put in a gist when i was first wiring up mcp. we ran a test with a single agent doing a simple repo search task: 91% of the context was tool schema before the first user turn. logged it with a tiktoken counter on the input side.
+
+the three cases framing you end on is solid. the one i'd add: workflows that can preselect a subset of tools (function calling with a static tool list) rather than loading all 93 on every call. cuts the overhead from 55k to maybe 4k to 6k for targeted tasks. have you experimented with partial schema loading on the server side?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 4
+
+Copy link
+
+                Hide
+
+91% of the context was tool schema before the first user turn
+
+That's the number the post needed — thank you for measuring it with a real tiktoken count instead of hand-waving like I did. 91% before the first user token is the whole argument in one stat.
+
+And yes, preselecting a static subset is the biggest lever there is — 55k → 4–6k for a targeted task is exactly the win, and it's why "lazy-load per task" keeps surfacing. On server-side partial loading: it's awkward under the current spec. The 2026-07-28 revision says tools/list can't vary per connection or as a side effect, so a server can't quietly hand you a task-specific subset mid-session. The practical lever stays client-side — a gateway exposing a search_tools(intent) that injects only the handful you need, or the newer Tool-Search path that defers schemas until they're used. The server can page, but as this thread nailed, pagination saves round trips, not context. Out of the 93, which tool did your repo-search agent actually end up needing?
+
+      Mudassir Khan
+
+      Mudassir Khan
+
+      Mudassir Khan
+
+  Follow
+
+    I write about Next.js + TypeScript + AI engineering, with a focus on making sites discoverable to LLMs and AI search. Long-form notes at mudassirkhan.me
+
+            Location
+
+            Islamabad, Pakistan
+
+              Education
+
+              AI Engineer
+
+              Pronouns
+
+              He/Him
+
+              Work
+
+              CTO
+
+          Joined
+
+          Sep 6, 2025
+
+  •
+
+    Oct 5
+
+Copy link
+
+                Hide
+
+honest answer: mostly search_code, get_file_contents, and list_files_in_repo. the other 90 were just schema weight. what killed us was that the agent kept loading tool definitions for things like issue management that were completely irrelevant to a read only search task. the 55k is really the cost of not scoping your server before you deploy it. do you see the same pattern — most agents using maybe 5% of what tools/list exposes?
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 11
+
+Copy link
+
+                Hide
+
+do you see the same pattern — most agents using maybe 5% of what tools/list exposes?
+
+Exactly that pattern, every time. For a read-only search task it's basically search_code, get_file_contents, list_files — and the other ~90 definitions are pure schema weight that still gets re-sent on every turn.
+
+Your phrasing is the one I'll keep:
+
+the 55k is really the cost of not scoping your server before you deploy it
+
+Because the tax isn't the tools you call, it's the tools you could call. The cheapest real fix I've found is per-session scoping — expose only the handful a given task needs instead of the full catalogue — which is closer to "ship several small servers" than "one GitHub server with 93 tools." Did scoping yours down change the agent's behaviour too, or just the token bill? I've seen fewer wrong-tool detours once the irrelevant 90 stop being in context.
+
+      CodeArchitect_J
+
+      CodeArchitect_J
+
+      CodeArchitect_J
+
+  Follow
+
+    Building the decentralized AI stack. Obsessed with Model Context Protocol (MCP), scaling open-source LLMs, and Python integrations.
+
+          Joined
+
+          Oct 15, 2026
+
+  •
+
+    Oct 19
+
+Copy link
+
+                Hide
+
+This is the cost nobody puts in the budget. Tool schemas are paid on every single turn, so 55k tokens of definitions can outweigh the actual work in a long agent loop. What's worked for me: expose only the 5-10 tools a given agent actually needs, and load the rest on demand through a search step. It also tends to improve tool selection accuracy, not just cost.
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 23
+
+Copy link
+
+                Hide
+
+expose only the 5–10 tools a given agent actually needs, and load the rest on demand
+
+The fix — and the second-order benefit is the bigger one: fewer schemas in context doesn't just cut the 55k-token tax, it improves selection accuracy, because the model stops getting distracted by 40 tools it'll never call. Lazy-load via a search/registry step. The tax being paid every turn is what nobody budgets for; a long loop pays it dozens of times.
+
+      Carlos Dumas
+
+      Carlos Dumas
+
+      Carlos Dumas
+
+  Follow
+
+    Always learning mobile dev who likes dev tools
+
+            Email
+
+            juniorknappczpa@hotmail.com
+
+            Location
+
+            의왕시, South Korea
+
+              Pronouns
+
+              she/her
+
+          Joined
+
+          Oct 7, 2026
+
+  •
+
+    Oct 7
+
+Copy link
+
+                Hide
+
+solid write-up on mcp, thanks for sharing
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Email
+
+            rudratoshs@gmail.com
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+  •
+
+    Oct 11
+
+Copy link
+
+                Hide
+
+Thanks Carlos, glad it was useful. If you run MCP servers yourself, the one cheap check worth doing is counting the tokens your tools/list actually injects before the first user turn — it's usually a lot more than people expect, and most of it is tools the task never touches.
+
+        View full discussion (34 comments)
+
+        Are you sure you want to hide this comment? It will become hidden in your post, but will still be visible via the comment's permalink.
+
+Hide child comments as well
+
+          Confirm
+
+For further actions, you may consider blocking this person and/or reporting abuse
+
+      Rudratosh Shastri
+
+  Follow
+
+    Backend architect, 15 years deep. Still curious, still shipping.
+Systems • AI Agents • Security • Breaking things on purpose 🔥
+
+            Location
+
+            Indore,MP
+
+              Education
+
+              Studied Computer Science at Arya Institute of IT
+
+              Pronouns
+
+              He
+
+              Work
+
+              Technical Lead & Senior Backend Architect at PharmaForceIQ
+
+          Joined
+
+          Sep 24, 2026
+
+            More from Rudratosh Shastri
+
+              Can You Break Our AI Security Defenses? Help Test Buried Injections & Taintgate
+
+                  #opensource
+                  #ai
+                  #security
+                  #python
+
+              How to Make RAG Show Its Evidence: Claim Verification at 15M-Document Scale
+
+                  #rag
+                  #ai
+                  #llm
+                  #machinelearning
+
+          We're a place where coders share, stay up-to-date and grow their careers.
+
+        Log in
+
+        Create account
+

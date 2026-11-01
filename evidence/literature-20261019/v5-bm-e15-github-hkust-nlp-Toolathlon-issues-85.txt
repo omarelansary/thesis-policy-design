@@ -1,0 +1,96 @@
+
+
+  External API instability causes non-model evaluation failures · Issue #85 · hkust-nlp/Toolathlon · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+External API instability causes non-model evaluation failures #85
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+External API instability causes non-model evaluation failures#85
+
+Copy link
+
+Description
+
+nursery42
+opened on Aug 19, 2026
+
+Issue body actions
+
+Summary
+
+Several Toolathlon tasks depend on live third-party APIs or public websites. During repeated benchmark runs, we observed failures caused by rate limits, anti-bot protection, network restrictions, data drift, or evaluator-side API errors rather than model capability.
+
+These failures can make results difficult to reproduce and may incorrectly count infrastructure failures as model failures.
+
+Observed unstable dependencies
+
+Several benchmark tasks can fail because of unstable external APIs rather than model capability:
+
+Yahoo Finance / yfinance: frequent HTTP 429 and YFRateLimitError, affecting finance and exchange-rate tasks.
+
+Google Scholar: request timeouts, HTTP 403, and CAPTCHA, affecting add-bibtex and profile-update-online.
+
+OpenReview: api2.openreview.net may return Cloudflare ChallengeRequiredError, affecting hk-top-conf.
+
+These failures can consume the task's turn budget or cause evaluator-side failures.
+
+Representative Yahoo Finance error
+
+yfinance.exceptions.YFRateLimitError:
+Too Many Requests. Rate limited. Try after a while.
+
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

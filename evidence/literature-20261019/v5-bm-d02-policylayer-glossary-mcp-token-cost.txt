@@ -1,0 +1,75 @@
+ What is MCP Token Cost? Definition & Guide | PolicyLayer Glossary
+
+    New Your team’s decisions, in one playbook every coding agent works from. Never answer your agent twice →   
+
+ MCP REGISTRY FOR AGENTS DOCS PRICING  THEME    CONTROL YOUR AGENTS      
+
+// GLOSSARY -- MCP & TOOL INFRASTRUCTURE 
+What is MCP Token Cost?  
+ 2 min read Updated Jun 11, 2026   
+
+MCP token cost is the context-window overhead incurred by connecting MCP servers: every connected server's tool definitions — names, descriptions, and input schemas — are injected into the model's prompt, consuming tokens on every request whether or not the tools are used.    
+WHY IT MATTERS 
+
+For the model to know what it can call, the client serialises each server's tools/list output into the prompt. A single verbose tool — long description, large JSON schema — can cost hundreds of tokens; a server exposing dozens of tools can cost thousands; a typical multi-server setup can consume a five-figure token count before the user types anything. That overhead recurs on every request in the session.
+The costs compound in three ways. Money: those tokens are billed as input on every call. Latency: larger prompts take longer to process. Quality: tool definitions compete with actual work for context window space, and models pick tools less reliably as the catalogue grows — the tool sprawl problem measured in tokens.
+Mitigation options, roughly in order of effort:
+Connect fewer servers — disconnect servers a project does not use; the cheapest token is one never injected.
+Tool filtering — expose only the subset of a server's tools you actually call, where the client or an intermediary supports it.
+Virtual servers — aggregate many upstreams behind one curated facade exposing a minimal tool set (see MCP virtual server).
+Measurement — count the serialised definition size per server so trimming decisions are data-driven rather than guesswork.   
+
+Expose only the tools your agents actually use and stop paying context cost for the rest. 
+ CUT YOUR TOKEN COST → 
+Cut context cost and attack surface in one move.       
+HOW POLICYLAYER USES THIS 
+
+PolicyLayer publishes per-server token-cost data at policylayer.com/token-cost, measured from each scanned server's actual tool definitions, so you can see what a server costs your context window before connecting it. The gateway's virtual server support lets teams expose a filtered tool subset from registered upstreams, cutting injected definitions to the tools policy actually permits. 
+Look up any server’s token cost →    
+IN THE CATALOGUE 
+Measured across 13,230 MCP servers (265,284 tools): connecting a server loads its full tool definitions into the context window on every request. 
+
+ 1,864 tokens — median server 
+ 13,636 tokens — 90th percentile 
+ 448,698 tokens — largest measured (Ainumbers Mcp Apps)     
+ServerTool definitionsTokens per request   
+ GitHub8614,406 
+ Linear667,149 
+ Supabase292,561 
+ Filesystem141,666    
+Look up any server’s token cost →     
+FREQUENTLY ASKED QUESTIONS 
+   Do MCP tools cost tokens even when not used?   
+Yes. Tool definitions are injected into the prompt so the model knows they exist, and that happens on every request regardless of whether any tool is called.   How many tokens does a typical MCP server cost?   
+It varies enormously — from under a hundred tokens for a small, tersely documented server to several thousand for servers with many tools and large schemas. Measuring the serialised tools/list output is the only reliable answer.   What is the most effective way to reduce MCP token cost?   
+Reduce what gets injected: disconnect unused servers, filter to the tools you call, or front multiple upstreams with a virtual server exposing a minimal curated set.      
+RELATED TERMS 
+ Context WindowMCP Tool SprawlMCP Virtual ServerTool DiscoveryContext Engineering       
+FURTHER READING  
+  MCP token cost data by server →           
+
+// THE REGISTRY 
+Every MCP server your agents touch has a registry record. 
+Type a name, get the breakdown: verified identity, auth posture, risk grade, every tool classified, recommended policy. Re-checked continuously.     GET THE RECORD  
+
+Teams ship this data inside their own products.
+See what a licence covers →       
+
+ Take your agents live. Without losing control.  
+Route your MCP traffic through PolicyLayer. Every tool call is checked against your policy before it runs: allow, deny, or require approval. Per-identity grants. Full audit log. Live in minutes. 
+  CUT YOUR TOKEN COST →
+
+Instant setup, no code required. 
+46,500+ MCP servers and 515,000+ tools scanned and risk-classified.    
+
+ × 
+
+// GET IN TOUCH 
+Have a question or want to learn more? Send us a message.      
+ NAME   
+ EMAIL   
+ MESSAGE   
+ CANCEL SEND    
+
+Message sent. 
+We'll get back to you soon.                  

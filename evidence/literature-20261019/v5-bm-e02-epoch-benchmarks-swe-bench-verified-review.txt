@@ -1,0 +1,197 @@
+SWE-bench Verified – Benchmark review | Epoch AI
+
+Back to Benchmarks
+
+Benchmark Review
+SWE-bench Verified
+
+Reviewed: Sep. 3, 2026
+Benchmark creator: Carlos Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, and Karthik Narasimhan in collaboration with OpenAI
+Verdict: 
+Flawed
+
+How we review benchmarks
+
+SWE-bench Verified evaluates large language models on real-world software issues collected from public GitHub repos. Given a codebase and an issue, a language model is tasked with generating a patch that resolves the described problem. SWE-bench Verified is a static benchmark, so it can be assumed that all current and future models have been trained on the codebases used in its tasks, leading to contamination. An audit by OpenAI found that over half of commonly unsolved questions had test cases that rejected functionally correct submissions. This audit gives us reasonable confidence that over 20% of questions have scoring-based issues and informs our Flawed designation.
+
+Methodology
+SWE-bench Verified consists of 500 bug fixes sourced from 12 repos. It is a subset of the original 2,294 SWE-bench problems created through independent review by 3 experts to attempt to remove problems that had issues.1
+Numerous public audits have documented issues with the benchmark:
+
+On June 13, 2025, Epoch AI released a prior review noting that the benchmark had high contamination risk, among other issues.2 Our prior review also documents that results are highly dependent on the scaffold used.
+
+On February 23, 2026, OpenAI released their audit results. They audited 27.6% of the tasks, finding that 59.4% had flawed test cases that rejected functionally correct submissions (floor of 16.4% of tasks broken).3 We therefore believe the benchmark is unlikely to meet our bar of fewer than 20% of questions having accuracy-impacting issues.
+
+OpenAI’s analysis further revealed that all frontier models tested “have seen at least some of the problems and solutions during training,” and they conclude that “improvements on SWE-bench Verified no longer reflect meaningful improvements in models’ real-world software development abilities. Instead, they increasingly reflect how much the model was exposed to the benchmark at training time.”
+
+RDI identified a reward hack that achieves a perfect score.4
+
+Acknowledgements
+This review relies on published audits from OpenAI and RDI as well as Epoch’s prior review.
+
+Rubric
+
+1. Reviewability
+
+LevelMeaningStatus
+FullAll tasks and scoring logic inspectable,5 and harness/API settings used for each model (reasoning effort, token/time limits, tool access, system prompts) are fully disclosed
+[proceed to 2]
+PartialA representative sample of tasks and scoring logic inspectable, with full harness/API settings disclosed
+[proceed to 2]
+InadequateLimited, biased, or no inspectable tasks or scoring logic, harness/API settings undisclosed
+[stop → NEI]
+2. Scoring
+This is the minimum standard required to be Verified; failing any of these items results in a Flawed verdict.
+
+Scoring
+Examples
+Essentially impossible to correctly answer as written (e.g., underspecified task, hidden requirement, missing file/tool)
+False Negative (e.g., overly strict scorer, stale/incorrect ground truth, dependent on live external state that can drift, sandbox failure independent of the agent)
+False Positive (e.g., lax scorer, reward-hackable environment, stated skill can be bypassed via a shortcut such as exploiting an error in the scoring logic or retrieving the answer from the harness/web)
+Task egregiously doesn’t measure the claimed capability
+Default threshold for FlawedEither errors affect ≥20%6 of the total score in the inspected sample,7 or there is an issue that corrupts grading at scale
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Benchmark Consistency
+Examples
+Scorer, instructions, or ground truth changed without a version bump
+Default threshold for FlawedLeaderboard has incomparable results from different versions
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Elicitation
+Examples
+Model elicitation is extremely constraining and is not the focus of the benchmark:
+Under-resourced relative to task size (token/turn/time limit, sandbox resources)
+Poor context management
+Lack of agentic environment where one would be natural to provide
+Excessive non-voluntary termination for agentic benchmarks
+Default threshold for FlawedSubstantially reduced performance compared to reasonable alternatives for the tasks
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+
+Bias in Evaluation Setup
+Examples
+Uneven compute/token budgets
+Unfair scaffold choice (e.g., only a subset of models optimized)
+Default threshold for FlawedMaterial model-specific advantage found
+Status
+
+Pass
+Flag [stop → Flawed]
+Not reviewed
+Notes—
+3. Evaluation Quality
+This is the standard we would like all benchmarks to meet, but it is not necessarily disqualifying to omit or fail these items.
+
+QuestionStatusNotes
+Elicitation and resource adequacy: Are the resources given to models (reasoning token/turn budget, tool access, etc.) sufficient for them to perform near their ceiling?
+
+Sufficient
+Constraining
+Unreasonably constraining
+Unknown
+Not reviewed—
+Scaffold fairness: What scaffold does the leaderboard report?
+
+Shared common scaffold
+Mix of model-specific and common scaffolds
+Model-specific scaffolds
+Not reviewed—
+Is there evidence/risk of contamination?
+As of Sep. 3, 2026:
+100% of tasks public
+100% of solutions public
+Not reviewed—
+Has human completability been assessed?
+
+All tasks
+Representative set of tasks
+Poor implementation (Unrepresentative set of tasks, unreasonable set of participants)
+Not established
+Not reviewed—
+Score range (if possible to estimate)
+— floor, — ceiling
+Not reviewed—
+Statistical adequacy: how many runs/model (≥ 5 recommended for error bars)
+— runs/model
+Unknown
+Not reviewed—
+Construct validity
+
+Measures stated capabilities
+Partially measures stated capabilities
+Does not measure stated capabilities
+Not reviewedNo longer measures stated capability due to contamination.
+
+Disclaimer
+This is a partial review. We stopped inspecting once we discovered errors that exceeded our published threshold for a flawed benchmark.
+We attempted to reach out to the benchmark developer prior to launch, and if they write a response to this review we will link it here. If you’re the benchmark developer, please email us at reviews@epoch.ai with a link to your response if you would like us to include it here.
+
+Notes
+
+Methodology: https://openai.com/index/introducing-swe-bench-verified/#dataset-construction 
+
+https://epoch.ai/publications/what-skills-does-swe-bench-verified-evaluate 
+
+https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/ 
+
+https://rdi.berkeley.edu/blog/trustworthy-benchmarks-cont/ 
+
+Either publicly or privately to reviewers under an NDA.
+
+A benchmark is rated Flawed if scoring defects could affect ≥20% of the benchmark’s full score. For benchmarks with equally weighted all-or-nothing tasks, our threshold corresponds to ≥20% of tasks having defects. For benchmarks with partial scoring or unequal task weights, our threshold corresponds to ≥20% of the total possible score affected by defects. For single task benchmarks, our threshold is the reported score having defects that could affect it by ≥20%.
+
+For benchmarks with >50 available tasks, we will sample a random set of 50 (stratified by category, when present). If the observed error rate is 15–25%, we will expand the sample to 100. For benchmarks with ≤50 available tasks, all available tasks will be assessed.
+
+About Benchmark Reviews
+Epoch AI’s Benchmark Reviews are independent reviews of external AI benchmarks. Our documentation describes the rubric behind this verdict, how we choose which benchmarks to review, and answers frequently asked questions.
+View benchmarkRead the documentation and FAQs
+
+Cite
+
+Epoch AI’s work is free to use, distribute, and reproduce provided the source and authors are credited under the Creative Commons Attribution license.
+
+Citation
+
+Epoch AI (2026), "SWE-bench Verified". Published online at epoch.ai. Retrieved from 'https://epoch.ai/benchmarks/swe-bench-verified/review' [online resource]. Accessed 1 Nov 2026.
+
+BibTeX Citation
+
+@misc{epoch2026swebenchverified,
+title={SWE-bench Verified},
+author={{Epoch AI}},
+year={2026},
+url={https://epoch.ai/benchmarks/swe-bench-verified/review},
+note={Accessed: 2026-11-01}}
+
+Feedback
+
+Feedback
+
+Have a question? Noticed something wrong? Let us know.
+Message
+
+If you would like a reply, please include your name and email address.
+
+Name
+
+Email address
+
+CancelSubmit
+
+SWE-bench Verified
+SWE-bench Verified evaluates large language models on real-world software issues collected from public GitHub repos. Given a codebase and an issue, a language model is tasked with generating a patch that resolves the described problem.

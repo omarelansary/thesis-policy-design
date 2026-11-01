@@ -1,0 +1,161 @@
+
+
+  Cannot reproduce leaderboard score for gpt-oss-120B (OpenRouter, function-call) · Issue #45 · SalesforceAIResearch/MCP-Universe · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Cannot reproduce leaderboard score for gpt-oss-120B (OpenRouter, function-call) #45
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+Cannot reproduce leaderboard score for gpt-oss-120B (OpenRouter, function-call)#45
+
+Copy link
+
+Description
+
+eliumusk
+opened on Jan 5, 2026
+
+Issue body actions
+
+Hi maintainers,
+
+Thanks for releasing MCP-Universe and the leaderboard.
+
+I’m trying to reproduce the leaderboard result for gpt-oss-120B (OpenRouter, function-call) using the official evaluation script, but I consistently obtain a score that is significantly lower than what is reported on the leaderboard. Since the gap is large and stable across runs, I’d like to confirm whether there are any undocumented settings or differences in tool / function-call configuration.
+
+Evaluation setup
+
+Model: gpt-oss-120B (OpenRouter)
+
+Invocation mode: function-call
+
+Evaluation method: official evaluation script in the repository
+
+Sampling parameters: temperature / top_p / max_tokens
+
+(kept exactly the same as the default / official configuration; no modifications)
+
+Max iterations: 50
+
+Number of runs: 3
+
+Results
+
+Leaderboard score: ≈ 24.44
+
+My reproduced score: ≈ 11
+
+The reproduced score is stable across multiple runs and does not appear to be an occasional fluctuation.
+
+What I have already verified
+
+I am using the original evaluation code without local modifications.
+
+Model outputs are returned as proper function-call structures (not text fallbacks).
+
+Multiple runs yield consistent results.
+
+Sampling parameters match the official configuration.
+
+Questions / clarifications I’m hoping to get
+
+Function-call / tool configuration
+
+Does the leaderboard evaluation use any settings that are not explicitly documented in the repository, such as:
+
+strict vs relaxed function-call parsing
+
+specific tool-choice strategies (e.g., auto vs required)
+
+a specific version of the tool schema
+
+retry or auto-repair mechanisms for failed tool calls?
+
+When function-call parsing fails, is fallback allowed, or is the step counted as a failure?
+
+OpenRouter routing
+
+Is the leaderboard run pinned to a specific OpenRouter provider route?
+
+If not, could differences between providers significantly affect function-call success rates and final scores?
+
+google-maps MCP server version
+
+Which google-maps MCP server version was used for the leaderboard evaluation?
+
+Is the google-maps tool implementation currently in the repository exactly the same as the one used during the leaderboard run?
+
+Is it possible that:
+
+the leaderboard used an older / modified / private version of the google-maps MCP server, or
+
+the tool schema or response format changed across versions, affecting function-call success rates and scoring?
+
+Code vs leaderboard consistency
+
+Are the prompts, tool schemas, and evaluation logic in the current repository fully aligned with what was used for the leaderboard entry?
+
+Is it possible to share the exact evaluation command or configuration used for the leaderboard result of gpt-oss-120B, to make reproduction possible?
+
+If helpful, I can provide additional diagnostics, such as:
+
+per-task or per-tool function-call failure rates (especially for google-maps),
+
+raw tool-call logs or parsing error examples.
+
+Thanks in advance for your help in clarifying this.
+
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

@@ -1,0 +1,341 @@
+
+
+  Toolathlon模型评测问题梳理 · Issue #98 · hkust-nlp/Toolathlon · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+Toolathlon模型评测问题梳理 #98
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+Toolathlon模型评测问题梳理#98
+
+Copy link
+
+Description
+
+adverbial03
+opened on Oct 19, 2026
+
+Issue body actions
+
+首先感谢 Toolathlon 团队构建并开源了这样一套高质量的评测基准。Toolathlon 的任务设计贴近真实工具调用场景，覆盖多工具、多步骤和复杂推理，评测框架也具备很好的可扩展性，对我们理解和评估 Agent 的工具使用能力非常有帮助。我们在实际使用当前测试集评测器时，发现了一些可能影响评测结果稳定性和公平性的问题，特此整理反馈，希望能对后续改进有所帮助。
+
+下面是我们观察到的问题、复现方式与改进建议：
+
+1. 官方测试服务器账号停用
+
+wandb 账号已经停用：wandb.errors.errors.AuthenticationError: API key verification failed for host https://api.wandb.ai. Make sure your API key is valid.
+
+2. 仓库无隔离机制
+
+实测部分模型可以从公开仓库下载gt 及evaluation，从评测器反推答案后填入。
+
+Activity
+
+adverbial03 commented on Oct 19, 2026 
+
+adverbial03
+on Oct 19, 2026
+
+Author
+More actions
+
+3. 部分评测器存在缺陷
+
+因答案时效性，外部应用改版等原因，部分评测器与原始评测意图不完全一致。此处缺陷整理由agent辅助完成，有不尽不实之处希望能与您讨论。
+
+3.1 cooking-guidance
+
+问题类型： 评分逻辑缺陷、GT错误
+
+任务内容： 工作区给出现有食材 ingredients.csv（如 茄子 200g、土豆 100g）。要求通过 howtocook MCP 选 3 道菜，按原格式填 cuisine.json，菜名与用量须与 MCP 返回严格一致；再把不足或缺失的食材写进 shopping.csv（Name、Quantity 两列）。
+
+评测逻辑： tasks/finalpool/cooking-guidance/evaluation/check_local.py:
+
+L491 find_insufficient_ingredients（L176-202）对每项需求调用 ingredient_utils_enhanced.py:L418-462 的 is_sufficient_quantity，单位不可换算时直接判不足（L439-450）；L513-542 若“存在但不足”的食材没出现在 shopping.csv，直接判 Critical failure。
+
+评测错误点： 两个缺陷叠加。
+
+MCP 返回的“必备原料”多数只有名称、没有用量，例如 '- 茄子'、'- 土豆'。clean_required_ingredients 解析不出数值（quantity=0、unit=''），is_sufficient_quantity 拿库存 '200g' 和 '' 比较时判为 Unit mismatch，返回不足。现象：选了一道本地缺失的菜后，库存 200g 的茄子（菜谱中每个约 150g，库存足够）被判为“存在但不足”。正确的购物单不含茄子，却被判 'Critical failure: Insufficient ingredients not in shopping list: [茄子]'。离线用原函数重放：增强路径下 茄子炖土豆 的不足清单为空；回退路径下茄子、土豆都被判不足，原因是 'Unit mismatch: have g, need '。
+
+3.2 experiments-recordings
+
+问题类型： 评分逻辑缺陷、诊断信息缺陷
+
+任务内容： 要求根据 W&B 项目 mbzuai-llm/Guru 的历史实验，在 Notion 页面 mcp_experiments_recordings 的表格中填写每个 benchmark 的 val-core acc 最高分及 Best Step（格式 step(average)）。题面明确：同名的多个 run 视为一个 run 合并统计；平均分只用该 step 上存在的指标求算术平均。评分在评测时实时调用 W&B API，为两个目标 run 名（341943-...cliphigh...、342297-...nocliphigh...）生成 GT，再与 Notion 数据库逐格比较（容差 1e-3）。
+
+评测逻辑： tasks/finalpool/experiments-recordings/evaluation/main.py：L88-96 用 api.runs() 拉取全部 run 并按 name 分组，组内顺序就是 API 返回顺序；L98-132 scan_history_rows_for_runs 把同名各 run 的历史行按 run 顺序依次拼接，L128-129 遇到任何异常都静默 continue；L134-186 aggregate_best_by_benchmark_and_best_step：L146-160 构建 step_metric_values[step][header]，其中 L154-158 只在当前这一行的候选 key 里取 max，L160 step_metric_values[step][h] = best_val 直接赋值，覆盖了之前同一 step（来自另一个同名 run）的值；L162-171 再在已被覆盖的字典上取每列最大值；L173-185 用同一个字典算 Best Step；L374-395 只对两个目标 run 生成 GT；L258-311 compare_with_notion 逐格比较，L300-303 用 NUMERIC_TOLERANCE=1e-3（L25）。
+
+评测错误点： 合并同名 run 时，评分器按 step 建字典，同一 step 的值直接被后来的 run 覆盖（main.py:160），没有和已有值取 max，之后再在被覆盖过的字典上取各列最大值（L162-171）。因此“每个 benchmark 的最高分”取决于 W&B API 返回 run 的顺序。以项目 mbzuai-llm/Guru 中 341943-…cliphigh… 的 4 个同名 run 为例：ArcAgI1 的全局最大值是 run it75fa5k 在 step170 上的 0.13，同一 step 上 run ihdboejo 的值是 0.09。离线用原函数遍历 4 个 run 的全部 24 种顺序，其中 12 种得到 0.115（0.13 被 0.09 覆盖），另外 12 种得到 0.13；评测实际生成的 GT 是 0.115。现象：按原始数据如实取最大值、填 0.13 的答案会被判错。Best Step（L173-185）对同一 step 跨 run 的取值同样是后者覆盖前者，规则没有定义。诊断方面：GT 每次评测时实时生成，不打印各同名 run 的行数和遍历顺序；L128-129 还会静默吞掉 scan_history 的异常，GT 来源无从核对。
+
+3.3 hk-top-conf
+
+问题类型： 评分逻辑缺陷、诊断信息缺陷
+
+任务内容： 要求模型统计 HKU、CUHK、HKUST 三校以第一作者单位身份在 ICML 2024、NeurIPS 2024、ICLR 2025 主会议发表的论文数，并按 Poster/Spotlight/Oral 分类。产物为 workspace/result.md，只含一个 markdown 表（University, Poster, Spotlight, Oral, Total），按 Total 降序排列。
+
+评测逻辑： check_local 读取模型与 GT 的 result.md（tasks/finalpool/hk-top-conf/evaluation/check_local.py:L158-192）；解析 markdown 表（L37-65）；第一列用 normalize_university_name 归一化：先 normalize_str 去除标点和空格并转小写，再在别名字典中做精确键查找，找不到就原样返回（L4-35）；其余列取第一个整数（L80-84）；按 Total 排序后逐格严格相等（L98-155）。
+
+评测错误点： 1）学校别名映射（check_local.py L8 起）只做整串精确匹配，不做包含匹配，也不去掉冠词。三校的官方英文名都带 'The'，常见写法还会带括号缩写。离线用原函数重放：'Hong Kong University of Science and Technology (HKUST)'、'The Chinese University of Hong Kong'、'The University of Hong Kong' 分别归一化为 'hongkonguniversityofscienceandtechnologyhkust'、'thechineseuniversityofhongkong'、'theuniversityofhongkong'，都映射不到 hkust/cuhk/hku。只有不带 'The'、不带缩写的写法（与 GT 相同）或纯缩写能通过。现象：题面本身用的就是 'the University of Hong Kong (HKU)' 这种带括号缩写的写法，照着写会在第 1 行第 1 列判错，例如报 "Row 1 column 1 mismatch: 'hongkonguniversityofscienceandtechnologyhkust' != 'hkust'"。2）诊断缺陷：check_local 不管因为什么失败都返回 (result, None)（L201），eval_res 里只剩一句 'local check failed: None'。
+
+3.4 imagenet
+
+问题类型： 评分逻辑缺陷、题面与评测不一致
+
+任务内容： 工作区有两篇图像生成论文（DiT 2212.09748、LlamaGen 2406.06525）和 format.tex 表格模板。要求汇总各论文模型在 ImageNet 256 上的结果，写成 LaTeX 表格存为 survey.tex。列为模型名（论文含多个模型时报 FID 最低者）、方法类别、参数量、FID-50K、Inception Score，并按 FID 降序排列。
+
+评测逻辑： tasks/finalpool/imagenet/evaluation/check_local.py:L3-11 normalize_content 只做空白折叠、小写化和 strip；L30-33 把 agent 的 survey.tex 与 groundtruth_workspace/survey.tex 归一化后整文件做字符串相等比较，不等即失败（L37-44 只输出第一个不同位置）。没有按单元格解析，也没有模型名的同义或别名处理。
+
+评测错误点： 评分把整张 survey.tex 当作一个字符串精确比较，模型名一列只接受 GT 写法 'DiT-XL/2' 和 'LlamaGen-3B'。题面要求报告“论文中 FID 最低的那个”模型，但没有规定名称写法。两篇论文的 ImageNet 256 结果表里，FID 最低的那一行标签本身就是 'DiT-XL/2-G (cfg=1.50)'（DiT Table 2，FID 2.27，IS 278.24）和 'LlamaGen-3B (cfg=1.65)'（LlamaGen Table 6，FID 2.18，IS 263.33）。同一模型在不同 cfg 下有多行，例如 DiT-XL/2 不加引导时 FID 为 9.62，所以带采样配置的写法才能唯一指向 FID 最低的那一行。现象：模型名照抄论文行标签，类别、参数量、FID、IS、行序、表格结构都与 GT 一致，仍报 'survey.tex content mismatch ... First divergence at offset 134'；离线用原 check_local 重放，只把这两个模型名换成 GT 写法、其余字符不动，即可通过。
+
+3.5 ipad-edu-price
+
+问题类型： 评分逻辑缺陷
+
+任务内容： 用户是香港大学生，要求比较中国大陆、香港、新加坡、美国四地 Apple 官方教育优惠下 iPad Pro（11 英寸 256GB）+ Apple Pencil Pro 的合计价格，换算为港币后找出最便宜地区。产物为 workspace/result.json，包含 cheapest_region 与以港币数值表示的 cheapest_total_price。
+
+评测逻辑： 评测时实时抓取：用 yfinance 取各币种兑 CNY 汇率（tasks/finalpool/ipad-edu-price/evaluation/main.py:L26-59，失败时回落到写死汇率 L200）；用 playwright 打开四地教育商店 iPad Pro 购买页和 Pencil Pro 产品页，对 browser_snapshot 首屏文本调用 extract_price_from_text 取价（L115-134）；extract_price_from_text 用币种正则匹配页面全部金额，按固定区间过滤后取 min()（L62-86，区间 L98-113）；四地合计换算 CNY 取最低地区，比较地区一致后再换算 HKD，要求与模型价差 ≤1%（L330-375）。
+
+评测错误点： extract_price_from_text（main.py L62-86）用币种正则匹配页面上的所有金额，只要落在固定区间（L98-113）内就当作候选，最后取 min()。它既不区分售价和页面上的其他金额，也不绑定题目要求的 11 英寸 / 256GB SKU。Apple 美国和香港的 iPad Pro 购买页首屏都有以旧换新文案："Get $45–$905 for your trade-in with Apple."、"Get HK$250–HK$7,450 for your trade-in with Apple."。其中 905 落在 USD 区间 700-1500 内，7450 落在 HKD 区间 7000-15000 内，又都低于实际售价，于是被 min() 当成 iPad 价格。评测得出的合计因此变成美国 USD 1024（905+119）、香港 HKD 8349（7450+899）。
+
+3.6 k8s-redis-helm-upgrade
+
+问题类型： 评分逻辑缺陷、题面与评测不一致
+
+任务内容： 把 shared-services 命名空间中 bitnami/redis release 从 chart 19.0.0 升级到正好 22.0.0，并保证 config/redis-values.yaml 中的所有配置在升级后仍然生效（remain effective），pods 正常运行。
+
+评测逻辑： tasks/finalpool/k8s-redis-helm-upgrade/evaluation/main.py:190-196 执行 helm get values redis -o json（只取用户提供的 values）；L199-204 读取 groundtruth_workspace/expected-redis-values.yaml（与 initial_workspace/config/redis-values.yaml 逐字节相同）；L210-215 调用 find_preservation_mismatches（L29-66）：对 GT 中每个键要求在 helm values 中按原路径存在且值相同（L47-48 缺键即 '(missing)'），允许额外键；L270 custom_values_preserved 与 L273-277 configuration_correct 都依赖该结果；L284 需 5 项全满分才算通过。评分不检查渲染后的资源或 Redis 运行参数是否生效。
+
+评测错误点： 题面要求旧配置升级后 "remain effective"，但评分（main.py L29-66、L190-215）要求旧 values 的键按原路径、逐字留在 helm get values 里。chart 22.0.0 已不再使用 redis.configmap（自定义 redis.conf 改由 commonConfiguration 提供），也不再使用顶层 securityContext（改为 master/replica 的 podSecurityContext/containerSecurityContext）。现象：把这两项迁到 22.0.0 的等价键，再用 helm upgrade -f <新 values>（不带 --reuse-values）升级后，chart=22.0.0、Pod 正常，CONFIG GET 返回 maxmemory-policy=allkeys-lru、timeout=300、tcp-keepalive=60、save=""，错误密码返回 NOAUTH，Pod 为 fsGroup/runAsUser 1001、runAsNonRoot=true，所有配置都生效了，评分却只报 $.redis (missing)、$.securityContext (missing)，得 0.6 分判失败。反过来，把旧键原样保留、再另加新键就能通过，可见判分取决于有没有保留字面键，与配置是否生效无关。另外，chart 19.0.0 渲染出的 redis-configuration ConfigMap 里只有 appendonly yes / save ""，没有 maxmemory-policy/timeout/tcp-keepalive，说明 redis.configmap 在升级前就不生效，评分强制保留的是一个本来就失效的键。
+
+3.7 merge-hf-datasets
+
+问题类型： GT错误、评分逻辑缺陷、题面与评测不一致
+
+任务内容： 要求从 Hugging Face 下载 lockon/ToolACE、lockon/glaive_toolcall_en、lockon/xlam-function-calling-60k 三个数据集，各取前 500 条，按工作区 unified_format.md 的规范转换成统一格式，合并写入 unified_tool_call.jsonl（共 1500 条）。规范要求每个工具的 parameters 都表示为 JSON Schema 风格对象，包含 type、properties、required。
+
+评测逻辑： tasks/finalpool/merge-hf-datasets/evaluation/main.py:L251-304 按 GT 顺序遍历 1500 个会话，对每个会话调用 deep_compare_with_tool_call_mapping（L117-149，递归 deep_compare 见 L197-249）；只忽略 'dict' vs 'object' 和 tool_call id 差异（L284-291），其余任何差异都在第一个失败会话处 return False（L294-297）。字段值比较前经 normalize_value_for_comparison（L37-54）处理，路径以 .type 结尾时用 _TYPE_ALIASES（L16-24）归一化类型名，只认 str/int/float/bool/list/dict/none 及其 JSON Schema 名称。
+
+评测错误点： 规范 unified_format.md L14 要求 parameters 用 JSON Schema 风格，但 GT 的 XLAM 部分直接保留了源数据里的 Python 类型注解：List[int] 68 处、List[float] 66 处、List[List[float]] 12 处、List[List[int]] 10 处、List[Union[int, float]] 8 处、List[str] 8 处、Tuple[float, float] 8 处，另有 Callable[[float], float] 3 处。评测的 _TYPE_ALIASES（main.py L21 起）只把 'list' 映射为 'array'，不处理 List[...]、Tuple[...] 这类泛型。现象：按规范把 List[int] 写成 JSON Schema 的 'array'，在 GT 顺序中第一个含泛型的会话 xlam_8（find_peak_element.nums）就报 'List[int]' vs 'array' 失败；离线遍历全部会话，把 GT 中的泛型视为 array 之后，XLAM 部分的这类误判全部消失。同类不一致还有一处：规范 L14、L19 要求每个工具都有 required（没有必填参数时为空列表），但 GT 中有 12 个 glaive 工具（如 glaive_3）没有 required 字段，按规范补上 required 的答案会报 'required: missing from left'。
+
+3.8 shopping-helper（该错误仅影响本地）
+
+问题类型： 评分逻辑缺陷、诊断信息缺陷
+
+任务内容： 要求模型在 Amazon 上为用户挑选 3 款预算低于 400 美元的黑色皮质（faux/PU/vegan 均可）沙发，并按 example.json 格式把 canonical_url、title、price、store_name 写入 workspace/recommend.json。题面没有指定配送地区。
+
+评测逻辑： check_local 读取 recommend.json 的 3 个商品（tasks/finalpool/shopping-helper/evaluation/check_local.py:L186-230）；评测浏览器先访问 amazon.com，仅设置 lc-main=en_US、i18n-prefs=USD 两个 cookie（L15-30、L507-519），不设置配送地区；然后对每个 ASIN 依次用 same-session fetch、详情页、exact-ASIN 搜索卡片取当前 USD 报价（L531-678，选价 L360-375）；要求实时价 <400 且与提交价相对差 ≤1%，标题互相包含（L726-830），3/3 通过才判 pass（L870 起）。
+
+评测错误点： 1）评测没有固定配送地区：check_local.py 的 warm-up（L507-519）只设置语言和币种，不设置配送地区，Amazon 按评测机出口 IP 决定 'Deliver to' 地区，判分结果因此取决于评测机所在位置，而不只是答案本身。现象：评测机出口在 Amazon 无法配送的地区（如 Singapore）时，Amazon 不显示这些商品的报价，3 个正确的 ASIN 在所有取价路径上都得到 'no current USD offer price'，直接判 0/3。用原取价/判分函数实时对照：默认 Singapore 时三款均为 deliveryBlocked=true、candidates=[]；同一会话只把邮编改为 10001，三款立即取到 USD 报价（156.99/179.99/229.99）。2）诊断缺陷：L660 的 can_deliver = not bool((winning_probe or {}).get('deliveryBlocked'))。没取到报价时 winning_probe 为 None，即使详情页 probe 已经明确 deliveryBlocked=true，can_deliver 仍为 True，L785-790 的 'cannot deliver to the evaluator browser location' 诊断永远不会输出，日志里只能看到 'no current USD offer'。
+
+3.9 trip-adviser
+
+问题类型： 评分逻辑缺陷
+
+任务内容： 从东京站日本桥口出发，乘直达线路前往镰仓站。出发前要在离日本桥口最近的星巴克买咖啡，到站后以最短距离步行至镰仓历史文化交流馆。按 format.json 输出 travel_plan.json（starbucks / transportation_route / kamakura_station / walking_route）。
+
+评测逻辑： tasks/finalpool/trip-adviser/evaluation/main.py:26 调用 check_local。check_local.py：L10-14 导入 utils.app_specific.google_maps.google_maps_mcp_client.GoogleMapsMCPClient；L191 verify_starbucks_with_maps（L16-99）声称用 Google Maps 校验所选星巴克是否离日本桥口最近；L202-208 要求 line_name 含 'yokosuka'；L215-217 要求出口含 'west'；L226-229 校验步行起终点字符串；L240 verify_walking_route_with_maps（L101-142）声称用 Google Maps 实测步行时长，允许 ±30%。GT 没有独立文件，全部是硬编码的字符串规则加上述两个“地图校验”。
+
+评测错误点： 题目核心的两项“Google Maps 校验”实际调用的是写死的 mock，没有访问任何地图服务。任何名称里带 Starbucks 的门店都能通过“最近门店”校验，例如把东京站附近的门店换成涩谷店或镰仓御成町店仍然通过；步行时长实际只和常数 9 分钟比较，填 7–12 分钟都通过，5 分钟或 13 分钟失败。也就是说，“最近的星巴克”这一要求实际没有被评测，步行时长校验也与真实路线无关。
+
+3.10 upenn-campus-route
+
+问题类型： 评分逻辑缺陷、诊断信息缺陷
+
+任务内容： 用户位于 Penn Bookstore，要求按 recommendation.md 中的 5 个景点（ENIAC/工程学院、Penn Museum、Benjamin Franklin Statue、Fisher Fine Arts Library、College Hall）规划最短步行路线，并明确要求即使景点很近也必须分别列出。结果按 format.json 保存为 upenn_route_plan.json（road_plan 中每段含 from/to/distance/estimated_time/directions）。
+
+评测逻辑： tasks/finalpool/upenn-campus-route/evaluation/main.py：L141-144 评测时实时调用 google_map maps_directions 构建 6x6 步行矩阵，并穷举 120 种排列求最优；L190-197 每个景点一组子串关键词（Franklin 雕像含 "statue"/"franklin"，College Hall 含 "hall"）；L199-203 location_matches_keywords 先 normalize_str（去掉空格和标点）再做子串匹配；L205-216 find_matching_attraction 有一个特判：只要原字符串小写后同时含 "college hall" 和 "statue"/"franklin"，就返回合并景点 "College Hall & Benjamin Franklin Statue"，否则按 KEYWORDS 顺序取第一个命中项；L239-247 要求每段 from 的映射结果与上一段 to 的映射结果完全相等，否则报 Route discontinuity；L283-306 逐段累加评测矩阵中的时长，超过最优值的 1.2 倍判失败。
+
+评测错误点： 1）合并景点特判误伤：validate_route_content 中 find_matching_attraction（main.py L205-211）只要名称同时含 'college hall' 和 statue/franklin，就映射为合并景点 'College Hall & Benjamin Franklin Statue'。
+
+3.11 woocommerce-stock-alert
+
+问题类型： 评分逻辑缺陷、诊断信息缺陷
+
+任务内容： 读取 WooCommerce 全部商品的 stock_quantity 与 stock_threshold，找出低于阈值的商品，更新名为 stock_sheet 的 Google Sheets 采购申请表，并按 stock_alert_email_template.md 给 purchasing_manager_email.txt 中的采购经理逐个发提醒邮件。题面未说明表中已有行（初始表第 2 行为 DELL-XPS-13、Current Stock=12 的旧记录）应覆盖还是保留。
+
+评测逻辑： tasks/finalpool/woocommerce-stock-alert/evaluation/evaluate_updated_stock_alert.py:51-109 硬编码 8 个期望低库存商品（含 DELL-XPS-13 stock=5/threshold=10）；:143 读取 stock_sheet!A:H；:201 要求记录数≥8（注释写 'original 6 + new 2'）；:228-233 对每个期望 SKU 取表中第一条同 SKU 记录后 break；:243-247 比较该首条记录的 Current Stock/Safety Threshold；:354-427 校验发给 laura_thompson@mcp.com 的邮件恰为 8 封且 SKU 集合一致。evaluation/main.py:71-74 在 Sheets 失败时固定输出修复提示。
+
+评测错误点： (1) 首条匹配导致结果依赖行序：evaluate_updated_stock_alert.py L228-233 对每个期望 SKU 只取表中第一条同 SKU 记录就 break。初始的 stock_sheet 第 2 行已有一条 DELL-XPS-13 旧记录（Current Stock=12），当前实际库存是 5。现象：保留初始行、在其后追加 8 条当前低库存记录（含 DELL-XPS-13=5）时，评分取到的是旧行，报 'Stock quantity mismatch for DELL-XPS-13: expected 5, got 12'；同样的内容只要新记录排在旧行之前就能通过。表中出现重复 SKU 时，评分既不报重复，也不按最新记录判断，只看物理顺序。题面没有说明已有行应覆盖还是保留，保留过时行本身也有可商榷之处，因此这里只主张判分规则需要明确，不主张这类答案一定应判通过。(2) 失败诊断与实际 GT 不一致：main.py L71-74 提示 'Ensure MacBook Pro 14-inch M3 and Nintendo Switch OLED are added'、'Verify new products are inserted after existing 6 records'、'Check that original data remains unchanged'，L201 注释也写 'original 6 + new 2'；而实际 GT 要求 8 个商品，初始表只有 1 条数据行，失败的真正原因恰恰是旧行没有更新，与“保持原数据不变”的提示正好相反。
+
+3.12 gdp-cr5-analysis
+
+问题类型： GT时效(动态数据)、题面与评测不一致
+
+任务内容： 要求模型读取 Google Sheets 中的 GDP2022 表，按 World Bank 七大地区分类计算各地区 CR5（前五国 GDP 之和占地区 GDP 比例）。产物是新建的 Google 表格 "GDP CR5 Analysis" 中的 gdp_cr5_analysis 工作表，包含 Region、Top5_Countries、Top5_GDP_Sum、Region_GDP_Total、CR5_Ratio，按 CR5 降序排列。题面要求严格遵循 World Bank 的国家分类，但没有指定分类版本或日期。
+
+评测逻辑： 从 Drive 读取模型创建的表格（tasks/finalpool/gdp-cr5-analysis/evaluation/main.py:L42-78），与静态 GT tasks/finalpool/gdp-cr5-analysis/groundtruth_workspace/standard_answer.csv 逐地区比较（L100-122、L260-423）：CR5 绝对差 ≤1 个百分点（L373-376）；前五国集合须 100% 匹配（L214-258、L381-402）；任何一项错误都判失败。
+
+评测错误点： GT 的 South Asia 行写死为 "India/Bangladesh/Pakistan/Sri Lanka/Nepal"、CR5=99.44（standard_answer.csv L3），即把 Pakistan 算进南亚。按 World Bank 当前分类，WB API 国家元数据中 PAK 的 region.id=MEA（"Middle East, North Africa, Afghanistan & Pakistan"），worldbank.org/en/region/sar 列出的南亚国家只有 Bangladesh、Bhutan、India、Maldives、Nepal、Sri Lanka。题面只要求按 World Bank 分类，没有锁定分类年份。
+
+3.13 language-school
+
+问题类型： GT时效(动态数据)、题面与评测不一致
+
+任务内容： 要求模型找出 QS 计算机科学全球前十中的美国大学，收集每所学校的城市、排名、TOEFL/IELTS 是否接受及最低分、研究生申请费和申请截止日期，按排名写入 workspace/cs_top10_us.xlsx（表头与 format.xlsx 一致）。题面明确要求使用当年最新信息，没有时再用上一年。
+
+评测逻辑： check_local 读取 cs_top10_us.xlsx，要求恰好 5 行（tasks/finalpool/language-school/evaluation/check_local.py:L47-72）；GT 以硬编码字典给出 MIT/Stanford/CMU/Berkeley/Harvard 各字段（L74-125）；逐行逐列用 compare_element 比较：两边都能转成数字时要求数值完全相等，否则先比类型再比归一化字符串（L11-44、L141-174）；截止日期只检查非空（L147-156）；第一处不一致即判失败。
+
+评测错误点： GT 中的语言成绩最低分是写死的旧值，与题面要求的“当年最新信息”冲突。ETS 自 2026-01-21 起把 TOEFL iBT 改为 1-6 分制，各校官网同时公布新旧两套最低分，例如：Stanford 'TOEFL (Taken before January 21, 2026) 90 / (Taken on or after January 21, 2026) 4.5 / IELTS 7'；Berkeley 新制最低 5；CMU 旧制 100 或新制 5；Harvard GSAS 'minimum score of 5 (95 for tests taken prior to January 21, 2026)'，IELTS 最低 7。GT 写死的是 Stanford TOEFL=90（check_local L88）、Berkeley 90（L111）、CMU 100（L97），这些只适用于 2026-01-21 前参加的考试；Harvard 写的是 TOEFL=80、IELTS=6.5（L120-122），与当前官网的 95/5 和 7 都不符，属于过期数据。现象：按“当年最新”填新分制，在第一处（Stanford TOEFL）就判错；即使各校都改填旧制分数，Harvard 的 IELTS 按官网填 7 也会因 GT 是 6.5 判错。按题面要求正确作答无法通过当前 GT。
+
+3.14 mrbeast-analysis
+
+问题类型： GT时效(动态数据)
+
+任务内容： 要求模型通过 YouTube 工具找出 MrBeast 在 2024-01-01 至 2025-07-01 期间发布的所有长于 2 分钟的视频，按四个给定类别分类，并统计最常见发布星期、平均时长、平均发布间隔和各星期占比。产物是填好的 workspace/result.xlsx（Detail_Lists 与 Statistics 两个工作表）。
+
+评测逻辑： check_local 将模型 result.xlsx 与静态 GT tasks/finalpool/mrbeast-analysis/groundtruth_workspace/result.xlsx 按工作表、列名、形状逐格比较（tasks/finalpool/mrbeast-analysis/evaluation/check_local.py:L180-277）；数值单元格要求完全相等（L146-153），duration_formatted 按 HH:MM:SS 去前导零后相等（L157-164）；仅对 3 个视频允许 Survival/Challenges 互换（L10-15、L44-64），平均时长允许 ±5 秒（L16-17、L66-94），平均间隔允许 ±0.05 天（L18-19、L96-129）；第一处不一致即返回失败。
+
+评测错误点： GT 中有 4 个视频的 duration_seconds 与任务提供的 YouTube 工具当前返回的 contentDetails.duration 不一致：krsBRQbOPQ4 GT 1019 vs API PT15M24S=924；tWYsfOSY9vY GT 1044 vs PT14M54S=894；erLbbextvlY GT 1346 vs PT20M45S=1245；gs8qfL9PNac GT 1485 vs PT23M17S=1397。其余 28 个视频的 ID、标题、发布时间、时长完全一致。现象：按工具返回如实填写，会在 L149-153 的数值严格相等检查上直接判错，平均时长也受连带影响：GT 平均 1398.59s（00:23:18），按 API 时长算是 1385.03s（00:23:05），相差约 13.6s，超过 5 秒容差。这 4 条时长只能从 YouTube API 获得，差异很可能是 GT 制作之后视频被重新剪辑或替换导致的（时长属于动态数据）。
+
+3.15 sla-timeout-monitor
+
+问题类型： GT错误、题面与评测不一致、评分逻辑缺陷
+
+任务内容： 根据工作区文档（mcpincdocs.tar.gz 中的 SLA 手册）找出数据库里超过首次响应时限的工单，按手册中的模板给对应负责经理发提醒邮件，并给所有相关用户发道歉邮件。
+
+评测逻辑： tasks/finalpool/sla-timeout-monitor/evaluation/main.py：L24-28 从 files/ 读取模板；L146-172 对每位经理按 max→pro→basic、同级按 created_at 排序生成工单列表，填进 files/manager_reminder.txt 的 {FULL_LIST_OF_TICKETS}，再调用 check_email_sent（L30-45）；它调用 utils/app_specific/poste/ops.py:298-325 mailbox_has_email_matching_body，把正文经 utils/general/helper.py:547-549 normalize_str（删去所有非 \w 字符并转小写）处理后与期望正文做全文相等比较（ops.py:311），主题也全文比较。
+
+评测错误点： agent 可见的手册与评分模板不一致。workspace 里的 sla_manual.pdf 来自 initial_workspace/mcpincdocs.tar.gz（提交 0bdfa96 更新，md5 09dff2bf…）。新版 PDF 在 6.2.2 Manager Reminder Template 正文里，'Dear Manager,' 之后、'The following tickets…' 之前多了一句 'Within the same service level, please order by creation time in chronological order.'。评分模板 files/manager_reminder.txt 和 files/SLA_Manual.md L109-124 都没有这一句，评分又用 normalize_str 做全文相等比较（utils/app_specific/poste/ops.py:311）。
+
+3.16 task-tracker
+
+问题类型： GT错误、题面与评测不一致
+
+任务内容： 检查 BenchTasksCollv3 仓库各开发者分支最近一次提交新增的任务，按 tasks/examples 中的要求判定 implemented/implementing，并把这些新任务写入 Notion 'Task Tracker' 数据库。然后新建 finalpool 分支，把 Notion 中所有 implemented 任务放到 tasks/finalpool 下。题面 Tips 明确说：'In addition to the content requirements explicitly mentioned in the examples, only the existence of the file needs to be checked'。
+
+评测逻辑： tasks/finalpool/task-tracker/evaluation/main.py:71-121 读取 groundtruth_workspace/notion_table_after.xlsx（116 行），与 Notion 数据库逐行逐列精确比较（:93-94 行数、:106-114 每列含 Task Status）；:234-367 检查 GitHub finalpool 分支，其中 :291-301 同样以该 xlsx 中 Task Status=='implemented' 的集合作为期望，:308-317 要求 tasks/finalpool 下的目录集合与之完全一致（多一个、少一个都失败）。
+
+评测错误点： groundtruth_workspace/notion_table_after.xlsx 中，29 个新任务里有 3 个的状态无法由环境仓库（preprocess/main.py L18-21 从 Toolathlon-Archive/BenchTasksCollv3 镜像）的实际内容和题面规则推出。tasks/examples/example-task 给出的规则是：docs/task.md、docs/agent_system_prompt.md 必须非空且全英文；docs/user_system_prompt.md 可选，非空时须全英文；evaluation/main.py、preprocess/main.py 的内容为 '# This script is optional'；initial_workspace、groundtruth_workspace 可选。(1) lueyang/client-portal：7 个文件齐全、纯 ASCII，与被 GT 判为 implemented 的 junteng/help-desk 等任务是同一模板（evaluation/main.py 替换任务名后逐字相同），GT 却判为 implementing。(2) gyy/sitemap-generator、junteng/customer-portal：docs 全英文，只缺示例中标明可选的 evaluation/main.py，GT 判为 implementing；而缺少同样可选的 preprocess/main.py、initial_workspace 的任务（如 certificate-manager、storage-manager）却判为 implemented。按示例规则复算全部可见任务，与 GT 有多处不一致；即使再加上题面没给出的“必须有 evaluation/main.py”，client-portal 仍不一致。现象：由于 GitHub finalpool 检查（main.py L291-317）也以这份 xlsx 为准，按题面规则正确判定的 agent 会把这 3 个任务判为 implemented，结果同时在 Notion 检查（3 处 Task Status 不一致，报 'Excel=implementing, Notion=implemented'）和 finalpool 检查（多出这 3 个目录）上失败。
+
+3.17 university-course-selection
+
+问题类型： GT错误、诊断信息缺陷
+
+任务内容： 工作区有复旦大学 2025-26 学年第一学期课程表 PDF 和 reference_format.xlsx。要求选出自然语言处理、软件体系结构，再各选一门周一开课、开卷考试的思政B 课和通识教育核心课。每种可行方案保存为一个 xlsx，表头保留英文、值用中文，最后只保留方案文件。
+
+评测逻辑： tasks/finalpool/university-course-selection/evaluation/check_local.py:L300-302 要求方案文件数与 GT 一致（4 份 en_op1-4.xlsx）；L304-335 对 agent 文件做全排列，要求存在一种一一配对使每对文件完全匹配；L179-275 compare_single_files 逐行逐列比较，任何单元格不等即记 mismatch（L266-271 收集明细，但 L273-275 只返回个数）；L132-177 smart_compare 中，“Course Selection Restrictions”列用 _restriction_tokens（L50-83）按空白/逗号/分号切分成无序集合后比较集合相等，其余列为数值或 normalize_str 比较。
+
+评测错误点： 四份 GT 中，自然语言处理（COMP130141.01）这一行的 Course Selection Restrictions 都是 '23 22 计算机科学与技术，大数据与人工智能(2024)，大数据与人工智能(2022)，计算机科学技术学院'，漏了 '大数据与人工智能(2023)'。原 PDF 第 252 页（页脚“第 230 页”）该课程的“选课限制条件”单元格，按坐标抽取从上到下依次为 '23 22 计算机科学与技术'、'大数据与人工智能(2024)'、'大数据与人工智能(2023)'、'大数据与人工智能(2022)'、'计算机科学技术学院'。限制列按集合精确比较，四份 GT 又都含这门必选课。现象：照 PDF 如实填写含 (2023) 的限制条件，任何一份方案在这一格都会判 mismatch。诊断方面，compare_single_files 在 L266-271 已经收集了每个不匹配单元格的行、列、GT 值和实际值，但 L273-275 只返回 'Found N mismatches'，日志看不出是哪一格。
+
+3.18 youtube-repo
+
+问题类型： GT不可达(给定工具取不到)、GT时效(动态数据)
+
+任务内容： 读取 YouTube 播放列表 PLyzTA8cetPdHtlGw1X8Kt7Ea4bd27ApR7（共 52 条），找出所有与机器学习相关的技术视频，定位相关技术的原始 GitHub 仓库，把项目名、仓库 URL 和主要功能写入 ml_tech.md。
+
+评测逻辑： tasks/finalpool/youtube-repo/evaluation/main.py:15-26 硬编码 7 个必须出现的仓库子串（awesome-o1、Qwen3-Coder、flash-attention（Dao-AILab/HazyResearch 二选一）、OpenHands、claude-code、gemini-cli、openai/codex）；main.py:42-54 纯子串包含判断，缺一个即失败。
+
+评测错误点： GT 要求的 7 个仓库中，srush/awesome-o1 对应播放列表第 19 位视频《Speculations on Test-Time Scaling (o1)》，flash-attention 对应第 28 位《MedAI #54: FlashAttention ... Tri Dao》。任务提供的 youtube_playlists_getPlaylistItems 只有 playlistId/maxResults 两个参数，没有 pageToken。每条记录都带完整描述和统计信息，maxResults>=13 时输出约 100373 字符就被截断，只能看到第 0-12 条（落盘的完整输出文件也只有这些）；maxResults=10 时返回的 nextPageToken 无法传回，再次调用拿到的仍是第 1 页。现象：只用题面给定的工具，最多能看到前 13 个视频，只能覆盖 7 个 GT 中的 5 个，任何作答都无法满足 GT。另外，GT 依赖一个实时、可变的公开播放列表（其中已出现 'Private video' 条目），视频增删或重排都会让 GT 漂移。评分本身（子串匹配，flash-attention 接受两种 owner）并不苛刻。
+
+3.19 canvas-list-test
+
+问题类型： 题面与评测不一致
+
+任务内容： agent 需根据 memory 中的个人信息以及 Canvas 上的课程、测验、作业提交状态，找出所有未提交且需要完成的测验和作业，按 workspace 中两个 CSV 的表头和示例行格式填写，按截止时间排序，截止时间相同时按课程代码字典序排序。quiz_info.csv 的表头包含 credits（学分）列。
+
+评测逻辑： tasks/finalpool/canvas-list-test/evaluation/main.py L18 调用 check_local；evaluation/check_local.py L314-325 定义两个文件的 key_columns，其中 quiz_info 包含 credits；L78-81 要求行数一致；L200-204 把 credits 归为数值列，L216-253 逐行逐列与 GT 比对，任一列不同即判失败。GT 由 preprocess/main.py L113-131 在预处理时调用 preprocess/extract_quiz_info.py 生成，其中 credits 直接取自 files/course_config.json 的 course['credits']（extract_quiz_info.py L35、L61），并在 L30-31 硬编码排除 ENG101-1。
+
+评测错误点： GT 的 credits 列取自任务配置 files/course_config.json，但预处理在 Canvas 中建课时（preprocess/setup_courses_with_mcp.py L172-180）只提交了 name、course_code、account_id、enrollment_term_id、default_view、course_format，没有写入学分；课程描述、syllabus、页面和公告里也没有学分。题面限定的信息源（memory 与 Canvas）中，只有示例行给出了 CS401=4。现象：agent 在 Canvas 中把课程详情、syllabus、页面、公告逐一查完，仍然拿不到学分，只能推测，于是 13 门课的学分必然有多行与 GT 不符。只有读到任务目录下的配置文件才能答对，而这个文件不属于题面给出的信息源。
+
+3.20 investment-decision-analysis
+
+问题类型： 诊断信息缺陷、GT时效(动态数据)
+
+任务内容： 要求用 Yahoo Finance 分析 NVDA 与 AAPL，在指定 Google Drive 文件夹中按 results.xlsx 的三个 sheet 名分别建 3 个 Google 表格：Investment Return Comparison、Fundamental Analysis、Investment Decision Reference，并填满空白单元格。浮点数保留 2 位小数，累计价值按 2020 年末投入 10,000 美元计算。
+
+评测逻辑： tasks/finalpool/investment-decision-analysis/evaluation/main.py:L30-38 用 pandas 读 GT xlsx（空单元格为 NaN）；L215-240 把 Investment Decision Reference 的第 3-5 行替换为评测时用 yfinance 实时取的当前 P/E、目标价、上涨空间（evaluation/realtime.py）；L258-297 _check_all_sheets 在 Drive 文件夹中找 3 个表格并逐个调用 compare_sheets（L299 由 grade_with_retry 调用）；L132-197 compare_sheets 先用 normalize_cell_value（L108-129）归一化两边，相等即匹配，不等时在 L178-179 直接 float(expected_norm)、float(actual_norm) 做 3% 容差比较，这一步外面没有 try；整个检查由 utils/evaluation/retry.py:L83-90 的 grade_with_retry 包裹，异常被转成 'check raised <类型>: <消息>'，最多重试 3 次。
+
+评测错误点： compare_sheets 默认两边不相等时都是数字，L178-179 的 float() 没有异常处理。只要有一边是空单元格（normalize_cell_value 返回 ''）或文本（如 Better Stock 列 'nvda' vs 'aapl'），比较就抛 ValueError，整个检查中止。异常被 grade_with_retry 吞掉后只留下一句消息，最终诊断里没有 sheet 名、单元格位置、期望值和实际值；L286-292 本来写了逐格输出 mismatch 的逻辑，却根本执行不到。确定性的异常还被当作可恢复错误重试了 3 次。现象：只要 Fundamental Analysis 中有一格（如 2022 年增长率 F2/G2）留空，评测输出就只剩 "check raised ValueError: could not convert string to float: ''"。离线用原函数重放，把 float 失败改记为 mismatch 后，能正常报出具体是哪几格不一致（期望 0.22 和 7.79）。判失败本身没错，问题在于诊断信息不可读。
+
+附带一个 GT 时效风险：2022 年增长率需要 2021 财年营收，而任务提供的 Yahoo Finance 工具的 income_stmt 只返回最近 4 年，可能取不到这一年的数据。
+
+adverbial03 commented on Oct 19, 2026 
+
+adverbial03
+on Oct 19, 2026
+
+Author
+More actions
+
+再次感谢 Toolathlon 团队的工作。以上问题我们可提供日志和最小复现用例，也很愿意就评测器改进与团队进一步讨论。期待作者的回复和指正；如部分行为属于预期设计，也欢迎说明。🙇
+
+adverbial03 commented on Oct 20, 2026 
+
+adverbial03
+on Oct 20, 2026
+
+Author
+More actions
+
+在近期的官方评测中我们还发现了任务容器与宿主机隔离不彻底，导致答案泄露的问题。
+
+评测脚本虽然会在任务执行前，将评分器、标准答案等受保护文件转存至宿主侧暂存目录，删除任务容器中的对应副本，待任务结束后再恢复并评分，但容器启动配置同时将宿主的 /var/run/docker.sock 挂入了任务容器。
+
+实际执行轨迹显示，任务内程序通过该接口调用宿主 Docker 服务，创建辅助容器并挂载宿主上的评测仓库，从而读取原本对任务隐藏的标准答案和评分器，再将其中的答案数据或评分规则用于生成、修改最终交付。这形成了“任务容器 → 宿主 Docker 服务 → 辅助容器挂载宿主目录 → 读取隐藏材料 → 影响最终交付”的完整路径，绕过了原有的文件隐藏措施。
+
+meidgit commented on Oct 29, 2026 
+
+meidgit
+on Oct 29, 2026
+
+More actions
+
+@adverbial03 Hi! I noticed that you've recently been working with Toolathlon for model evaluation. May I ask how you're running the evaluations?
+
+We've been trying to use the official public evaluation server, but it seems to be unavailable. Are you using the public server or running the evaluation environment locally?
+
+I'd really appreciate it if you could share your setup or any workaround. Thanks a lot!
+
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

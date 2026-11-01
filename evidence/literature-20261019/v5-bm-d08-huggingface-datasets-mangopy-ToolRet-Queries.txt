@@ -1,0 +1,1115 @@
+
+
+		mangopy/ToolRet-Queries · Datasets at Hugging Face
+
+ Hugging Face 
+
+ Datasets:  
+
+   mangopy  
+/ 
+ToolRet-Queries      
+  Like  7  
+
+Modalities: 
+  Text   
+Formats: 
+  parquet   
+Languages: 
+  English   
+Size: 
+  1K - 10K   
+ArXiv: 
+
+  arxiv: 2503.01763  
+
+Libraries: 
+  Datasets  
+  pandas  
+
+  Croissant  
+     + 1
+
+  Dataset card   Data Studio   Files Files and versions  
+ xet  Community 
+2    
+
+Dataset Viewer   Auto-converted to Parquet API Embed  Duplicate  Data Studio 
+
+Subset (35) 
+apibank · 101 rows  apibank (101 rows)apigen (1k rows)appbench (32 rows)autotools-food (22 rows)autotools-music (32 rows)autotools-weather (11 rows)craft-math-algebra (280 rows)craft-tabmwp (174 rows)craft-vqa (200 rows)gorilla-huggingface (500 rows)gorilla-pytorch (43 rows)gorilla-tensor (55 rows)gpt4tools (32 rows)gta (14 rows)metatool (200 rows)mnms (33 rows)restgpt-spotify (40 rows)restgpt-tmdb (54 rows)reversechain (200 rows)rotbench (550 rows)t-eval-dialog (50 rows)t-eval-step (50 rows)taskbench-daily (40 rows)taskbench-huggingface (23 rows)taskbench-multimedia (40 rows)tool-be-honest (350 rows)toolace (1k rows)toolalpaca (94 rows)toolbench (1.1k rows)toolbench-sam (197 rows)toolemu (38 rows)tooleyes (95 rows)toolink (497 rows)toollens (314 rows)ultratool (500 rows) 
+Split (1) 
+queries · 101 rows  queries (101 rows)  
+
+SQL Console 
+
+id   
+stringlengths 
+
+15 
+17  
+
+query   
+stringlengths 
+
+26 
+144  
+
+instruction   
+stringlengths 
+
+138 
+279  
+
+labels   
+stringlengths 
+
+476 
+3.66k  
+
+category   
+stringclasses 
+
+1
+				value 
+
+ apibank_query_0  
+
+ Can you tell me about the historical events of April 21st?  
+
+ Given a `historical events query` task, retrieve tools that access historical databases to provide a list of events that occurred on a specified date by processing date input parameters.  
+
+ [{"id": "apibank_tool_33", "doc": {"expressions": "QueryHistoryToday(date: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_history_today.py", "parameters": "(date: datetime)", "name": "QueryHistoryToday", "description": "description = \"QueryHistoryToday API take...  
+
+ web  
+
+ apibank_query_1  
+
+ Can you tell me today's date?  
+
+ Given a `date inquiry` task, retrieve tools that provide the current date by processing the request and returning today's date accurately.  
+
+ [{"id": "apibank_tool_23", "doc": {"expressions": "GetTodayNone", "category": "\u83b7\u53d6\u4fe1\u606f - \u5916\u754c\u4fe1\u606f\u67e5\u8be2", "path": "apis/get_today.py", "parameters": NaN, "name": "GetToday", "description": "description = \"Get a list of today's tasks which are not completed yet.\"\ninput_parameter...  
+
+ web  
+
+ apibank_query_2  
+
+ Can you tell me the current date?  
+
+ Given a `current date retrieval` task, retrieve tools that provide accurate date information based on the current system date without requiring additional inputs.  
+
+ [{"id": "apibank_tool_23", "doc": {"expressions": "GetTodayNone", "category": "\u83b7\u53d6\u4fe1\u606f - \u5916\u754c\u4fe1\u606f\u67e5\u8be2", "path": "apis/get_today.py", "parameters": NaN, "name": "GetToday", "description": "description = \"Get a list of today's tasks which are not completed yet.\"\ninput_parameter...  
+
+ web  
+
+ apibank_query_3  
+
+ Can you help me register on this app?  
+
+ Given a `user registration` task, retrieve tools that facilitate the registration process on an application by collecting and processing inputs such as username, password, and email to create a new user account and return the status of the registration.  
+
+ [{"id": "apibank_tool_1", "doc": {"expressions": "RegisterUser(username: str, password: str, email: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/register_user.py", "parameters": "(username: str, password: str, email: str)", "name": "RegisterUser", "description":...  
+
+ web  
+
+ apibank_query_4  
+
+ Can you delete my alarm at 7:00 a.m. on March 16th?  
+
+ Given an `alarm deletion` task, retrieve tools that facilitate the cancellation of alarms by processing parameters such as authentication tokens and timer IDs to confirm the status of the deletion operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_5  
+
+ Can you show me my history for today?  
+
+ Given a `history retrieval` task, retrieve tools that query and provide historical events by processing date inputs to return a list of occurrences corresponding to the specified day.  
+
+ [{"id": "apibank_tool_33", "doc": {"expressions": "QueryHistoryToday(date: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_history_today.py", "parameters": "(date: datetime)", "name": "QueryHistoryToday", "description": "description = \"QueryHistoryToday API take...  
+
+ web  
+
+ apibank_query_6  
+
+ Hi, can you help me delete my account?  
+
+ Given an `account deletion` task, retrieve tools that facilitate the deletion of user accounts by processing authentication tokens to execute the operation and return the status of the request.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_7  
+
+ Can you tell me about the devices included in the Morning Routine scene?  
+
+ Given a `scene query` task, retrieve tools that can provide detailed information about specific scenes by processing the scene name as input to return a comprehensive description and attributes of devices included in the scene.  
+
+ [{"id": "apibank_tool_67", "doc": {"expressions": "QueryScene(scene_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_scene.py", "parameters": "(scene_name: str)", "name": "QueryScene", "description": "description = \"API to query a specific 'scene' by pr...  
+
+ web  
+
+ apibank_query_8  
+
+ Hi, can you please tell me my current balance?  
+
+ Given a `balance inquiry` task, retrieve tools that access and process account information by utilizing authentication tokens and account identifiers to return accurate balance details.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_9  
+
+ Can you record my recent health data please?  
+
+ Given a `health data recording` task, retrieve tools that support the entry of personal health information by processing relevant inputs like user ID, date, and health data object to record the information and return the status of the operation.  
+
+ [{"id": "apibank_tool_62", "doc": {"expressions": "RecordHealthData(user_id: str, date: datetime, health_data: object)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/record_health_data.py", "parameters": "(user_id: str, date: datetime, health_data: object)", "name": "RecordHeal...  
+
+ web  
+
+ apibank_query_10  
+
+ Can you help me register as a user?  
+
+ Given a `user registration` task, retrieve tools that facilitate the registration process by processing user input details such as username, password, and email to create a new user account and return the status of the operation.  
+
+ [{"id": "apibank_tool_1", "doc": {"expressions": "RegisterUser(username: str, password: str, email: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/register_user.py", "parameters": "(username: str, password: str, email: str)", "name": "RegisterUser", "description":...  
+
+ web  
+
+ apibank_query_11  
+
+ Can you check the registration for Alice Chen on June 15, 2023 with Dr. Wang?  
+
+ Given a `registration query` task, retrieve tools that verify or check appointments by processing patient name and appointment date parameters to return the registration status and details.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_12  
+
+ Can you please cancel my appointment for David Brown with Dr. Davis on April 10th, 2023 at 10:00 am?  
+
+ Given an `appointment cancellation` task, retrieve tools that manage scheduling operations by processing details such as the individual's name, the appointment date and time, and the associated professional to effectively cancel the appointment and provide a confirmation status.  
+
+ [{"id": "apibank_tool_59", "doc": {"expressions": "CancelRegistration(registration_number: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_registration.py", "parameters": "(registration_number: str)", "name": "CancelRegistration", "description": "description...  
+
+ web  
+
+ apibank_query_13  
+
+ Hi, can you help me check my alarm for March 20th, 2023 at 6:30AM?  
+
+ Given an `alarm verification` task, retrieve tools that can authenticate user identity and subsequently access alarm details by processing the user's authentication token to return relevant alarm information.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_14  
+
+ Can you help me check if there is a reservation for the Design Team Meeting on March 26, 2023 from 11:00AM to 1:00PM at Design Studio?  
+
+ Given a `meeting reservation query` task, retrieve tools that authenticate user access and check meeting schedules by processing authentication tokens to verify and list existing reservations based on the given details such as date, time, and location.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_15  
+
+ Can you search the definition of the word "plethora" for me?  
+
+ Given a `word definition retrieval` task, retrieve tools that search for and provide comprehensive definitions by processing text inputs for specific words or terms as outlined in the query.  
+
+ [{"id": "apibank_tool_37", "doc": {"expressions": "Dictionary(query: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/dictionary.py", "parameters": "(query: str)", "name": "Dictionary", "description": "description = \"API that takes a 'query' parameter as input and retrieves...  
+
+ web  
+
+ apibank_query_16  
+
+ Can you please tell me which devices are included in the "Morning Routine" scene?  
+
+ Given a `scene query` task, retrieve tools that provide information about smart home setups by processing scene names to return the list of devices and their associated attributes.  
+
+ [{"id": "apibank_tool_67", "doc": {"expressions": "QueryScene(scene_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_scene.py", "parameters": "(scene_name: str)", "name": "QueryScene", "description": "description = \"API to query a specific 'scene' by pr...  
+
+ web  
+
+ apibank_query_17  
+
+ Can you translate "Hello, how are you?" to French?  
+
+ Given a `translation` task, retrieve tools that can translate text by processing input text and language parameters to deliver the desired translated text output.  
+
+ [{"id": "apibank_tool_41", "doc": {"expressions": "Translate(text: str, source_language: str, target_language: str)", "category": "\u5176\u4ed6AI\u6a21\u578b", "path": "apis/translate.py", "parameters": "(text: str, source_language: str, target_language: str)", "name": "Translate", "description": "description = \"Trans...  
+
+ web  
+
+ apibank_query_18  
+
+ Can you modify my alarm from 8:00AM to 9:00AM on March 16, 2023?  
+
+ Given an `alarm modification` task, retrieve tools that facilitate adjusting alarm settings by processing inputs such as authorization token, timer ID, and the new alarm time to update the alarm schedule and return the operation status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_19  
+
+ Can you help me modify my schedule for next week? I need to change the time and location of one of my events.  
+
+ Given a `schedule modification` task, retrieve tools that assist in updating events by processing parameters such as token, schedule ID, new time, and location to modify the agenda and return the operation's status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_20  
+
+ Can you help me record my blood pressure and heart rate?  
+
+ Given a `health data recording` task, retrieve tools that manage and store personal health metrics by processing inputs such as user ID, date, and health data to update the user's health history and return the status of the operation.  
+
+ [{"id": "apibank_tool_62", "doc": {"expressions": "RecordHealthData(user_id: str, date: datetime, health_data: object)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/record_health_data.py", "parameters": "(user_id: str, date: datetime, health_data: object)", "name": "RecordHeal...  
+
+ web  
+
+ apibank_query_21  
+
+ Can you please modify my reminder to submit the proposal at 2 pm on March 25th?  
+
+ Given a `reminder modification` task, retrieve tools that manage scheduling operations by processing authentication tokens, reminder IDs, updated content, and time inputs to adjust an existing reminder and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_22  
+
+ Hi there, can you tell me today's date?  
+
+ Given a `date retrieval` task, retrieve tools that can provide the current date by processing minimal or no input parameters and accurately delivering the requested date information.  
+
+ [{"id": "apibank_tool_23", "doc": {"expressions": "GetTodayNone", "category": "\u83b7\u53d6\u4fe1\u606f - \u5916\u754c\u4fe1\u606f\u67e5\u8be2", "path": "apis/get_today.py", "parameters": NaN, "name": "GetToday", "description": "description = \"Get a list of today's tasks which are not completed yet.\"\ninput_parameter...  
+
+ web  
+
+ apibank_query_23  
+
+ Can you help me check if I have a reminder to call my mom on March 16th at 2:30pm?  
+
+ Given a `reminder check` task, retrieve tools that access and query user reminder systems by authenticating user identity through a token and returning scheduled reminders that match the specified date and time criteria.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_24  
+
+ Can you tell me what's the current date?  
+
+ Given a `date inquiry` task, retrieve tools that provide the current date information by processing applicable query parameters and returning the date result.  
+
+ [{"id": "apibank_tool_23", "doc": {"expressions": "GetTodayNone", "category": "\u83b7\u53d6\u4fe1\u606f - \u5916\u754c\u4fe1\u606f\u67e5\u8be2", "path": "apis/get_today.py", "parameters": NaN, "name": "GetToday", "description": "description = \"Get a list of today's tasks which are not completed yet.\"\ninput_parameter...  
+
+ web  
+
+ apibank_query_25  
+
+ Can you help me change my account password?  
+
+ Given a `password modification` task, retrieve tools that facilitate changing account passwords by processing authentication inputs, such as user credentials and new password data, to ensure security and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_26  
+
+ Can you give me the key features of the software in this article - https://www.example.com/article-4.txt?  
+
+ Given a `document analysis` task, retrieve tools that perform question answering by processing text-based document content and providing targeted answers to specific inquiries related to the document.  
+
+ [{"id": "apibank_tool_45", "doc": {"expressions": "DocumentQA(document_content: str, question: str)", "category": "\u5176\u4ed6AI\u6a21\u578b", "path": "apis/document_qa.py", "parameters": "(document_content: str, question: str)", "name": "DocumentQA", "description": "description = \"Document Question Answering (Docume...  
+
+ web  
+
+ apibank_query_27  
+
+ Can you help me cancel a timed switch for one of my smart devices?  
+
+ Given a `smart device timer cancellation` task, retrieve tools that process device identifiers and scheduled switch times to execute the cancellation of a timed switch and provide feedback on the success of the operation.  
+
+ [{"id": "apibank_tool_69", "doc": {"expressions": "CancelTimedSwitch(device_id: str, switch_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_timed_switch.py", "parameters": "(device_id: str, switch_time: datetime)", "name": "CancelTimedSwitch", "de...  
+
+ web  
+
+ apibank_query_28  
+
+ Can you play the music "Shape of You"?  
+
+ Given a `music playback` task, retrieve tools that play specified music tracks by processing song names or playlist names along with the source location to initiate streaming and provide feedback on the playback status.  
+
+ [{"id": "apibank_tool_71", "doc": {"expressions": "PlayMusic(song_playlist_name: str, source: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u5b9e\u65f6\u901a\u4fe1", "path": "apis/play_music.py", "parameters": "(song_playlist_name: str, source: str)", "name": "PlayMusic", "description": "description = \"Play Music AP...  
+
+ web  
+
+ apibank_query_29  
+
+ Can you help me change my password?  
+
+ Given a `password modification` task, retrieve tools that handle user authentication and password updates by processing input parameters such as user credentials for authentication and new password details to perform the update and return the operation's status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_30  
+
+ Can you tell me what happened on April 21st in history?  
+
+ Given a `historical event retrieval` task, retrieve tools that can query and return a list of events that occurred on a specific date by processing the date input aligned with the query's requirements.  
+
+ [{"id": "apibank_tool_33", "doc": {"expressions": "QueryHistoryToday(date: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_history_today.py", "parameters": "(date: datetime)", "name": "QueryHistoryToday", "description": "description = \"QueryHistoryToday API take...  
+
+ web  
+
+ apibank_query_31  
+
+ Can you help me open a new bank account?  
+
+ Given a `bank account setup` task, retrieve tools that facilitate creating a new bank account by processing personal information inputs such as account number, password, name, and email to complete the setup process and provide the status of the operation.  
+
+ [{"id": "apibank_tool_25", "doc": {"expressions": "OpenBankAccount(account: str, password: str, name: str, email: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/open_bank_account.py", "parameters": "(account: str, password: str, name: str, email: str)", "name": "O...  
+
+ web  
+
+ apibank_query_32  
+
+ Can you help me delete a scene named "Relaxing Time"?  
+
+ Given a `scene deletion` task, retrieve tools that facilitate the removal of specified items by accepting inputs like scene names and returning the success or failure status of the operation.  
+
+ [{"id": "apibank_tool_65", "doc": {"expressions": "DeleteScene(scene_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/delete_scene.py", "parameters": "(scene_name: str)", "name": "DeleteScene", "description": "description = \"Delete a scene API that takes one ...  
+
+ web  
+
+ apibank_query_33  
+
+ Can you modify my appointment with doctor Smith on October 10th, 2023 to doctor Johnson on October 15th, 2023?  
+
+ Given an `appointment modification` task, retrieve tools that handle scheduling operations by processing registration numbers and new appointment times to update existing appointments and return the status of the modification.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_34  
+
+ Can you help me schedule a meeting?  
+
+ Given a `meeting scheduling` task, retrieve tools that facilitate booking a meeting by processing input parameters such as content, time, and recipient information to successfully schedule and confirm the meeting with the desired participants.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_35  
+
+ Can you help me with a health issue?  
+
+ Given a `health query` task, retrieve tools that can provide assistance or information related to health issues by processing criteria such as symptoms, conditions, or appointments to deliver relevant advice or administrative solutions.  
+
+ [{"id": "apibank_tool_57", "doc": {"expressions": "EmergencyKnowledge(disease_injury_name: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/emergency_knowledge.py", "parameters": "(disease_injury_name: str)", "name": "EmergencyKnowledge", "description": "description = \"An A...  
+
+ web  
+
+ apibank_query_36  
+
+ Can you give me the definition of the word "resilience"?  
+
+ Given a `word definition retrieval` task, retrieve tools that provide definitions by processing a word query input and returning the corresponding meaning or explanation.  
+
+ [{"id": "apibank_tool_37", "doc": {"expressions": "Dictionary(query: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/dictionary.py", "parameters": "(query: str)", "name": "Dictionary", "description": "description = \"API that takes a 'query' parameter as input and retrieves...  
+
+ web  
+
+ apibank_query_37  
+
+ Can you help me check if I have a reminder for attending a meeting on March 18th at 10:30 am?  
+
+ Given a `reminder verification` task, retrieve tools that check for scheduled reminders by processing user authentication tokens and querying reminder details to confirm the existence of an event.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_38  
+
+ Can you turn on my smart light at 7 PM tonight? Today is 2021-12-05.  
+
+ Given a `smart device operation` task, retrieve tools that schedule actions for smart devices by processing device ID, switch time, and on/off commands to configure and execute operations at a specified time, returning the status of execution.  
+
+ [{"id": "apibank_tool_68", "doc": {"expressions": "TimedSwitch(device_id: str, switch_time: datetime, on_off_command: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/timed_switch.py", "parameters": "(device_id: str, switch_time: datetime, on_off_command: str)", "na...  
+
+ web  
+
+ apibank_query_39  
+
+ Can you tell me the stock price of SQ on March 14, 2022?  
+
+ Given a `stock price retrieval` task, retrieve tools that can query and provide stock prices by processing parameters such as the stock code and the specified date to return accurate historical stock data.  
+
+ [{"id": "apibank_tool_31", "doc": {"expressions": "QueryStock(stock_code: str, time: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_stock.py", "parameters": "(stock_code: str, time: datetime)", "name": "QueryStock", "description": "description = \"Query stock AP...  
+
+ web  
+
+ apibank_query_40  
+
+ Can you please check my account balance?  
+
+ Given an `account balance inquiry` task, retrieve tools that can access account information by utilizing authentication and account identifiers to provide the current balance status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_41  
+
+ Can you help me find information about my headache symptoms?  
+
+ Instruction: Given a `symptom information retrieval` task, retrieve tools that provide detailed insights related to specific health symptoms by processing inputs regarding the symptoms and returning relevant medical knowledge or guidance.  
+
+ [{"id": "apibank_tool_57", "doc": {"expressions": "EmergencyKnowledge(disease_injury_name: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/emergency_knowledge.py", "parameters": "(disease_injury_name: str)", "name": "EmergencyKnowledge", "description": "description = \"An A...  
+
+ web  
+
+ apibank_query_42  
+
+ Hi, can you help me add a new schedule for my meeting tomorrow at 2pm? Today is 2021-09-27  
+
+ Given a `schedule management` task, retrieve tools that facilitate creating new meeting agendas by processing input details such as date, time, location, and agenda content, while ensuring authentication for successful creation and returning the operation status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_43  
+
+ Can you help me find out my schedule for tomorrow? Today is 2023-03-17.  
+
+ Given a `schedule retrieval` task, retrieve tools that access and provide a user's agenda by processing authentication tokens to return a detailed list of scheduled events.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_44  
+
+ Can you please check if there is any appointment for Olivia Davis with Dr. Smith on 10th Oct 2023?  
+
+ Given an `appointment check` task, retrieve tools that verify scheduled appointments by processing patient name and appointment date inputs to confirm the details and status of the reservation.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_45  
+
+ Can you help me find information on abdominal pain?  
+
+ Given a `symptom information retrieval` task, retrieve tools that provide medical information by processing symptom descriptions to identify and return relevant medical conditions.  
+
+ [{"id": "apibank_tool_56", "doc": {"expressions": "SymptomSearch(symptom_description: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/symptom_search.py", "parameters": "(symptom_description: str)", "name": "SymptomSearch", "description": "description = \"An API that searche...  
+
+ web  
+
+ apibank_query_46  
+
+ can you check my registration status for March 25th, 2023?  
+
+ Given a `registration status check` task, retrieve tools that can verify registration details by processing inputs such as patient name and appointment time to return the status and any relevant information regarding the registration.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_47  
+
+ Can you recognize speech from an audio URL?  
+
+ Given a `speech recognition` task, retrieve tools that process audio inputs from URLs to generate accurate text transcriptions, along with additional information such as confidence levels, aligned with the query's content and requirements.  
+
+ [{"id": "apibank_tool_40", "doc": {"expressions": "SpeechRecognition(voice_file: object)", "category": "\u5176\u4ed6AI\u6a21\u578b", "path": "apis/speech_recognition.py", "parameters": "(voice_file: object)", "name": "SpeechRecognition", "description": "description = \"An API that performs speech recognition on an audi...  
+
+ web  
+
+ apibank_query_48  
+
+ Can you please delete my reminder to call the dentist on March 16th at 4:30 pm?  
+
+ Given a `reminder deletion` task, retrieve tools that manage reminders by using authorization tokens and reminder IDs to delete specified entries, ensuring the status of the operation is returned.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_49  
+
+ Can you help me modify a reminder for my conference?  
+
+ Given a `reminder modification` task, retrieve tools that handle the updating of reminders by processing parameters such as reminder ID, content, and time to modify existing reminders and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_50  
+
+ Can you help me record my recent health data?  
+
+ Given a `health data recording` task, retrieve tools that manage user health information by processing inputs such as user ID, date, and detailed health data to store records accurately and return the operation status.  
+
+ [{"id": "apibank_tool_62", "doc": {"expressions": "RecordHealthData(user_id: str, date: datetime, health_data: object)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/record_health_data.py", "parameters": "(user_id: str, date: datetime, health_data: object)", "name": "RecordHeal...  
+
+ web  
+
+ apibank_query_51  
+
+ Can you help me book a hotel room?  
+
+ Given a `hotel booking` task, retrieve tools that facilitate the reservation of hotel rooms by processing parameters such as hotel name, check-in and check-out dates, room count, and number of guests, ultimately providing booking status and reference details as outputs.  
+
+ [{"id": "apibank_tool_83", "doc": {"expressions": "BookHotel(hotel_name: str, check_in_date: datetime, check_out_date: datetime, room_count: int, adult_count: int, child_count: int)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/book_hotel.py", "parameters": "(hotel_na...  
+
+ web  
+
+ apibank_query_52  
+
+ Can you help me find my upcoming appointment with Dr. Smith?  
+
+ Given an `appointment query` task, retrieve tools that manage and access appointment information by processing patient name and appointment time inputs to locate and provide details of the upcoming appointment.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_53  
+
+ Can you cancel my appointment on April 10th with Dr. Davis under David Brown's name? The appointment ID is 56789012.  
+
+ Given an `appointment cancellation` task, retrieve tools that handle schedules by processing input parameters such as appointment ID, date, and associated name to cancel the specific appointment and return the operation status.  
+
+ [{"id": "apibank_tool_59", "doc": {"expressions": "CancelRegistration(registration_number: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_registration.py", "parameters": "(registration_number: str)", "name": "CancelRegistration", "description": "description...  
+
+ web  
+
+ apibank_query_54  
+
+ Can you change my appointment?  
+
+ Given an `appointment modification` task, retrieve tools that manage scheduling operations by processing registration numbers and new appointment times to update the appointment details and return the status of the operation.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_55  
+
+ Can you cancel a timed switch for my smart device?  
+
+ Given a `timed switch cancellation` task, retrieve tools that manage smart device operations by processing required inputs such as device ID and switch time to cancel the scheduled operation and provide feedback on the success of the cancellation.  
+
+ [{"id": "apibank_tool_69", "doc": {"expressions": "CancelTimedSwitch(device_id: str, switch_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_timed_switch.py", "parameters": "(device_id: str, switch_time: datetime)", "name": "CancelTimedSwitch", "de...  
+
+ web  
+
+ apibank_query_56  
+
+ Can you help me register an appointment with a specific doctor on a specific date?  
+
+ Given an `appointment registration` task, retrieve tools that facilitate setting up appointments by processing inputs such as patient name, doctor name, and appointment date and time, and providing feedback on the registration status.  
+
+ [{"id": "apibank_tool_58", "doc": {"expressions": "AppointmentRegistration(patient_name: str, appointment_time: datetime, doctor_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/appointment_registration.py", "parameters": "(patient_name: str, appointment_time:...  
+
+ web  
+
+ apibank_query_57  
+
+ Can you answer a question about a document for me?  
+
+ Given a `document question answering` task, retrieve tools that analyze document content to extract and provide answers to specific questions by processing the text of the document and the related query.  
+
+ [{"id": "apibank_tool_45", "doc": {"expressions": "DocumentQA(document_content: str, question: str)", "category": "\u5176\u4ed6AI\u6a21\u578b", "path": "apis/document_qa.py", "parameters": "(document_content: str, question: str)", "name": "DocumentQA", "description": "description = \"Document Question Answering (Docume...  
+
+ web  
+
+ apibank_query_58  
+
+ Can you help me reschedule my appointment with Dr. Smith on April 12th?  
+
+ Given an `appointment rescheduling` task, retrieve tools that manage and update scheduling information by processing input details such as registration number and new appointment time to modify and confirm the updated schedule.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_59  
+
+ Can you cancel my appointment on August 5th with Dr. Chen under the name Sarah Johnson? My appointment ID is 78901234.  
+
+ Given an `appointment cancellation` task, retrieve tools that handle appointment management by processing inputs such as patient's name, appointment ID, and date to cancel the scheduled appointment and confirm the operation's status.  
+
+ [{"id": "apibank_tool_59", "doc": {"expressions": "CancelRegistration(registration_number: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_registration.py", "parameters": "(registration_number: str)", "name": "CancelRegistration", "description": "description...  
+
+ web  
+
+ apibank_query_60  
+
+ Can you add a reminder for a meeting on 2022-05-06 at 2 PM?  
+
+ Given a `reminder creation` task, retrieve tools that facilitate the addition of reminders by processing authentication tokens, content descriptions, and time inputs to schedule and confirm the reminder's setup.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_61  
+
+ Can you help me reschedule my appointment with Dr. Smith?  
+
+ Given an `appointment rescheduling` task, retrieve tools that handle scheduling operations by processing registration numbers and new appointment times to modify existing appointments and return the status of the update.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_62  
+
+ Can you tell me the definition of the word "perplexed"?  
+
+ Given a `word definition retrieval` task, retrieve tools that provide dictionary definitions by processing the query word and returning its meaning or definition.  
+
+ [{"id": "apibank_tool_37", "doc": {"expressions": "Dictionary(query: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/dictionary.py", "parameters": "(query: str)", "name": "Dictionary", "description": "description = \"API that takes a 'query' parameter as input and retrieves...  
+
+ web  
+
+ apibank_query_63  
+
+ Can you check the registration of patient with ID 34567890 on March 25, 2023 and tell me about his appointments?  
+
+ Given a `patient registration and appointment inquiry` task, retrieve tools that access and query registration databases to provide appointment details based on patient ID and date parameters, ensuring relevant information is accurately returned.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_64  
+
+ Can you please cancel my appointment with id 78901234 for August 5th, 2023 with Dr. Chen under the name Sarah Johnson?  
+
+ Given an `appointment cancellation` task, retrieve tools that manage appointments by processing parameters like appointment ID, date, doctor, and patient name to cancel the specified appointment and return the status of the request.  
+
+ [{"id": "apibank_tool_59", "doc": {"expressions": "CancelRegistration(registration_number: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_registration.py", "parameters": "(registration_number: str)", "name": "CancelRegistration", "description": "description...  
+
+ web  
+
+ apibank_query_65  
+
+ Can you delete my account?  
+
+ Given an `account deletion` task, retrieve tools that enable user account deletion by processing an authentication token to execute the request and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_66  
+
+ Can you help me search artificial intelligence on wikipedia?  
+
+ Given a `Wikipedia search` task, retrieve tools that facilitate information retrieval from Wikipedia by processing a keyword input to return relevant details such as the title, summary, and URL of the corresponding page.  
+
+ [{"id": "apibank_tool_35", "doc": {"expressions": "Wiki(keyword: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/wiki.py", "parameters": "(keyword: str)", "name": "Wiki", "description": "description = \"Wikipedia search API that takes one parameter - 'keyword'. The 'keyword...  
+
+ web  
+
+ apibank_query_67  
+
+ Can you help me open a bank account?  
+
+ Given a `bank account creation` task, retrieve tools that facilitate the opening of bank accounts by processing required user information such as account number, password, name, and email to initiate the creation process and return the status of the operation.  
+
+ [{"id": "apibank_tool_25", "doc": {"expressions": "OpenBankAccount(account: str, password: str, name: str, email: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/open_bank_account.py", "parameters": "(account: str, password: str, name: str, email: str)", "name": "O...  
+
+ web  
+
+ apibank_query_68  
+
+ Can you cancel a timer for my smart device?  
+
+ Given a `timer cancellation` task, retrieve tools that facilitate smart device management by using input parameters such as device ID and scheduled switch time to perform the cancellation of a timed event, subsequently providing the operation status.  
+
+ [{"id": "apibank_tool_69", "doc": {"expressions": "CancelTimedSwitch(device_id: str, switch_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/cancel_timed_switch.py", "parameters": "(device_id: str, switch_time: datetime)", "name": "CancelTimedSwitch", "de...  
+
+ web  
+
+ apibank_query_69  
+
+ Can you please query the Morning Routine scene for me?  
+
+ Given a `scene query` task, retrieve tools that can access and provide detailed information about specific scenes by processing a scene name and returning comprehensive scene data, including relevant attributes and descriptions.  
+
+ [{"id": "apibank_tool_67", "doc": {"expressions": "QueryScene(scene_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_scene.py", "parameters": "(scene_name: str)", "name": "QueryScene", "description": "description = \"API to query a specific 'scene' by pr...  
+
+ web  
+
+ apibank_query_70  
+
+ Can you help me check a meeting on March 20th from 2 PM to 4 PM in Conference Room A for a Sales Meeting with John Smith and Jane Doe attending?  
+
+ Given a `meeting scheduling` task, retrieve tools that facilitate querying meeting details and attendees by utilizing parameters such as date, time, location, and participants to provide comprehensive meeting information.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_71  
+
+ Can you help me reschedule my appointment with Dr. Smith on April 12th, 2023?  
+
+ Given an `appointment rescheduling` task, retrieve tools that manage scheduling operations by processing parameters like identification numbers and new appointment times, to adjust existing appointments and return the status of the operation.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_72  
+
+ I forgot my password, can you help me reset it?  
+
+ Given a `password reset` task, retrieve tools that facilitate the resetting of an account password by processing user credentials such as username and email, and returning the status of the reset operation.  
+
+ [{"id": "apibank_tool_2", "doc": {"expressions": "DeleteAccount(token: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u5220", "path": "apis/delete_account.py", "parameters": "(token: str)", "name": "DeleteAccount", "description": "description = \"Delete account API that takes a token p...  
+
+ web  
+
+ apibank_query_73  
+
+ Can you check my account balance, please?  
+
+ Given an `account balance inquiry` task, retrieve tools that access and manage bank account information by processing user identification details and authentication credentials to obtain and provide current account balance data.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_74  
+
+ Can you help me book an appointment with Dr. Smith?  
+
+ Given an `appointment booking` task, retrieve tools that facilitate scheduling appointments by processing inputs such as patient name, doctor name, and appointment time to ensure a successful booking and return the status of the reservation.  
+
+ [{"id": "apibank_tool_58", "doc": {"expressions": "AppointmentRegistration(patient_name: str, appointment_time: datetime, doctor_name: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/appointment_registration.py", "parameters": "(patient_name: str, appointment_time:...  
+
+ web  
+
+ apibank_query_75  
+
+ Can you tell me about my history for today, please?  
+
+ Given a `historical query` task, retrieve tools that process date inputs to provide a list of historical events or personal history corresponding to the specified date.  
+
+ [{"id": "apibank_tool_33", "doc": {"expressions": "QueryHistoryToday(date: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_history_today.py", "parameters": "(date: datetime)", "name": "QueryHistoryToday", "description": "description = \"QueryHistoryToday API take...  
+
+ web  
+
+ apibank_query_76  
+
+ Can you calculate (5+6)*3 for me?  
+
+ Given a `arithmetic calculation` task, retrieve tools that perform computations on mathematical expressions provided in infix notation by processing the input expression to return the calculated result.  
+
+ [{"id": "apibank_tool_53", "doc": {"expressions": "Calculator(infix_expression: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u5de5\u5177", "path": "apis/calculator.py", "parameters": "(infix_expression: str)", "name": "Calculator", "description": "description = \"An API to perform arithmetic calculations on an infix...  
+
+ web  
+
+ apibank_query_77  
+
+ Can you record my health data?  
+
+ Given a `health data recording` task, retrieve tools that can record user-specific health information by processing inputs such as user ID, date, and health data to store the data and return the status of the operation.  
+
+ [{"id": "apibank_tool_62", "doc": {"expressions": "RecordHealthData(user_id: str, date: datetime, health_data: object)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/record_health_data.py", "parameters": "(user_id: str, date: datetime, health_data: object)", "name": "RecordHeal...  
+
+ web  
+
+ apibank_query_78  
+
+ Can you help me record my health history?  
+
+ Given a `health history recording` task, retrieve tools that support storing health-related data by processing user identifiers, dates, and complex data inputs to maintain and update health records systematically.  
+
+ [{"id": "apibank_tool_62", "doc": {"expressions": "RecordHealthData(user_id: str, date: datetime, health_data: object)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/record_health_data.py", "parameters": "(user_id: str, date: datetime, health_data: object)", "name": "RecordHeal...  
+
+ web  
+
+ apibank_query_79  
+
+ Can you search for the possible diseases and first-aid methods for shortness of breath?  
+
+ Given a `health advisory retrieval` task, retrieve tools that can provide information regarding diseases and corresponding first-aid methods by processing a disease or condition name to deliver relevant emergency procedures and first aid activities.  
+
+ [{"id": "apibank_tool_57", "doc": {"expressions": "EmergencyKnowledge(disease_injury_name: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/emergency_knowledge.py", "parameters": "(disease_injury_name: str)", "name": "EmergencyKnowledge", "description": "description = \"An A...  
+
+ web  
+
+ apibank_query_80  
+
+ Can you please modify my appointment scheduled for March 25th with Dr. Kim to March 26th with Dr. Lee?  
+
+ Given an `appointment modification` task, retrieve tools that facilitate the rescheduling of appointments by processing parameters such as registration number, new appointment date, and contact details to modify existing appointments and confirm the status of the update.  
+
+ [{"id": "apibank_tool_60", "doc": {"expressions": "ModifyRegistration(registration_number: str, new_appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u6539", "path": "apis/modify_registration.py", "parameters": "(registration_number: str, new_appointment_time: datet...  
+
+ web  
+
+ apibank_query_81  
+
+ Can you switch off my smart bulb at 10 pm tonight? Today is 2022-03-01.  
+
+ Given a `smart device operation` task, retrieve tools that schedule and execute commands for smart devices by processing device ID, switch time, and on/off command inputs to perform the desired operation at the specified time.  
+
+ [{"id": "apibank_tool_68", "doc": {"expressions": "TimedSwitch(device_id: str, switch_time: datetime, on_off_command: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u589e", "path": "apis/timed_switch.py", "parameters": "(device_id: str, switch_time: datetime, on_off_command: str)", "na...  
+
+ web  
+
+ apibank_query_82  
+
+ Can you please tell me the stock price of SQ on March 14th, 2022?  
+
+ Given a `stock data retrieval` task, retrieve tools that query historical stock prices by processing stock code and date inputs to return the relevant stock data.  
+
+ [{"id": "apibank_tool_31", "doc": {"expressions": "QueryStock(stock_code: str, time: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_stock.py", "parameters": "(stock_code: str, time: datetime)", "name": "QueryStock", "description": "description = \"Query stock AP...  
+
+ web  
+
+ apibank_query_83  
+
+ Can you help me modify a reminder for paying bills on March 20th at 12 PM?  
+
+ Given a `reminder modification` task, retrieve tools that handle updating reminders by processing parameters such as reminder ID, updated content, and updated time to modify the reminder and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_84  
+
+ Can you help me find possible diseases related to fatigue?  
+
+ Given a `symptom-based diagnosis` task, retrieve tools that search and provide potential medical conditions by processing symptom descriptions to align with the query's requirements.  
+
+ [{"id": "apibank_tool_56", "doc": {"expressions": "SymptomSearch(symptom_description: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/symptom_search.py", "parameters": "(symptom_description: str)", "name": "SymptomSearch", "description": "description = \"An API that searche...  
+
+ web  
+
+ apibank_query_85  
+
+ Can you help me modify a meeting reservation?  
+
+ Given a `meeting modification` task, retrieve tools that manage meeting details by processing parameters such as meeting ID, content, time, and attendees to modify the reservation and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_86  
+
+ Can you please help me query a reminder for "Attend meeting" on March 18th, 2023 at 10:30am?  
+
+ Given a `reminder query` task, retrieve tools that facilitate accessing and listing reminders by employing user authentication through token input to ensure secure retrieval of scheduled events.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_87  
+
+ Can you help me find out my next appointment with Dr. Smith on October 10th, 2023? My patient ID is 90123456 and my name is Olivia Davis.  
+
+ Given an `appointment retrieval` task, retrieve tools that help in querying appointment details by processing inputs such as patient name, patient ID, and appointment date to provide the relevant appointment information.  
+
+ [{"id": "apibank_tool_61", "doc": {"expressions": "QueryRegistration(patient_name: str, appointment_time: datetime)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/query_registration.py", "parameters": "(patient_name: str, appointment_time: datetime)", "name": "QueryReg...  
+
+ web  
+
+ apibank_query_88  
+
+ Can you delete the agenda of picking up my dry cleaning on March 21st at the Cleaners?  
+
+ Given an `agenda deletion` task, retrieve tools that handle schedule management operations by processing security credentials and schedule identification inputs to delete specified agendas and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_89  
+
+ Can you please tell me the current date?  
+
+ Given a `date retrieval` task, retrieve tools that provide the current date by processing minimal or no input and returning the present date information.  
+
+ [{"id": "apibank_tool_23", "doc": {"expressions": "GetTodayNone", "category": "\u83b7\u53d6\u4fe1\u606f - \u5916\u754c\u4fe1\u606f\u67e5\u8be2", "path": "apis/get_today.py", "parameters": NaN, "name": "GetToday", "description": "description = \"Get a list of today's tasks which are not completed yet.\"\ninput_parameter...  
+
+ web  
+
+ apibank_query_90  
+
+ Hi, I forgot my password. Can you help me reset it?  
+
+ Given a `password reset` task, retrieve tools that assist in recovering account access by processing user credentials such as username and email to initiate and execute the password reset process, providing feedback on the status of the operation.  
+
+ [{"id": "apibank_tool_4", "doc": {"expressions": "ForgotPassword(username: str, email: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c - \u67e5", "path": "apis/forgot_password.py", "parameters": "(username: str, email: str)", "name": "ForgotPassword", "description": "description = \"Forgot...  
+
+ web  
+
+ apibank_query_91  
+
+ Can you search for the definition of the word 'perplexed'?  
+
+ Given a `word definition search` task, retrieve tools that can process a text query to find and return a precise definition of the specified word.  
+
+ [{"id": "apibank_tool_37", "doc": {"expressions": "Dictionary(query: str)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/dictionary.py", "parameters": "(query: str)", "name": "Dictionary", "description": "description = \"API that takes a 'query' parameter as input and retrieves...  
+
+ web  
+
+ apibank_query_92  
+
+ Can you please give me the health data for user A12345 from 2023-03-01 to 2023-03-31?  
+
+ Given a `user health data retrieval` task, retrieve tools that access and query health information by processing user ID and time period inputs to return detailed user health data for the specified range.  
+
+ [{"id": "apibank_tool_55", "doc": {"expressions": "QueryHealthData(user_id: str, time_period: datetime)", "category": "\u83b7\u53d6\u4fe1\u606f - \u6570\u636e\u5e93\u67e5\u8be2", "path": "apis/query_health_data.py", "parameters": "(user_id: str, time_period: datetime)", "name": "QueryHealthData", "description": "descri...  
+
+ web  
+
+ apibank_query_93  
+
+ Can you modify my alarm for tomorrow morning at 7am? Today is 2023-03-15.  
+
+ Given an `alarm modification` task, retrieve tools that facilitate the adjustment of alarms by processing the necessary authorization token, timer ID, and desired alarm time to update the alarm settings and return the status of the operation.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_94  
+
+ Can you help me set an alarm for 8 am tomorrow?  
+
+ Given an `alarm setting` task, retrieve tools that manage alarm operations by authenticating the user and processing time inputs to set an alarm, ensuring successful scheduling and returning the operation status.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web  
+
+ apibank_query_95  
+
+ Can you help me delete my account?  
+
+ Given an `account deletion` task, retrieve tools that facilitate account management by processing authentication tokens to perform the deletion operation and return the status outcome.  
+
+ [{"id": "apibank_tool_0", "doc": {"expressions": "GetUserToken(username: str, password: str)", "category": "\u5bf9\u5916\u5f71\u54cd - \u6570\u636e\u5e93\u64cd\u4f5c", "path": "apis/get_user_token.py", "parameters": "(username: str, password: str)", "name": "GetUserToken", "description": "description = \"Get user token...  
+
+ web   
+End of preview. Expand in Data Studio      
+
+🔧 Retrieving useful tools from a large-scale toolset is an important step for Large language model (LLMs) in tool learning. This project (ToolRet) contribute to (i) the first comprehensive tool retrieval benchmark to systematically evaluate existing information retrieval (IR) models on tool retrieval tasks; and (ii) a large-scale training dataset to optimize the expertise of IR models on this tool retrieval task.
+See the official Github for more details.
+
+A concrete example for our evaluation dataset.
+
+{
+    "id": "apigen_query_5",
+    "query": "Given an initial population of 500 bacteria with a growth rate of 0.3 per minute and a doubling time of 20 minutes, what will be the population after 45 minutes?",
+    "labels": [
+        {
+            "id": "apigen_tool_272",
+            "doc": {
+                "name": "bacterial_growth",
+                "description": "Calculates the bacterial population after a given time based on the initial population and growth rate.",
+                "parameters": {
+                    "initial_population": {
+                        "description": "The initial bacterial population.",
+                        "type": "int",
+                        "default": 20
+                    },
+                    "growth_rate": {
+                        "description": "The growth rate per unit time.",
+                        "type": "float",
+                        "default": 20
+                    },
+                    "time": {
+                        "description": "The time elapsed.",
+                        "type": "float"
+                    },
+                    "doubling_time": {
+                        "description": "The doubling time of the bacteria in minutes. Defaults to 20.",
+                        "type": "float, optional"
+                    }
+                }
+            },
+            "relevance": 1
+        }
+    ],
+    "instruction": "Given a `bacterial population prediction` task, retrieve tools that calculate population growth by processing parameters such as initial population, growth rate, elapsed time, and doubling time to provide the projected population size."
+}
+
+We evaluate a wide range of retrieval models on ToolRet. Our evaluation also supports two main settings, including w/ inst. and w/o inst.. Please see our paper for more details.
+
+Our evaluation benchmark ToolRet is built by first collecting existing datasets and efficiently sample diverse retrieval tasks from them through K-means. 
+We also release the tool retrieval corpus and all raw datasets before K-means.
+
+		Citation
+
+@article{shi2025retrieval,
+  title={Retrieval Models Aren't Tool-Savvy: Benchmarking Tool Retrieval for Large Language Models},
+  author={Shi, Zhengliang and Wang, Yuhan and Yan, Lingyong and Ren, Pengjie and Wang, Shuaiqiang and Yin, Dawei and Ren, Zhaochun},
+  journal={arXiv preprint arXiv:2503.01763},
+  year={2025}
+}
+
+ Copy to bucket    
+
+ Use this dataset      
+
+ Downloads last month 
+ 10,573  
+
+Number of rows: 
+7,961 
+Total file size: 
+6.37 MB     
+
+ Collection including mangopy/ToolRet-Queries 
+
+Tool-Retrieval 
+ Collection 
+The first large-scale and diverse tool retrieval benchmark. See our homepage for more details: https://github.com/mangopy/tool-retrieval-benchmark. • 8 items • Updated Jun 26, 2025 •  4 
+
+ Paper for mangopy/ToolRet-Queries 
+
+Retrieval Models Aren't Tool-Savvy: Benchmarking Tool Retrieval for
+  Large Language Models 
+ Paper • 2503.01763 • Published Mar 3, 2025 •  4   
+

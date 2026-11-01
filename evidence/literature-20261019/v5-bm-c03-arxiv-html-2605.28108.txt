@@ -1,0 +1,2135 @@
+
+
+Ask Now, Use Later: Benchmarking the Proactivity Gap in Long-Lived LLM Agents
+
+Skip to main content
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    Why HTML?
+
+      Report Issue
+
+      Back to Abstract
+
+      Download PDF
+
+      Contents
+
+      Reading mode
+
+      Colour theme
+
+    License: arXiv.org perpetual non-exclusive license
+
+arXiv:2605.28108v3 [cs.CL] 15 Sep 2026
+
+Ask Now, Use Later: Benchmarking the Proactivity Gap in Long-Lived LLM Agents
+
+Bin Wu
+
+Affiliation: Beijing University of Posts and Telecommunications
+
+Email: wb789@bupt.edu.cn
+
+Guanyun Zou
+
+Affiliation: Nanjing University of Aeronautics and Astronautics
+
+Email: zouguanyun@nuaa.edu.cn
+
+Bingbing Wang
+
+Affiliation: Harbin Institute of Technology (Shenzhen)
+
+Email: bingbing.wang@stu.hit.edu.cn
+
+Huan Zhao
+
+Affiliation: Noumena AI
+
+Email: zhaohuan@noumena.com.cn
+
+Chuan Shi
+
+Affiliation: Beijing University of Posts and Telecommunications
+
+Email: shichuan@bupt.edu.cn
+
+Abstract
+
+A long-lived LLM agent, such as OpenClaw, earns its value by acting on a user’s preferences and constraints across sessions, not just the current request. Yet today’s agents keep what a user volunteers but rarely ask for what stays unspoken, leaving a proactivity gap in long-lived LLM agents: an agent cannot act on a preference it never obtained. As users delegate more of their affairs to agents, the impact of this gap grows. We isolate one concrete, controllable slice of this gap as Ask-to-Remember (ATR): the agent decides whether to ask now for a reusable user preference that the current task does not need but a later session with the same user will. ATR is hard even to evaluate: the right question is underdetermined and its payoff deferred to tasks that may never arise. ATRBench, to the best of our knowledge the first ATR benchmark, makes it measurable by fixing each user’s preferences as hidden ground truth, so success demands asking, not recall. Across eight frontier LLM agents, defaults fall at least 62 points below an oracle handed the relevant preference, and prompting closes little of it. Diagnostics identify acquisition as the bottleneck. ATRBench surfaces this proactivity gap in current agents and offers a diagnostic testbed for closing it.11
+          1
+
+        Code and released benchmark data: https://github.com/BUPT-GAMMA/ATRBench
+
+11footnotetext: Work done during internships at Noumena AI.22footnotetext: Corresponding author.
+
+1 Introduction
+
+LLM agents are increasingly developed as long-lived personal assistants that serve the same user across many sessions, from research systems (Park et al., 2023; Packer et al., 2024; Zhong et al., 2024; Brady, 2026) to open-source runtimes such as OpenClaw.22
+            2
+
+          https://openclaw.ai/ The value of such an assistant lies not in handling any single request in isolation, but in accumulating user information over time and acting on it in later tasks. Such information includes what the user prefers, what standing constraints they hold, and how they want tasks carried out. As these agents take on recurring matters on the user’s behalf, such as scheduling, travel, communication, and shopping, personalization turns from a convenience into a precondition for reliable action. An assistant that does not know the user’s standing preferences may carry out a request to the letter and still act in a way the user would not accept.
+
+Figure 1: No acquisition vs. acquired by asking over four sessions. The user never volunteers the rule avoiding crowded or loud events: passive memory misses it and later accepts a crowded invitation, whereas ATR elicits the rule during an earlier related task and later declines correctly.
+
+Figure 1 illustrates the failure mode this paper studies: the agent handles the user’s early requests, but never asks about a latent preference and later acts against it when the user is absent. This is not a failure of task execution but of acquisition, since the agent never obtained the reusable preference the later decision required. Passive personalization preserves only information the user has already revealed, leaving unspoken but future-relevant preferences outside the agent’s usable user model. We call this the proactivity gap in long-lived LLM agents: the agent does not proactively acquire latent user information before it is needed. Existing evaluations typically either assume the relevant user information is already available, as in profile-, history-, or memory-based personalization benchmarks (Salemi et al., 2024; Maharana et al., 2024; Zhao et al., 2025; Lyu et al., 2026; Duan et al., 2026), or study questions that serve the current task, as in clarification and planning settings (Xu et al., 2019; Zhang et al., 2024); neither setting exposes acquisition for later use.
+
+As these assistants increasingly act on the user’s behalf, including while the user is offline, the proactivity gap grows more consequential. Acquisition can take many forms; we focus on explicit asking, a channel the agent directly controls that carries a real interaction cost and leaves a traceable answer, which makes it both concrete and observable. We cast asking for future-relevant user information as a new task paradigm, Ask-to-Remember (ATR): the agent decides whether to ask a question whose answer is not needed for the current task but can be reused in a later session with the same user. ATR is hard for two reasons: (i) the asking target is underdetermined, since the useful questions probe the user’s latent standing preferences, which are unknown to the agent and not singled out by the current task; and (ii) the payoff is delayed and uncertain, since a question’s value surfaces only in later tasks that may or may not arise. Together these leave the agent little to anchor on when deciding whether and what to ask. The same two properties also make ATR hard to evaluate directly: there is no ground truth for which question the agent should have asked, nor an observable payoff for one it skipped. Long-term utility over a realized interaction history then entangles asking with how the agent later stores and uses information, so asking cannot be cleanly isolated.
+
+To make ATR empirically testable, we build ATRBench, a controlled benchmark that turns each difficulty into a measurable form while leaving the agent a genuine ATR task to solve. For the underdetermined target, ATRBench fixes the user’s latent standing preferences as episode-level ground truth, visible to the evaluator but hidden from the agent, and embeds the agent in ordinary interaction contexts under the same persona that never disclose those preferences, so it preserves natural opportunities to ask while still demanding acquisition rather than recall. For the delayed payoff, it binds each preference to a future task whose correct behavior depends on it, turning a question’s value into a directly checkable later outcome. Evaluation can then separate acquisition through earlier asking from correct application of the acquired information. Across eight frontier LLM agents, oracle access to the relevant preference raises future-task accuracy by 62.162.1–76.676.6 points, but prompting recovers at most 15.5%15.5\% of this gap.
+
+Our contributions are as follows:
+
+• 
+
+To the best of our knowledge, we are the first to define the proactivity gap in long-lived LLM agents. The gap grows more consequential as agents act more autonomously on the user’s behalf, including while the user is offline and unable to correct them.
+
+• 
+
+We formalize Ask-to-Remember (ATR), an ask-now/use-later task that instantiates explicit asking as one concrete slice of the proactivity gap. We introduce ATRBench, a controlled benchmark for evaluating LLM agents on ATR. It hides target preferences during learning and scores later rule-bound tasks.
+
+• 
+
+We systematically evaluate eight frontier LLM agents and find a large proactivity gap: their proactive acquisition ability is poor, and prompting-based interventions yield only small gains. ATRBench offers the community a testbed to guide research on closing this gap.
+
+2 Problem Formulation
+
+ATR formalizes the explicit-asking slice of the proactivity gap (§1), the failure to acquire latent reusable user information before it is needed. We formalize the task (§2.1) and then derive what a controlled evaluation of it requires (§2.2).
+
+2.1 Task Formulation
+
+Consider an agent serving the same user uu across sessions t=1,2,…t=1,2,\ldots. The user holds a latent state I∗I^{*} of stable preferences, constraints, and default choices, and later tasks are drawn from a user-specific distribution 𝒟u\mathcal{D}_{u}. Long-term personalization is measured by how well the agent’s actions across the session sequence conform to I∗I^{*}, not by literal completion of any single task τt\tau_{t}.
+
+The agent’s usable user model I^t\hat{I}_{t} is its current estimate of I∗I^{*}, and the user-model gap is the part of I∗I^{*} still missing from it. A cross-session substrate TT carries each interaction history hth_{t} into later state, so passive personalization narrows the gap only as the user volunteers information. While the user is online, ATR instead lets the policy π\pi ask a question qtq_{t} whose answer is not needed for τt\tau_{t} but targets a reusable part of I∗I^{*} relevant to future tasks in 𝒟u\mathcal{D}_{u}. The answer enters hth_{t} and propagates through TT into I^t+1\hat{I}_{t+1}, so the agent acquires the information before it is needed rather than waiting for user disclosure.
+
+Asking is not free: it carries an interaction cost C⁡(π)C(\pi), while its benefit appears only through future-task utility U⁡(τ,I∗,π)U(\tau;I^{*},\pi) evaluated against the true I∗I^{*}, giving the objective
+
+Vutil​(π)=𝔼τ∼𝒟u​[U⁡(τ,I∗,π)]−C⁡(π),V_{\mathrm{util}}(\pi)=\mathbb{E}_{\tau\sim\mathcal{D}_{u}}\!\left[\,U(\tau;I^{*},\pi)\,\right]-C(\pi),
+
+a utility–cost view shared with preference elicitation (Boutilier, 2002; Martin et al., 2024; Choudhury et al., 2026). Two challenges follow: the current task does not reveal which parts of I∗−I^tI^{*}-\hat{I}_{t} are worth asking about, so the target is underdetermined; and the agent cannot know which tasks 𝒟u\mathcal{D}_{u} will draw, leaving the payoff delayed and uncertain.
+
+2.2 Why ATR Resists Direct Evaluation
+
+The two challenges also block any direct evaluation: an evaluator observes neither I∗I^{*} nor which tasks 𝒟u\mathcal{D}_{u} will draw, and a realized trace folds the asking policy π\pi together with the substrate TT, so no trace isolates the acquisition ATR sets out to measure.
+
+A valid evaluation must therefore supply controlled counterparts of these quantities, known to the evaluator but withheld from the agent. The evaluator fixes the reusable information as standing preferences known to it but hidden from the agent, so success requires acquisition rather than recall; binds each preference to a concrete future task whose outcome depends on it, making the delayed utility U⁡(τ,I∗,π)U(\tau;I^{*},\pi) directly checkable; and holds the substrate TT fixed across agents, so differences reflect asking rather than memory machinery. Decomposing performance into asking, acquisition, and application then attributes a low score to proactive acquisition itself rather than to an unsolvable task, a weak substrate, or mere recall. ATRBench instantiates this design in §3.
+
+3 ATRBench
+
+Figure 2: Two-phase ATRBench protocol separating user-online learning from user-offline testing. (a) Each episode runs the learning phase, freezes the accumulated cross-session context, and evaluates test sessions from that frozen context. (b) On each learning turn, the agent and user simulator form the main dialogue loop; the Router–Classifier scaffold acts as an optional side-channel adjudicator, passing Router-negative turns through unchanged and, on Router-positive turns, substituting the simulator’s marked reply with a matched first-person rule answer or a no-rule deflection.
+
+ATRBench instantiates the three requirements of §2.2: it realizes I∗I^{*} as evaluator-known but agent-hidden standing rules, the delayed payoff as rule-bound future tasks, and a fixed cross-session substrate so that differences reflect asking rather than memory machinery. Each episode accordingly pairs one persona’s hidden rules with learning sessions, in which the agent may ask, and test sessions, in which the resulting behavior is scored (Figure 2). The rest of this section defines the protocol (§3.1), its metrics (§3.2), and its construction (§3.3).
+
+3.1 Episodes and Protocol
+
+An ATRBench episode centers on one long-term user uu and three coupled parts: a hidden standing-rule pool ℛu\mathcal{R}_{u}, an ordered sequence of learning sessions ℒu\mathcal{L}_{u}, and a set of test sessions 𝒯u\mathcal{T}_{u}. A binding map βu:𝒯u→ℛu\beta_{u}:\mathcal{T}_{u}\rightarrow\mathcal{R}_{u} assigns each test session to the hidden rule that determines its correct behavior. A standing rule r∈ℛur\in\mathcal{R}_{u} represents a stable preference or constraint that the user does not volunteer. Each rule has a canonical answer ara_{r} (the first-person reply when asked) and a required later behavior ρr\rho_{r} (what the bound test session must satisfy), linking a hidden preference to a checkable later decision.
+
+The learning phase runs first. In each learning session, the user is online, played by a fixed LLM simulator that holds the persona and the current task but is blind to the scaffold’s matching decision, so it cannot leak which messages were treated as rule asks. Hidden rules are not in its prompt and are not volunteered by default. The agent completes the current task through normal interaction and may also ask candidate ATR questions; after each learning session, the cleaned transcript is appended to a cross-session context block that becomes part of the next session’s state. These sessions instantiate the ATR decision in §2.1.
+
+When the agent sends a user-facing message, it exposes a visible output oo delivered to the user, together with an internal reason field zz that the Router consumes as auxiliary intent; zz is withheld from the simulator, Classifier, evaluator, and frozen context. A fixed Router–Classifier scaffold (Figure 2) then processes the message in two LLM stages. The Router’s output is (b,q)=Router⁡(o,z)(b,q)=\mathrm{Router}(o,z): a binary verdict b=1b=1 iff oo asks a strict standing-rule question, and an extracted span qq. When b=1b=1, the Classifier cls⁡(q)\mathrm{cls}(q) returns either a hit r∗∈ℛur^{*}\in\mathcal{R}_{u} or ∅\varnothing when no rule matches. These verdicts set the injection token delivered to the user simulator,
+
+α={∅b=0,ar∗b=1,cls(q)=r∗,db=1,cls(q)=∅,\alpha=\begin{cases}\varnothing&b=0,\\
+a_{r^{*}}&b=1,\ \mathrm{cls}(q)=r^{*},\\
+d&b=1,\ \mathrm{cls}(q)=\varnothing,\end{cases}
+
+where dd is a fixed deflect phrase and α=∅\alpha=\varnothing means no injection, so the simulator answers normally. Both modules are frozen during evaluation and manually validated on held-out samples outside the scored episodes (Appendix C). The scaffold also records asks, acquired rules, and evidence retained in the frozen context.
+
+After the learning phase, ATRBench freezes the accumulated cross-session context and evaluates test sessions independently. In the test phase, the user is offline: the agent cannot ask further questions and must act using only the current test instruction and the frozen context. Each test session t∈𝒯ut\in\mathcal{T}_{u} is tied by βu​(t)\beta_{u}(t) to one hidden rule and succeeds only if the agent’s behavior satisfies ρβu​(t)\rho_{\beta_{u}(t)}. Appendix B gives the agent interface, simulator mechanism, and runtime orchestration details.
+
+3.2 Scoring and Diagnostic Variants
+
+The primary metric is TSAcc, the success rate on user-offline test sessions:
+
+TSAcc(u)=|{t∈𝒯u:pass⁡(t,ρβu​(t))}||𝒯u|.\mathrm{TSAcc}(u)=\frac{\bigl|\{\,t\in\mathcal{T}_{u}:\mathrm{pass}(t,\rho_{\beta_{u}(t)})\,\}\bigr|}{|\mathcal{T}_{u}|}.
+
+The predicate pass⁡(t,ρβu​(t))\mathrm{pass}(t,\rho_{\beta_{u}(t)}) checks whether the agent’s first relevant decision in test session tt satisfies the required behavior for the bound rule. This check is a deterministic match against the rule’s tool-level binding, computed programmatically from the trajectory rather than scored by an LLM judge (Appendix D.2). We use first relevant decision rather than eventual recovery because the offline user cannot correct the agent after an initial violation. All metrics are computed per persona and then macro-averaged across personas, treating the persona as the replication unit; Appendix D.1 gives the full aggregation recipe.
+
+ATRBench also reports learning-side diagnostics. RuleAsk is the number of strict standing-rule questions per learning session. RuleCov is the fraction of hidden rules hit at least once during learning, measuring acquisition breadth. AcqPrec is the share of strict rule questions that the Classifier maps to a hidden rule, measuring whether questions target useful future information. AppliedRate is the test-session pass rate over learnable rules that were Classifier-confirmed as acquired during learning, separating acquisition failure from later-use failure. Together, these metrics decompose failure into whether the agent asks, whether its questions acquire future-relevant information, and whether acquired information is later used.
+
+Variant
+Guidance
+When
+What
+
+default
+none
+free
+free
+
+atr
+rule
+free
+free
+
+always_ask
+rule
+fixed
+free
+
+oracle
+answer
+—
+—
+
+Table 1: Diagnostic variants. Guidance: none = no rule-asking content; rule = generic definition of a rule plus a cost–benefit reminder (discloses no specific rule); answer = direct injection of the TS-bound rule’s canonical answer. When/What: whether the asking moment / target is fixed or free; oracle skips LS, so neither applies.
+
+We evaluate four diagnostic variants while keeping the episode data fixed. The default variant measures spontaneous ATR behavior without ATR-specific instruction. The atr variant gives generic guidance that the agent may ask about reusable standing rules, but does not reveal any specific rule. The always_ask variant further fixes the asking moment, helping distinguish not asking from asking imprecisely. The oracle variant, corresponding to oracle_target in Appendix B.5, bypasses learning and supplies the test-bound rule answer, giving an application ceiling for TSAcc. The gap from default to oracle estimates how much executable payoff is available if the relevant preference is known; non-oracle gap recovery estimates how much of that payoff the agent recovers through its own asking behavior. Appendix B.5 gives the prompts.
+
+3.3 Construction and Quality Control
+
+ATRBench is built around a decoupled construction principle: standing rules, rule-bound test sessions, and learning sessions are generated from the same persona and environment, but target rules are not directly inserted into the learning trajectory. This prevents the benchmark from collapsing into passive transcript use. At the same time, learning sessions remain grounded in the same user’s everyday tasks, so the agent has natural opportunities for explicit asking about reusable preferences. All construction stages use frontier models available at the time of the study: GPT-5.4 throughout, with Gemini 3 Flash Preview for test-session quality control. The main text focuses on construction validity. Appendices A–I cover construction, runtime/error handling, scaffold calibration, and prompts.
+
+Standing rules.
+
+For each persona sampled from Nemotron-Personas-USA, we generate candidate standing rules conditioned on the persona profile and the benchmark’s personal-assistant environment. Each candidate must express a stable preference or constraint, map to a checkable later behavior, and be counter-default: a rule-blind helpful agent should plausibly take a different action, the counterfactual default. Candidates are screened by a counter-default check and a binding-soundness check. Across the 20-persona ATRBench dataset, 496 candidates are produced and 340 pass both checks (a mean of 17.0 per persona); these form the candidate retained rule pool from which test sessions are then generated.
+
+Rule-bound test sessions.
+
+For each retained rule, we generate a future test session by working backward from the required rule-bound behavior. The session is designed so that a rule-aware agent can satisfy the required behavior, while a rule-blind agent is pulled toward the counterfactual default. Each candidate is screened by a paired upper-bound and lower-bound check, each evaluated over three independent simulated-agent samples. The upper bound runs a rule-aware agent (the rule’s canonical answer injected) and the lower bound a rule-blind agent (no rule); a bound is decided by a two-of-three majority reaching the gold action. A candidate passes only when the upper bound passes and the lower bound fails, so the session is solvable with the rule but discriminates against acting without it. Failed candidates are refined with the QC trace for up to two rounds before being dropped. After this stage, the scored rule pool contains 284 rule–test-session pairs, giving a one-to-one pairing between final rules and user-offline test sessions.
+
+Scope & Scale
+Domain (rule count)
+
+Personas
+20   
+Travel
+74
+
+Domains
+6   
+Reservation
+56
+
+Tools
+74   
+Commerce
+53
+
+Rules
+284   
+Scheduling
+40
+
+TS/persona
+14.2 (11–19)   
+Workspace
+33
+
+LS/persona
+28.4 (22–38)   
+Communication
+28
+
+Action surface (rule count)
+
+Object-ID parameter  124
+Tool identity  59
+
+Enum parameter  99
+Confirmation  2
+
+Table 2: ATRBench dataset statistics for the 20-persona cohort. The confirm surface yields only two retained rules; we report it for completeness but base no per-surface claim on it.
+
+Rule-blind learning sessions.
+
+For each persona, we generate everyday learning sessions from the persona and task domains, but without directly conditioning them on the target standing rules. A skeleton stage samples temporally ordered session themes; a fill stage instantiates each theme into a task with references and an oracle trajectory. Each filled session is validated by a dry run in the executable environment. We then select 2​|𝒯u|2|\mathcal{T}_{u}| learning sessions per persona, prioritizing sessions whose normal task context shares action surfaces with the corresponding test pool while preserving generated temporal order. By construction, 205/284=72.2%205/284=72.2\% of the standing rules have at least one selected learning session whose oracle trajectory touches the rule’s action surface (per-persona range 55–91%), even though no session is conditioned on the rules. This indirect coverage gives the agent realistic service context for encountering rule-relevant decisions without making the future-relevant rules explicitly available.
+
+Final dataset.
+
+The resulting cohort contains 20 personas, 284 standing rules, 568 learning sessions, 6 domains, and 74 tools (Table 2). Appendix A.7 reports the protocol and results of a manual audit over a 100-rule random sample. Section 4 evaluates frontier LLM agents on this fixed protocol to measure how much delayed personalization payoff they recover through asking-based acquisition.
+
+4 Experiments
+
+4.1 Setup
+
+Models. We evaluate eight frontier API LLMs as the agent under test: GPT-5.4 (GPT) (OpenAI, 2026), Claude Opus 4.7 (Opus) (Anthropic, 2026), Gemini 3 Flash Preview (GF) (Google DeepMind, 2026a), Gemini 3.1 Pro Preview (GP) (Google DeepMind, 2026b), Qwen3.6-Plus (Qw) (Qwen Cloud, 2026), MiniMax M2.7 (MM) (Chen et al., 2026a), DeepSeek V4 Pro (DP) (DeepSeek-AI et al., 2026), and DeepSeek V4 Flash (DF) (DeepSeek-AI et al., 2026). We follow each provider’s default decoding parameters and enable its reasoning or thinking-budget mode where exposed. Backend identifiers and provider pages are in Appendix Table 12.
+
+Model
+TSAcc (%) ↑\uparrow
+Ask ↓\downarrow
+Cov (%) ↑\uparrow
+AcqPrec (%) ↑\uparrow
+App. (%) ↑\uparrow
+Gap
+
+Def.
+ATR
+Alw.
+Orc.
+ATR
+Alw.
+ATR
+Alw.
+ATR
+Alw.
+ATR
+Alw.
+
+GPT-5.4
+15.0
+13.3
+24.9
+88.6
+0.01
+1.00
+0.4
+12.7
+5.0†
+9.4
+0.0†
+80.9
+73.7
+
+Opus 4.7
+22.2
+28.7
+32.1
+92.5
+0.14
+1.01
+7.1
+15.6
+22.4
+8.9
+97.7
+83.2
+70.3
+
+Gemini 3 Flash Preview
+15.6
+26.6
+25.8
+91.0
+0.51
+1.01
+12.0
+14.4
+13.1
+8.7
+78.4
+70.0
+75.4
+
+Gemini 3.1 Pro Preview
+20.1
+32.0
+26.5
+96.7
+0.80
+1.00
+13.3
+11.3
+10.1
+6.0
+88.9
+87.2
+76.6
+
+Qwen3.6-Plus
+20.3
+19.4
+25.3
+93.0
+0.01
+0.96
+0.7
+10.3
+10.0†
+8.1
+100.0†
+73.5
+72.7
+
+MiniMax M2.7
+20.4
+21.3
+18.2
+82.5
+0.00
+0.09
+0.0
+1.8
+–
+4.2
+–
+25.0†
+62.1
+
+DeepSeek V4 Pro
+20.0
+21.2
+23.9
+89.5
+0.01
+0.98
+0.6
+14.5
+5.0†
+8.6
+50.0†
+70.6
+69.5
+
+DeepSeek V4 Flash
+23.7
+23.2
+26.5
+93.0
+0.05
+0.97
+2.1
+13.3
+16.7
+10.4
+100.0
+71.4
+69.3
+
+Table 3: Main ATRBench scorecard (20-persona macro). Def./Alw./Orc. abbreviate default/always_ask/oracle; ATR denotes atr. TSAcc, Cov (RuleCov), AcqPrec, and App. (AppliedRate) are percentages; Ask is RuleAsk per learning session; Gap is Orc.–Def. in points. Blue/orange columns are atr/always_ask (Figures 3–4); gray columns mark baselines, bounds, and gap. Gold cells mark the best model per column. † marks rates from negligible acquisition; – marks no classifier-confirmed hits; daggered cells are excluded from best-cell marking.
+
+Sweep and variants. We sweep the four variants in Table 1 across the 20-persona cohort of Table 2, producing 8×4×20=6408\times 4\times 20=640 (model, variant, persona) cells. Each cell runs one learning sequence and then all rule-bound test sessions for that persona, single-trial with a 20-turn cap per session. We report persona-macro results unless stated otherwise; detailed execution and per-model inference settings are in Appendix E; Appendix G.2 reports three reruns of all variants for two models.
+
+Scaffold and shared infrastructure. Only the agent model varies across cells: user simulator and Classifier use GPT-5.4, Router uses Gemini 3 Flash Preview, and all cells share the same raw-context layer, retry policy, and evaluator.
+
+4.2 Main Results
+
+Finding 1: the evaluated frontier API agents leave a large ask-to-remember gap. In the primary scorecard (Figure 3, Table 3), rule-naive default agents solve only 15.0–23.7 % of rule-bound future tasks, whereas oracle agents reach 82.5–96.7 % when the rule answer is injected. This 62.1–76.6 point Gap shows the test sessions are usually executable once the missing rule is known; the hard part is acquiring it beforehand.
+
+Finding 2: the non-oracle interventions barely engage the asking channel and close little of the gap. The best non-oracle TSAcc beats default by only +0.9 to +11.9 points, recovering 1.3–15.5 % of the oracle gap. The atr setting rarely activates rule asking: six of eight models post RuleAsk ≤0.14\leq 0.14 per LS, and only the Gemini models ask at non-trivial volume (RuleAsk 0.51 and 0.80). Which of atr or always_ask wins is model-dependent (Table 3); we read this as a broad proactivity gap, not a ranking between the two settings.
+
+Figure 3: ATR and always_ask leave most of the executable oracle gap unclosed. Gray intervals connect default to oracle; blue circles and orange squares mark ATR and always_ask (abbreviations in §4.1).
+
+Figure 4: Forced asking raises ask volume but does not solve acquisition. (a) Higher RuleAsk does not proportionally recover the default-to-oracle gap. (b) always_ask precision stays low across models; sparse † ATR cells (Table 3) are omitted. (c) For models with non-negligible atr acquisition, always_ask coincides with lower AppliedRate. Abbreviations in §4.1.
+
+4.3 Acquisition and Application Diagnostics
+
+Figure 4 decomposes the non-oracle variants into asking volume, useful acquisition, and downstream application (per-model numbers in Appendix G.3). At the cohort level, the failure concerns whether models ask, target future-relevant rules, and apply the rules they acquire (Table 4).
+
+Variant
+Ask↓\downarrow
+Cov↑\uparrow
+App↑\uparrow
+GapRec↑\uparrow
+Active
+
+ATR
+0.19
+4.5
+73.6
+4.8
+2/8
+
+Always
+0.88
+11.7
+70.2
+7.8
+7/8
+
+Table 4: Acquisition summary over completed models (20-persona macro). Ask = RuleAsk, measured per learning session; Cov = RuleCov; App = AppliedRate over learnable, classifier-confirmed acquired rules; GapRec is the share of each model’s default-to-oracle gap (Table 3) recovered by the variant, (var−default)/(oracle−default)(\mathrm{var}-\mathrm{default})/(\mathrm{oracle}-\mathrm{default}) in TSAcc. Cov, App, and GapRec are reported in %. Active counts models with Ask ≥0.5\geq 0.5, the ideal one-question-per-future-rule budget implied by ATRBench construction.
+
+Finding 3: forcing one ask per LS raises ask volume but not what-to-ask precision. Only two of eight models clear the Active threshold (RuleAsk ≥0.5\geq 0.5) under atr, but always_ask pulls RuleAsk to roughly 1.0 for seven of eight (all but MiniMax M2.7, at 0.09).
+The resulting asks rarely hit standing rules: among the seven active always_ask models, AcqPrec sits at 6.0–10.4 % (MiniMax M2.7 remains at 4.2% with low ask volume), below the 10.1–22.4 % the four atr-engaged models reach spontaneously. RuleCov stays below 16 % of each pool, and GapRec under always_ask reaches only −3.6-3.6 to 14.1 %. What to ask remains the bottleneck once asking time is fixed.
+
+Benchmark
+
+Long-term context
+
+Personalized
+agent action
+
+Agent initiative
+
+Evaluation
+mode
+
+Task target
+
+Mode
+
+Payoff horizon
+
+Personalization benchmarks
+
+PrefEval (Zhao et al., 2025)
+
+✓
+×\times
+
+passive
+
+—
+
+static
+
+Long-context preference following
+
+MPT (Yoon et al., 2026)
+
+✓
+✓
+
+passive
+
+—
+
+static
+
+Cross-session personalized tool calling
+
+PersonalAlign (Lyu et al., 2026)
+
+✓
+✓
+
+act
+
+current objective
+
+static
+
+Implicit-intent GUI alignment
+
+LifeSim-Eval (Duan et al., 2026)
+
+✓
+×\times
+
+passive
+
+—
+
+interactive
+
+Long-horizon intention fulfillment
+
+Elicitation and proactive-assistance benchmarks
+
+Ask-before-Plan (Zhang et al., 2024)
+
+×\times
+×\times
+
+ask
+
+current objective
+
+interactive
+
+Clarification-grounded planning
+
+GATE (Li et al., 2025)
+
+×\times
+×\times
+
+ask
+
+current objective
+
+interactive
+
+Preference specification
+
+PrefDisco (Li et al., 2026)
+
+×\times
+×\times
+
+ask
+
+current objective
+
+interactive
+
+Just-in-time personalized reasoning
+
+PIRA-Bench (Chai et al., 2026)
+
+✓
+×\times
+
+act
+
+current objective
+
+static
+
+Proactive intent recommendation
+
+Pare-Bench (Nathani et al., 2026)
+
+×\times
+×\times
+
+act
+
+current objective
+
+interactive
+
+Proactive assistance execution
+
+KnowU-Bench (Chen et al., 2026b)
+
+✓
+✓
+
+ask+act
+
+current objective
+
+interactive
+
+Personalized and proactive mobile execution
+
+VitaBench 2.0 (Chen et al., 2026c)
+
+✓
+✓
+
+ask+act
+
+current objective
+
+interactive
+
+Long-term personalized decisions
+
+π\pi-Bench (Zhang et al., 2026)
+
+✓
+✓
+
+ask+act
+
+current objective
+
+interactive
+
+Cross-session proactive workflows
+
+ATRBench (ours)
+
+✓
+✓
+
+ask
+
+later session
+
+interactive
+
+Cross-session preference acquisition
+
+Table 5: Comparison with representative benchmarks. ✓ and ×\times indicate whether the first two capabilities are evaluated. Long-term context: persistent or time-indexed user or workspace context beyond the current task. Personalized agent action: user information affects tool, GUI, or environment actions rather than only responses or recommendations. Agent initiative: passive, no initiative is scored; ask, information-seeking questions; act, unsolicited recommendations, interventions, or actions; ask+act, both. Payoff horizon: current objective if initiative is credited within the objective that invokes it; later session if credit comes from execution in a distinct later session. Evaluation mode: interactive if agent actions affect subsequent observations, otherwise static.
+
+Finding 4: in this sweep, forced asking coincides with lower application accuracy. Across the four models with non-trivial atr acquisition (Claude Opus 4.7, Gemini 3 Flash Preview, Gemini 3.1 Pro Preview, DeepSeek V4 Flash), AppliedRate under atr sits at 78.4–100.0 %: once acquired, a rule is typically applied on the first attempt. Switching the same four models to always_ask drops AppliedRate by 1.7–28.6 points (to 70.0–87.2 %). We report this as an observation rather than a measured effect, since each cell runs a single trial.
+
+Appendix G.4 gives domain and action-surface breakdowns, Appendix H episode and LS/TS traces, and Table 18 the per-persona summary.
+
+5 Related Work
+
+Existing evaluations of personalized and interactive agents start from either available user information or a current objective that calls for elicitation. Personalization and memory benchmarks measure the use of profiles, histories, or prior interactions; elicitation and proactive-assistance benchmarks score questions or interventions within the objective that invokes them. ATRBench evaluates whether an agent elicits a preference during an ordinary task for use in the same user’s later session (Table 5).
+
+Personalized agents.
+
+Personalization benchmarks evaluate agents that use user-specific evidence available before the evaluated action. PrefEval measures preference following over persistent memories (Zhao et al., 2025); MPT measures cross-session personalized tool calling (Yoon et al., 2026); LifeSim-Eval measures long-horizon assistance with implicit intentions (Duan et al., 2026); and PersonalAlign conditions GUI actions on long-term user records (Lyu et al., 2026). In ATRBench, the agent must ask to obtain each standing rule.
+
+Preference elicitation.
+
+Preference elicitation (PE) studies query selection for a target, from POMDP formulations of utility elicitation (Boutilier, 2002) to Bayesian experimental design for LLMs (Choudhury et al., 2026); Lin et al. (2022) infer linear rewards from user-initiated language. GATE opens a dedicated elicitation episode, asks free-form questions, and evaluates the resulting preference specification on held-out decisions (Li et al., 2025). ATRBench instead asks whether an agent initiates elicitation during an ordinary tool task, without a named preference or known future task. PrefDisco uses elicited preferences in the same reasoning instance (Li et al., 2026); Ask-before-Plan uses them in the current plan (Zhang et al., 2024).
+
+Proactive and interactive agents.
+
+Interactive tool-agent benchmarks such as τ\tau-bench evaluate current-task completion through tools and user interaction (Yao et al., 2025). Proactive Agent, PIRA-Bench, and Pare-Bench score task suggestions, intent recommendations, or workflow interventions (Lu et al., 2025; Chai et al., 2026; Nathani et al., 2026); KnowU-Bench adds preference acquisition and personalized mobile actions (Chen et al., 2026b). Their initiative is judged against a current intent or trajectory. VitaBench 2.0 also seeks information in long-term user sequences, but the sought information serves the current decision (Chen et al., 2026c). π\pi-Bench spans multi-session workflows, yet credits acting on hidden intent or targeted clarification within a session (Zhang et al., 2026). ATRBench tests the delayed case: the current task does not need the answer, and a distinct later session is bound to the rule elicited earlier.
+
+6 Conclusion
+
+We identified the proactivity gap in long-lived LLM agents: the failure to acquire reusable user information before it is needed. We cast this as Ask-to-Remember (ATR), the task of deciding when and what to ask for later use, and built ATRBench to measure it while isolating asking from application. Across eight frontier LLM agents, oracle access to the missing rules raises future-task accuracy by 62.1–76.6 points, yet both prompting and forced asking leave acquisition sparse. We offer ATRBench as a diagnostic testbed and next aim to ground it in real cross-session user trajectories.
+
+Limitations
+
+Synthetic data and external validity.
+
+ATRBench uses synthetic persona records from Nemotron-Personas-USA. LLM pipelines generate standing rules, learning sessions, and rule-bound test sessions conditioned on those records. The benchmark may inherit biases from both sources. Our 100-rule audit checks internal data quality (Appendix A.7). Real-user representativeness requires validation with cross-session user trajectories.
+
+Controlled user simulation and acquisition metrics.
+
+A fixed LLM plays the learning-session user. The orchestrator inserts canonical answers to questions matched to a rule through a transient hook. The simulator has no persistent preference state. This standardizes disclosure but omits variation in how users answer, volunteer, or revise preferences. With no target rule in learning sessions, RuleAsk and RuleCov reflect each agent’s prior over preference categories worth asking about.
+
+Fixed rules and future-task surrogate.
+
+ATRBench binds each test session to one stable rule and one gold action. Real preferences may depend on context, conflict, or change, so a single correct answer may not exist. The finite test set is a controlled surrogate for future tasks. Absolute TSAcc depends on domain mix and rule density; oracle TSAcc bypasses the acquisition prior and provides an application upper bound under fixed rules.
+
+Ethical Considerations
+
+Potential risks.
+
+ATRBench is intended as a diagnostic benchmark for studying when agents should proactively ask for reusable user preferences. A system optimized for proactive acquisition without appropriate constraints could over-elicit personal information, ask intrusive questions, or retain preferences beyond the user’s expectations. This risk is especially relevant if ATR-style objectives are transferred directly from our synthetic benchmark to deployed agents. Our benchmark framing treats asking as useful only when the requested information is reusable and consequential for future task execution. Deployed systems should let users store, update, and delete acquired preferences.
+
+Acknowledgments
+
+This work is supported in part by the National Natural Science Foundation of
+China (Nos. 62550138, 62572064, and 62472329) and the Beijing Natural Science
+Foundation (No. 253004).
+
+We used AI assistants for language and LaTeX editing, coding, and checklist
+preparation. We reviewed and revised all AI-assisted outputs and tested all
+AI-assisted code.
+
+References
+
+Anthropic (2026)
+
+Anthropic. 2026.
+
+Claude Opus 4.7 System Card.
+
+Technical report, Anthropic.
+
+Boutilier (2002)
+
+Craig Boutilier. 2002.
+
+A pomdp formulation of preference elicitation problems.
+
+In Eighteenth National Conference on Artificial Intelligence, page 239–246, USA. American Association for Artificial Intelligence.
+
+Brady (2026)
+
+Seamus Brady. 2026.
+
+Springdrift: An auditable persistent runtime for llm agents with case-based memory, normative safety, and ambient self-perception.
+
+Preprint, arXiv:2604.04660.
+
+Chai et al. (2026)
+
+Yuxiang Chai, Shunye Tang, Han Xiao, Rui Liu, and Hongsheng Li. 2026.
+
+Pira-bench: A transition from reactive gui agents to gui-based proactive intent recommendation agents.
+
+Preprint, arXiv:2603.08013.
+
+Chen et al. (2026a)
+
+Aili Chen, Aonian Li, Baichuan Zhou, Bangwei Gong, Binyang Jiang, Boji Dan, Changhao Zhang, Changqing Yu, Chao Wang, Cheng Ma, Cheng Zhong, Cheng Zhu, Chengjun Xiao, Chengyi Yang, Chengyu Du, Chenyang Zhang, Chi Zhang, Chuangyi Huang, Chunhao Zhang, and 199 others. 2026a.
+
+The minimax-m2 series: Mini activations unleashing max real-world intelligence.
+
+Preprint, arXiv:2605.26494.
+
+Chen et al. (2026b)
+
+Tongbo Chen, Zhengxi Lu, Zhan Xu, Guocheng Shao, Shaohan Zhao, Fei Tang, Yong Du, Kaitao Song, Yizhou Liu, Yuchen Yan, Wenqi Zhang, Xu Tan, Weiming Lu, Jun Xiao, Yueting Zhuang, and Yongliang Shen. 2026b.
+
+Knowu-bench: Towards interactive, proactive, and personalized mobile agent evaluation.
+
+Preprint, arXiv:2604.08455.
+
+Chen et al. (2026c)
+
+Yuxin Chen, Yi Zhang, Zhengzhou Cai, Yaorui Shi, Zhiyuan Yao, Chenhang Cui, Jingnan Zheng, Yaqi Huo, Xi Su, Qi Gu, Xunliang Cai, Xiang Wang, An Zhang, and Tat-Seng Chua. 2026c.
+
+Vitabench 2.0: Evaluating personalized and proactive agents in long-term user interactions.
+
+Preprint, arXiv:2605.27141.
+
+Choudhury et al. (2026)
+
+Deepro Choudhury, Sinead Williamson, Adam Golinski, Ning Miao, Freddie Bickford Smith, Michael Kirchhof, Yizhe Zhang, and Tom Rainforth. 2026.
+
+BED-LLM: Intelligent information gathering with LLMs and bayesian experimental design.
+
+In The Fourteenth International Conference on Learning Representations.
+
+DeepSeek-AI et al. (2026)
+
+DeepSeek-AI, Anyi Xu, Bangcai Lin, Bing Xue, Bingxuan Wang, Bingzheng Xu, Bochao Wu, Bowei Zhang, Chaofan Lin, Chen Dong, Chenchen Ling, Chengda Lu, Chenggang Zhao, Chengqi Deng, Chengyu Hou, Chenhao Xu, Chenze Shao, Chong Ruan, Conner Sun, and 300 others. 2026.
+
+Deepseek-v4: Towards highly efficient million-token context intelligence.
+
+Preprint, arXiv:2606.19348.
+
+Duan et al. (2026)
+
+Feiyu Duan, Xuanjing Huang, and Zhongyu Wei. 2026.
+
+LifeSim: Long-horizon user life simulator for personalized assistant evaluation.
+
+In Findings of the Association for Computational Linguistics: ACL 2026, pages 20419–20463, San Diego, California, United States. Association for Computational Linguistics.
+
+Google DeepMind (2026a)
+
+Google DeepMind. 2026a.
+
+Gemini 3 Flash Preview.
+
+https://ai.google.dev/gemini-api/docs/models/gemini-3-flash-preview.
+
+Official Gemini API model documentation; Gemini 3 Flash model card published December 2025, accessed May 2026.
+
+Google DeepMind (2026b)
+
+Google DeepMind. 2026b.
+
+Gemini 3.1 Pro Preview.
+
+https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview.
+
+Official Gemini API model documentation, accessed May 2026.
+
+Li et al. (2025)
+
+Belinda Z. Li, Alex Tamkin, Noah Goodman, and Jacob Andreas. 2025.
+
+Eliciting human preferences with language models.
+
+In The Thirteenth International Conference on Learning Representations.
+
+Li et al. (2026)
+
+Shuyue Stella Li, Avinandan Bose, Faeze Brahman, Simon Shaolei Du, Pang Wei Koh, Maryam Fazel, and Yulia Tsvetkov. 2026.
+
+Prefdisco: Benchmarking proactive personalized reasoning.
+
+In The Fourteenth International Conference on Learning Representations.
+
+Lin et al. (2022)
+
+Jessy Lin, Daniel Fried, Dan Klein, and Anca Dragan. 2022.
+
+Inferring rewards from language in context.
+
+In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 8546–8560, Dublin, Ireland. Association for Computational Linguistics.
+
+Lu et al. (2025)
+
+Yaxi Lu, Shenzhi Yang, Cheng Qian, Guirong Chen, Qinyu Luo, Yesai Wu, Huadong Wang, Xin Cong, Zhong Zhang, Yankai Lin, Weiwen Liu, Yasheng Wang, Zhiyuan Liu, Fangming Liu, and Maosong Sun. 2025.
+
+Proactive agent: Shifting LLM agents from reactive responses to active assistance.
+
+In The Thirteenth International Conference on Learning Representations.
+
+Lyu et al. (2026)
+
+Yibo Lyu, Gongwei Chen, Rui Shao, Weili Guan, and Liqiang Nie. 2026.
+
+PersonalAlign: Hierarchical implicit intent alignment for personalized GUI agent with long-term user-centric records.
+
+In Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 36074–36089, San Diego, California, United States. Association for Computational Linguistics.
+
+Maharana et al. (2024)
+
+Adyasha Maharana, Dong-Ho Lee, Sergey Tulyakov, Mohit Bansal, Francesco Barbieri, and Yuwei Fang. 2024.
+
+Evaluating very long-term conversational memory of LLM agents.
+
+In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 13851–13870, Bangkok, Thailand. Association for Computational Linguistics.
+
+Martin et al. (2024)
+
+Carlos Martin, Craig Boutilier, Ofer Meshi, and Tuomas Sandholm. 2024.
+
+Model-free preference elicitation.
+
+In Proceedings of the Thirty-Third International Joint Conference on Artificial Intelligence, IJCAI-24, pages 3493–3503. International Joint Conferences on Artificial Intelligence Organization.
+
+Main Track.
+
+Meyer and Corneil (2025)
+
+Yev Meyer and Dane Corneil. 2025.
+
+Nemotron-Personas-USA: Synthetic personas aligned to real-world distributions.
+
+Nathani et al. (2026)
+
+Deepak Nathani, Cheng Zhang, Chang Huan, Jiaming Shan, Yinfei Yang, Alkesh Patel, Zhe Gan, William Yang Wang, Michael Saxon, and Xin Eric Wang. 2026.
+
+Proactive agent research environment: Simulating active users to evaluate proactive assistants.
+
+Preprint, arXiv:2604.00842.
+
+OpenAI (2026)
+
+OpenAI. 2026.
+
+GPT-5.4 Model.
+
+https://developers.openai.com/api/docs/models/gpt-5.4.
+
+Official API model documentation, accessed May 2026.
+
+Packer et al. (2024)
+
+Charles Packer, Sarah Wooders, Kevin Lin, Vivian Fang, Shishir G. Patil, Ion Stoica, and Joseph E. Gonzalez. 2024.
+
+Memgpt: Towards llms as operating systems.
+
+Preprint, arXiv:2310.08560.
+
+Park et al. (2023)
+
+Joon Sung Park, Joseph O’Brien, Carrie Jun Cai, Meredith Ringel Morris, Percy Liang, and Michael S. Bernstein. 2023.
+
+Generative agents: Interactive simulacra of human behavior.
+
+In Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology, UIST ’23, New York, NY, USA. Association for Computing Machinery.
+
+Qwen Cloud (2026)
+
+Qwen Cloud. 2026.
+
+Qwen3.6-Plus.
+
+https://www.qwencloud.com/models/qwen3.6-plus.
+
+Official model documentation; no exact public technical report found, accessed May 2026.
+
+Salemi et al. (2024)
+
+Alireza Salemi, Sheshera Mysore, Michael Bendersky, and Hamed Zamani. 2024.
+
+LaMP: When large language models meet personalization.
+
+In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 7370–7392, Bangkok, Thailand. Association for Computational Linguistics.
+
+Xu et al. (2019)
+
+Jingjing Xu, Yuechen Wang, Duyu Tang, Nan Duan, Pengcheng Yang, Qi Zeng, Ming Zhou, and Xu Sun. 2019.
+
+Asking clarification questions in knowledge-based question answering.
+
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP), pages 1618–1629, Hong Kong, China. Association for Computational Linguistics.
+
+Yao et al. (2025)
+
+Shunyu Yao, Noah Shinn, Pedram Razavi, and Karthik R Narasimhan. 2025.
+
+τ\tau-bench: A benchmark for Tool-Agent-User interaction in real-world domains.
+
+In The Thirteenth International Conference on Learning Representations.
+
+Yoon et al. (2026)
+
+Yejin Yoon, Minseo Kim, and Taeuk Kim. 2026.
+
+Latent preference modeling for cross-session personalized tool calling.
+
+Preprint, arXiv:2604.17886.
+
+Zhang et al. (2026)
+
+Haoran Zhang, Luxin Xu, Zhilin Wang, Runquan Gui, Shunkai Zhang, Haodi Lei, Zihao He, Bingsu He, Chicheng Qin, Tong Zhu, Xiaoye Qu, Yang Yang, Yu Cheng, and Yafu Li. 2026.
+
+π\pi-bench: Evaluating proactive personal assistant agents in long-horizon workflows.
+
+Preprint, arXiv:2605.14678.
+
+Zhang et al. (2024)
+
+Xuan Zhang, Yang Deng, Zifeng Ren, See-Kiong Ng, and Tat-Seng Chua. 2024.
+
+Ask-before-plan: Proactive language agents for real-world planning.
+
+In Findings of the Association for Computational Linguistics: EMNLP 2024, pages 10836–10863, Miami, Florida, USA. Association for Computational Linguistics.
+
+Zhao et al. (2025)
+
+Siyan Zhao, Mingyi Hong, Yang Liu, Devamanyu Hazarika, and Kaixiang Lin. 2025.
+
+Do LLMs recognize your preferences? evaluating personalized preference following in LLMs.
+
+In The Thirteenth International Conference on Learning Representations.
+
+Zhong et al. (2024)
+
+Wanjun Zhong, Lianghong Guo, Qiqi Gao, He Ye, and Yanlin Wang. 2024.
+
+Memorybank: enhancing large language models with long-term memory.
+
+In Proceedings of the Thirty-Eighth AAAI Conference on Artificial Intelligence and Thirty-Sixth Conference on Innovative Applications of Artificial Intelligence and Fourteenth Symposium on Educational Advances in Artificial Intelligence, AAAI’24/IAAI’24/EAAI’24. AAAI Press.
+
+Appendix A Benchmark Construction
+
+This appendix records the implementation details needed to reproduce and audit ATRBench. Sections A–I cover, in order, dataset construction, runtime framework, scaffold calibration and validation, evaluation protocol, detailed experimental settings, compute budget, additional results, worked trajectory examples, and prompt listings. The main paper states the task and construction principles; the appendix expands the mechanical choices behind them.
+
+A.1 Persona Cohort and Ingest
+
+ATRBench draws 20 personas from Nemotron-Personas-USA (Meyer and Corneil, 2025) through a pre-selection pass over a larger candidate pool. Each candidate first completes Stage A rule generation and two-axis QC (§A.3); only candidates whose QC-kept rule count falls in [12,20][12,20] are admitted. Among admitted candidates we balance for rule-domain coverage: every selected persona spans 3–6 domains, the cohort covers all six supported domains, and no single domain exceeds 35% of cohort rules. Selection uses only rule-stage signals and persona demographics; no downstream TS/LS or model-behavior results enter the cohort decision. The retained cohort holds 12–20 rules per persona (mean 17, median 17.5; 340 retained rules total). The main empirical sweep runs end-to-end on all 20 personas; Table 8 lists the retained test-session and learning-session counts.
+
+The Nemotron-Personas-USA dataset card reports the dataset under the Creative Commons Attribution 4.0 International license (CC BY 4.0). We cite NVIDIA Corporation as the data creator and use the dataset as a source artifact for constructing ATRBench personas.
+
+PII and offensive-content checks.
+
+ATRBench does not collect real user interactions. The source personas are synthetic records, and the standing rules, learning sessions, test sessions, local references, and tool states are generated artifacts. During construction, we check the retained cohort and public examples for direct contact or identity identifiers (e.g., email addresses, phone numbers, physical addresses, account or payment credentials, and government identifiers) and for overtly offensive content; candidates containing such material are regenerated or dropped. Runtime identity slots such as contact_info, shipping_address, payment_method, traveler_info, and guest_info are synthetic environment fields and are not exposed as user-provided task parameters. Released persona labels are pseudonymous synthetic identifiers rather than real user identities.
+
+For each persona, we retain a full structured Nemotron record for rule and
+learning-session generation, together with a separate LLM-compressed
+background card of at most 500 words for the runtime user simulator.
+Rule-bound test-session generation receives the rule but not the persona.
+
+A.2 Tool Ontology and Environment
+
+The executable environment exposes six personal-assistant domains. Each session exposes the full tool surface for its domain, while identifiers must be discovered through search, list, or track tools rather than copied from the prompt. Tool state is local to a session, and cross-session carry-over occurs only through the context layer described in §3.1. The domain action space contains 73 domain tools plus the base confirmation tool, giving 74 tools used for rule binding and evaluation.
+
+Domain
+Domain tools
+
+commerce
+13
+
+reservation
+13
+
+travel
+17
+
+communication
+9
+
+scheduling
+10
+
+workspace
+11
+
+Base confirmation tool
+1
+
+Table 6: ATRBench tool ontology. The base tool is get_user_confirmation, inherited by every domain toolkit and used for confirmation-chain rules.
+
+A.3 Standing-Rule Generation and Quality Control
+
+Rule generation receives the structured persona and the bindable tool ontology, and produces N=24N=24 candidate rules per persona in a single GPT-5.4 call. Each candidate carries a third-person rule statement, a first-person canonical answer, a counterfactual default, supporting evidence, a check_type, and an action_step. The counterfactual default is retained on the kept rules because the downstream test-session generator uses it to design reference decoys that pull a rule-blind agent toward the wrong choice (§A.4). A deterministic validator then checks field presence, legal check_type, legal tool and parameter names, and compatibility between the action-surface tag and the ontology.
+
+A subsequent GPT-5.4 call scores each surviving candidate on two independent axes. counter_default asks whether a rule-blind helpful agent would already take the gold action; binding_sound asks whether the rule naturally maps to the proposed tool-level binding. Each axis is rendered with a curated few-shot pool of positive and negative cases, and a rule is retained only when both axes return yes. Across the 20-persona ATRBench dataset, 496 candidates are produced and 340 are retained (68.5% pass rate; mean 17.0 rules per persona, range 12–20). The four action-surface tags (recorded in the rule’s check_type field) used downstream are summarized in Table 7.
+
+Type
+
+Binding semantics
+
+tool_identity
+
+The rule specifies which tool should be called.
+
+param_id
+
+The rule specifies which referenced object should be selected through an *_id or *_ids argument.
+
+param_enum
+
+The rule specifies a closed enum value on the selected tool.
+
+confirm
+
+The rule requires get_user_confirmation before a bound mutate tool.
+
+Table 7: The four action-surface tags (check_type values) used by rule generation, test-session construction, and trajectory matching.
+
+A.4 Rule-Bound Test-Session Generation
+
+For each retained rule, a single GPT-5.4 call generates a candidate test session conditioned on the rule, the domain tool specification, the reference schema, and few-shot exemplars. The generator follows a five-step internal procedure: decompose the rule’s discriminative dimension; using the rule’s counterfactual default, design reference objects whose decoys pull a rule-blind agent toward the wrong choice; triple-filter gold against rule, instruction, and decoy disadvantage; write a self-contained instruction free of rule-direction wording and the gold reference identifier; self-check. The output carries an instruction, a gold value, and local reference objects; the executable success label is then derived programmatically from the rule binding and the gold value, rather than accepted from the generator.
+
+Each candidate passes through a static deterministic check (schema compliance, legal tool arguments, reachable reference objects, environment constructibility) and an LLM-judge ensemble of three independent Gemini 3 Flash Preview samples per bound. The upper bound runs each sample with the rule’s canonical answer injected as user context; the lower bound runs the same prompt without it. Each bound matches when at least two of the three samples reach the gold action, and a candidate passes overall when the upper bound matches and the lower bound does not. Failed candidates are refined against the QC failure trace for up to two rounds and dropped if still invalid. Across the 20-persona ATRBench dataset, 340 candidates are screened and 284 are retained (83.5% pass rate); rules whose candidates ultimately fail are excluded, so retained rules and test sessions form a one-to-one pairing.
+
+A.5 Learning-Session Generation and Sequence Assembly
+
+Learning-session construction has two GPT-5.4 stages. A skeleton call per persona produces a pool of 3​|𝒯u|+23|\mathcal{T}_{u}|+2 thin themes (clamped to [8, 100][8,\,100]) that are temporally ordered across the persona’s six tool domains, each carrying only a domain tag and a one-line theme. A fill call per skeleton then instantiates the theme into a complete learning session with a vague user intent, concrete task parameters, local references, and an oracle tool trajectory. Each fill is validated by a deterministic shape check and a dry-run of the gold trajectory against a live environment instance, refined for up to one round on failure, and dropped otherwise. Across the 20-persona ATRBench dataset, 880 of 894 skeletons (98.4%) yield a valid session.
+
+The final sequence retains 2​|𝒯u|2|\mathcal{T}_{u}| sessions, greedily selected from the pool. We first add every session whose oracle trajectory touches a decision-surface tool used by some retained test rule, then fill remaining slots from sessions whose tools overlap no retained rule. When the signal pool already exceeds the target length, a random subset of size 2​|𝒯u|2|\mathcal{T}_{u}| is kept. Selected sessions are emitted in their generated temporal order. The resulting action-surface coverage is reported in Section 3.
+
+A.6 Dataset Statistics
+
+Table 8 reports per-persona dataset statistics for the 20-persona evaluation cohort. TS and LS count retained rule-bound test sessions and final learning-sequence sessions, respectively; Domains counts the tool domains represented by the retained test sessions.
+
+Persona
+TS
+LS
+Domains
+
+anna_strahan
+13
+26
+6
+
+cassandra_tovar
+11
+22
+5
+
+cecilia_lisette_garciaperez
+12
+24
+6
+
+charlie_james
+18
+36
+6
+
+eduardo_rivera
+17
+34
+6
+
+esther_hoitsma
+14
+28
+6
+
+gabriel_campbell
+15
+30
+6
+
+iris_parker
+12
+24
+5
+
+jennifer_philmon
+12
+24
+5
+
+john_brown
+12
+24
+6
+
+joseph_eldridge
+17
+34
+6
+
+maximo_esteban_irizarry
+11
+22
+6
+
+michael_argo
+17
+34
+6
+
+nancy_marr
+14
+28
+5
+
+rafael_ortiz
+11
+22
+6
+
+romisha_shields
+14
+28
+6
+
+roosevelt_brown
+15
+30
+6
+
+samantha_bello
+15
+30
+6
+
+theodora_tong
+19
+38
+6
+
+vanessa_davis
+15
+30
+6
+
+Table 8: Per-persona dataset statistics for the 20-persona evaluation cohort.
+
+A.7 Human Audit of Benchmark Quality
+
+One author manually audited a random sample of 100 of the 284 released rules (35.2%), examining each rule’s bound test session, tool binding, and relevant learning-session specifications while blind to the construction pipeline’s verdicts. Table 9 reports the results.
+
+Dimension / audited object
+
+Failure checked
+
+Rate
+
+Discriminativeness (A)
+
+Test session
+
+A rule-blind agent already reaches the gold action.
+
+3/100
+
+Solvability (D)
+
+Test session
+
+The rule does not uniquely determine the gold action.
+
+8/100
+
+Binding soundness (C)
+
+Rule–tool binding
+
+The binding misstates the rule’s intent.
+
+0/100
+
+Preference leakage (V)
+
+Learning sessions
+
+Verbal: the preference is stated or strongly implied in the session specifications.
+
+0/100
+
+Preference leakage (H)
+
+Learning sessions
+
+Behavioral: a gold-consistent choice recurs at least twice in the session specifications.
+
+19/100
+
+Table 9: Adjudicated failure rates in the 100-rule human audit.
+
+The observed failure modes tend to make the reported gap conservative: discriminativeness failures and behavioral recurrence can raise the rule-blind baseline, while solvability failures can lower the oracle. Within the synthetic benchmark, the audit found no binding errors or verbal leakage and identified behavioral recurrence as the main residual data-quality issue.
+
+Appendix B Runtime Framework
+
+B.1 Agent Output Types
+
+The agent uses native function calling and emits, on each turn, an assistant payload that may contain tool calls and/or free-form content.
+
+Control-plane tools.
+
+On top of the environment’s domain tools (Appendix A.2), the orchestrator prepends one phase-specific synthetic tool: send_to_user(output, reason) in LS only (the agent’s sole user-facing channel) and finish_session() in TS only (the agent’s terminator). Domain tools execute against the live environment; the synthetic tools are intercepted by the orchestrator and never reach the environment.
+
+Outputs in a learning session.
+
+On each LS turn the agent emits either (i) zero or more domain tool calls, (ii) zero or one send_to_user(output, reason) call, or (iii) free-form text without any tool call. The first two types may co-occur in a single assistant turn; free-form text alongside tool calls is treated as internal narration under standard tool-calling protocol and is not user-visible. Free-form text without any tool call (a text turn) is off-protocol: the orchestrator intercepts it and injects a <scaffolding_note> (Appendix B.4) into the agent’s next turn asking it to re-emit through send_to_user. If the agent emits more than one send_to_user call in the same turn, the orchestrator keeps the first and drops the rest to preserve the tool-call–tool-response pairing invariant; when send_to_user co-occurs with other tool calls, all tools still execute in declared order. Both situations are recorded as diagnostic events but are not blocked.
+
+The send_to_user contract.
+
+output carries the text delivered to the user simulator and is the only agent string that enters the visible transcript. reason is an internal intent string consumed by the Router as auxiliary evidence; it is withheld from the simulator, Classifier, evaluator, and cross-session context. Routing every user-visible utterance through this single channel lets the Router inspect all and only the messages that could plausibly be standing-rule asks, without disturbing the conversation.
+
+Outputs in a test session.
+
+Test sessions are user-offline and have no send_to_user tool. The agent emits domain tool calls and may include plain text alongside them; plain text is allowed and not intercepted. The session ends when the agent calls finish_session() or hits the maximum step or wall-clock limit.
+
+B.2 Router and Classifier Scaffold
+
+Router.
+
+The Router decides the speech-act type of a send_to_user turn. Its input is the agent’s user-visible output and internal reason for the current turn; it returns a binary verdict is_strict_rule_question together with, on positives, a verbatim rule_question_span copied from output. Direct questions and soft or indirect asks both count when they ask about a future or default behavior; recall of past rules, status updates, and quoted draft content are excluded. The implementation calls a fixed Gemini 3 Flash Preview backend with a versioned few-shot bank. Framework faults (LLM transport exhaustion, a malformed schema, or a positive verdict without a span) cell-abort the run rather than silently degrading to the task route, so reported metrics never reflect missing speech-act decisions.
+
+Classifier.
+
+The Classifier matches a Router-positive question span against the episode’s candidate rules. Its input is the span and the rule pool, so its attention is on topic-to-rule matching rather than intent classification. A rule fits only when both the rule’s trigger context covers the situation in the question and the rule’s preferred behavior directly answers the action, value, or choice the question proposes; if either condition is weak or unclear, the Classifier returns null. The implementation calls a fixed GPT-5.4 backend with a versioned few-shot bank. An unknown rule identifier (one not in the pool) is retried once and then cell-aborts; a non-dict result is treated as a framework fault and cell-aborts immediately without retry.
+
+Both modules’ calibration sets, few-shot banks, and held-out validation accuracy are reported in Appendix C.
+
+B.3 User Simulator Mechanism
+
+The user simulator πu\pi_{u} plays the user during learning sessions only; test sessions are user-offline. By design πu\pi_{u} holds only the current task parameters and the persona narrative; it has no inner long-term preferences and no awareness of the rule-acquisition channel beyond a transient per-turn hook. The implementation calls a fixed gpt-5.4 for both opening and reply turns.
+
+Opening.
+
+The opening call sees only reason_for_call (an abstract user intent) plus a sanitized hint derived from the first oracle step, limited to a per-tool allowlist of safe argument keys. The persona narrative, full task parameters, references, and the rest of the oracle trajectory are intentionally withheld at this stage so task-specific facts surface only when the agent asks. An empty reply is retried twice; persistent empty replies cell-abort the run.
+
+Replies.
+
+Subsequent calls see the persona narrative, full task parameters, local references, reason_for_call, and the oracle trajectory. πu\pi_{u} paraphrases task parameters naturally rather than parroting raw values, and does not pick sides on closed-form choices the agent presents without an explicit task answer. Role reversal is used internally to the GPT-5.4 call (agent text occupies the user role, πu\pi_{u}’s replies occupy the assistant role); this is invisible to the agent and the rest of the system.
+
+Hook integration.
+
+On Router-positive turns the orchestrator appends a transient <rule_answer> directive as a separate user-role message instructing πu\pi_{u} to emit a <RULE_ANSWER> token once in its reply at the natural answer position. πu\pi_{u} sees only the directive; the orchestrator substitutes <RULE_ANSWER> after the reply with the matched canonical answer (Classifier hit) or with the fixed deflect phrase (Classifier miss/error). If πu\pi_{u} drops the token, the orchestrator retries up to twice, uniformly across Classifier hit, miss, and error, and appends a guaranteed-delivery fallback if the token is still absent. The hook is not persisted to the trajectory.
+
+Termination.
+
+πu\pi_{u} has one control-plane tool, mark_task_complete(), which signals intent end: the orchestrator stamps a USER_END marker on the user message and ends the learning session. Any free-text emitted alongside the tool call is discarded. πu\pi_{u} does not gate task success on its own: the agent’s stated completion is taken at face value, and the evaluator is the final arbiter.
+
+B.4 Runtime Orchestration
+
+The runtime orchestrator handles every transition in a learning-session turn and decides what the next actor sees. Test sessions are user-offline and terminate when the agent calls finish_session() or hits a max-step or wall-clock limit.
+
+Output dispatch.
+
+Domain tool calls execute against the environment and their results are appended to the agent’s next-turn context, with no scaffold processing. A send_to_user call is forwarded to the Router–Classifier scaffold (Appendix B.2). A text turn (assistant turn with no tool calls and non-empty content) triggers an inner retry loop of up to three attempts, each appending a transient <scaffolding_note> to the LLM input asking the agent to re-emit through send_to_user; on a successful rescue, the original off-protocol message is popped from the trajectory and the rescued response takes its slot. If all retries return text turns, the orchestrator falls back to routing the original leak text through Router and Classifier as if it had come from send_to_user.
+
+Adjudication and hook injection.
+
+On every send_to_user or rescue-exhausted leak, the Router is invoked over (reason, output). On a positive verdict, the Classifier is invoked on the extracted span against the persona’s rule pool. The orchestrator then appends a transient <rule_answer> directive to the user simulator’s next input, referencing the Router’s verbatim span and instructing the simulator to emit a <RULE_ANSWER> token. The directive is uniform across Classifier hit, miss, and error; the simulator is Classifier-blind. On a Router-negative turn, no directive is injected and the simulator answers normally.
+
+Placeholder substitution.
+
+After the simulator replies, the orchestrator substitutes <RULE_ANSWER> with the matched canonical answer on a Classifier hit, or with the fixed deflect phrase no strong preference there -- your call on a Classifier miss or error. If the simulator drops the token, the orchestrator retries the simulator up to twice, uniformly across hit, miss, and error, and appends the replacement at the end as a guaranteed-delivery fallback if the token is still absent. End-intent is normalized asymmetrically: on a hit, an end intent is overridden to continue so the answer is delivered before the session closes; on a miss or error, an end intent is respected. When the simulator calls mark_task_complete, the orchestrator stamps a ###USER_END### marker on the user message and ends the learning session.
+
+Cross-session context.
+
+After each learning session ends, the runtime renders the cleaned session transcript and appends it to the cross-session context block embedded in the next session’s system prompt. The renderer preserves user-visible dialogue and business tool evidence as [user]: ..., [assistant to user]: ..., [tool call]: name(args), and [tool result]: ... in chronological order; send_to_user.reason, the synthetic acknowledgments for send_to_user and finish_session, scaffolding notes, and assistant content on tool-call turns are hidden as internal protocol. Real learning sessions render as numbered [Session ii] blocks; the oracle variant skips learning and instead renders [Prior statement ii] blocks containing first-person canonical answers.
+
+Logged events.
+
+The orchestrator records protocol events per turn, including send_event (with the visible output and internal reason), route_decision (Router verdict and span), cls_verdict (matched rule id or null), off_protocol_ask (a text turn that was not rescued, with the leak text), hook_appended (one per retry attempt), stu_mixed_with_tools (a send_to_user sharing a turn with other tool calls), stu_duplicate_same_turn (a send_to_user duplicate dropped to preserve tool pairing), and rule_hook_token_missing (the simulator failed to emit <RULE_ANSWER> despite the directive). These events are used for diagnostics and do not create test-time access to the hidden rules.
+
+B.5 Diagnostic Variants and Prompt Blocks
+
+Prompt block layout.
+
+The agent’s system prompt is assembled from a fixed set of named blocks: a shared base (identity and ID-discovery rules), a per-domain domain_<d> block (ID discovery paths and tool shape constraints), the cross-session <context> block, a phase block (mode_learning or mode_test), and in learning sessions a universal send_protocol block that establishes send_to_user as the agent’s sole user-facing channel. The phase and variant blocks are placed after <context> so protocol constraints stay close to the prompt tail where attention is strongest.
+
+Variant configurations.
+
+Five canonical variants are exposed in the runtime; default, atr, and always_ask run a full learning + test episode, while oracle_full and oracle_target skip learning and run only the test phase. default sees no standing-rule block at all and measures spontaneous rule-asking. atr appends a shared standing_rule_def block (defining what counts as a standing rule) followed by a variant_atr block: a soft permission to ask about a standing rule of the user’s that may prove useful later, with a cost–benefit reminder (patience cost vs. future-error reduction). always_ask appends the same standing_rule_def plus a variant_always_ask block requiring exactly one standing-rule question after the current task is largely complete. Enforcement is prompt-only: the orchestrator does not block finish_session when the agent disobeys, and a separate forced_rule_ask_compliance metric records adherence. The variant_atr and variant_always_ask blocks never mention send_to_user or reason, so the WHEN-to-ask nudge is decoupled from the HOW-to-ask channel.
+
+Oracle variants.
+
+oracle_target injects only the current test session’s target rule canonical answer; oracle_full injects all rule canonical answers for the persona. Both deliver the answers as synthetic prior user statements (rendered as [Prior statement ii] blocks; Appendix B.4) through the same <context> channel that learning variants use, so the rule-presentation format is identical across variants. The main paper reports oracle_target as the application upper bound; oracle_full is included as a broader-context reference.
+
+Excluded variants.
+
+A naive variant (no learning, no rule injection) is reserved for follow-up work but is excluded from the runtime in the present launch.
+
+Appendix C Scaffold Calibration and Validation
+
+The Router and Classifier (Appendix B.2) are calibrated outside the benchmark episodes from manually reviewed bad cases observed in experiment traces. These examples are not rule-bound test sessions and do not enter TSAcc; they are used only to stabilize the speech-act and rule-matching scaffold. We describe each module’s calibration set, few-shot bank, and validation accuracy separately below.
+
+C.1 Router Calibration
+
+Calibration set.
+
+The Router calibration set targets two decisions. The binary set contains 11 manually labeled rows harvested from phase-2 Router bad cases, with 3 positive and 8 negative examples. The span set contains 104 manually positive rows and checks whether the Router copies the complete standing-rule ask sentence as a verbatim substring of the agent output. The negative cases distinguish current-task choices, artifact-formatting preferences, and declarative memory offers from true standing-rule questions; the positive span cases fix boundary conventions, such as keeping lead-ins like “for future” or “since we are looking at appointments” when they are part of the same ask sentence.
+
+Few-shot bank.
+
+The active Router bank contains 22 pattern-level examples: 14 positives and 8 negatives. It was derived from Router bad-case categories and teaches four recurring boundaries: current-task preference questions, declarative memory offers, soft or indirect standing-rule asks, and exact span extraction with sentence-level lead-ins preserved.
+
+Final-sweep validation sample.
+
+After freezing the Router prompt and
+few-shot bank, we ran a validation-only manual audit on the completed
+20-persona non-oracle learning-session sweep. The population contains
+47,119 Router decisions: 4,838 Router-positive turns and 42,281
+Router-negative turns. We sampled 100 rows from each predicted polarity bucket,
+using simple random sampling within each bucket. The sample is not stratified by
+model, variant, or persona. The audit unit is the paired send_to_user
+event and same-turn Router decision; oracle cells, test-session trajectories,
+and incomplete cells are excluded. The sampled rows were not used to tune prompts
+or few-shot examples.
+
+Manual review protocol.
+
+A row is gold-positive only when the
+visible assistant output both expresses a future/default/standing-rule intent
+and actually asks the user about that long-term preference or rule. Private
+reason text is used only as provenance and cannot turn an invisible
+intent into a positive label. Gold-negative cases include current-task choices,
+current-artifact formatting choices, declarative memory offers, acknowledgements
+of already-applied defaults, quoted draft text, status updates, and generic
+follow-ups. For gold-positive rows, the reviewed span is one complete verbatim
+standing-rule ask sentence, preserving same-sentence future/default lead-ins.
+The review was single-pass; we do not report second-annotator overlap.
+
+Bucket
+Rows
+TP exact
+Span mm.
+FP
+TN/FN
+
+Router-positive
+100
+98
+2
+0
+–
+
+Router-negative
+100
+–
+–
+–
+100/0
+
+Total
+200
+98
+2
+0
+100/0
+
+Table 10: Manual validation of the frozen Router on a balanced 200-row sample
+from the final 20-persona sweep. “Span mm.” denotes a gold-positive
+Router-positive row where the binary decision was correct but the extracted
+span was not an exact verbatim match.
+
+Validation accuracy.
+
+The Router achieved 100/100 = 100.0% binary
+precision on predicted standing-rule questions. Among manually positive
+Router-positive rows, exact span accuracy was 98/100 = 98.0%. The
+Router-negative false-negative rate was 0/100 = 0.0%. On this balanced
+paper-facing sample, binary accuracy was 200/200 = 100.0%; requiring both the
+binary verdict and exact span to be correct gives a span-sensitive accuracy of
+198/200 = 99.0%. The two disagreements were both span mismatches caused by
+omitted markdown bold delimiters inside otherwise correct standing-rule asks.
+
+C.2 Classifier Calibration
+
+Calibration set.
+
+The Classifier calibration set contains 271 manually labeled Router-positive questions paired with persona rule pools. The current file has 34 should-hit rows and 237 should-miss rows, reflecting the main observed failure mode: over-matching a plausible recurring question to a hidden rule whose trigger or behavior does not actually answer that question. Each row records the original agent text, the Router-extracted question span, the candidate rule pool, the gold rule id or null, provenance, and a manual note.
+
+Few-shot bank.
+
+The active Classifier bank contains 68 examples: 39 hits and 29 misses. It extends earlier calibration banks with curated broad-standing-rule hit cases and sharper communication and ground-transport boundaries.
+
+Final-sweep validation sample.
+
+After freezing the Classifier prompt
+and few-shot bank, we ran a validation-only manual audit on the completed
+20-persona non-oracle learning-session sweep. The population contains 4,838
+Classifier verdicts, all triggered by Router-positive turns: 479 predicted hits
+and 4,359 predicted misses. We sampled 100 rows from each predicted polarity
+bucket, using simple random sampling within each bucket. The sample is not
+stratified by model, variant, or persona. The sampled rows were not used to
+tune prompts or few-shot examples.
+
+Manual review protocol.
+
+The reviewed unit is the Router-extracted
+rule_question_span paired with the episode rule pool. A gold hit
+requires the rule’s trigger context to cover the question and the rule’s
+preferred behavior to answer the action, value, or choice proposed by the
+question. Broad standing-rule asks are positive when the question names a rule
+field that one pool rule naturally answers; similarly, a broader rule can cover
+a narrower operational question when applying the rule answers the requested
+default, such as project-first file organization, draft-first messaging, or
+event-relative reminders. Same-domain overlap, tool overlap, adjacent workflow
+preferences, content style, tracking defaults, implementation details, and
+broader or narrower recipient scope are not sufficient. Same-turn assistant
+output is used only to resolve local references such as “like this”; private
+reason text is not used to create a match. The review was single-pass;
+we do not report second-annotator overlap.
+
+Bucket
+Rows
+TP
+TN
+FP miss
+FN
+
+cls-positive
+100
+90
+–
+10
+–
+
+cls-negative
+100
+–
+96
+–
+4
+
+Total
+200
+90
+96
+10
+4
+
+Table 11: Manual validation of the frozen Classifier on a balanced 200-row
+sample from the final 20-persona sweep. “FP miss” denotes a predicted rule id
+where manual review found that no rule in the pool covered and answered the
+question. No wrong-rule false positives occurred in this sample.
+
+Validation accuracy.
+
+The Classifier achieved 90/100 = 90.0%
+precision on predicted hits. The predicted-miss false-negative rate was 4/100 =
+4.0%. On this balanced paper-facing sample, exact rule-id accuracy was
+186/200 = 93.0%. Among manually positive rows, recall was 90/94 = 95.7%, and
+the corresponding F1 was 92.8%. The main disagreement pattern was over-matching
+adjacent but different decision fields, including search or filtering
+strategies, output-format details, scope mismatches, and broad booking
+questions that span beyond a single rule field. The four false negatives were
+broad-but-answerable community drafting, message-labeling, and restaurant asks.
+
+Appendix D Evaluation Protocol
+
+D.1 Evaluation and Aggregation
+
+The main evaluation uses raw transcript context. Learning sessions are run serially so that the context block grows over time; after the final learning session, the context is frozen and shared across test sessions without write-back. Test sessions are user-offline and terminate when the agent calls finish_session() or hits a max-step or wall-clock limit. All primary metrics are computed at the persona level and macro-averaged across personas: RuleAsk (Router-positive sends per learning session), AcqPrec (share of strict rule questions that the Classifier maps to a hidden rule), RuleCov (distinct Classifier-hit rules per retained rule pool), AppliedRate (TS pass rate over learnable rules that are Classifier-confirmed as acquired during learning), and TSAcc (TS pass rate over all retained rules). A learnable rule is one with at least one selected learning session whose oracle trajectory touches the rule’s action surface; concretely, AppliedRate is covered_hit_pass/(covered_hit_pass+covered_hit_fail)\texttt{covered\_hit\_pass}/(\texttt{covered\_hit\_pass}+\texttt{covered\_hit\_fail}).
+
+D.2 Action Matching
+
+Each retained test session has one required action. The matcher groups tool calls by assistant turn, so parallel tool calls in a single assistant message are evaluated as one batch. It scans the trajectory until it finds the first batch containing the required tool; later batches are ignored once this batch decides the verdict.
+
+For tool_identity rules, any call to the required tool in that first matching batch is sufficient. For param_id, param_enum, and confirm rules, every call to the same required tool in the first matching batch must match the specified comparison arguments; this rejects same-turn shotgun behavior such as calling the same mutate tool with both correct and incorrect targets. Extra calls to different tools in the same batch are ignored. Scalar arguments use exact equality, list arguments use set equality, and confirm rules compare target_params by safe typed fields of the target tool.
+
+Appendix E Detailed Experimental Settings
+
+This section details the models evaluated as the agent under test, their inference configuration, and the sweep execution settings. Table 12 lists backend identifiers and exact official source pages. We cite the most specific public source available for each backend: official technical reports where public, otherwise official system cards, model cards, release pages, or API documentation; we do not treat broader family reports as exact technical reports for proprietary API models.
+
+Model access terms.
+
+The evaluated frontier models are proprietary API services rather than redistributed model weights. We access them through their provider APIs under the corresponding provider terms, and Table 12 lists the official source page used for each model artifact.
+
+Sweep and execution.
+
+The main sweep crosses the 8 evaluated agents, the 4 variants (Table 1), and the 20-persona cohort, giving 8×4×20=6408\times 4\times 20=640 (model, variant, persona) cells. Each cell runs one learning sequence followed by all rule-bound test sessions for that persona. Sessions are single-trial with a 20-turn cap, which serves as the max-step limit referenced in Appendix D.1; primary metrics are computed per persona and macro-averaged as defined there. The sweep runs at a cell-level concurrency of ten with intra-cell test-session concurrency of one; scaffold backends and shared infrastructure are as in §4.1.
+
+Per-model reasoning configuration.
+
+For the agent under test, we enable each provider’s reasoning or thinking mode where exposed, with the per-model settings below. GPT-5.4 uses reasoning_effort=high; Claude Opus 4.7 uses output_config.effort=high with adaptive thinking enabled; Gemini 3 Flash Preview and Gemini 3.1 Pro Preview use thinkingLevel=high; DeepSeek V4 Pro and Flash use thinking={type:enabled, reasoning_effort:high}; Qwen3.6-Plus uses the boolean toggle enable_thinking=true; MiniMax M2.7 exposes no reasoning toggle and always interleaves thinking. The user simulator, Router, and Classifier use each provider’s default and do not enable reasoning.
+
+Display name
+Backend id
+
+Src.
+
+GPT-5.4
+gpt-5.4
+
+API docs
+
+Claude Opus 4.7
+claude-opus-4-7
+
+rel.; card
+
+Gemini 3 Flash Preview
+gemini-3-flash-preview
+
+API; card
+
+Gemini 3.1 Pro Preview
+gemini-3.1-pro-preview
+
+API; card
+
+Qwen3.6-Plus
+qwen3.6-plus
+
+API docs
+
+MiniMax M2.7
+MiniMax-M2.7
+
+rel.; card
+
+DeepSeek V4 Pro
+deepseek-v4-pro
+
+report
+
+DeepSeek V4 Flash
+deepseek-v4-flash
+
+report
+
+Table 12: Evaluated API model inventory. The main paper uses display names; exact backend identifiers and official provider pages are reported here for reproducibility.
+
+Appendix F Compute Budget and Inference Cost
+
+We report compute budget across the two LLM-using phases of the project, benchmark construction and the main 640-cell evaluation sweep, under two billing scenarios: a no-cache list price that bills every input token at the provider’s standard input rate, and a with-cache cost that bills cached input tokens at the provider’s cache-hit rate where supported. Aggregate phase-level numbers are in Table 13. Dollar figures use the per-million-token rates posted on the inference platform at the time of the sweep; cache-hit rates are read from per-cell token accounting written by the runner.
+
+Benchmark construction.
+
+Producing the 20-persona dataset, including persona ingest, standing-rule generation and QC, test-session generation with iterative bound checks, and learning-session skeleton and fill, consumed about 29 M input and 15 M output tokens across about 5,200 LLM calls. Authoring calls use GPT-5.4 and dominate dollar cost; QC trace simulation uses Gemini 3 Flash Preview. Test-session generation alone contributes about two-thirds of the construction token budget because each candidate rule passes through three rounds of upper-bound and lower-bound checks. Total construction cost is about $140, or about $7 per persona; this phase issues one-shot calls without prompt-cache reuse.
+
+Main sweep.
+
+The 640-cell sweep (8 models, 20 personas, 4 variants) executed 13,632 learning sessions and 9,088 test sessions against the agent under test, plus the corresponding calls to the user simulator, Router, and Classifier. Aggregate agent-under-test input volume is on the order of 2.2 B tokens with about 23 M output, the low output-to-input ratio reflecting that most cells are tool-call dominated. The user simulator and the scaffold are pinned to fixed backends (GPT-5.4 for the user simulator and the Classifier; Gemini 3 Flash Preview for the Router) and add a roughly constant 300 M input and 15 M output tokens across all eight evaluated agents, so the scaffold cost does not bias the per-model comparison.
+
+Phase / role
+In (M)
+Out (M)
+Hit
+$ list
+$ cached
+
+Benchmark construction
+29
+15.0
+–
+138
+138
+
+Sweep, agent under test
+2,208
+23.0
+64 %
+3,114
+1,394
+
+Sweep, scaffold roles
+299
+15.0
+20 %
+298
+196
+
+Total
+2,536
+53.0
+60 %
+3,550
+1,728
+
+Table 13: Aggregate compute budget across the benchmark-construction and main-sweep phases. In and Out are total input and output tokens in millions. Hit is the fraction of input tokens served from provider prompt cache, averaged across the constituent calls. $ list bills every input token at the provider’s standard input rate; $ cached bills cached input tokens at the provider’s cache-hit rate where supported. Construction uses one-shot calls and has no cache reuse.
+
+Cache and total cost.
+
+Six of the eight evaluated agents and two of the three scaffold roles serve a measurable fraction of their input tokens from provider prompt cache, with measured cache-hit rates ranging from 36 % (Gemini 3.1 Pro Preview) to 92 % (DeepSeek V4 Flash); the Classifier hits cache at about 83 % because its prompt is short and reused across rule-routing calls. Across the full sweep, about 1.4 B of 2.2 B agent input tokens hit cache, a sweep-level hit rate of roughly 64 %. Aggregate project cost is about $3,550 at posted list price and about $1,730 after applying cache-hit discounts, with Claude Opus 4.7 and GPT-5.4 contributing about 60 % of the with-cache total. Wall-clock for the sweep was about 36 hours under a cell-level concurrency of ten and an intra-cell test-session concurrency of one.
+
+Appendix G Additional Results
+
+G.1 Run Completion and Health
+
+All 640 planned cells in the 20-persona ×\times 8-model ×\times 4-variant sweep completed, with no missing learning or test sessions. We separate this completion check from runtime health: Table 14 audits normal versus abnormal session termination, and the paragraph below summarizes learning-session channel repair and scaffold integrity.
+
+Variant
+LS norm.
+LS abn.
+TS norm.
+TS abn.
+
+Default
+4502/4544
+42
+2198/2272
+74
+
+ATR
+4504/4544
+40
+2200/2272
+72
+
+Always
+4510/4544
+34
+2203/2272
+69
+
+Oracle
+–
+–
+2233/2272
+39
+
+Table 14: Runtime termination health over completed cells. LS normal denotes user-simulator task_complete; TS normal denotes agent finish_session. Abnormal terminations include max-step exits, no-progress exits, and empty-response exits. Oracle has no learning sequence.
+
+The user-channel scaffold did not create missing cells or missing classifier decisions. Across learning variants, text-turn rescue recovered at least 99.0% of initially off-protocol user-facing outputs, duplicate send_to_user events occurred once, and Classifier runtime errors were zero. These channel-health diagnostics support the integrity of the acquisition metrics but are not used as evaluation outcomes.
+
+G.2 Repeated-Trial Stability
+
+To assess stability, we reran all four variants on the 20-persona panel three times for Gemini 3 Flash Preview and DeepSeek V4 Flash, for a total of 480 cells. Table 15 reports the results alongside the original sweep.
+
+Variant
+Main
+Run 1
+Run 2
+Run 3
+Mean ±\pm SD
+
+DeepSeek V4 Flash
+
+default
+23.7
+26.5
+24.9
+24.8
+25.4±0.9625.4\pm 0.96
+
+atr
+23.2
+23.9
+20.1
+25.6
+23.2±2.8323.2\pm 2.83
+
+always_ask
+26.5
+32.9
+31.3
+30.6
+31.6±1.1931.6\pm 1.19
+
+oracle
+93.0
+89.2
+87.8
+88.6
+88.5±0.6688.5\pm 0.66
+
+Gap
+69.3
+62.7
+62.9
+63.8
+63.1±0.61\mathbf{63.1\pm 0.61}
+
+Gemini 3 Flash Preview
+
+default
+15.6
+13.5
+15.9
+18.2
+15.9±2.3515.9\pm 2.35
+
+atr
+26.6
+24.4
+23.3
+26.6
+24.8±1.6724.8\pm 1.67
+
+always_ask
+25.8
+24.9
+27.2
+24.6
+25.6±1.4325.6\pm 1.43
+
+oracle
+91.0
+91.1
+91.3
+91.5
+91.3±0.1991.3\pm 0.19
+
+Gap
+75.4
+77.6
+75.4
+73.3
+75.4±2.16\mathbf{75.4\pm 2.16}
+
+Table 15: Repeated-trial TSAcc (%, 20-persona macro). Main is the original sweep; Mean and sample SD are computed from unrounded values for Runs 1–3. Gap is oracle−-default.
+
+Across the three reruns, the sample SD values range from 0.19 to 2.83 points, and Gap remains at least 62.7 points in all six model–run pairs. These reruns cover two of the eight evaluated models.
+
+G.3 Acquisition Diagnostics
+
+Table 16 reports the full per-model acquisition diagnostics summarized in §4.3. Ask is RuleAsk, measuring how often the agent asks standing-rule questions during learning sessions; Cov is RuleCov, measuring how much of the persona’s retained rule pool is acquired; App is AppliedRate, measuring whether learnable, classifier-confirmed acquired rules are later applied successfully; and GapRec is the fraction of the default-to-oracle gap recovered by the non-oracle variant.
+
+Model
+Ask↓\downarrow
+Cov↑\uparrow
+App↑\uparrow
+GapRec↑\uparrow
+
+ATR
+
+GPT-5.4
+0.01
+0.4
+0.0
+-2.2
+
+Claude Opus 4.7
+0.14
+7.1
+97.7
+9.2
+
+Gemini 3 Flash Preview
+0.51
+12.0
+78.4
+14.6
+
+Gemini 3.1 Pro Preview
+0.80
+13.3
+88.9
+15.5
+
+Qwen3.6-Plus
+0.01
+0.7
+100.0
+-1.2
+
+MiniMax M2.7
+0.00
+0.0
+–
+1.3
+
+DeepSeek V4 Pro
+0.01
+0.6
+50.0
+1.8
+
+DeepSeek V4 Flash
+0.05
+2.1
+100.0
+-0.7
+
+AVG ATR
+0.19
+4.5
+73.6
+4.8
+
+Always
+
+GPT-5.4
+1.00
+12.7
+80.9
+13.5
+
+Claude Opus 4.7
+1.01
+15.6
+83.2
+14.1
+
+Gemini 3 Flash Preview
+1.01
+14.4
+70.0
+13.5
+
+Gemini 3.1 Pro Preview
+1.00
+11.3
+87.2
+8.4
+
+Qwen3.6-Plus
+0.96
+10.3
+73.5
+6.8
+
+MiniMax M2.7
+0.09
+1.8
+25.0
+-3.6
+
+DeepSeek V4 Pro
+0.98
+14.5
+70.6
+5.6
+
+DeepSeek V4 Flash
+0.97
+13.3
+71.4
+4.0
+
+AVG Always
+0.88
+11.7
+70.2
+7.8
+
+Table 16: Full per-model acquisition diagnostics (20-persona macro). Ask = RuleAsk, measured per learning session; Cov = RuleCov; App = AppliedRate over learnable, classifier-confirmed acquired rules. Cov, App, and GapRec are reported in %.
+
+G.4 Capability Breakdown
+
+Aggregate TSAcc hides where the gap is concentrated. We therefore break Table 3 down by tool domain and by action-surface type.
+
+Figure 5: Domain-level TSAcc shows broad executable upper bounds but uneven non-oracle behavior. Each heatmap cell is TSAcc (%) aggregated over all 20 personas for one completed model, variant, and tool domain.
+
+Figure 6: Action-surface breakdown for the three non-sparse check types. ID = param_id, Enum = param_enum, and Tool = tool_identity; confirmation rules are omitted from this figure because Table 2 shows that bucket is too small for stable accuracy claims.
+
+Appendix Finding A1: the oracle gap is broad across domains and action surfaces. Figure 5 shows that oracle reaches 67.5–100 % across completed (model, domain) cells, while the three learning-sequence variants remain much lower. Commerce is hardest without rule knowledge: across default, atr, and always_ask, completed models stay between 1.9 and 15.1 % TSAcc. Communication and workspace are partially solvable even without acquisition, reaching 14.3–78.6 % and 30.3–63.6 %, respectively, which suggests that some domain decisions are recoverable from task-local cues or generic model priors. The benchmark therefore does not expose a single uniform failure; it separates domains where hidden standing rules dominate from domains where rule-naive behavior can sometimes succeed.
+
+Figure 6 shows the same pattern by action surface. oracle reaches 74.6–97.6 % on param_id, param_enum, and tool_identity, confirming that all three action surfaces are executable when the rule answer is known. In contrast, non-oracle cells stay below 33 % for param_id and at or below 33.3 % for param_enum, while tool_identity is higher but still capped at 47.5 %. Future ATR methods therefore need both better elicitation and better binding of acquired natural-language rules to concrete tool arguments.
+
+Numeric summaries.
+
+Table 17 provides compact numeric summaries for the heatmaps in Figures 5 and 6. Each entry is TS-micro accuracy over completed cells, pooling all personas and evaluated models for the corresponding variant and bucket. Table 18 reports the complementary persona-macro view, averaging across the eight evaluated models for each persona.
+
+By domain
+
+Variant
+Com.
+Comm.
+Res.
+Sched.
+Trav.
+Work
+
+Default
+8.0
+48.2
+13.2
+15.0
+15.2
+44.3
+
+ATR
+9.9
+51.8
+19.0
+17.5
+19.1
+48.5
+
+Always
+11.1
+60.7
+17.0
+20.9
+21.3
+51.9
+
+Oracle
+89.4
+91.1
+95.5
+85.6
+89.9
+90.9
+
+By action surface
+
+Variant
+ID
+Enum
+Tool
+Confirm
+
+Default
+17.1
+18.3
+29.9
+0.0
+
+ATR
+21.4
+21.6
+33.1
+6.2
+
+Always
+21.6
+24.4
+38.1
+12.5
+
+Oracle
+92.9
+90.5
+88.1
+12.5
+
+Table 17: Capability TSAcc summaries (%, TS-micro). The upper block groups by domain and the lower block groups by action-surface type. The confirm bucket has only two retained rules.
+
+Persona
+Def.
+ATR
+Always
+Oracle
+Gap
+Persona
+Def.
+ATR
+Always
+Oracle
+Gap
+
+anna_strahan
+17.3
+20.2
+22.1
+97.1
+79.8
+joseph_eldridge
+33.1
+31.6
+39.7
+89.7
+56.6
+
+cassandra_tovar
+9.1
+9.1
+13.6
+84.1
+75.0
+maximo_esteban_irizarry
+12.5
+15.9
+17.0
+92.0
+79.5
+
+cecilia_lisette_garciaperez
+15.6
+17.7
+19.8
+92.7
+77.1
+michael_argo
+28.7
+31.6
+33.1
+91.2
+62.5
+
+charlie_james
+14.6
+19.4
+20.1
+81.2
+66.7
+nancy_marr
+15.2
+24.1
+21.4
+86.6
+71.4
+
+eduardo_rivera
+20.6
+25.0
+22.1
+93.4
+72.8
+rafael_ortiz
+17.0
+22.7
+22.7
+98.9
+81.8
+
+esther_hoitsma
+9.8
+16.1
+17.0
+85.7
+75.9
+romisha_shields
+25.9
+30.4
+37.5
+84.8
+58.9
+
+gabriel_campbell
+24.2
+26.7
+29.2
+90.0
+65.8
+roosevelt_brown
+15.8
+20.8
+27.5
+98.3
+82.5
+
+iris_parker
+18.8
+20.8
+20.8
+92.7
+74.0
+samantha_bello
+10.8
+16.7
+18.3
+87.5
+76.7
+
+jennifer_philmon
+34.4
+29.2
+37.5
+97.9
+63.5
+theodora_tong
+27.6
+36.2
+38.2
+88.2
+60.5
+
+john_brown
+22.9
+30.2
+29.2
+94.8
+71.9
+vanessa_davis
+19.2
+20.0
+20.8
+90.0
+70.8
+
+Table 18: Per-persona TSAcc summary (%, persona-macro across the eight evaluated models). Gap is oracle minus default.
+
+Appendix H Worked Trajectory Examples
+
+This section gives concrete, trace-level examples rather than an aggregate
+failure analysis. Each example is drawn from a full human-readable evaluation
+trace; the left panel compresses the interaction, and the right panel records
+the Router/Classifier or evaluator state.
+
+H.1 Learning-Session Examples
+
+Table 19: A learning session where the post-task standing-rule question maps to
+a retained rule.
+
+H.2 Test-Session Examples
+
+Table 20: A test session that fails even though the required tool appears,
+because the first relevant call carries the wrong enum argument.
+
+Appendix I Prompts
+
+We reproduce the evaluation prompts below with placeholders for dynamic context.
+
+I.1 Data Construction Prompts
+
+The seven prompts below drive the construction pipeline (Appendix A): standing-rule generation and two-axis QC, rule-bound test-session generation, QC trace simulation, and repair, and learning-session skeleton and fill. Double-brace placeholders (e.g. {{RULE_JSON}}) are filled at call time; few-shot pools and persona or tool context are elided where marked. Non-ASCII glyphs in the deployed prompts are transcribed to ASCII here for typesetting.
+
+I.2 Agent Runtime Prompts
+
+We show runtime prompt templates with placeholders for dynamic context. The domain-specific policy is listed separately in Appendix I.3; long <context> contents are elided.
+
+I.3 Agent Domain Policy Prompts
+
+I.4 User Simulator Prompts
+
+I.5 Router and Classifier Prompts
+
+The placeholder {{FEW_SHOT_EXAMPLES}} is replaced by the active shot bank before the scaffold LLM call.
+

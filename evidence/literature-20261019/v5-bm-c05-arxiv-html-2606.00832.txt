@@ -1,0 +1,564 @@
+
+
+Momento: Evaluating Persistent Memory and Reasoning with Multi-Session Agentic Conversations
+
+Skip to main content
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    Why HTML?
+
+      Report Issue
+
+      Back to Abstract
+
+      Download PDF
+
+      Contents
+
+      Reading mode
+
+      Colour theme
+
+    License: CC BY 4.0
+
+arXiv:2606.00832v1 [cs.CL] 30 May 2026
+
+Momento: Evaluating Persistent Memory and Reasoning with 
+
+Multi-Session Agentic Conversations
+
+Adril Putra Merin
+
+Email: adrilbless37@gmail.com
+
+David Anugraha
+
+Email: davidanu@stanford.edu
+
+Ayu Purwarianti
+††thanks: Senior authors.
+Email: ayu@informatika.org
+
+Genta Indra Winata
+
+Email: genta.winata@capitalone.com
+
+Affiliation: Institut Teknologi Bandung Stanford University Capital One
+
+Abstract
+
+Recent advances in agentic AI have enabled agents to complete complex tasks through tool use, reasoning, and multi-step planning. Yet existing benchmarks evaluate agents within a single session, ignoring past actions, stated preferences, and prior decisions that agents must integrate to fulfill personalized user goals. We introduce Momento, a benchmark for persistent agentic task completion in multi-session service environments, requiring agents to take consequential, tool-mediated actions while resolving temporal dependencies and evolving user goals across sessions. Experimental results reveal that current agents fail primarily through misestimation of user state, treating prior session history as a reliable proxy for current context rather than stale information requiring re-validation, highlighting a substantial gap between current agent capabilities and realistic long-horizon human-agent interaction.
+
+1 Introduction
+
+Large language model (LLM) agents have recently demonstrated strong capabilities in reasoning, tool use, and multi-step planning, enabling increasingly sophisticated agentic systems (Barres et al., 2025; Yang et al., 2024; Koh et al., 2024; Xu et al., 2026). However, existing benchmarks predominantly evaluate agents in isolated single-session settings (Patil et al., 2025; Zhang et al., 2025b; Chakraborty et al., 2026), which does not reflect real-world deployments where users return to the same agent across days and weeks with evolving goals and accumulated history. In practice, agents must integrate prior interactions, adapt to evolving user preferences, and reason over information distributed across temporally separated sessions to support coherent and personalized task completion.
+
+Despite its importance, this persistent, cross-session setting remains largely underexplored. Multi-session interaction has been studied mostly in question-answering dialogue and conversational continuity settings Ge et al. (2025); Wang et al. (2025), which do not require agents to take consequential actions. Separately, memory-augmented agents have been evaluated primarily on fact recall over past conversations Wu et al. (2024); Maharana et al. (2024), rather than on whether retrieved context drives better task decisions (Pink et al., 2025). Together, these gaps reveal the absence of an evaluation setting where memory of past sessions directly supports task-critical decisions.
+
+Figure 1: The Momento framework for persistent multi-session agentic interaction. A user agent and assistant agent interact across temporally separated sessions while accessing a shared memory module containing conversation history and multi-session context. The assistant agent uses external tools for reservation, search, ordering, retrieval, and database querying to support persistent memory retrieval, temporal reasoning, and long-term task completion.
+
+To address this gap, we introduce Momento, the first benchmark framework for evaluating persistent agentic task completion in multi-session, multimodal service environments. We construct a large-scale dataset of temporally separated interactions featuring evolving user goals, preferences, interruptions, and long-range dependencies across sessions through role-play-based user simulation. These scenarios require agents to retrieve and update memory, maintain contextual consistency over time, and perform temporal and longitudinal reasoning across extended interactions. Our evaluation reveals that performance degrades in the presence of cross-session dependencies, with agents over-relying on historical context rather than actively verifying current user state. We publicly release the dataset and code under the CC-BY-SA and Apache 2.0 licenses, respectively.11
+            1
+
+          The dataset is available at https://huggingface.co/datasets/adrilmanurung/momento, and the source code is available at https://github.com/ninoaddict/momento.
+
+2 Momento
+
+To study persistent multi-session conversational agents, we introduce Momento, a benchmark and evaluation framework for long-term multi-session interactions with evolving tasks.
+
+2.1 Tasks and Definitions
+
+We define the User Agent as πu\pi_{u} and the Assistant Agent as πa\pi_{a}, which interact in a role-playing simulation framework. The two agents engage in multi-turn, bidirectional communication, where πu\pi_{u} is responsible for pursuing a specified goal through interaction, while πa\pi_{a} is responsible for responding to user inputs, providing assistance, and invoking tools when necessary.
+
+2.1.1 User Agent
+
+The User Agent πu\pi_{u} simulates human behavior in persistent multi-session interactions by generating natural conversational responses conditioned on a user policy Φu\Phi_{u}. This policy specifies the interaction instructions and behavioral constraints, including the user persona, long-term goals, preferences, and session-level conditions, thereby enabling temporally coherent and evolving behavior across sessions.
+
+At each interaction step ii, the user agent retrieves relevant contextual information from a shared Agentic Memory module MM, which includes the prior dialogue history 𝐝<i\mathbf{d}_{<i} containing all turns preceding step ii. Conditioned on this contextual information, the user agent generates a multimodal response uiu_{i}, which may include both textual and visual components, while maintaining consistency with the current objective and previously established conversational state:
+
+ui=πu​(Φui,𝐝<i).\displaystyle u_{i}=\pi_{u}(\Phi_{u_{i}},\mathbf{d}_{<i}).
+
+(1)
+
+After generation, the response uiu_{i} is stored in MM, enabling persistent state tracking and supporting continuity across future interactions and sessions.
+
+2.1.2 Assistant Agent
+
+The Assistant Agent πa\pi_{a} performs three primary functions. First, it retrieves relevant information from multi-session summaries 𝐬={s1,s2,…,sn}\mathbf{s}=\{s_{1},s_{2},\dots,s_{n}\}, where each summary sjs_{j} corresponds to a distinct user session that may occur at different time intervals and contain multiple dialogue turns. Second, the agent generates the necessary tool calls to fulfill the user request, which are subsequently executed within the environment. Finally, conditioned on the retrieved context, tool execution outputs, and dialogue history, the agent produces the assistant response aia_{i} returned to the user.
+
+During retrieval, we apply a function Θ\Theta to identify relevant temporal constraints (i.e., time-specific filters over sessions), followed by a retrieval model that ranks sessions based on semantic similarity and selects the top-kk results of 𝐬^={s1,⋯,sk}=Θ⁡(𝐬,ui)\hat{\mathbf{s}}=\{s_{1},\cdots,s_{k}\}=\Theta(\mathbf{s},u_{i}). Given the retrieved sessions 𝐬^\hat{\mathbf{s}}, the assistant agent generates tool calls cic_{i} conditioned on the policy, retrieved context, user input, and dialogue history:
+
+ci=πa​(Φa,𝐬^,ui,𝐝<i).\displaystyle c_{i}=\pi_{a}(\Phi_{a},\hat{\mathbf{s}},u_{i},\mathbf{d}_{<i}).
+
+(2)
+
+The tool calls cic_{i} are then executed in the environment, producing execution outputs oio_{i}, which are fed back into the assistant agent to generate the final response:
+
+ai=πa​(Φa,oi,ui,𝐝<i).\displaystyle a_{i}=\pi_{a}(\Phi_{a},o_{i},u_{i},\mathbf{d}_{<i}).
+
+(3)
+
+2.2 Agentic Memory
+
+We introduce an Agentic Memory module MM operating within a bounded 128k-token context memory block, consisting of two complementary mechanisms: long-term recall and short-term compression. Long-term memory retrieves relevant prior sessions from a session database via LLM-generated SQL queries that jointly incorporate semantic matching, temporal constraints, and structural conditions. This hybrid retrieval approach enables explicit reasoning over cross-session dependencies and improves the resolution of references that are challenging for vector-only retrieval methods. Short-term memory manages in-context dialogue history through a structured compression scheme. Specifically, the most recent 80%80\% of the available context budget is retained verbatim to preserve fine-grained conversational detail, while the remaining older prefix is condensed into a compact summary that retains salient information and reduces context overhead.
+
+2.3 Benchmark Creation
+
+Using these components, we construct Momento, a benchmark for evaluating persistent multi-session conversational agents. It contains 161 task instances, each defined by human annotators who specify a high-level user goal, task objectives, and a set of executable tools. Some tasks involve food-related entities from WorldCuisines (Winata et al., 2025), requiring multimodal understanding. All instances are manually verified for correctness, consistency, and feasibility. Each task spans multiple sessions connected through latent memory dependencies and covers scenarios such as personal assistance, planning, scheduling, recommendation, and task continuation. We incorporate evolving preferences, implicit references, contradictory updates, and temporally distributed information to increase realism. Prior sessions are generated via human role-playing to simulate realistic interaction histories with evolving user states.
+
+3 Experimental Setup
+
+User Simulator.
+
+To generate realistic multi-session interactions, we employ a role-play-based user simulator with predefined profiles, goals, preferences, and latent states that evolve across sessions. The simulator dynamically generates user utterances conditioned on prior session history, ongoing objectives, and temporal progression, producing complex conversational phenomena such as preference changes, interruptions, revisiting unfinished tasks, and implicit references to earlier sessions. Stochastic interaction behaviors are incorporated to increase diversity and reduce repetitive interaction patterns. For consistency across experiments, we use Qwen3.6-35B-A3B as the user simulator in all settings.
+
+Model
+Task Success Rate
+Pass Rate
+
+DB State
+Output
+Tool Recall
+Pass@k
+Pass^K
+
+Qwen3.6-35B-A3B
+72.87
+84.68
+71.45
+67.70
+32.91
+
+Qwen3.6-27B
+82.40
+95.79
+81.45
+75.15
+42.23
+
+Gemma4-26B-A4B-it
+77.85
+94.64
+80.54
+73.91
+39.13
+
+Gemma4-31B-it
+85.50
+95.98
+84.75
+78.26
+47.83
+
+GPT-5.4-mini
+85.71
+95.16
+85.94
+75.15
+44.72
+
+Table 1: Results on Momento with K=3K=3. A comparison of model performance across Task Success Rate and Pass Rate metrics, with the best-performing results for each category bolded.
+
+Models.
+
+We evaluate several representative state-of-the-art open-weight visual language models (VLMs) as assistant agents, including Qwen3.6-35B-A3B, Qwen3.6-27B, Gemma4-26B-A4B-it, and Gemma4-31B-it, to assess their ability to perform multi-session reasoning, memory utilization, and tool-based task completion. Hyperparameters can be found in Section B.
+
+Metrics.
+
+We evaluate agent performance using three metrics: DB State, which checks whether the final database state matches the goal; Output, which measures whether the response satisfies the user request; and Tool Recall, which evaluates whether the correct tools are invoked in the correct order. Tool matching uses arguments for mutation tools and execution results for query tools. A task is considered successful only if all three metrics are satisfied. We additionally report Pass@k and Pass^K to measure consistency across kk runs.
+
+4 Results and Analysis
+
+Figure 2: Failure distribution across models, showing that tool-recall errors dominate.
+
+Overall.
+
+Table 1 shows that Gemma4-31B-it exhibits the strongest overall performance, securing the highest Pass​@​3\textsc{Pass}@3 and Pass^3 scores while remaining highly competitive across all component metrics. Although GPT-5.4-mini achieves a marginal lead in DB State and Tool Recall, Gemma4-31B-it demonstrates superior consistency across repeated trials. Conversely, both Mixture-of-Experts (MoE) models underperform relative to their dense counterparts, with Qwen3.6-35B-A3B recording the lowest scores across all evaluated dimensions. Furthermore, the substantial gap between Pass​@​3\textsc{Pass}@3 and Pass^3 for every model highlights a pervasive instability in multi-step task execution.
+
+Error Analysis.
+
+The dominant failure mode is Tool Recall, though the actual cause is rarely ignorance of tool availability.
+Figure 2 shows the distribution of failure types across evaluation runs, confirming that Tool Recall errors dominate across all models.
+Agents appear to misestimate user state: given access to prior session history, agents seem to form implicit assumptions about the user’s current context and omit verification or retrieval calls that would otherwise update or verify those assumptions.
+Figure 3 reinforces this point by showing that among the ten tools most commonly left uncalled, the vast majority are verification and retrieval tools rather than action-execution ones, e.g. get_membership_benefits.
+
+These intermediate errors matter even when final write operations are correct. While a single missed tool call may not cascade in every instance, such errors can propagate across different scenarios, thereby corrupting subsequent steps in ways that a correct terminal state evaluation may not show. This failure mode is structurally enabled by the multi-session setting, where session history creates a false sense of state continuity across interactions.
+
+Figure 3: Tool call failure rates across five models. Failure rates vary substantially by tool and model, with get_membership_benefits and get_membership_status showing the highest error rates.
+
+5 Related Work
+
+Agentic Benchmarks.
+
+Existing benchmarks evaluate agents across a range of real-world task domains, including web navigation Koh et al. (2024); Zhou et al. (2024), computer and mobile use Xie et al. (2024); Zhang et al. (2025a), software engineering Jimenez et al. (2024); Yang et al. (2024), and enterprise workflows Drouin et al. (2024); Xu et al. (2026). A related line of work evaluates agents via role-play-based user simulation in dialogue-grounded settings Yao et al. (2024); Barres et al. (2025); Anugraha et al. (2026). However, many of the existing benchmarks evaluate agents within a single session, ignoring the cross-session context that real-world deployments require. Momento addresses this gap by introducing persistent, multi-session environments where cross-session context is a first-class input to agent decision-making.
+
+Memory in Agentic Systems.
+
+Recent work has explored equipping agents with memory, such as OS-inspired hierarchies Packer et al. (2023); Kang et al. (2025), retrieval-augmented systems Zhong et al. (2024), and structured memory storage Rasmussen et al. (2025). However, existing benchmarks primarily evaluate these systems on fact recall over long conversational histories Maharana et al. (2024); Wu et al. (2024), while Pink et al. (2025) argue that memory should instead be evaluated in service of task completion. Momento operationalizes this by treating prior sessions context as a driver for agent decision-making.
+
+6 Conclusion
+
+In this work, we introduce Momento, a benchmark and evaluation framework for persistent multi-session agentic task completion in realistic service environments. Experimental results reveal that current agents fail primarily through misestimation of user state, treating prior session history as a reliable proxy for current context rather than stale information requiring re-validation. These findings highlight a substantial gap between current agent capabilities and the demands of realistic long-horizon human–agent interaction, and we hope Momento provides a foundation for future research on persistent, memory-informed agentic systems.
+
+Limitations
+
+Similar to previous agent benchmarks, Momento relies on LLM-based user simulators to generate multi-session interactions. Although this enables scalable and diverse data collection, simulated users do not always exhibit realistic user behavior (Zhou et al., 2026; Anugraha et al., 2026). Future work may explore stronger constrained simulation methods, role-specific fine-tuning, or real-human interactions to explore the behavioral gap.
+
+Ethical Consideration
+
+Our work focuses on task completion in simulated agentic environments. As such, we do not anticipate ethical concerns beyond those generally associated with LLMs, including potential biases, hallucinations, and misuse risks inherited from the underlying models. Furthermore, all interactions in our benchmark are synthetically generated through role-play-based simulation and do not involve real user data.
+
+References
+
+Anugraha et al. (2026)
+D. Anugraha, V. Padmakumar, and D. Yang
+
+SparkMe: adaptive semi-structured interviewing for qualitative insight discovery.
+
+arXiv preprint arXiv:2602.21136.
+
+Cited by: §5,
+Limitations.
+
+Barres et al. (2025)
+V. Barres, H. Dong, S. Ray, X. Si, and K. Narasimhan
+
+τ2\tau^{2}-Bench: evaluating conversational agents in a dual-control environment.
+
+arXiv preprint arXiv:2506.07982.
+
+Cited by: §1,
+§5.
+
+Chakraborty et al. (2026)
+A. Chakraborty, P. Dashore, N. Bathaee, A. Jain, A. Das, S. Zhang, S. Sahu, M. Naphade, and G. Winata
+
+T1: a tool-oriented conversational dataset for multi-turn agentic planning.
+
+Advances in Neural Information Processing Systems 38.
+
+Cited by: §1.
+
+Drouin et al. (2024)
+A. Drouin, M. Gasse, M. Caccia, I. H. Laradji, M. Del Verme, T. Marty, L. Boisvert, M. Thakkar, Q. Cappart, D. Vazquez, et al.
+
+Workarena: how capable are web agents at solving common knowledge work tasks?.
+
+arXiv preprint arXiv:2403.07718.
+
+Cited by: §5.
+
+Ge et al. (2025)
+Y. Ge, S. Romeo, J. Cai, R. Shu, Y. Benajiba, M. Sunkara, and Y. Zhang
+
+Tremu: towards neuro-symbolic temporal reasoning for llm-agents with memory in multi-session dialogues.
+
+In Findings of the Association for Computational Linguistics: ACL 2025,
+
+pp. 18974–18988.
+
+Cited by: §1.
+
+Jimenez et al. (2024)
+C. E. Jimenez, J. Yang, A. Wettig, S. Yao, K. Pei, O. Press, and K. Narasimhan
+
+Swe-bench: can language models resolve real-world github issues?.
+
+In International Conference on Learning Representations,
+
+Vol. 2024, pp. 54107–54157.
+
+Cited by: §5.
+
+Kang et al. (2025)
+J. Kang, M. Ji, Z. Zhao, and T. Bai
+
+Memory os of ai agent.
+
+In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing,
+
+pp. 25972–25981.
+
+Cited by: §5.
+
+Koh et al. (2024)
+J. Y. Koh, R. Lo, L. Jang, V. Duvvur, M. Lim, P. Huang, G. Neubig, S. Zhou, R. Salakhutdinov, and D. Fried
+
+Visualwebarena: evaluating multimodal agents on realistic visual web tasks.
+
+In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers),
+
+pp. 881–905.
+
+Cited by: §1,
+§5.
+
+Kwon et al. (2023)
+W. Kwon, Z. Li, S. Zhuang, Y. Sheng, L. Zheng, C. H. Yu, J. Gonzalez, H. Zhang, and I. Stoica
+
+Efficient memory management for large language model serving with pagedattention.
+
+In Proceedings of the 29th symposium on operating systems principles,
+
+pp. 611–626.
+
+Cited by: Appendix B.
+
+Maharana et al. (2024)
+A. Maharana, D. Lee, S. Tulyakov, M. Bansal, F. Barbieri, and Y. Fang
+
+Evaluating very long-term conversational memory of llm agents.
+
+In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers),
+
+pp. 13851–13870.
+
+Cited by: §1,
+§5.
+
+Packer et al. (2023)
+C. Packer, S. Wooders, K. Lin, V. Fang, S. G. Patil, I. Stoica, and J. E. Gonzalez
+
+MemGPT: towards llms as operating systems.
+
+arXiv preprint arXiv:2310.08560.
+
+Cited by: §5.
+
+Patil et al. (2025)
+S. G. Patil, H. Mao, F. Yan, C. C. Ji, V. Suresh, I. Stoica, and J. E. Gonzalez
+
+The berkeley function calling leaderboard (bfcl): from tool use to agentic evaluation of large language models.
+
+In Forty-second International Conference on Machine Learning,
+
+Cited by: §1.
+
+Pink et al. (2025)
+M. Pink, Q. Wu, V. A. Vo, J. Turek, J. Mu, A. Huth, and M. Toneva
+
+Position: episodic memory is the missing piece for long-term llm agents.
+
+arXiv preprint arXiv:2502.06975.
+
+Cited by: §1,
+§5.
+
+Rasmussen et al. (2025)
+P. Rasmussen, P. Paliychuk, T. Beauvais, J. Ryan, and D. Chalef
+
+Zep: a temporal knowledge graph architecture for agent memory.
+
+arXiv preprint arXiv:2501.13956.
+
+Cited by: §5.
+
+Wang et al. (2025)
+M. Wang, P. Wang, L. Wu, X. Yang, D. Wang, S. Feng, Y. Chen, B. Wang, and Y. Zhang
+
+AnnaAgent: dynamic evolution agent system with multi-session memory for realistic seeker simulation.
+
+In Findings of the Association for Computational Linguistics: ACL 2025,
+
+pp. 23221–23235.
+
+Cited by: §1.
+
+Winata et al. (2025)
+G. I. Winata, F. Hudi, P. A. Irawan, D. Anugraha, R. A. Putri, W. Yutong, A. Nohejl, U. A. Prathama, N. Ousidhoum, A. Amriani, et al.
+
+Worldcuisines: a massive-scale benchmark for multilingual and multicultural visual question answering on global cuisines.
+
+In Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers),
+
+pp. 3242–3264.
+
+Cited by: §2.3.
+
+Wu et al. (2024)
+D. Wu, H. Wang, W. Yu, Y. Zhang, K. Chang, and D. Yu
+
+Longmemeval: benchmarking chat assistants on long-term interactive memory.
+
+arXiv preprint arXiv:2410.10813.
+
+Cited by: §1,
+§5.
+
+Xie et al. (2024)
+T. Xie, D. Zhang, J. Chen, X. Li, S. Zhao, R. Cao, T. J. Hua, Z. Cheng, D. Shin, F. Lei, et al.
+
+Osworld: benchmarking multimodal agents for open-ended tasks in real computer environments.
+
+Advances in Neural Information Processing Systems 37, pp. 52040–52094.
+
+Cited by: §5.
+
+Xu et al. (2026)
+F. F. Xu, Y. Song, B. Li, Y. Tang, K. Jain, M. Bao, Z. Wang, X. Zhou, Z. Guo, M. Cao, et al.
+
+Theagentcompany: benchmarking llm agents on consequential real world tasks.
+
+Advances in Neural Information Processing Systems 38.
+
+Cited by: §1,
+§5.
+
+Yang et al. (2024)
+J. Yang, C. E. Jimenez, A. L. Zhang, K. Lieret, J. Yang, X. Wu, O. Press, N. Muennighoff, G. Synnaeve, K. R. Narasimhan, et al.
+
+Swe-bench multimodal: do ai systems generalize to visual software domains?.
+
+arXiv preprint arXiv:2410.03859.
+
+Cited by: §1,
+§5.
+
+Yao et al. (2024)
+S. Yao, N. Shinn, P. Razavi, and K. Narasimhan
+
+τ\tau-Bench: a benchmark for tool-agent-user interaction in real-world domains.
+
+arXiv preprint arXiv:2406.12045.
+
+Cited by: §5.
+
+Zhang et al. (2025a)
+C. Zhang, Z. Yang, J. Liu, Y. Li, Y. Han, X. Chen, Z. Huang, B. Fu, and G. Yu
+
+Appagent: multimodal agents as smartphone users.
+
+In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems,
+
+pp. 1–20.
+
+Cited by: §5.
+
+Zhang et al. (2025b)
+Y. Zhang, Y. Zeng, Q. Li, Z. Hu, K. Han, and W. Zuo
+
+Tool-r1: sample-efficient reinforcement learning for agentic tool use.
+
+arXiv preprint arXiv:2509.12867.
+
+Cited by: §1.
+
+Zhong et al. (2024)
+W. Zhong, L. Guo, Q. Gao, H. Ye, and Y. Wang
+
+Memorybank: enhancing large language models with long-term memory.
+
+In Proceedings of the AAAI conference on artificial intelligence,
+
+Vol. 38, pp. 19724–19731.
+
+Cited by: §5.
+
+Zhou et al. (2024)
+S. Zhou, F. F. Xu, H. Zhu, X. Zhou, R. Lo, A. Sridhar, X. Cheng, T. Ou, Y. Bisk, D. Fried, et al.
+
+Webarena: a realistic web environment for building autonomous agents.
+
+In International Conference on Learning Representations,
+
+Vol. 2024, pp. 15585–15606.
+
+Cited by: §5.
+
+Zhou et al. (2026)
+X. Zhou, W. Sun, Q. Ma, Y. Xie, J. Liu, W. Du, S. Welleck, Y. Yang, G. Neubig, S. T. Wu, et al.
+
+Mind the sim2real gap in user simulation for agentic tasks.
+
+arXiv preprint arXiv:2603.11245.
+
+Cited by: Limitations.
+
+Appendix A Tools
+
+Momento is built around a restaurant service platform designed to emulate realistic multi-session agentic interactions. The environment provides 26 tools spanning reservation management, restaurant and menu retrieval, food ordering, membership management, utility operations, and text-to-SQL access. Table 2 summarizes the categories of tools available and their functionalities.
+
+Category
+
+Tools
+
+Functionality
+
+Reservation
+
+CheckRestaurantAvailability,
+CreateReservation,
+CancelReservation,
+UpdateReservation,
+GetReservationDetails,
+ListUserReservations
+
+Restaurant reservation creation, modification, cancellation, and retrieval across sessions.
+
+Search & Query
+
+SearchRestaurants,
+QueryMenuItems,
+GetMenuItemDetails,
+GetRestaurantDetails,
+ListRestaurantMenu
+
+Restaurant and menu search, recommendation, and information retrieval.
+
+Order
+
+CreateOrder,
+CancelOrder,
+GetOrderDetails,
+ListUserOrders,
+GetDeliveryProviders
+
+Food ordering, order tracking, cancellation, and delivery provider access.
+
+Membership
+
+ApplyMembership,
+CancelMembership,
+RenewMembership,
+GetMembershipStatus,
+GetMembershipBenefits
+
+Membership application, renewal, cancellation, and benefit retrieval.
+
+Utility
+
+GetUserDetails,
+DoesCuisineExist,
+DoesCategoryExist
+
+User profile retrieval and database validation utilities.
+
+Text-to-SQL
+
+GetDatabaseSchema,
+ExecuteSQL
+
+Database schema inspection and SQL query execution.
+
+Table 2: Tool environment provided in Momento for realistic multi-session agentic conversational interaction.
+
+Appendix B Hyper-parameters
+
+We use vLLM (Kwon et al., 2023) for inference. For Qwen models, we use a temperature of 1.01.0, top-pp of 0.950.95, and top-kk of 2020. For Gemma models, we use a temperature of 1.01.0, top-pp of 0.950.95, and top-kk of 6464.
+
+Appendix C Prompts
+
+C.1 Agent Prompt
+
+C.2 Simulated User Prompt
+
+C.3 Session Retrieval Prompt
+

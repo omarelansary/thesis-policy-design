@@ -1,0 +1,289 @@
+
+
+  [Bug/Data Quality] Systematic Ground Truth (GT) Quality Issues in Evaluation Claims · Issue #76 · scaleapi/mcp-atlas · GitHub
+
+      Skip to content
+
+Navigation Menu
+
+Sign in
+
+Search/
+
+Sign inSign up
+Appearance settings
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+Dismiss alert
+
+{{ message }}
+
+Repository navigation
+
+[Bug/Data Quality] Systematic Ground Truth (GT) Quality Issues in Evaluation Claims #76
+
+New issueCopy link
+
+New issueCopy link
+
+Open
+
+Open
+
+[Bug/Data Quality] Systematic Ground Truth (GT) Quality Issues in Evaluation Claims#76
+
+Copy link
+
+Description
+
+lkq111
+opened on Aug 28, 2026
+
+Issue body actions
+
+Description
+
+After comparing the gtfa_claims with the corresponding official_trajectory and underlying tool outputs, I found several ground-truth quality issues across six tasks. These include a deterministic filename typo, a route-duration unit error, unsupported generalizations from NPS tool results, an ambiguous award year that changes a downstream dataset lookup, and a malformed machine translation.
+
+Some of these issues have already caused factually or semantically valid answers to receive reduced or zero credit.
+
+Summary
+
+Task ID
+Issue
+
+689e0b1d9c8e2ac413c1f23b
+Filename typo: skeleton,tsk instead of skeleton.tsx
+
+68993ef3cf3e953b8ab83fa3
+Route duration was interpreted using the wrong unit
+
+689bd255c0422b257e7dfcd5
+Area conflicts with the official NPS Geodiversity Atlas
+
+689bd255c0422b257e7dfcd5
+Trail hours were generalized to the entire monument
+
+689e0b1d9c8e2ac413c1f20f
+Barataria Preserve was incorrectly classified as the only “fishing center”
+
+6888e207a34beb25cfedda86
+The award year is ambiguous between the 2014 award class and its 2015 presentation
+
+689bd255c0422b257e7dfca9
+The Croatian translation in GTFA is grammatically malformed
+
+1. Filename typo for the Skeleton component
+
+Task ID: 689e0b1d9c8e2ac413c1f23b
+
+GTFA claims that the following file exists:
+
+/data/repos/storyteller/src/components/ui/skeleton,tsk
+
+The actual file returned from the repository is:
+
+/data/repos/storyteller/src/components/ui/skeleton.tsx
+
+The comma and tsk extension in GTFA are a transcription error. A model that correctly reads the repository and reports skeleton.tsx may therefore be penalized.
+
+Suggested fix: Change skeleton,tsk to skeleton.tsx.
+
+2. Route-duration unit error
+
+Task ID: 68993ef3cf3e953b8ab83fa3
+
+The task asks for the walking time from The Salty Donut to Vizcaya Museum. The routing tool was called with mode: "foot" and returned:
+
+{
+  "distance": 8496.7,
+  "duration": 687.3
+}
+
+GTFA states:
+
+The Walking Time from The Salty Donut to Vizcaya Museum is
+687.3 minutes (11 hours and 27 minutes).
+
+The raw duration value was treated as minutes without validating the routing API's unit. Routing APIs of this form conventionally return duration in seconds, not minutes. Consequently, the GTFA expands the raw value into an implausible 11-hour-and-27-minute walk for an approximately 8.5 km route.
+
+The raw result itself should also be sanity-checked: 687.3 seconds would be unusually short for walking 8.5 km and may indicate an incorrect routing profile or upstream tool issue.
+
+Suggested fix: Verify the tool's duration unit and routing profile, rerun the route if necessary, and regenerate the walking-time claim. The value 687.3 should not be labeled as minutes without supporting unit metadata.
+
+3. Area conflicts with official NPS data
+
+Task ID: 689bd255c0422b257e7dfcd5
+
+GTFA claims that Agate Fossil Beds National Monument covers:
+
+3,057.87 acres (12.3748 km²)
+
+However, the official NPS Geodiversity Atlas result included in the same official trajectory states:
+
+3,055.22 acres
+Federal: 2,737.52 acres
+Non-federal: 317.70 acres
+
+The two components sum to 3,055.22 acres, approximately 12.3640 km². The value in GTFA appears to have been taken from a secondary search result instead of the primary NPS result.
+
+This is at minimum a source/version inconsistency. An answer using the official NPS figure should not be treated as incorrect.
+
+Suggested fix: Use 3,055.22 acres (approximately 12.3640 km²), or document the source and effective date if 3,057.87 acres represents an intentionally selected boundary or acreage version. The evaluator should accept reasonable rounding and documented official figures.
+
+4. Trail hours generalized to the entire monument
+
+Task ID: 689bd255c0422b257e7dfcd5
+
+GTFA claims:
+
+Agate Fossil Beds National Monument is open from dawn till dusk every day.
+
+The NPS tool output is narrower:
+
+The park's two trails are open from dawn till dusk every day.
+
+The returned operating-hours entry is explicitly named Trails. It does not establish that every facility in the monument, including the Visitor Center and museum, follows those hours. The GTFA therefore generalizes a component-specific schedule to the entire monument.
+
+Suggested fix: Scope the claim to the trails:
+
+The monument's two trails are open from dawn till dusk every day.
+
+If the task is intended to request facility hours, the Visitor Center/museum schedule should be represented separately.
+
+5. Barataria Preserve incorrectly classified as a “fishing center”
+
+Task ID: 689e0b1d9c8e2ac413c1f20f
+
+GTFA claims:
+
+There's only one fishing center on the Jean Lafitte National Historical
+Park and Preserve, which is called Barataria Preserve.
+
+The official trajectory searched the NPS visitor-center endpoint using q: "fishing". It returned one visitor-center record whose description mentions fishing. A single search result does not establish that:
+
+Barataria Preserve is a facility classified as a “fishing center”; or
+
+it is the only fishing center in the park.
+
+Barataria Preserve is a large preserve unit containing wetlands, trails, waterways, fishing opportunities, and a Visitor Center. The returned Sunday hours of 9:30 AM–4:30 PM refer to the Barataria Preserve Visitor Center, not to a dedicated fishing center or necessarily to all outdoor access.
+
+The astronomy call itself is not the issue here. It was explicitly queried with dt: "2025-08-17"; the location.localtime field represents the location's current time at the time of the request, not the target astronomy date.
+
+Suggested fix: Remove the unsupported “only one fishing center” claim and identify the facility accurately, for example:
+
+The Barataria Preserve Visitor Center is open on Sundays from
+9:30 AM to 4:30 PM.
+
+If fishing-access hours are required, they should be retrieved and stated separately from Visitor Center hours.
+
+6. Ambiguous National Medal of Arts year changes the downstream crime lookup
+
+Task ID: 6888e207a34beb25cfedda86
+
+The query asks for crimes recorded in the same year that Stephen King, who used the pseudonym Richard Bachman, “was awarded” the National Medal of Arts.
+
+The official trajectory uses an Open Library biography stating that he received the medal in 2015. Based on that year, the local Crime_records.csv correctly yields:
+
+CRIME687,2015-01-20,Cybercrime
+
+It is also correct that this is the only 2015 record in the provided file. Therefore, the crime ID and crime type are internally consistent if 2015 is the intended join year.
+
+The ambiguity occurs upstream: Stephen King is officially listed as a 2014 National Medal of Arts recipient, while the medal was presented at a White House ceremony in September 2015. The phrase “was awarded” does not specify whether it refers to the award class/year or the presentation year.
+
+An agent using the official award year may reasonably select 2014 and retrieve the multiple 2014 records (CRIME679 through CRIME686) instead of CRIME687.
+
+Suggested fix: Choose one interpretation and make it explicit:
+
+If 2015 is intended, revise the query to say “the year in which the medal was presented to him” and retain CRIME687.
+
+If the official award year is intended, use 2014 and regenerate all downstream crime-record claims.
+
+No correction to the CRIME687 date or crime type is required when the selected year is 2015.
+
+7. Malformed Croatian translation frozen into GTFA
+
+Task ID: 689bd255c0422b257e7dfca9
+
+The English source in slackr_bot.r is:
+
+#' @note You need a <https://www.slack.com> account and will also need to
+#'   setup an incoming webhook: <https://api.slack.com/>. Old style webhooks are
+#'   no longer supported.
+
+GTFA contains the following translation returned by the translation tool:
+
+#' @note Potrebno <https://www.slack.com> vam je račun za  i morat ćete
+#'   postaviti dolazni webhook:<https://api.slack.com/>. Stari stil web-dojavnika
+više nije podržan.
+
+This output is malformed:
+
+Potrebno <URL> vam je račun za has broken word order and a dangling za.
+
+The Slack URL is inserted in an unnatural position.
+
+webhook and web-dojavnika are used inconsistently.
+
+The final line loses the Roxygen #' prefix.
+
+This has caused valid Croatian translations to be scored as incorrect. In the analyzed runs, both a natural translation preserving the technical term webhook and another semantically correct variant received a score of 0.0 because they did not reproduce the malformed GTFA wording.
+
+One suitable corrected translation is:
+
+#' @note Potreban vam je račun na Slacku (<https://www.slack.com>), a morat ćete
+#'   postaviti i dolazni webhook: <https://api.slack.com/>. Webhookovi starog
+#'   tipa više nisu podržani.
+
+Suggested fix: Replace the malformed GTFA with a reviewed Croatian translation. Since translation admits multiple valid formulations, evaluation should accept semantically equivalent translations rather than requiring the exact wording of one machine-generated output.
+
+Recommended dataset-level safeguards
+
+Validate deterministic claims such as filenames directly against tool output.
+
+Preserve and verify units before converting numerical tool results.
+
+Avoid turning search-result counts into exclusivity claims about real-world entities.
+
+Preserve the scope of source statements, such as Trails versus the entire park.
+
+Disambiguate award year, event year, publication year, and presentation year before joining against local datasets.
+
+Human-review machine translations before promoting them to GTFA claims.
+
+Allow semantic equivalence for translation tasks instead of anchoring evaluation to malformed tool output.
+
+Expected outcome
+
+Please review and correct the affected GTFA claims, then rescore submissions affected by these issues. At minimum, valid answers that match deterministic repository contents, official primary sources, or grammatically correct translations should not be penalized for disagreeing with erroneous or underspecified GTFA wording.
+
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+
+Metadata
+Metadata
+
+AssigneesNo one assigned
+
+LabelsNo labels
+
+No labels
+
+TypeNo type
+
+ProjectsNo projects
+
+MilestoneNo milestone
+
+RelationshipsNone yet
+
+DevelopmentNo branches or pull requests
+
+Issue actions
+Open in GitHub Copilot app
+
+    You can’t perform that action at this time.
+

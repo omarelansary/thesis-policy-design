@@ -1,0 +1,167 @@
+ MCP Token Cost Calculator — What Your Servers Really Cost
+
+    New Your team’s decisions, in one playbook every coding agent works from. Never answer your agent twice →   
+
+ MCP REGISTRY FOR AGENTS DOCS PRICING  THEME    CONTROL YOUR AGENTS    
+
+ Home / Token cost     
+
+// MCP TOKEN COST 
+Your MCP servers spend tokens before the agent starts. 
+
+Every connected server's tool definitions — names, descriptions, JSON schemas — are loaded
+        into the model's context on every request.
+GitHub + Linear + Supabase together: 24,116 tokens, 12% of a 200k window, before the first message.  
+ MEASURED CORPUS 13,230 servers · 265,284 tool schemas · median 1,864 tokens · max 448,698 Method →      
+
+// CALCULATOR 
+Measure your stack. 
+
+Pick servers from the catalogue or paste your mcpServers config. Untick the
+        tools you don't use to see what a scoped grant saves.
+Want the risk view instead? Check your stack →  
+
+ PICK SERVERS PASTE CONFIG  
+
+ + GitHub+ Linear+ Supabase+ Filesystem   
+
+ MATCH SERVERS     
+
+Nothing selected yet. Add servers above — the totals update live.  
+
+ TOOL DEFINITIONS IN CONTEXT 0 Full load — every tool ticked:  tokens  
+
+ 200K WINDOW 0%  
+
+ 1M WINDOW 0%  
+
+ THROUGH A POLICYLAYER GRANT  
+
+Exposing only the 0 tools you keep ticked:
+0 tokens
+  SCOPE YOUR GRANT →         
+
+// BY SERVER 
+Measured server by server. 
+
+Every measured server has its own breakdown — headline cost, per-tool table, and what a
+        scoped grant saves. The popular names and the heaviest of the catalogue:
+
+  Ainumbers Mcp Apps 754 tools · 448,698 tokens  ReplyNodes 66 tools · 432,983 tokens  Apibase 1384 tools · 342,902 tokens  Ioacloud 506 tools · 260,904 tokens  Ms 365 194 tools · 246,515 tokens  Sap 453 tools · 178,326 tokens  UnClick 1662 tools · 148,419 tokens  Delx Mcp A2a 1068 tools · 145,894 tokens  Calcgrid 253 tools · 140,850 tokens  SmartBear MCP 240 tools · 137,725 tokens  metagraphed — Bittensor subnet operational registry 243 tools · 136,053 tokens  Ghl 569 tools · 118,544 tokens  Superdoc 13 tools · 114,517 tokens  Bannerbear Mcp Cli 75 tools · 111,968 tokens  ZeroWidth 299 tools · 107,920 tokens  Adobe Mcp Suite 447 tools · 105,325 tokens  Meridian 235 tools · 104,466 tokens  Stable Baseline 222 tools · 104,426 tokens  Gapup Mcp 279 tools · 103,841 tokens  Mcp Knowledge 279 tools · 103,841 tokens  GitHub 86 tools · 14,406 tokens  Linear 66 tools · 7,149 tokens  Supabase 29 tools · 2,561 tokens  Filesystem 14 tools · 1,666 tokens   
+ 13,230 servers measured in total — search the full set in the calculator
+        above, or browse the tool catalogue.
+
+// WHY THIS HAPPENS 
+Tool definitions are context overhead, paid on every request. 
+
+01 
+Every schema rides along 
+An MCP client sends each connected server's tools/list — name, description, full JSON input schema per tool — to the model so it knows what it can call. Connecting a server means paying for all of it.  
+
+02 
+It compounds across servers 
+Stacks accumulate: a few popular servers reach tens of thousands of tokens of definitions. That space competes directly with your code, documents and conversation history.  
+
+03 
+Most of it is never used 
+Agents typically call a handful of tools per session, but pay for every definition on every request. The fix is structural: expose only the tools you actually grant.       
+
+// DEFERRED LOADING 
+Some clients now defer loading. It reduces the bill — it doesn't remove it. 
+
+Deferral trades upfront cost for per-use cost: tool searches and schema reloads are
+        themselves charged against the window. And several major clients don't defer at all.
+
+ClientTool definition loading   
+ Claude Code Defers MCP schemas behind tool search by default — you pay per search and per reload 
+ VS Code (Copilot) Experimental tool grouping — partial deferral, off by default 
+ Cursor Loads all tool definitions upfront, every request 
+ Windsurf Loads all tool definitions upfront, every request 
+ Gemini CLI Loads all tool definitions upfront, every request    
+Client behaviour verified 04-06-2026. A scoped grant cuts the cost either way: fewer definitions to load upfront, fewer to search and reload when deferred.     
+
+// THE CORPUS 
+The median server is cheap. The ones you actually run aren't. 
+
+Across 13,230 servers with complete schema coverage in the PolicyLayer scan
+        database, definition cost is heavily long-tailed.
+
+1,864 
+MEDIAN TOKENS / SERVER  
+
+13,636 
+P90  
+
+40,135 
+P99  
+
+448,698 
+HEAVIEST — 224% OF A 200K WINDOW   
+
+The heaviest measured server (Ainumbers Mcp Apps) consumes 224% of a
+        200k context window with tool definitions alone. Popular productivity servers cluster well
+        above the median — GitHub + Linear + Supabase average 8,039 tokens each.
+
+//FAQ
+MCP token-cost questions.
+
+How much of my context window do MCP servers use?+
+
+It depends entirely on the servers. Across 13,230 measured servers the median is 1,864 tokens of tool definitions, but the heavy hitters dominate: GitHub + Linear + Supabase together consume 24,116 tokens — 12% of a 200k window — before the first message.
+
+Why do MCP tool definitions consume tokens?+
+
+MCP clients send every connected server's tool definitions — name, description, and JSON input schema — to the model so it knows what it can call. That payload counts against the context window on every request, whether or not any tool is used.
+
+Does deferred tool loading (Claude Code tool search) solve this?+
+
+It helps in clients that support it, but it is not free: each tool search and schema reload costs tokens, and definitions still enter context once loaded. Cursor, Windsurf and Gemini CLI load all definitions upfront. Cutting the exposed tool set reduces cost in every client.
+
+How do I reduce MCP token usage?+
+
+Expose fewer tools. Routing servers through a PolicyLayer grant means only the tools you explicitly allow are visible to the client — ungranted definitions never enter the context window, and every call that does run is policy-checked.
+
+How are these token counts measured?+
+
+Each tool is serialised the way a tools/list response carries it ({name, description, inputSchema}) using schemas from the PolicyLayer scan database, then counted with tiktoken o200k_base. Clients vary slightly in serialisation, so treat counts as close estimates rather than exact invoices.     
+
+// METHOD & REVIEW 
+How these numbers were measured. 
+
+01 
+Serialisation 
+Each tool is serialised as a tools/list entry — name, description, input schema — from the schemas in the PolicyLayer scan database. Clients differ slightly in framing, so treat counts as close estimates.  
+
+02 
+Tokeniser 
+tiktoken o200k_base (GPT-4o/o-series). Anthropic's current tokeniser isn't published, so Claude's exact counts will differ; for English text and JSON schemas the totals are close enough to treat these as estimates.  
+
+03 
+Coverage 
+Only servers with (near-)complete schema coverage are measured — 13,230 of the catalogue. Partial coverage is disclosed per page rather than estimated away.   
+
+Computed 31-10-2026 from the PolicyLayer scan database. Counts refresh with every
+        site build. Sources: the MCP specification (tools/list),
+tiktoken, and our
+State of MCP research.
+
+ GO DEEPER: Tool catalogue Policy library State of MCP     
+
+ Pay for the tools you use — not every tool on every server.  
+A PolicyLayer grant exposes only the tools you allow. Ungranted definitions never enter your context window, and every call that does run is checked against policy first. 
+  CUT YOUR TOKEN COST →
+
+Instant setup, no code required. 
+46,500+ MCP servers and 515,000+ tools scanned and risk-classified.    
+
+ × 
+
+// GET IN TOUCH 
+Have a question or want to learn more? Send us a message.      
+ NAME   
+ EMAIL   
+ MESSAGE   
+ CANCEL SEND    
+
+Message sent. 
+We'll get back to you soon.             

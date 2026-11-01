@@ -1,0 +1,941 @@
+
+
+LiveMCP-101: Stress Testing and Diagnosing MCP-enabled Agents on Challenging Queries
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    arXiv is now an independent nonprofit!
+    Learn more
+    ×
+
+      Back to arXiv
+
+    License: CC BY 4.0
+
+arXiv:2508.15760v1 [cs.CL] 21 Aug 2025
+
+LiveMCP-101: Stress Testing and Diagnosing MCP-enabled Agents on Challenging Queries
+
+Ming Yin   Dinghan Shen Silei Xu Jianbing Han Sixun Dong Mian Zhang Yebowen Hu
+††thanks: Work done during internship at Zoom
+Affiliation: Zoom Video Communications
+
+Shujian Liu   Simin Ma   Song Wang   Sathish Reddy Indurthi   Xun Wang
+
+Yiran Chen   Kaiqiang Song22footnotemark: 
+            2
+
+††thanks: Corresponding author.
+
+Affiliation: Duke University
+
+Abstract
+
+Tool calling has emerged as a critical capability for AI agents to interact with the real world and solve complex tasks. While the Model Context Protocol (MCP) provides a powerful standardized framework for tool integration, there is a significant gap in benchmarking how well AI agents can effectively solve multi-step tasks using diverse MCP tools in realistic, dynamic scenarios. In this work, we present LiveMCP-101, a benchmark of 101 carefully curated real-world queries, refined through iterative LLM rewriting and manual review, that require coordinated use of multiple MCP tools including web search, file operations, mathematical reasoning, and data analysis. Moreover, we introduce a novel evaluation approach that leverages ground-truth execution plans rather than raw API outputs, better reflecting the evolving nature of real-world environments. Experiments show that even frontier LLMs achieve a success rate below 60%, highlighting major challenges in tool orchestration. Detailed ablations and error analysis further reveal distinct failure modes and inefficiencies in token usage, pointing to concrete directions for advancing current models. LiveMCP-101 sets a rigorous standard for evaluating real-world agent capabilities, advancing toward autonomous AI systems that reliably execute complex tasks through tool use.
+
+1 Introduction
+
+Figure 1: Construction and Evaluation framework of LiveMCP-101.
+
+The ability to interact with external tools and services is a cornerstone of autonomous AI agents Schick et al. (2023); Qin et al. (2023a), enabling them to extend their capabilities beyond static knowledge and engage dynamically with the real world. Recent advancements in tool integration frameworks—most notably the Model Context Protocol (MCP) Anthropic (2024)—have standardized how models discover, invoke, and coordinate tools across diverse domains, from web search and data analysis to API interactions and file manipulation. These developments promise a new generation of AI agents capable of executing complex, multi-step tasks with minimal human intervention Yao et al. (2022); Shinn et al. (2024). However, reliability remains a key barrier to real-world deployment, as systems that perform well in prototypes often fail on diverse user queries and in real production environments Lu et al. (2024); Yao et al. (2024); Barres et al. (2025).
+
+Understanding why agents fail Zhang et al. (2025b); Cemri et al. (2025) in realistic, temporally evolving production environments can offer valuable insights for improving the corresponding models and system architectures.
+However, existing benchmarks Li et al. (2023a); Tang et al. (2023); Xu et al. (2023); Patil et al. (2024); Liu et al. (2025) focus only on single-step tool calls, synthetic environments (normally a mock database), or limited tool sets, failing to capture the complexity and dynamism of real-world scenarios.
+In practice, agents must interact with practical tools that may produce varying responses over time and span entirely different domains.
+Moreover, user queries can carry nuanced contexts and specific constraints Zhong et al. (2025), requiring accurate reasoning across dozens of tool calls to complete a task.
+As a result, current benchmarks cannot fully reveal the gaps in current agent systems when deployed in real production environments.
+
+In this work, motivated by the goal of stress testing frontier LLMs and agents in realistic, challenging scenarios, we introduce LiveMCP-101—a benchmark of 101 carefully designed tasks requiring coordinated use of diverse MCP-enabled tools Anthropic (2024) (e.g., web browsing, file operations, mathematical reasoning, data analysis). Notably, user queries are refined through multiple iterations of LLM rewriting and manual review Wang et al. (2022) to enhance complexity while preserving practicality, enabling us to reveal where even state-of-the-art agentic models and systems fall short. To ensure robust evaluation—given that MCP-enabled tools may return varying responses to the same API call over time—we propose a novel setup that runs two agents in parallel, one following the ground-truth execution plan and the other operating autonomously, and compute a score based on their real-time outputs.
+
+Our experiments reveal that even state-of-the-art models struggle with the demands of complex tool orchestration, achieving less than 60% success rate. It highlights a significant gap between current agent capabilities and the robustness required for truly autonomous task execution. More importantly, by digging deep into the error cases with various models, we are able to glean useful insights into different models’ agentic capabilities.
+By carefully analyzing the agent trajectories Chen et al. (2023), we identify seven common failure modes in frontier models, shedding light on how to further improve these systems.
+Moreover, we observe a striking log-shaped curve in token efficiency: closed-source models gain rapidly and then plateau, while open-source models fail to turn tokens into reliable evidence.
+We release this benchmark to accelerate development in tool-augmented AI systems and foster innovations in planning, reasoning, and long-horizon task execution Xi et al. (2023).
+
+Concurrently, Liu et al. (2025) also proposes to evaluate AI agents connected to MCP tools and servers, but their setup is limited to user queries within a single MCP server and involves low task complexity. Consequently, different models achieve similar success rates, offering limited insight into their distinct strengths and weaknesses. Moreover, their evaluation compares the agent’s trajectory only against a static ground-truth execution plan, failing to account for variations in MCP server responses over time, which are critical for assessing robustness in dynamic environments.
+
+In summary, our contributions are as follows:
+
+• 
+
+We introduce LiveMCP-101, a benchmark of 101 diverse real-world tasks requiring coordinated use of multiple MCP tools (from diverse domains), with user queries refined through iterative LLM rewriting and manual review.
+
+• 
+
+We propose a novel evaluation approach that leverages ground-truth execution plans, rather than raw API responses or end results, to account for the evolving nature of real-world environments.
+
+• 
+
+Experiments show that even frontier LLMs achieve a task success rate below 60%, underscoring major challenges in real-world tool orchestration.
+
+• 
+
+Detailed ablation studies and error analysis draw insights on how to further improve current models, from the perspectives of different agent failure modes and token efficiency.
+
+2 Related Work
+
+Agents with Tool Use
+
+Chain-of-Thought (CoT) prompting Wei et al. (2022) first demonstrated that large language models could remarkably improve performance on complex questions by making their intermediate reasoning steps explicit.
+Its success fueled the rapid rise of reasoning models OpenAI (2024); Guo et al. (2025), which consistently outperform baselines across diverse domains.
+The ReAct Yao et al. (2022) framework extends CoT by decoupling reasoning from tool calls, enabling LLM-based agents to ground their reasoning in external information, correct errors mid-process, and adapt their plans dynamically. Building on these foundations, recent LLM-agent research explores diverse strategies for autonomous tool use.
+One line of work focuses on fine-tuning LLMs with large and diverse tool collections, enabling them to operate effectively over extensive real-world APIs Schick et al. (2023); Du et al. (2024); Qin et al. (2023b).
+Another approach adopts modular and hierarchical architectures that decompose agents into specialized roles for proposing, planning, executing, and evaluating,
+improving robustness and compositional reasoning Zhuang et al. (2023); Zhou et al. (2024); Shi et al. (2024).
+Retrieval-augmented methods further enhance tool access by incorporating improved retrieval, documentation compression, and reranking techniques Yuan et al. (2024); Zheng et al. (2024).
+
+The emergence of Model Context Protocol (MCP) Anthropic (2024) marks a turning point for agentic tool use. MCP provides a standardized, JSON-RPC-based API layer for integrating LLMs with external tools. Since its release, MCP has been quickly adopted across all major AI players and has attracted significant attention from the research community Hou et al. (2025); Ehtesham et al. (2025).
+
+Evaluation of Agentic Tool Use
+
+Evaluating agentic tool use in LLMs presents inherent challenges, and substantial research effort has been devoted to developing benchmarks that capture different dimensions of this capability.
+Early work primarily focused on assessing single-turn function-calling abilities of LLMs, where the model is required to invoke the correct tool in response to a given query Yan et al. (2024); Qin et al. (2023b); Guo et al. (2024); Li et al. (2023b); Wu et al. (2024); Patil et al. (2024).
+Subsequent benchmarks have extended this scope to multi-turn conversational settings, where effective tool use requires maintaining context and reasoning across dialogue turns Wang et al. (2023); Song et al. (2023); Lu et al. (2024); Yao et al. (2024); Barres et al. (2025).
+
+Following the emergence of MCP, various datasets and benchmarks have been proposed to evaluate the MCP ecosystem.
+Luo et al. (2025) introduced MCPBench, the first MCP-specific evaluation.
+Building on this, Gao et al. (2025) proposed MCP-RADAR, which adopts a multi-dimensional evaluation approach; while Liu et al. (2025) presented MCPEval, an automated, fine-grained MCP evaluation framework. These early MCP benchmarks have limited scope with only around 10 MCP servers.
+Fei et al. (2025) presented MCP-Tools, a large MCP-tool retrieval dataset (308 servers, 2,797 tools). However, it does not provide a benchmark for evaluation. A concurrent work by Mo et al. (2025) introduced LiveMCPBench, which evaluates agents against dynamic, real-time MCP servers,
+and employs LLM-as-judge evaluator for scoring.
+However, tasks in LiveMCPBench are relatively simple, averaging only 2.7 tool calls and 2.8 steps per example. In addition, its gold annotations specify only the tool names without detailed parameters, and these annotations are not used as a reference during scoring. This leads to results that may not fully capture relative model capabilities, for instance, GPT-4.1-mini outperforming GPT-4.1.
+In contrast, our LiveMCP-101 benchmark introduces a three-tiered difficulty structure (easy, medium, hard), with tasks requiring an average of 5.4 tool-calling steps, making it a significantly more challenging benchmark for LLMs. Furthermore, we provide detailed gold-standard tool invocation chains, which serve as explicit references to ensure scoring consistency and closer alignment with human judgments.
+
+3 LiveMCP-101
+
+3.1 Construction
+
+Query Generation
+
+To generate challenging queries that require agents to leverage tools across different domains, we first sample diverse application domains from the overall MCP tool pool, which spans 41 MCP servers and 260 tools, using GPT-4.1. As the next step, we employ OpenAI o3 model to generate queries of varying complexity, conditioned on domain context and detailed tool specifications (names, descriptions, and parameters). However, even with carefully tuned prompts, some generated queries are either not solvable with the provided tools or have end states whose results are not easily verifiable. To ensure the dataset is clean and rigorous, we perform multiple rounds of LLM rewriting and manual revision Wang et al. (2022) to guarantee clarity, balanced difficulty, solvability with the given tools, and objectively verifiable outcomes. All queries are divided into three difficulty tiers: Easy (30), Medium (30), and Hard (41). Figure 2 illustrates representative examples from each tier.
+
+Execution Plan Generation
+
+Because tasks interact with live, time-varying MCP services, answers may change over time. Thus, having fixed ground-truth results may not serve as a reliable way to evaluate agent results at test time. To resolve this issue, for every curated query, we draft an execution plan with o3 given the query and tool specifications. As the next step, we revise it using the reference agent’s execution trajectory and outputs, combining LLM-assisted edits with manual adjustments to correct logical, tool-selection, parameter, and data-processing errors. Approximately 120 PhD-hours were required for this revision. Each task was validated across multiple trials with human verification of correctness. The finalized plan deterministically yields the reference output when followed. The distribution of tool-chain lengths in the execution plans is shown in Figure 3.
+
+3.2 Evaluation
+
+Evaluation framework
+
+For each task, we launch two parallel executions: (1) a real-time reference execution, where the reference agent strictly follows the validated execution plan using only the MCP tools specified therein to produce the reference output; (2) a real-time test execution, where the agent being evaluated receives only the natural-language query and a predefined per-task MCP tool pool, and must independently analyze the query, select tools, schedule calls, and process intermediate results. The test execution proceeds until the agent declares completion or reaches the maximum iteration rounds. The per-task pool contains all task-essential tools plus a set of additional MCP tools (to make the task more challenging for the agents). These additional tools approximate real-world choice breadth, and enable assessment of tool discovery and selection under distractors. This setup mitigates temporal drift and enables a fair comparison between the evaluated agent’s output and the reference. In addition, the reference trajectory provides a reference for analyzing the evaluated agent’s trajectory, enabling fine-grained diagnosis of planning, tool-selection, parameter, and output-handling errors.
+
+Evaluation metrics
+
+Both the result and trajectory of the evaluated agent are scored by an LLM judge Zheng et al. (2023) using a 1-5 Likert scale Liu et al. (2023) and then mapped to {0.00,0.25,0.50,0.75,1.00}\{0.00,0.25,0.50,0.75,1.00\}. Prompts are provided in the Appendix A.1 and Appendix A.2.
+
+Result Metrics: we use Task Success Rate (TSR), the proportion of instances with a score 1.00, and Average Result Score (ARS), the mean score across instances. TSR measures the proportion of tasks successfully solved, while ARS reflects the overall quality of the solutions.
+
+Trajectory Metric:
+Average Trajectory Score (ATS) of the evaluated agent is reported across all tasks. This metric evaluates trajectories for logical coherence, completeness, and correctness, capturing the quality of the solution process complementary to result metrics.
+
+Average Token Consumption: in order to measure the token efficiency, for each task, we sum the agent’s output tokens across all the iteration rounds; the reported value is the mean of these per-task totals over the evaluation set.
+
+Average Tool Calls: for each task, we count the tool invocations across the full trajectory; the reported value is the mean of these per-task counts over the evaluation set.
+
+Figure 2: Example queries by difficulty level. These queries require the multi-step composition of heterogeneous MCP tools, with proper parameterization and output handling.
+
+Figure 3: Distribution of tool-chain lengths in the LiveMCP-101 execution plans.
+
+4 Experiments
+
+4.1 Experimental Setup
+
+Models
+
+We evaluate a diverse set of 18 widely used and popular LLMs on LiveMCP-101: OpenAI (GPT-5, GPT-5-mini, GPT-4.1, GPT-4o, GPT-4.1-mini, GPT-4o-mini, o3, o4-mini), Anthropic (Claude-4.1-Opus, Claude-4-Sonnet, Claude-3.7-Sonnet), Google (Gemini-2.5-Pro, Gemini-2.5-Flash), and open-source (Qwen3-235B-A22B, Qwen3-32B, Qwen3-8B, Llama-3.3-70B-Instruct, Llama-3.1-8B-Instruct). For OpenAI reasoning models OpenAI (2025b), the reasoning effort is set to medium. For Anthropic models, we test both standard and extended thinking (ET) models Anthropic (2025). For Qwen3 models, thinking is enabled by default Qwen Team (2025).
+
+Settings
+
+Each agent is limited to a maximum of 30 iteration rounds. For reference execution, we employ GPT-4.1 due to its low latency OpenAI (2025a) and strong instruction-following capabilities OpenAI (2025a); Zhang et al. (2025a), strictly adhering to the validated execution plan to produce the reference output. For each task, a per-task MCP pool is constructed by combining all task-essential servers with randomly sampled MCP servers, yielding a total of 15 MCP servers and 76–125 tools available per task. We adopt the widely used ReAct prompting Yao et al. (2023) and use GPT-4.1 as the LLM judge Zheng et al. (2023) to score both the final output and the execution trajectory.
+
+Metrics
+
+As described in our evaluation framework, we report the following metrics for each model: task success rate (TSR), average result score (ARS), average trajectory score (ATS), average tool calls and average tokens used.
+
+4.2 Main Results
+
+As shown in Table 1, GPT-5 achieves the best overall performance on LiveMCP-101, leading across all difficulty tiers. Next are o3, GPT-5-mini, Claude-4.1-Opus (ET), and Claude-4-Sonnet (ET), indicating that stronger reasoning effort can yield meaningful improvements for dynamic, multi-step problem-solving and MCP tool calling. Among mid-tier proprietary models, GPT-4.1, Gemini-2.5-Pro, and Claude-3.7-Sonnet perform reasonably well but remain behind the top performers. Open-source models lag behind proprietary models. Among them, Qwen3-235B-A22B (22.77%/42.57%) is the strongest among them yet remains far from the frontier. Llama models underperform notably on LiveMCP-101, and a more detailed analysis is provided in Section 5.2. Performance degrades substantially with task difficulty for all models. Notably, even the strongest model attains only 39.02% TSR on Hard. Rankings by TSR and ARS are broadly consistent.
+
+Figure 4(a) visualizes the relationship among TSR, ARS, and ATS. The color-encoded ATS increases with both ARS and TSR, with higher-ATS models clustering toward the upper-right region. This suggests that better trajectories usually yield better outputs. Higher ATS corresponds to more reliable tool selection, parameterization, and post-processing, which helps satisfy task success criteria. Figure 4(b) shows the relationship between TSR, the average number of tokens, and the average number of tool calls. Closed-source models exhibit a mild upward trend with tokens, yet planning quality remains the primary driver.Open-source models exhibit two characteristic inefficiencies. Llama variants cluster in the low-token, low-tool region, under-exploring tool affordances and often stopping early, which yields low ARS and TSR. Qwen variants trend toward the opposite extreme, producing longer outputs and invoking more tools without commensurate gains compared to the closed-source models. Extended-thinking variants consistently shift the efficiency frontier upward at comparable token budgets, suggesting gains from improved planning and error recovery rather than verbosity.
+
+Model
+Overall
+Easy
+Medium
+Hard
+
+TSR
+ARS
+TSR
+ARS
+TSR
+ARS
+TSR
+ARS
+
+GPT-5
+58.42
+73.02
+86.67
+89.17
+56.67
+72.50
+39.02
+61.59
+
+o3
+46.53
+64.60
+66.67
+80.00
+46.67
+65.83
+31.71
+52.44
+
+GPT-5-mini
+43.56
+63.12
+63.33
+82.50
+43.33
+64.17
+29.27
+48.17
+
+Claude-4.1-Opus (ET)
+41.58
+61.88
+56.67
+79.17
+43.33
+61.67
+29.27
+49.39
+
+o4-mini
+40.59
+61.63
+53.33
+77.50
+46.67
+62.50
+26.83
+49.39
+
+Claude-4-Sonnet (ET)
+43.56
+60.40
+63.33
+79.17
+46.67
+62.50
+26.83
+45.12
+
+Claude-4.1-Opus
+39.60
+59.41
+60.00
+83.33
+33.33
+49.17
+29.27
+49.39
+
+Claude-4-Sonnet
+37.62
+55.69
+63.33
+78.33
+46.67
+65.00
+12.20
+32.32
+
+GPT-4.1
+35.64
+55.94
+60.00
+76.67
+36.67
+55.83
+17.07
+40.85
+
+Claude-3.7-Sonnet (ET)
+29.70
+47.77
+43.33
+66.67
+26.67
+46.67
+21.95
+34.76
+
+Gemini-2.5-Pro
+27.72
+46.78
+36.67
+61.67
+30.00
+46.67
+19.51
+35.98
+
+Claude-3.7-Sonnet
+26.73
+42.57
+46.67
+61.67
+20.00
+40.83
+17.07
+29.88
+
+Qwen3-235B-A22B
+22.77
+42.57
+43.33
+63.33
+26.67
+45.00
+4.88
+25.61
+
+GPT-4o
+21.78
+41.09
+40.00
+62.50
+20.00
+37.50
+9.76
+28.05
+
+GPT-4.1-mini
+17.82
+35.15
+36.67
+56.67
+13.33
+31.67
+7.32
+21.95
+
+Qwen3-32B
+18.81
+34.41
+36.67
+59.17
+16.67
+32.50
+7.32
+17.68
+
+GPT-4o-mini
+8.91
+27.48
+16.67
+40.83
+6.67
+31.67
+4.88
+14.63
+
+Gemini-2.5-Flash
+10.89
+22.48
+26.67
+44.17
+10.00
+22.33
+0.00
+6.71
+
+Qwen3-8B
+3.96
+11.63
+10.00
+26.67
+3.33
+8.33
+0.00
+3.05
+
+Llama-3.3-70B-Instruct
+1.98
+6.93
+3.33
+15.83
+3.33
+5.83
+0.00
+1.22
+
+Llama-3.1-8B-Instruct
+0.99
+2.72
+3.33
+9.17
+0.00
+0.00
+0.00
+0.00
+
+Table 1: Task success rate (TSR, %) and average result score (ARS, %) overall and by difficulty (Easy/Medium/Hard). Shaded rows mark the top-3 models by overall TSR. Bold indicates column-best. ET denotes extended thinking enabled for Anthropic models.
+
+(a) 
+
+(b) 
+
+Figure 4: Results on LiveMCP-101, showing model performance in terms of task success rate (TSR), average result score (ARS), average trajectory score (ATS), average token consumption, and average tool calls. (a) TSR (%) vs. ARS (%), with color encoding ATS (%). (b) TSR (%) vs. average tokens per task, with color encoding average tool calls.
+
+4.3 Ablation Study
+
+We conduct ablations on GPT-5, Claude-4.1-Opus (ET), GPT-4.1, Gemini-2.5-Pro, Qwen3-235B-A22B, and Qwen3-8B, covering frontier and mid-tier closed-source models and open-source models.
+
+Impact of maximum iteration rounds
+
+In LiveMCP-101, the longest validated execution plan requires 15 tool calls. By default, each agent is limited to 30 iteration rounds, where each round may involve one or more tool invocations. To study sensitivity to the iteration budget, we vary this limit to 15, 20, 30, and 50 rounds. The results in Figure 5 (a) and (b) highlight two key phenomena. First, increasing the max iteration limit from 15 to about 25 rounds consistently improves task success, as the added budget enables more thorough tool exploration and error recovery Yuan et al. (2025); Zhang et al. (2025c). Notably, although the longest validated execution plan comprises 15 tool calls (with an average of 5.4), the continued gains when raising the round limit from 15 to around 25 indicate that agents often expend extra rounds on error recovery or redundant deliberation even on correctly solved instances, revealing substantial headroom for execution efficiency. Second, beyond 25 rounds, the benefits saturate: performance becomes constrained by model capability—particularly planning quality and tool-use competence—rather than iteration capacity. Additional rounds yield diminishing returns and can even introduce noise or compound errors, leaving performance essentially flat.
+
+Figure 5: Ablation study results. (a) TSR (%) vs. max iteration rounds: all models improve from 15 to around 25 rounds, then plateau. (b) Relative TSR change w.r.t. 15-round setting shows diminishing returns beyond about 25. (c) TSR (%) vs. number of MCP servers: top-tier models remain largely stable, while weaker or mid-tier models degrade as distractors grow. (d) Relative change w.r.t. 6-server setting shows that larger pools affect weaker models more, consistent with long-context sensitivity and tool-selection noise.
+
+Impact of the number of MCP servers
+
+In the default setting, the most demanding task requires up to 6 MCP servers, and we expose a pool of 15 servers to the evaluated agent. To study sensitivity to MCP server breadth, we vary the pool size to 6, 10, 12, and 15. We set 15 as the upper limit because larger pools could hit API limits (e.g., 128 tools per request) OpenAI (2025) or exceed context length. This choice keeps the setup realistic and comparable to real-world deployments.
+As the pool grows, the expanded tool search and tool call space increases selection overhead and the likelihood of spurious tool usage.
+We find weaker and mid-tier models more sensitive to this effect, often showing declines as noise accumulates and planning bandwidth is diluted. In contrast, top-tier systems (e.g., GPT-5, Claude-4.1-Opus (ET)) remain largely stable: stronger planning and tool-screening mitigate distractors, so performance changes are negligible.
+
+Figure 6: Human–LLM agreement (Cohen’s κ\kappa, %) on result and trajectory evaluation for six models. Blue bars denote scores for the result evaluation, and pink bars denote scores for the trajectory evaluation.
+
+4.4 Analysis of LLM-as-a-Judge
+
+We apply an LLM-as-a-Judge to score both final outputs and execution trajectories. To assess reliability, we conduct a blinded human-expert study on a stratified subset of tasks for six representative models: GPT-5, Claude-4.1-Opus (ET), GPT-4.1, Gemini-2.5-Pro, Qwen3-235B-A22B, and Qwen3-32B. Experts follow the same rubric and judge prompts. We compare human and LLM-judge decisions at the instance level and report inter-rater agreement using Cohen’s κ\kappa Cohen (1960). We evaluate a sampled set of 30 tasks in total with 10 per difficulty tier (Easy, Medium, Hard). Across all six models, the human vs. LLM-judge agreement (quadratic-weighted Cohen’s κ\kappa) exceeds 85% for the result evaluations and 78% for the trajectory evaluations respectively, indicating that the LLM judge yields consistent, human-aligned ratings Landis & Koch (1977); Fleiss (1981).
+
+5 Discussion
+
+5.1 Token Efficiency
+
+We observe that closed-source models exhibit a striking log-shaped pattern: task success rate (TSR) rises rapidly with small token budgets, then plateaus (Figure 4(b)). Intuitively, early tokens drive high-value actions—planning, probing tools, checking constraints—yielding large gains. But as budgets grow, extra tokens mostly add redundancy (longer explanations, repeated self-checks) rather than new evidence, and returns diminish.
+This curve reflects models’ token efficiency: even the strongest struggle to make effective use of additional tokens beyond a certain point.
+How to maximize intelligence per token, or per dollar, remains an intriguing open challenge for MCP-based agents.
+In contrast, open-source models break this trend: despite equal or greater token use, TSR barely improves, revealing a failure to turn tokens into reliable evidence and thus lower token efficiency.
+
+5.2 Failure analysis
+
+To diagnose failure modes in MCP-based tool use, we carefully analyze execution logs across different models and identify three error categories including seven subtypes: tool planning and orchestration errors (1–4), parameter errors (5–6), and output handling errors (7).
+
+(1) Ignoring requirement: the agent misses an explicitly stated requirement and does not select any relevant tool. Typical signs include no corresponding thinking process and tool call, early termination, or a generic final answer that does not address the requirement. This often occurs when the agent fails to extract key requirements from the prompt or loses track of them during execution.
+(2) Overconfident self-solving: the agent recognizes the requirement but attempts to answer from its own knowledge or using its own reasoning and capabilities without calling the needed tool. Symptoms include: no corresponding tool call, generic or hallucinated answers, and premature termination.
+(3) Unproductive thinking: the agent acknowledges that a tool is needed and may discuss plans or parameters, but never initiates the call and does not propose any solution that addresses the requirement. It loops in unproductive or verbose thinking and eventually times out or gives up. Symptoms include repeated plan rewrites without execution, token-consuming thinking, and reaching the round limit with zero calls for the requirement.
+(4) Wrong tool selection: the agent calls a tool but chooses an inappropriate one, leading to erroneous intermediate states or final outputs. This can happen as a single misselection or repeated wrong calls until the budget is exhausted. Symptoms include irrelevant responses, repeated mistakes, or missing required fields in outputs.
+(5) Syntactic errors: parameters provided to a tool are malformed, such as having incorrect types, missing or wrong field names, or invalid schema. These errors prevent the MCP server from correctly parsing the request, leading to failure.
+(6) Semantic errors: parameters are well-formed but do not match the task intent. Common cases include mis-scoped query strings, wrong identifiers or entity references, and incorrect contextual constraints. These errors often arise from mistakes in intermediate reasoning used to generate parameters.
+(7) Output parsing errors: the tool returns a correct result, but the agent mishandles it during parsing, causing incorrect intermediate states or final answers. We further evaluate several popular models spanning a range of capabilities, and their core error-type distributions are shown in Figure 7.
+Several interesting observations can be inferred from the results:
+
+• 
+
+Semantic errors dominate: even strong models show rates of 16–25%, while smaller ones exceed 40% (e.g., GPT-4.1-mini), pinpointing content grounding and constraint enforcement as the primary bottleneck in live tool use.
+
+• 
+
+Syntactic errors are negligible for frontier models but catastrophic for Llama-3.3-70B-Instruct ≈48%\approx 48\%. A likely cause is limited MCP-specific training—MCP adoption surged Ehtesham et al. (2025) after the Llama-3 release Meta Llama Team (2024)—suggesting that targeted fine-tuning on MCP function-call schemas could substantially cut such errors and boost overall performance.
+
+• 
+
+Overconfident self-solving is common in mid-tier models: they often skip tool calls because planning and screening remain brittle under large tool pools and long contexts, making reliance on internal knowledge Chhikara (2025) seem safer than attempting uncertain tool selection and parameterization.
+
+Figure 7: Error classification heatmap across models. The leftmost column (Correct) aligns with TSR, while the remaining columns decompose failures into 7 fine-grained subtypes.
+
+6 Conclusion
+
+In this work, we introduce LiveMCP-101, a benchmark of challenging user queries for evaluating AI agents’ ability to plan and execute multi-step tool use in realistic, dynamic environments via the Model Context Protocol (MCP). The benchmark comprises 101 diverse tasks, refined through iterative LLM-based rewriting and manual review, spanning domains including web search, file operations, mathematical reasoning, and data analysis. We further propose an evaluation methodology based on ground-truth execution plans, providing a more reliable measure of agent performance in evolving environments. Experiments show that even frontier LLMs achieve a success rate below 60%, underscoring key challenges in tool orchestration, adaptive reasoning, and token efficiency. Detailed ablations and error analysis reveal distinct failure modes and highlight opportunities for improvement. By releasing LiveMCP-101, we establish a rigorous and scalable framework to benchmark and advance the development of more capable autonomous AI agents.
+
+References
+
+Anthropic (2024)
+
+Anthropic.
+
+Model context protocol, 2024.
+
+URL https://modelcontextprotocol.io/.
+
+Anthropic (2025)
+
+Anthropic.
+
+Extended thinking in claude.
+
+https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking, 2025.
+
+ET (extended thinking) models and usage; Accessed 2025-08-21.
+
+Barres et al. (2025)
+
+Victor Barres, Honghua Dong, Soham Ray, Xujie Si, and Karthik Narasimhan.
+
+τ2\tau^{2}-bench: Evaluating conversational agents in a dual-control environment.
+
+arXiv preprint arXiv:2506.07982, 2025.
+
+Cemri et al. (2025)
+
+Mert Cemri, Melissa Z Pan, Shuyi Yang, Lakshya A Agrawal, Bhavya Chopra, Rishabh Tiwari, Kurt Keutzer, Aditya Parameswaran, Dan Klein, Kannan Ramchandran, et al.
+
+Why do multi-agent llm systems fail?
+
+arXiv preprint arXiv:2503.13657, 2025.
+
+Chen et al. (2023)
+
+Qiantong Chen, Hongyu Zhang, Xueliang Liu, Jian Feng, Longtao Wang, et al.
+
+Tooleval: An automatic evaluation framework for tool-augmented language models.
+
+arXiv preprint arXiv:2307.10813, 2023.
+
+Chhikara (2025)
+
+Prateek Chhikara.
+
+Mind the confidence gap: Overconfidence, calibration, and distractor effects in large language models.
+
+arXiv preprint arXiv:2502.11028, 2025.
+
+Cohen (1960)
+
+J. Cohen.
+
+A coefficient of agreement for nominal scales.
+
+Educational and Psychological Measurement, 20(1):37–46, 1960.
+
+Du et al. (2024)
+
+Yu Du, Fangyun Wei, and Hongyang Zhang.
+
+Anytool: Self-reflective, hierarchical agents for large-scale api calls.
+
+arXiv preprint arXiv:2402.04253, 2024.
+
+Ehtesham et al. (2025)
+
+Abul Ehtesham, Aditi Singh, Gaurav Kumar Gupta, and Saket Kumar.
+
+A survey of agent interoperability protocols: Model context protocol (mcp), agent communication protocol (acp), agent-to-agent protocol (a2a), and agent network protocol (anp).
+
+arXiv preprint arXiv:2505.02279, 2025.
+
+Fei et al. (2025)
+
+Xiang Fei, Xiawu Zheng, and Hao Feng.
+
+Mcp-zero: Proactive toolchain construction for llm agents from scratch.
+
+arXiv preprint arXiv:2506.01056, 2025.
+
+Fleiss (1981)
+
+Joseph L. Fleiss.
+
+Statistical methods for rates and proportions.
+
+John Wiley & Sons, New York, 2nd edition, 1981.
+
+Gao et al. (2025)
+
+Xuanqi Gao, Siyi Xie, Juan Zhai, Shqing Ma, and Chao Shen.
+
+Mcp-radar: A multi-dimensional benchmark for evaluating tool use capabilities in large language models.
+
+arXiv preprint arXiv:2505.16700, 2025.
+
+Guo et al. (2025)
+
+Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al.
+
+Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning.
+
+arXiv preprint arXiv:2501.12948, 2025.
+
+Guo et al. (2024)
+
+Zhicheng Guo, Sijie Cheng, Hao Wang, Shihao Liang, Yujia Qin, Peng Li, Zhiyuan Liu, Maosong Sun, and Yang Liu.
+
+Stabletoolbench: Towards stable large-scale benchmarking on tool learning of large language models.
+
+arXiv preprint arXiv:2403.07714, 2024.
+
+Hou et al. (2025)
+
+Xinyi Hou, Yanjie Zhao, Shenao Wang, and Haoyu Wang.
+
+Model context protocol (mcp): Landscape, security threats, and future research directions.
+
+arXiv preprint arXiv:2503.23278, 2025.
+
+Landis & Koch (1977)
+
+J Richard Landis and Gary G Koch.
+
+The measurement of observer agreement for categorical data.
+
+Biometrics, 33(1):159–174, 1977.
+
+Li et al. (2023a)
+
+Minghao Li, Feifan Song, Bowen Yu, Haiyang Yu, Zhoujun Li, Fei Huang, and Yongbin Li.
+
+Api-bank: A comprehensive benchmark for tool-augmented llms.
+
+arXiv preprint arXiv:2304.08244, 2023a.
+
+Li et al. (2023b)
+
+Minghao Li, Yingxiu Zhao, Bowen Yu, Feifan Song, Hangyu Li, Haiyang Yu, Zhoujun Li, Fei Huang, and Yongbin Li.
+
+Api-bank: A comprehensive benchmark for tool-augmented llms.
+
+arXiv preprint arXiv:2304.08244, 2023b.
+
+Liu et al. (2023)
+
+Yang Liu, Dan Iter, Yichong Xu, Shuohang Wang, Ruochen Xu, and Chenguang Zhu.
+
+G-eval: Nlg evaluation using gpt-4 with better human alignment.
+
+arXiv preprint arXiv:2303.16634, 2023.
+
+Liu et al. (2025)
+
+Zhiwei Liu, Jielin Qiu, Shiyu Wang, Jianguo Zhang, Zuxin Liu, Roshan Ram, Haolin Chen, Weiran Yao, Huan Wang, Shelby Heinecke, et al.
+
+Mcpeval: Automatic mcp-based deep evaluation for ai agent models.
+
+arXiv preprint arXiv:2507.12806, 2025.
+
+Lu et al. (2024)
+
+Jiarui Lu, Thomas Holleis, Yizhe Zhang, Bernhard Aumayer, Feng Nan, Felix Bai, Shuang Ma, Shen Ma, Mengyu Li, Guoli Yin, et al.
+
+Toolsandbox: A stateful, conversational, interactive evaluation benchmark for llm tool use capabilities.
+
+arXiv preprint arXiv:2408.04682, 2024.
+
+Luo et al. (2025)
+
+Zhiling Luo, Xiaorong Shi, Xuanrui Lin, and Jinyang Gao.
+
+Evaluation report on mcp servers.
+
+arXiv preprint arXiv:2504.11094, 2025.
+
+Meta Llama Team (2024)
+
+Meta Llama Team.
+
+Llama-3.3-70b-instruct: Model card.
+
+https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct, 2024.
+
+Accessed 2025-08-21.
+
+Mo et al. (2025)
+
+Guozhao Mo, Wenliang Zhong, Jiawei Chen, Xuanang Chen, Yaojie Lu, Hongyu Lin, Ben He, Xianpei Han, and Le Sun.
+
+Livemcpbench: Can agents navigate an ocean of mcp tools?
+
+arXiv preprint arXiv:2508.01780, 2025.
+
+OpenAI (2024)
+
+OpenAI.
+
+Openai o1 system card, 2024.
+
+URL https://openai.com/index/openai-o1-system-card/.
+
+Accessed: 2024-12-01.
+
+OpenAI (2025)
+
+OpenAI.
+
+Assistants api deep dive.
+
+https://platform.openai.com/docs/assistants/deep-dive, 2025.
+
+“Use the tools parameter to give the Assistant access to up to 128 tools.”.
+
+OpenAI (2025a)
+
+OpenAI.
+
+Gpt-4.1.
+
+https://openai.com/index/gpt-4-1/, 2025a.
+
+Accessed 2025-08-21.
+
+OpenAI (2025b)
+
+OpenAI.
+
+Openai platform: Reasoning models.
+
+https://platform.openai.com/docs/guides/reasoning, 2025b.
+
+Describes reasoning effort levels (low/medium/high); Accessed 2025-08-21.
+
+Patil et al. (2024)
+
+Shishir G Patil, Tianjun Zhang, Xin Wang, and Joseph E Gonzalez.
+
+Gorilla: Large language model connected with massive apis.
+
+Advances in Neural Information Processing Systems, 37:126544–126565, 2024.
+
+Qin et al. (2023a)
+
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang, Bill Qian, et al.
+
+Tool learning with foundation models.
+
+arXiv preprint arXiv:2304.08354, 2023a.
+
+Qin et al. (2023b)
+
+Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang, Bill Qian, et al.
+
+Toolllm: Facilitating large language models to master 16000+ real-world apis.
+
+arXiv preprint arXiv:2307.16789, 2023b.
+
+Qwen Team (2025)
+
+Qwen Team.
+
+Qwen3: Think deeper, act faster.
+
+https://qwenlm.github.io/blog/qwen3/, 2025.
+
+Accessed 2025-08-21.
+
+Schick et al. (2023)
+
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola Cancedda, and Thomas Scialom.
+
+Toolformer: Language models can teach themselves to use tools.
+
+arXiv preprint arXiv:2302.04761, 2023.
+
+Shi et al. (2024)
+
+Zhengliang Shi, Shen Gao, Xiuyi Chen, Yue Feng, Lingyong Yan, Haibo Shi, Dawei Yin, Pengjie Ren, Suzan Verberne, and Zhaochun Ren.
+
+Learning to use tools via cooperative and interactive agents.
+
+arXiv preprint arXiv:2403.03031, 2024.
+
+Shinn et al. (2024)
+
+Noah Shinn, Federico Cassano, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao.
+
+Reflexion: Language agents with verbal reinforcement learning.
+
+Advances in Neural Information Processing Systems, 36, 2024.
+
+Song et al. (2023)
+
+Yifan Song, Weimin Xiong, Dawei Zhu, Wenhao Wu, Han Qian, Mingbo Song, Hailiang Huang, Cheng Li, Ke Wang, Rong Yao, et al.
+
+Restgpt: Connecting large language models with real-world restful apis.
+
+arXiv preprint arXiv:2306.06624, 2023.
+
+Tang et al. (2023)
+
+Qiaoyu Tang, Ziliang Deng, Hongyu Lin, Xianpei Han, Qiao Liang, Boxi Cao, and Le Sun.
+
+Toolalpaca: Generalized tool learning for language models with 3000 simulated cases.
+
+arXiv preprint arXiv:2306.05301, 2023.
+
+Wang et al. (2023)
+
+Xingyao Wang, Zihan Wang, Jiateng Liu, Yangyi Chen, Lifan Yuan, Hao Peng, and Heng Ji.
+
+Mint: Evaluating llms in multi-turn interaction with tools and language feedback.
+
+arXiv preprint arXiv:2309.10691, 2023.
+
+Wang et al. (2022)
+
+Xuezhi Wang, Jason Wei, Dale Schuurmans, Quoc Le, Ed Chi, Sharan Sharan, Aakanksha Goodman, and Denny Zhou.
+
+Self-consistency improves chain of thought reasoning in language models.
+
+arXiv preprint arXiv:2203.11171, 2022.
+
+Wei et al. (2022)
+
+Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al.
+
+Chain-of-thought prompting elicits reasoning in large language models.
+
+Advances in Neural Information Processing Systems, 35:24824–24837, 2022.
+
+Wu et al. (2024)
+
+Mengsong Wu, Tong Zhu, Han Han, Chuanyuan Tan, Xiang Zhang, and Wenliang Chen.
+
+Seal-tools: Self-instruct tool learning dataset for agent tuning and detailed benchmark.
+
+In CCF International Conference on Natural Language Processing and Chinese Computing, pp.  372–384. Springer, 2024.
+
+Xi et al. (2023)
+
+Zhiheng Xi, Wenxiang Chen, Xin Guo, Wei He, Yiwen Ding, Boyang Hong, Ming Zhang, Junzhe Wang, Senjie Jin, Enyu Zhou, et al.
+
+The rise and potential of large language model based agents: A survey.
+
+arXiv preprint arXiv:2309.07864, 2023.
+
+Xu et al. (2023)
+
+Cheng Xu, Dazhen Guo, Nan Duan, and Julian McAuley.
+
+Tool learning with large language models: A survey.
+
+arXiv preprint arXiv:2405.17935, 2023.
+
+Yan et al. (2024)
+
+Fanjia Yan, Huanzhi Mao, Charlie Cheng-Jie Ji, Tianjun Zhang, Shishir G. Patil, Ion Stoica, and Joseph E. Gonzalez.
+
+Berkeley function calling leaderboard.
+
+2024.
+
+Yao et al. (2022)
+
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao.
+
+React: Synergizing reasoning and acting in language models.
+
+arXiv preprint arXiv:2210.03629, 2022.
+
+Yao et al. (2023)
+
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao.
+
+React: Synergizing reasoning and acting in language models.
+
+In International Conference on Learning Representations (ICLR), 2023.
+
+Yao et al. (2024)
+
+Shunyu Yao, Noah Shinn, Pedram Razavi, and Karthik Narasimhan.
+
+τ\tau-bench: A benchmark for tool-agent-user interaction in real-world domains.
+
+arXiv preprint arXiv:2406.12045, 2024.
+
+Yuan et al. (2024)
+
+Siyu Yuan, Kaitao Song, Jiangjie Chen, Xu Tan, Yongliang Shen, Ren Kan, Dongsheng Li, and Deqing Yang.
+
+Easytool: Enhancing llm-based agents with concise tool instruction.
+
+arXiv preprint arXiv:2401.06201, 2024.
+
+Yuan et al. (2025)
+
+Siyu Yuan, Zehui Chen, Zhiheng Xi, Junjie Ye, Zhengyin Du, and Jiecao Chen.
+
+Agent-r: Training language model agents to reflect via iterative self-training.
+
+arXiv preprint arXiv:2501.11425, 2025.
+
+Zhang et al. (2025a)
+
+Mian Zhang, Shujian Liu, Sixun Dong, Ming Yin, Yebowen Hu, Xun Wang, Steven Ma, Song Wang, Sathish Reddy Indurthi, Haoyun Deng, et al.
+
+Complex logical instruction generation.
+
+arXiv preprint arXiv:2508.09125, 2025a.
+
+Zhang et al. (2025b)
+
+Shaokun Zhang, Ming Yin, Jieyu Zhang, Jiale Liu, Zhiguang Han, Jingyang Zhang, Beibin Li, Chi Wang, Huazheng Wang, Yiran Chen, et al.
+
+Which agent causes task failures and when? on automated failure attribution of llm multi-agent systems.
+
+arXiv preprint arXiv:2505.00212, 2025b.
+
+Zhang et al. (2025c)
+
+Zhisong Zhang, Tianqing Fang, Kaixin Ma, Wenhao Yu, Hongming Zhang, Haitao Mi, and Dong Yu.
+
+Enhancing web agents with explicit rollback mechanisms.
+
+arXiv preprint arXiv:2504.11788, 2025c.
+
+Zheng et al. (2023)
+
+Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang, Zi Lin, Zhuohan Li, Dacheng Li, Eric Xing, et al.
+
+Judging llm-as-a-judge with mt-bench and chatbot arena.
+
+Advances in neural information processing systems, 36:46595–46623, 2023.
+
+Zheng et al. (2024)
+
+Yuanhang Zheng, Peng Li, Wei Liu, Yang Liu, Jian Luan, and Bin Wang.
+
+Toolrerank: Adaptive and hierarchy-aware reranking for tool retrieval.
+
+arXiv preprint arXiv:2403.06551, 2024.
+
+Zhong et al. (2025)
+
+Lucen Zhong, Zhengxiao Du, Xiaohan Zhang, Haiyi Hu, and Jie Tang.
+
+Complexfuncbench: exploring multi-step and constrained function calling under long-context scenario.
+
+arXiv preprint arXiv:2501.10132, 2025.
+
+Zhou et al. (2024)
+
+Yifei Zhou, Qianlan Yang, Kaixiang Lin, Min Bai, Xiong Zhou, Yu-Xiong Wang, Sergey Levine, and Erran Li.
+
+Proposer-agent-evaluator(pae): Autonomous skill discovery for foundation model internet agents.
+
+2024.
+
+URL https://arxiv.org/abs/2412.13194.
+
+Zhuang et al. (2023)
+
+Yuchen Zhuang, Xiang Chen, Tong Yu, Saayan Mitra, Victor Bursztyn, Ryan A Rossi, Somdeb Sarkhel, and Chao Zhang.
+
+Toolchain*: Efficient action space navigation in large language models with a* search.
+
+arXiv preprint arXiv:2310.13227, 2023.
+
+Appendix A Prompts
+
+A.1 Result Evaluation Prompt
+
+A.2 Trajectory Evaluation Prompt
+

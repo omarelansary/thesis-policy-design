@@ -1,0 +1,372 @@
+
+
+	Introducing DolphinBench: Mapping the Pareto Frontier of Agent Memory
+
+DEVELOPERS
+
+RESOURCES
+
+PRICING
+
+USECASES
+
+COMPANY
+
+Star62,590
+
+home_primary_get-started
+
+Home
+
+Get Started
+
+DEVELOPERS
+
+RESOURCES
+
+PRICING
+
+USECASES
+
+COMPANY
+
+Star62,590
+
+home_primary_get-started
+
+Home
+
+Get Started
+
+Blog
+
+Introducing DolphinBench: Mapping the Pareto Frontier of Agent Memory
+
+Introducing DolphinBench: Mapping the Pareto Frontier of Agent Memory
+
+Introducing DolphinBench: Mapping the Pareto Frontier of Agent Memory
+
+Deshraj Yadav
+
+Deshraj Yadav
+
+•
+
+Sep 22, 2026
+
+•
+
+Updated on
+
+Sep 28, 2026
+
+Sep 22, 2026
+
+•
+
+Updated on
+
+Sep 28, 2026
+
+Agents today take real-world actions that depend on long-term memory.
+Most memory benchmarks still use a conversational question-answer format, where the question itself signals that some fact must be retrieved, and often which one. A QA benchmark asks “What messaging platform does the team use?”, which already announces that a platform fact exists and is wanted.
+An action-based test of the same fact instructs the agent to post an update in the team’s channel, and never mentions platforms at all. By then, the hardest step (recognizing that retrieval is required) has already been done on the system’s behalf.
+Today we are releasing DolphinBench, an open benchmark that evaluates agent memory through real-world simulated actions: Mapping the Pareto Frontier of Agent Memory.
+
+No existing memory benchmark combines all three properties: action rather than recall, cost and latency with accuracy, and solvability certification through with/without-history agent runs.
+Evaluating memory for agents means removing the question and using memory-dependent tasks as the accuracy signal.
+Memory is also an optimization problem: a system can raise accuracy by re-reading the entire history at every query with a frontier model, at a cost and latency no production deployment can sustain.
+Every result should report total cost and median task latency alongside accuracy. Synthetic suites are further prone to broken answer keys and unsolvable tests, so every DolphinBench test is verified with an agent that must pass when given the relevant history and fail when that history is withheld.
+Useful links:
+Website: https://dolphinbench.ai
+Leaderboard: https://dolphinbench.ai/leaderboard/
+Dataset: https://dolphinbench.ai/dataset/
+Run and submit: https://dolphinbench.ai/run/
+Repository: https://github.com/mem0ai/dolphinbench
+Paper: https://arxiv.org/abs/2609.24971
+
+What DolphinBench measures
+DolphinBench covers three knowledge-work personas:
+
+Morgan, a startup CEO;
+
+Alex, an infrastructure engineer;
+
+and Riley, a product manager.
+Each has a simulated history spanning several years, with 3,400 to 5,128 user messages totaling about 500k tokens per persona (tiktoken o200k_base, user-message content only).
+Across the three histories the public schema lists 13,539 messages, spanning 2023-01-09 through 2027-12-20.
+Agents process that history, then take 600 tool-using tests (200 per persona) whose correct actions depend on information inside those sessions. Apps (Notion, Gmail, GitHub, Discord, calendar, CRM, and related surfaces) are simulated so wrong actions have consequences the grader can see.
+
+Worked example (Morgan, test 018)
+Morgan states a channel rule once (Apr 25, 2023, message 000437):
+Put release notes in #eng-releases only until the deploy is green. Do not post them in #eng-all pre-green. Channel rule, not optional.
+Years of unrelated conversation pile on top of it. Morgan’s history runs across 3,400 messages and about 44 months. Nothing later repeats the rule. The request arrives years later (Sep 14, 2026, test 018):
+Jake suggests #eng-all for this rollout update: “Deployment is in progress; validation is still pending.” Post the update to the appropriate Discord channel.
+The ask never names the correct channel; it points to #eng-all, the channel Morgan’s rule excludes. Pass: send_discord_message with result.channel = "#eng-releases". Fail: the same call to #eng-all, or a chat reply that never makes the call. Knowing the fact is not enough. The agent has to apply it.
+
+Results
+Official results across two harnesses (Hermes, Claude Code) and three agent models (GPT-5.6-Luna, MiniMax M3, Claude Sonnet 5).
+Live leaderboard: https://dolphinbench.ai/leaderboard/
+
+Hermes · GPT-5.6-Luna
+
+Memory
+Acc. %
+Agent $
+Memory $
+Total $
+Median (s)
+
+Built-in
+65.67
+61.48
+0.00
+61.48
+44.35
+
+Mem0
+70.67
+61.54
+34.68
+96.21
+37.69
+
+Honcho
+68.50
+96.56
+46.30
+142.85
+44.66
+
+Hindsight
+69.50
+57.99
+26.66
+84.65
+55.31
+
+Supermemory
+59.17
+63.86
+281.79
+345.64
+52.68
+Hermes · MiniMax M3
+
+Memory
+Acc. %
+Agent $
+Memory $
+Total $
+Median (s)
+
+Built-in
+26.50
+107.03
+0.00
+107.03
+51.40
+
+Mem0
+47.83
+111.71
+36.31
+148.02
+46.95
+
+Honcho
+47.33
+168.39
+43.46
+211.85
+80.33
+
+Hindsight
+41.00
+119.51
+38.82
+158.33
+144.28
+Claude Code · Claude Sonnet 5
+
+Memory
+Acc. %
+Agent $
+Memory $
+Total $
+Median (s)
+
+Built-in
+26.33
+1,132.75
+0.00
+1,132.75
+32.19
+
+Mem0
+32.33
+1,803.63
+26.94
+1,830.57
+42.30
+
+Honcho
+35.83
+1,556.02
+9.79
+1,565.82
+37.92
+The highest-scoring configuration completes 70.67% of tasks (Hermes - GPT-5.6-Luna - Mem0).
+
+How the Benchmark is built
+DolphinBench is built in hierarchical stages: personas, multi-year history planning, simulated app records, user messages, test construction, then verification.
+
+History (offline). An LLM plans years of work and life into quarterly plans and weekly events. Simulated apps are updated first. Then user messages are written in the persona’s voice against those records. We author only the user side of each conversation, because each agent would reply differently during ingestion. Each released history ends at the first complete session that brings it to at least 500k user-message tokens. Facts are checked against source messages before they are used to build tests.
+Test construction (offline). An LLM proposes tasks that require earlier information to complete new work, then writes the user request and grading checks. The request supplies what is needed to act while leaving the remembered details for the agent to determine. We avoid cues that announce a stored preference (for example, “the way I usually do it”).
+Test verification (offline gate). For each candidate test we provide the original history messages as oracle context. We run the test twice with GPT-5.6-Luna given those messages, and twice without them. Both with-history runs must pass every grading check, and both no-history runs must fail. We inspect failures without history to confirm they reflect missing information, not tool errors. Fact cards stay out of the agent’s context.
+What the agent does at run time. After the dataset ships, a participant’s memory system ingests the user-message history through a normal agent harness, message by message. The agent then receives the 600 tasks against simulated apps. Construction is finished before any submission starts. Evaluation only measures how well the agent and memory system use what was already built.
+
+How this sits next to other memory benchmarks
+Three properties matter for an agent-memory benchmark:
+
+action-based grading,
+
+cost and latency alongside accuracy,
+
+and solvability certification (pass with history, fail without)
+Here’s how DolphinBench compares with the existing benchmarks-
+
+How to run and evaluate
+Keep your agent, model, and memory. DolphinBench gives you the histories, the 600 tasks, the simulated apps, and the grading.
+You can submit your own evaluations to the leaderboard. Run the suite with your stack, then upload results at https://dolphinbench.ai/run/.
+Full harness details are in the guide.
+
+Looking forward
+DolphinBench evaluates agent memory through the actions agents take. We grade task completion, verify every test through agent runs with and without the relevant history, and require every result to report cost and latency alongside accuracy.
+We intend to keep the benchmark growing: histories that exceed model context windows, more personas, longer tasks, and interleaved ingestion and testing that better matches real deployments. As agents improve, the benchmarks should become harder with them.
+Mapping the Pareto frontier of agent memory.
+
+Relevant Links-
+Website: https://dolphinbench.ai
+Leaderboard: https://dolphinbench.ai/leaderboard/
+Dataset: https://dolphinbench.ai/dataset/
+Run: https://dolphinbench.ai/run/
+Repo: https://github.com/mem0ai/dolphinbench
+Paper: https://arxiv.org/abs/2609.24971
+
+GET TLDR from:
+
+Summarize
+
+Website/Footer
+
+Summarize
+
+Website/Footer
+
+Summarize
+
+Website/Footer
+
+Summarize
+
+Website/Footer
+
+Read More Mem0 Blogs
+
+Managing Time in AI Memory
+
+Oct 20, 2026
+
+·
+
+Product
+
+Managing Time in AI Memory
+
+Oct 20, 2026
+
+·
+
+Product
+
+Cursor Pricing 2026: Plans, Usage Models & Which to Choose
+
+Sep 29, 2026
+
+·
+
+Library
+
+Cursor Pricing 2026: Plans, Usage Models & Which to Choose
+
+Sep 29, 2026
+
+·
+
+Library
+
+Testing memory placement against  compaction cliff
+
+Sep 26, 2026
+
+·
+
+Library
+
+Testing memory placement against  compaction cliff
+
+Sep 26, 2026
+
+·
+
+Library
+
+Coding Agents Explained: What They Are and How They Differ from AI Assistants
+
+Sep 18, 2026
+
+·
+
+Library
+
+Coding Agents Explained: What They Are and How They Differ from AI Assistants
+
+Sep 18, 2026
+
+·
+
+Library
+
+OpenAI Codex vs Claude Code: Which AI Coding Agent Wins in 2026?
+
+Sep 17, 2026
+
+·
+
+Library
+
+OpenAI Codex vs Claude Code: Which AI Coding Agent Wins in 2026?
+
+Sep 17, 2026
+
+·
+
+Library
+
+Mem0 joins Vercel Marketplace
+
+Sep 16, 2026
+
+·
+
+Product
+
+Mem0 joins Vercel Marketplace
+
+Sep 16, 2026
+
+·
+
+Product
+
