@@ -1,0 +1,56 @@
+{
+ "R1": {
+  "gpt-4.1-mini": {
+   "ok": 13,
+   "err": 3,
+   "in": 43638,
+   "cached": 22784,
+   "out": 142,
+   "usd": 0.0108
+  },
+  "gpt-5-mini": {
+   "ok": 13,
+   "err": 9,
+   "in": 44546,
+   "cached": 32768,
+   "out": 3361,
+   "usd": 0.0105
+  },
+  "usd_total": 0.0213
+ },
+ "A1": {
+  "gpt-4.1-mini": {
+   "ok": 25,
+   "err": 0,
+   "in": 85795,
+   "cached": 59904,
+   "out": 381,
+   "usd": 0.017
+  },
+  "gpt-5-mini": {
+   "ok": 25,
+   "err": 0,
+   "in": 87450,
+   "cached": 74752,
+   "out": 9812,
+   "usd": 0.0247
+  },
+  "usd_total": 0.0417
+ },
+ "usd_grand_total": 0.063,
+ "prices_usd_per_1M": {
+  "source": "https://developers.openai.com/api/docs/pricing (Standard tier; redirect from platform.openai.com/docs/pricing)",
+  "read_utc": "2026-11-02",
+  "gpt-4.1-mini": {
+   "input": 0.4,
+   "cached_input": 0.1,
+   "output": 1.6
+  },
+  "gpt-5-mini": {
+   "input": 0.25,
+   "cached_input": 0.025,
+   "output": 2.0
+  }
+ },
+ "method": "sum over HTTP-200 requests recorded in the output files: (prompt-cached)*input + cached*cached_input + completion*output; completion includes reasoning tokens for gpt-5-mini; failed requests (HTTP 400) are counted as free; billing page not read (login needed); requests not recorded in an output file (key checks of /v1/models are free) are not included"
+}

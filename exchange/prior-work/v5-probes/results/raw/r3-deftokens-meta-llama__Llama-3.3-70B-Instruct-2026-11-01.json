@@ -1,0 +1,73 @@
+{
+ "probe": "p2_tool_choice_probe",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-01T14:05:34Z",
+ "models": {
+  "meta-llama/Llama-3.3-70B-Instruct": [
+   {
+    "cell": "deftokens n=0",
+    "status": 200,
+    "seconds": 0.35,
+    "usage": {
+     "prompt": 36,
+     "cached": 0,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=10",
+    "status": 200,
+    "seconds": 0.42,
+    "usage": {
+     "prompt": 1263,
+     "cached": 0,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=50",
+    "status": 200,
+    "seconds": 1.54,
+    "usage": {
+     "prompt": 8478,
+     "cached": 1232,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=100",
+    "status": 200,
+    "seconds": 2.48,
+    "usage": {
+     "prompt": 16801,
+     "cached": 8448,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=200",
+    "status": 200,
+    "seconds": 8.17,
+    "usage": {
+     "prompt": 36120,
+     "cached": 16768,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=457",
+    "status": 400,
+    "seconds": 0.8,
+    "usage": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.ContextWindowExceededError: litellm.BadRequestError: ContextWindowExceededError: Hosted_vllmException - {\\\"error\\\":{\\\"message\\\":\\\"This model's maximum context length is 65536 tokens. However, you requested 1 output tokens and your prompt contains at least 65536 input tokens, for a total of at least 65537 tokens. Please reduce the length of the input prompt or the numbe"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,821 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:19:17Z",
+ "models": {
+  "MiniMaxAI/MiniMax-M3": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.28,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.76,
+    "usage": {
+     "prompt": 4403,
+     "cached": 0,
+     "completion": 60
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "323fb725-8349-4c6b-992f-c627ee5c976f",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0013928999999999999",
+      "x-litellm-response-cost-original": "0.0013928999999999999",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0013208999999999999",
+      "x-litellm-response-cost-output": "7.199999999999999e-05",
+      "x-litellm-response-cost-reasoning": "3.7199999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "595.7839488983154",
+      "x-litellm-overhead-duration-ms": "68.4791",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.73,
+    "usage": {
+     "prompt": 4403,
+     "cached": 4224,
+     "completion": 45
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "ea56ae42-ba5d-4e41-b757-02f3e367c7a9",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00036114",
+      "x-litellm-response-cost-original": "0.00036114",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.3700000000000004e-05",
+      "x-litellm-response-cost-output": "5.4e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "1.92e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "376.30295753479004",
+      "x-litellm-overhead-duration-ms": "61.2309",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.55,
+    "usage": {
+     "prompt": 4403,
+     "cached": 4224,
+     "completion": 43
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "2f95fa2f-5c6d-4bec-a678-aad22600a1de",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00035873999999999997",
+      "x-litellm-response-cost-original": "0.00035873999999999997",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.3700000000000004e-05",
+      "x-litellm-response-cost-output": "5.1599999999999994e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "1.68e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "370.1300621032715",
+      "x-litellm-overhead-duration-ms": "59.974",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 1.06,
+    "usage": {
+     "prompt": 4403,
+     "cached": 4224,
+     "completion": 41
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "fc1fc4ce-f0ee-41fa-b710-1871671063a9",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00035633999999999997",
+      "x-litellm-response-cost-original": "0.00035633999999999997",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.3700000000000004e-05",
+      "x-litellm-response-cost-output": "4.9199999999999997e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "1.44e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "892.9572105407715",
+      "x-litellm-overhead-duration-ms": "340.0183",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.05,
+    "usage": {
+     "prompt": 4403,
+     "cached": 4224,
+     "completion": 63
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "121885d6-0f74-43a0-925c-23d574c5d0f3",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038273999999999996",
+      "x-litellm-response-cost-original": "0.00038273999999999996",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.3700000000000004e-05",
+      "x-litellm-response-cost-output": "7.56e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "4.0799999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "873.4540939331055",
+      "x-litellm-overhead-duration-ms": "462.8131",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.91,
+    "usage": {
+     "prompt": 4425,
+     "cached": 4224,
+     "completion": 109
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "076ae0ee-f790-48ed-a18d-8f480e9e0a94",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00044453999999999994",
+      "x-litellm-response-cost-original": "0.00044453999999999994",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.03e-05",
+      "x-litellm-response-cost-output": "0.00013079999999999998",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "8.999999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "737.6871109008789",
+      "x-litellm-overhead-duration-ms": "68.8062",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 109,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted. Want me to use one of those instead?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.01,
+    "usage": {
+     "prompt": 4425,
+     "cached": 4224,
+     "completion": 144
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "ac2e7c62-eb69-4ced-9f92-685a94eda543",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00048653999999999993",
+      "x-litellm-response-cost-original": "0.00048653999999999993",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.03e-05",
+      "x-litellm-response-cost-output": "0.0001728",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "0.000138",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "852.5488376617432",
+      "x-litellm-overhead-duration-ms": "79.5448",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 86,
+     "text_head": "Sorry, tool_07 isn't allowed right now\u2014only tool_03, tool_04, and tool_05 can be used.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.83,
+    "usage": {
+     "prompt": 4425,
+     "cached": 4224,
+     "completion": 121
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "8c2a5ad4-b16d-401b-bca4-de649a4a0d71",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00045893999999999997",
+      "x-litellm-response-cost-original": "0.00045893999999999997",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.03e-05",
+      "x-litellm-response-cost-output": "0.0001452",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "0.0001152",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "665.0040149688721",
+      "x-litellm-overhead-duration-ms": "58.167",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 72,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.9,
+    "usage": {
+     "prompt": 4425,
+     "cached": 4224,
+     "completion": 132
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "dde4a595-b44d-4ccf-b16d-4d851f57fd8a",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00047213999999999996",
+      "x-litellm-response-cost-original": "0.00047213999999999996",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.03e-05",
+      "x-litellm-response-cost-output": "0.0001584",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "0.00011159999999999999",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "718.829870223999",
+      "x-litellm-overhead-duration-ms": "60.7529",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 129,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted right now. Let me know if you'd like to use one of those.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.77,
+    "usage": {
+     "prompt": 4425,
+     "cached": 4224,
+     "completion": 96
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": "vllm-0.32.0-tp4-7a90bd24",
+     "headers": {
+      "x-litellm-call-id": "b62661c2-797d-4c9b-b969-e9fd957deca4",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00042893999999999994",
+      "x-litellm-response-cost-original": "0.00042893999999999994",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.03e-05",
+      "x-litellm-response-cost-output": "0.00011520000000000001",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-reasoning": "8.04e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "592.8359031677246",
+      "x-litellm-overhead-duration-ms": "73.2388",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 90,
+     "text_head": "I'm not able to call tool_07 right now \u2014 only tool_03, tool_04, and tool_05 are permitted.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.77,
+    "usage": {
+     "prompt": 4406,
+     "cached": 0,
+     "completion": 56
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "54f56e59-4aff-436d-9240-7824a0ed74c2",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001389",
+      "x-litellm-response-cost-original": "0.001389",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.620000000000007e-05",
+      "x-litellm-response-cost-output": "6.720000000000001e-05",
+      "x-litellm-response-cost-cache-creation": "0.0013055999999999999",
+      "x-litellm-response-cost-reasoning": "3.12e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "585.1399898529053",
+      "x-litellm-overhead-duration-ms": "78.6941",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 153,
+     "text_head": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"tool_07\">]<]minimax[>[<note>probe]<]minimax[>[</note>]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.72,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4224,
+     "completion": 63
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "cc54f5ac-0d7e-425f-b929-8759c03f49e5",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038364",
+      "x-litellm-response-cost-original": "0.00038364",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.6200000000000028e-05",
+      "x-litellm-response-cost-output": "7.56e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-cache-creation": "3.84e-05",
+      "x-litellm-response-cost-reasoning": "3.96e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "496.6249465942383",
+      "x-litellm-overhead-duration-ms": "101.2509",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 153,
+     "text_head": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"tool_07\">]<]minimax[>[<note>probe]<]minimax[>[</note>]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.57,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4224,
+     "completion": 48
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "4d843aad-58e4-4334-be84-6b32ad87bdc4",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00036564",
+      "x-litellm-response-cost-original": "0.00036564",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.6200000000000028e-05",
+      "x-litellm-response-cost-output": "5.7600000000000004e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-cache-creation": "3.84e-05",
+      "x-litellm-response-cost-reasoning": "2.16e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "383.39805603027344",
+      "x-litellm-overhead-duration-ms": "56.0269",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 153,
+     "text_head": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"tool_07\">]<]minimax[>[<note>probe]<]minimax[>[</note>]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.6,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4224,
+     "completion": 60
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "6b8915ef-f36c-4891-b34c-fe3e61ba8250",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038004",
+      "x-litellm-response-cost-original": "0.00038004",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.6200000000000028e-05",
+      "x-litellm-response-cost-output": "7.2e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-cache-creation": "3.84e-05",
+      "x-litellm-response-cost-reasoning": "3.6e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "420.17602920532227",
+      "x-litellm-overhead-duration-ms": "47.9679",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 153,
+     "text_head": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"tool_07\">]<]minimax[>[<note>probe]<]minimax[>[</note>]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.64,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4224,
+     "completion": 61
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "MiniMaxAI/MiniMax-M3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "95a9162b-fe68-457d-8adf-64a9751c5a53",
+      "x-litellm-model-id": "29c3eee2-d6e8-4909-b4bf-499a475bce8f",
+      "x-litellm-model-name": "openai/MiniMaxAI/MiniMax-M3-MXFP8",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038124",
+      "x-litellm-response-cost-original": "0.00038124",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.6200000000000028e-05",
+      "x-litellm-response-cost-output": "7.319999999999999e-05",
+      "x-litellm-response-cost-cache-read": "0.00025343999999999996",
+      "x-litellm-response-cost-cache-creation": "3.84e-05",
+      "x-litellm-response-cost-reasoning": "3.7199999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "426.56493186950684",
+      "x-litellm-overhead-duration-ms": "51.9137",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "MiniMaxAI/MiniMax-M3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 153,
+     "text_head": "]<]minimax[>[<tool_call>\n]<]minimax[>[<invoke name=\"tool_07\">]<]minimax[>[<note>probe]<]minimax[>[</note>]<]minimax[>[</invoke>\n]<]minimax[>[</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

@@ -1,0 +1,636 @@
+{
+ "note": "Counts only. Subset = every 6th dev task from #1 (rule fixed before any outcome was read).",
+ "subset": [
+  "50e1ac9_1",
+  "530b157_1",
+  "b119b1f_1",
+  "0d8a4ee_1",
+  "3ab5b8b_1",
+  "383cbac_1",
+  "57c3486_1",
+  "6bdbc26_1",
+  "6c2c621_1",
+  "4fab96f_1"
+ ],
+ "runs": {
+  "or_b2_pilot": {
+   "tag": "or-b2-pilot",
+   "model": "minimax/minimax-m3",
+   "tasks": 10,
+   "passed": 7,
+   "passed_ids": [
+    "50e1ac9_1",
+    "b119b1f_1",
+    "0d8a4ee_1",
+    "383cbac_1",
+    "57c3486_1",
+    "6bdbc26_1",
+    "4fab96f_1"
+   ],
+   "failed": {
+    "530b157_1": "evaluation_failed",
+    "3ab5b8b_1": "evaluation_failed",
+    "6c2c621_1": "evaluation_failed"
+   },
+   "llm_calls": 130,
+   "turns": 130,
+   "prompt_tokens": 11899694,
+   "cached_prompt_tokens": 11062305,
+   "completion_tokens": 100489,
+   "step_capped": [],
+   "cost_reported_usd": 0.9644,
+   "providers": [
+    "GMICloud",
+    "Minimax",
+    "Novita",
+    "StreamLake"
+   ],
+   "functions_offered_first_agent_call": [
+    469
+   ],
+   "per_task": {
+    "50e1ac9_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 9,
+     "prompt_tokens": 754894,
+     "cached_prompt_tokens": 732196,
+     "completion_tokens": 6472,
+     "cost_usd": 0.058508,
+     "functions_offered": 469
+    },
+    "530b157_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 36,
+     "llm_calls": 36,
+     "prompt_tokens": 3776919,
+     "cached_prompt_tokens": 3652224,
+     "completion_tokens": 40257,
+     "cost_usd": 0.30485,
+     "functions_offered": 469
+    },
+    "b119b1f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 9,
+     "prompt_tokens": 701206,
+     "cached_prompt_tokens": 695808,
+     "completion_tokens": 1525,
+     "cost_usd": 0.045198,
+     "functions_offered": 469
+    },
+    "0d8a4ee_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 8,
+     "llm_calls": 8,
+     "prompt_tokens": 642651,
+     "cached_prompt_tokens": 559360,
+     "completion_tokens": 3160,
+     "cost_usd": 0.062341,
+     "functions_offered": 469
+    },
+    "3ab5b8b_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 11,
+     "llm_calls": 11,
+     "prompt_tokens": 926416,
+     "cached_prompt_tokens": 828862,
+     "completion_tokens": 10661,
+     "cost_usd": 0.091791,
+     "functions_offered": 469
+    },
+    "383cbac_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 9,
+     "prompt_tokens": 784548,
+     "cached_prompt_tokens": 680014,
+     "completion_tokens": 4670,
+     "cost_usd": 0.077765,
+     "functions_offered": 469
+    },
+    "57c3486_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 20,
+     "llm_calls": 20,
+     "prompt_tokens": 1947878,
+     "cached_prompt_tokens": 1750307,
+     "completion_tokens": 15034,
+     "cost_usd": 0.145864,
+     "functions_offered": 469
+    },
+    "6bdbc26_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 5,
+     "llm_calls": 5,
+     "prompt_tokens": 380654,
+     "cached_prompt_tokens": 376576,
+     "completion_tokens": 359,
+     "cost_usd": 0.024249,
+     "functions_offered": 469
+    },
+    "6c2c621_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 16,
+     "llm_calls": 16,
+     "prompt_tokens": 1432481,
+     "cached_prompt_tokens": 1315534,
+     "completion_tokens": 16675,
+     "cost_usd": 0.11027,
+     "functions_offered": 469
+    },
+    "4fab96f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 7,
+     "prompt_tokens": 552047,
+     "cached_prompt_tokens": 471424,
+     "completion_tokens": 1676,
+     "cost_usd": 0.043587,
+     "functions_offered": 469
+    }
+   },
+   "_ok_predictor_flag": [
+    false
+   ]
+  },
+  "or_control": {
+   "tag": "or-ctrl-pilot",
+   "model": "minimax/minimax-m3",
+   "tasks": 10,
+   "passed": 7,
+   "passed_ids": [
+    "50e1ac9_1",
+    "530b157_1",
+    "b119b1f_1",
+    "0d8a4ee_1",
+    "383cbac_1",
+    "57c3486_1",
+    "6bdbc26_1"
+   ],
+   "failed": {
+    "3ab5b8b_1": "evaluation_failed",
+    "6c2c621_1": "evaluation_failed",
+    "4fab96f_1": "evaluation_failed"
+   },
+   "llm_calls": 110,
+   "turns": 100,
+   "prompt_tokens": 1357750,
+   "cached_prompt_tokens": 1121186,
+   "completion_tokens": 66225,
+   "step_capped": [],
+   "cost_reported_usd": 0.1979,
+   "providers": [
+    "CoreWeave",
+    "GMICloud",
+    "Minimax",
+    "Novita",
+    "StreamLake"
+   ],
+   "functions_offered_first_agent_call": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    13
+   ],
+   "per_task": {
+    "50e1ac9_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 10,
+     "prompt_tokens": 148392,
+     "cached_prompt_tokens": 108182,
+     "completion_tokens": 7938,
+     "cost_usd": 0.027526,
+     "functions_offered": 11
+    },
+    "530b157_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 15,
+     "llm_calls": 16,
+     "prompt_tokens": 141775,
+     "cached_prompt_tokens": 130176,
+     "completion_tokens": 4190,
+     "cost_usd": 0.01621,
+     "functions_offered": 11
+    },
+    "b119b1f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 10,
+     "prompt_tokens": 63615,
+     "cached_prompt_tokens": 49280,
+     "completion_tokens": 1302,
+     "cost_usd": 0.00827,
+     "functions_offered": 9
+    },
+    "0d8a4ee_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 11,
+     "llm_calls": 12,
+     "prompt_tokens": 225068,
+     "cached_prompt_tokens": 187520,
+     "completion_tokens": 11466,
+     "cost_usd": 0.036173,
+     "functions_offered": 8
+    },
+    "3ab5b8b_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 9,
+     "llm_calls": 10,
+     "prompt_tokens": 105145,
+     "cached_prompt_tokens": 75479,
+     "completion_tokens": 7055,
+     "cost_usd": 0.021346,
+     "functions_offered": 8
+    },
+    "383cbac_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 8,
+     "llm_calls": 9,
+     "prompt_tokens": 99706,
+     "cached_prompt_tokens": 80619,
+     "completion_tokens": 2739,
+     "cost_usd": 0.013742,
+     "functions_offered": 10
+    },
+    "57c3486_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 15,
+     "llm_calls": 16,
+     "prompt_tokens": 266932,
+     "cached_prompt_tokens": 231493,
+     "completion_tokens": 13762,
+     "cost_usd": 0.032841,
+     "functions_offered": 8
+    },
+    "6bdbc26_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 5,
+     "llm_calls": 6,
+     "prompt_tokens": 31402,
+     "cached_prompt_tokens": 26240,
+     "completion_tokens": 476,
+     "cost_usd": 0.003593,
+     "functions_offered": 7
+    },
+    "6c2c621_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 13,
+     "llm_calls": 14,
+     "prompt_tokens": 224333,
+     "cached_prompt_tokens": 189957,
+     "completion_tokens": 15665,
+     "cost_usd": 0.032419,
+     "functions_offered": 13
+    },
+    "4fab96f_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 6,
+     "llm_calls": 7,
+     "prompt_tokens": 51382,
+     "cached_prompt_tokens": 42240,
+     "completion_tokens": 1632,
+     "cost_usd": 0.005801,
+     "functions_offered": 9
+    }
+   },
+   "_ok_predictor_flag": [
+    true
+   ]
+  },
+  "scads_part4": {
+   "tag": "minimax-m3",
+   "model": "MiniMaxAI/MiniMax-M3",
+   "tasks": 10,
+   "passed": 8,
+   "passed_ids": [
+    "50e1ac9_1",
+    "530b157_1",
+    "b119b1f_1",
+    "3ab5b8b_1",
+    "57c3486_1",
+    "6bdbc26_1",
+    "6c2c621_1",
+    "4fab96f_1"
+   ],
+   "failed": {
+    "0d8a4ee_1": "evaluation_failed",
+    "383cbac_1": "step_cap_reached"
+   },
+   "llm_calls": 131,
+   "turns": 121,
+   "prompt_tokens": 4548310,
+   "cached_prompt_tokens": 4294016,
+   "completion_tokens": 61701,
+   "step_capped": [
+    "383cbac_1"
+   ],
+   "cost_reported_usd": null,
+   "providers": [
+    "None"
+   ],
+   "functions_offered_first_agent_call": [
+    6,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "per_task": {
+    "50e1ac9_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 8,
+     "llm_calls": 9,
+     "prompt_tokens": 98174,
+     "cached_prompt_tokens": 79232,
+     "completion_tokens": 4841,
+     "cost_usd": null,
+     "functions_offered": 11
+    },
+    "530b157_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 60019,
+     "cached_prompt_tokens": 50688,
+     "completion_tokens": 1462,
+     "cost_usd": null,
+     "functions_offered": 12
+    },
+    "b119b1f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 12,
+     "llm_calls": 13,
+     "prompt_tokens": 78413,
+     "cached_prompt_tokens": 71040,
+     "completion_tokens": 1851,
+     "cost_usd": null,
+     "functions_offered": 9
+    },
+    "0d8a4ee_1": {
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 48939,
+     "cached_prompt_tokens": 42112,
+     "completion_tokens": 2532,
+     "cost_usd": null,
+     "functions_offered": 6
+    },
+    "3ab5b8b_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 68297,
+     "cached_prompt_tokens": 57216,
+     "completion_tokens": 6023,
+     "cost_usd": null,
+     "functions_offered": 9
+    },
+    "383cbac_1": {
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "turns": 49,
+     "llm_calls": 50,
+     "prompt_tokens": 3749588,
+     "cached_prompt_tokens": 3604736,
+     "completion_tokens": 9580,
+     "cost_usd": null,
+     "functions_offered": 8
+    },
+    "57c3486_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 12,
+     "llm_calls": 13,
+     "prompt_tokens": 250994,
+     "cached_prompt_tokens": 227840,
+     "completion_tokens": 15028,
+     "cost_usd": null,
+     "functions_offered": 13
+    },
+    "6bdbc26_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 5,
+     "llm_calls": 6,
+     "prompt_tokens": 32646,
+     "cached_prompt_tokens": 27648,
+     "completion_tokens": 595,
+     "cost_usd": null,
+     "functions_offered": 8
+    },
+    "6c2c621_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 8,
+     "llm_calls": 9,
+     "prompt_tokens": 107351,
+     "cached_prompt_tokens": 88448,
+     "completion_tokens": 16804,
+     "cost_usd": null,
+     "functions_offered": 10
+    },
+    "4fab96f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 6,
+     "llm_calls": 7,
+     "prompt_tokens": 53889,
+     "cached_prompt_tokens": 45056,
+     "completion_tokens": 2985,
+     "cost_usd": null,
+     "functions_offered": 10
+    }
+   },
+   "_ok_predictor_flag": [
+    true
+   ]
+  },
+  "scads_b1": {
+   "tag": "minimax-m3-b1",
+   "model": "MiniMaxAI/MiniMax-M3",
+   "tasks": 10,
+   "passed": 9,
+   "passed_ids": [
+    "50e1ac9_1",
+    "530b157_1",
+    "b119b1f_1",
+    "0d8a4ee_1",
+    "3ab5b8b_1",
+    "57c3486_1",
+    "6bdbc26_1",
+    "6c2c621_1",
+    "4fab96f_1"
+   ],
+   "failed": {
+    "383cbac_1": "step_cap_reached"
+   },
+   "llm_calls": 126,
+   "turns": 116,
+   "prompt_tokens": 4439858,
+   "cached_prompt_tokens": 4168192,
+   "completion_tokens": 63049,
+   "step_capped": [
+    "383cbac_1"
+   ],
+   "cost_reported_usd": null,
+   "providers": [
+    "None"
+   ],
+   "functions_offered_first_agent_call": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    13
+   ],
+   "per_task": {
+    "50e1ac9_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 79422,
+     "cached_prompt_tokens": 52864,
+     "completion_tokens": 4900,
+     "cost_usd": null,
+     "functions_offered": 11
+    },
+    "530b157_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 6,
+     "llm_calls": 7,
+     "prompt_tokens": 51468,
+     "cached_prompt_tokens": 42240,
+     "completion_tokens": 1294,
+     "cost_usd": null,
+     "functions_offered": 13
+    },
+    "b119b1f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 9,
+     "llm_calls": 10,
+     "prompt_tokens": 66563,
+     "cached_prompt_tokens": 59008,
+     "completion_tokens": 1970,
+     "cost_usd": null,
+     "functions_offered": 10
+    },
+    "0d8a4ee_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 52689,
+     "cached_prompt_tokens": 44288,
+     "completion_tokens": 2386,
+     "cost_usd": null,
+     "functions_offered": 7
+    },
+    "3ab5b8b_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 7,
+     "llm_calls": 8,
+     "prompt_tokens": 68144,
+     "cached_prompt_tokens": 57216,
+     "completion_tokens": 5933,
+     "cost_usd": null,
+     "functions_offered": 9
+    },
+    "383cbac_1": {
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "turns": 49,
+     "llm_calls": 50,
+     "prompt_tokens": 3687936,
+     "cached_prompt_tokens": 3536256,
+     "completion_tokens": 11197,
+     "cost_usd": null,
+     "functions_offered": 9
+    },
+    "57c3486_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 12,
+     "llm_calls": 13,
+     "prompt_tokens": 241964,
+     "cached_prompt_tokens": 217984,
+     "completion_tokens": 14771,
+     "cost_usd": null,
+     "functions_offered": 9
+    },
+    "6bdbc26_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 5,
+     "llm_calls": 6,
+     "prompt_tokens": 32652,
+     "cached_prompt_tokens": 27520,
+     "completion_tokens": 685,
+     "cost_usd": null,
+     "functions_offered": 8
+    },
+    "6c2c621_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 8,
+     "llm_calls": 9,
+     "prompt_tokens": 105934,
+     "cached_prompt_tokens": 86912,
+     "completion_tokens": 16652,
+     "cost_usd": null,
+     "functions_offered": 10
+    },
+    "4fab96f_1": {
+     "passed": true,
+     "failure_type": null,
+     "turns": 6,
+     "llm_calls": 7,
+     "prompt_tokens": 53086,
+     "cached_prompt_tokens": 43904,
+     "completion_tokens": 3261,
+     "cost_usd": null,
+     "functions_offered": 9
+    }
+   },
+   "_ok_predictor_flag": [
+    true
+   ]
+  }
+ }
+}

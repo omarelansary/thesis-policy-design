@@ -1,0 +1,7234 @@
+{
+ "models": {
+  "minimax-m3": {
+   "model": "MiniMaxAI/MiniMax-M3",
+   "note": "per_call_prompt_cached lists one [prompt, cached] pair per LM call in order; entry 0 is the API-predictor call (no tools declared).",
+   "totals_without_predictor": {
+    "tasks": 57,
+    "passed": 50,
+    "agent_llm_calls": 601,
+    "prompt_tokens": 13560768,
+    "cached_prompt_tokens": 12597120,
+    "completion_tokens": 377222
+   },
+   "totals_predictor_only": {
+    "calls": 57,
+    "prompt_tokens": 437675,
+    "cached_prompt_tokens": 423424,
+    "completion_tokens": 19344
+   },
+   "distributions_without_predictor": {
+    "turns": {
+     "n": 57,
+     "min": 5,
+     "median": 8,
+     "mean": 10.54,
+     "p90": 12.4,
+     "max": 49
+    },
+    "prompt_tokens": {
+     "n": 57,
+     "min": 23334,
+     "median": 69364,
+     "mean": 237908.21,
+     "p90": 234136.8,
+     "max": 3745656
+    },
+    "completion_tokens": {
+     "n": 57,
+     "min": 388,
+     "median": 4101,
+     "mean": 6617.93,
+     "p90": 14543.0,
+     "max": 45849
+    }
+   },
+   "distributions_predictor": {
+    "prompt_tokens": {
+     "n": 57,
+     "min": 7664,
+     "median": 7672,
+     "mean": 7678.51,
+     "p90": 7702.8,
+     "max": 7713
+    },
+    "cached_prompt_tokens": {
+     "n": 57,
+     "min": 7424,
+     "median": 7424,
+     "mean": 7428.49,
+     "p90": 7424.0,
+     "max": 7552
+    },
+    "completion_tokens": {
+     "n": 57,
+     "min": 156,
+     "median": 308,
+     "mean": 339.37,
+     "p90": 498.6,
+     "max": 742
+    },
+    "functions_offered": {
+     "n": 57,
+     "min": 5,
+     "median": 10,
+     "mean": 9.74,
+     "p90": 12.0,
+     "max": 17
+    }
+   },
+   "required_apis": {
+    "tasks_with_all_required_among_offered": 38,
+    "tasks_with_all_required_among_offered_and_passed": 37,
+    "tasks_not_all_required_among_offered_and_passed": 13,
+    "required_apis_total": 459,
+    "required_apis_among_offered_total": 422,
+    "required_apis_per_task": {
+     "n": 57,
+     "min": 6,
+     "median": 8,
+     "mean": 8.05,
+     "p90": 9.4,
+     "max": 10
+    }
+   },
+   "step_capped_tasks": {
+    "n": 3,
+    "task_ids": [
+     "0d8a4ee_2",
+     "383cbac_1",
+     "383cbac_3"
+    ],
+    "prompt_tokens_incl_predictor": 8219836,
+    "prompt_tokens_all_tasks_incl_predictor": 13998443,
+    "prompt_tokens_without_predictor_in_capped": 8196730
+   },
+   "totals_without_predictor_and_without_capped_tasks": {
+    "tasks": 54,
+    "passed": 50,
+    "agent_llm_calls": 454,
+    "prompt_tokens": 5364038,
+    "completion_tokens": 347286
+   },
+   "tasks": [
+    {
+     "task_id": "50e1ac9_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7680,
+     "predictor_cached": 7424,
+     "predictor_completion": 403,
+     "functions_offered_to_agent": 11,
+     "required_apis": 10,
+     "required_apis_among_offered": 10,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 90494,
+     "agent_cached": 71808,
+     "agent_completion": 4438,
+     "per_call_prompt_cached": [
+      [
+       7680,
+       7424
+      ],
+      [
+       5124,
+       512
+      ],
+      [
+       5451,
+       4992
+      ],
+      [
+       5642,
+       5376
+      ],
+      [
+       9658,
+       5888
+      ],
+      [
+       10274,
+       10112
+      ],
+      [
+       14271,
+       11136
+      ],
+      [
+       18635,
+       14976
+      ],
+      [
+       21439,
+       18816
+      ]
+     ]
+    },
+    {
+     "task_id": "50e1ac9_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7679,
+     "predictor_cached": 7424,
+     "predictor_completion": 343,
+     "functions_offered_to_agent": 12,
+     "required_apis": 10,
+     "required_apis_among_offered": 10,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 116910,
+     "agent_cached": 95744,
+     "agent_completion": 5541,
+     "per_call_prompt_cached": [
+      [
+       7679,
+       7424
+      ],
+      [
+       5199,
+       384
+      ],
+      [
+       5561,
+       5120
+      ],
+      [
+       5749,
+       5376
+      ],
+      [
+       9801,
+       6016
+      ],
+      [
+       10432,
+       10240
+      ],
+      [
+       14636,
+       11136
+      ],
+      [
+       18752,
+       15488
+      ],
+      [
+       22628,
+       19328
+      ],
+      [
+       24152,
+       22656
+      ]
+     ]
+    },
+    {
+     "task_id": "50e1ac9_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7678,
+     "predictor_cached": 7424,
+     "predictor_completion": 656,
+     "functions_offered_to_agent": 17,
+     "required_apis": 10,
+     "required_apis_among_offered": 10,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 100049,
+     "agent_cached": 84224,
+     "agent_completion": 4603,
+     "per_call_prompt_cached": [
+      [
+       7678,
+       7424
+      ],
+      [
+       7151,
+       1408
+      ],
+      [
+       7588,
+       7168
+      ],
+      [
+       7773,
+       7424
+      ],
+      [
+       12224,
+       8064
+      ],
+      [
+       12781,
+       12544
+      ],
+      [
+       16641,
+       13312
+      ],
+      [
+       17905,
+       16512
+      ],
+      [
+       17986,
+       17792
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 415,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 35773,
+     "agent_cached": 26368,
+     "agent_completion": 5963,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       5066,
+       384
+      ],
+      [
+       5396,
+       4992
+      ],
+      [
+       5583,
+       5248
+      ],
+      [
+       9593,
+       5888
+      ],
+      [
+       10135,
+       9856
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 590,
+     "functions_offered_to_agent": 7,
+     "required_apis": 7,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 40411,
+     "agent_cached": 31104,
+     "agent_completion": 7628,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4908,
+       256
+      ],
+      [
+       5260,
+       4864
+      ],
+      [
+       5377,
+       5120
+      ],
+      [
+       5571,
+       5248
+      ],
+      [
+       9374,
+       5888
+      ],
+      [
+       9921,
+       9728
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 305,
+     "functions_offered_to_agent": 8,
+     "required_apis": 7,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 5,
+     "agent_prompt": 36806,
+     "agent_cached": 26752,
+     "agent_completion": 12653,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4975,
+       384
+      ],
+      [
+       5322,
+       4864
+      ],
+      [
+       5513,
+       5120
+      ],
+      [
+       10220,
+       5888
+      ],
+      [
+       10776,
+       10496
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7706,
+     "predictor_cached": 7424,
+     "predictor_completion": 294,
+     "functions_offered_to_agent": 12,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 7,
+     "agent_prompt": 52313,
+     "agent_cached": 43264,
+     "agent_completion": 1168,
+     "per_call_prompt_cached": [
+      [
+       7706,
+       7424
+      ],
+      [
+       5570,
+       384
+      ],
+      [
+       5964,
+       5504
+      ],
+      [
+       6315,
+       5888
+      ],
+      [
+       7191,
+       6272
+      ],
+      [
+       8785,
+       7168
+      ],
+      [
+       9047,
+       8832
+      ],
+      [
+       9441,
+       9216
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7704,
+     "predictor_cached": 7424,
+     "predictor_completion": 331,
+     "functions_offered_to_agent": 13,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 61295,
+     "agent_cached": 53120,
+     "agent_completion": 1094,
+     "per_call_prompt_cached": [
+      [
+       7704,
+       7424
+      ],
+      [
+       5683,
+       1536
+      ],
+      [
+       6120,
+       5632
+      ],
+      [
+       6310,
+       6016
+      ],
+      [
+       7197,
+       6272
+      ],
+      [
+       8648,
+       7168
+      ],
+      [
+       8897,
+       8576
+      ],
+      [
+       9118,
+       8832
+      ],
+      [
+       9322,
+       9088
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7707,
+     "predictor_cached": 7552,
+     "predictor_completion": 309,
+     "functions_offered_to_agent": 11,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 7,
+     "agent_prompt": 51282,
+     "agent_cached": 42496,
+     "agent_completion": 1323,
+     "per_call_prompt_cached": [
+      [
+       7707,
+       7552
+      ],
+      [
+       5203,
+       640
+      ],
+      [
+       5603,
+       5120
+      ],
+      [
+       5952,
+       5504
+      ],
+      [
+       7544,
+       6016
+      ],
+      [
+       8323,
+       7552
+      ],
+      [
+       9104,
+       8320
+      ],
+      [
+       9553,
+       9344
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7672,
+     "predictor_cached": 7424,
+     "predictor_completion": 261,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 88000,
+     "agent_cached": 72320,
+     "agent_completion": 7449,
+     "per_call_prompt_cached": [
+      [
+       7672,
+       7424
+      ],
+      [
+       4690,
+       384
+      ],
+      [
+       5098,
+       4608
+      ],
+      [
+       5325,
+       4992
+      ],
+      [
+       9823,
+       5504
+      ],
+      [
+       10567,
+       10112
+      ],
+      [
+       15019,
+       11392
+      ],
+      [
+       18091,
+       16896
+      ],
+      [
+       19387,
+       18432
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 170,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 74939,
+     "agent_cached": 58112,
+     "agent_completion": 6811,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4690,
+       1280
+      ],
+      [
+       5086,
+       4608
+      ],
+      [
+       5290,
+       4992
+      ],
+      [
+       10135,
+       5376
+      ],
+      [
+       10876,
+       10624
+      ],
+      [
+       15929,
+       12544
+      ],
+      [
+       22933,
+       18688
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 328,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 57727,
+     "agent_cached": 45952,
+     "agent_completion": 6065,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4688,
+       1280
+      ],
+      [
+       5091,
+       4608
+      ],
+      [
+       5244,
+       4992
+      ],
+      [
+       5431,
+       5120
+      ],
+      [
+       10462,
+       5504
+      ],
+      [
+       11133,
+       10880
+      ],
+      [
+       15678,
+       13568
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 315,
+     "functions_offered_to_agent": 9,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 12,
+     "agent_prompt": 70743,
+     "agent_cached": 63616,
+     "agent_completion": 1536,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4555,
+       512
+      ],
+      [
+       4929,
+       4480
+      ],
+      [
+       5117,
+       4736
+      ],
+      [
+       5363,
+       5120
+      ],
+      [
+       5579,
+       5376
+      ],
+      [
+       5831,
+       5504
+      ],
+      [
+       6016,
+       5760
+      ],
+      [
+       6260,
+       6016
+      ],
+      [
+       6440,
+       6272
+      ],
+      [
+       6684,
+       6400
+      ],
+      [
+       6864,
+       6656
+      ],
+      [
+       7105,
+       6784
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7669,
+     "predictor_cached": 7424,
+     "predictor_completion": 173,
+     "functions_offered_to_agent": 11,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 12,
+     "agent_prompt": 83310,
+     "agent_cached": 75008,
+     "agent_completion": 1628,
+     "per_call_prompt_cached": [
+      [
+       7669,
+       7424
+      ],
+      [
+       5338,
+       384
+      ],
+      [
+       5717,
+       5248
+      ],
+      [
+       5911,
+       5632
+      ],
+      [
+       6480,
+       5888
+      ],
+      [
+       6702,
+       6528
+      ],
+      [
+       6958,
+       6656
+      ],
+      [
+       7145,
+       6912
+      ],
+      [
+       7391,
+       7040
+      ],
+      [
+       7574,
+       7296
+      ],
+      [
+       7819,
+       7680
+      ],
+      [
+       8002,
+       7808
+      ],
+      [
+       8273,
+       7936
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7669,
+     "predictor_cached": 7424,
+     "predictor_completion": 156,
+     "functions_offered_to_agent": 11,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 11,
+     "agent_prompt": 79426,
+     "agent_cached": 72576,
+     "agent_completion": 1807,
+     "per_call_prompt_cached": [
+      [
+       7669,
+       7424
+      ],
+      [
+       5350,
+       1792
+      ],
+      [
+       5622,
+       5248
+      ],
+      [
+       5729,
+       5504
+      ],
+      [
+       5922,
+       5632
+      ],
+      [
+       7151,
+       6016
+      ],
+      [
+       7726,
+       7552
+      ],
+      [
+       7989,
+       7808
+      ],
+      [
+       8174,
+       7936
+      ],
+      [
+       8371,
+       8192
+      ],
+      [
+       8569,
+       8320
+      ],
+      [
+       8823,
+       8576
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7667,
+     "predictor_cached": 7424,
+     "predictor_completion": 324,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 44857,
+     "agent_cached": 36224,
+     "agent_completion": 4024,
+     "per_call_prompt_cached": [
+      [
+       7667,
+       7424
+      ],
+      [
+       5066,
+       512
+      ],
+      [
+       5385,
+       4864
+      ],
+      [
+       5580,
+       5248
+      ],
+      [
+       8208,
+       5760
+      ],
+      [
+       8571,
+       8320
+      ],
+      [
+       12047,
+       11520
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7667,
+     "predictor_cached": 7424,
+     "predictor_completion": 295,
+     "functions_offered_to_agent": 13,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 48105,
+     "agent_cached": 38528,
+     "agent_completion": 4101,
+     "per_call_prompt_cached": [
+      [
+       7667,
+       7424
+      ],
+      [
+       5142,
+       512
+      ],
+      [
+       5485,
+       4992
+      ],
+      [
+       5678,
+       5376
+      ],
+      [
+       9174,
+       5760
+      ],
+      [
+       9541,
+       9344
+      ],
+      [
+       13085,
+       12544
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7667,
+     "predictor_cached": 7424,
+     "predictor_completion": 324,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 45741,
+     "agent_cached": 37760,
+     "agent_completion": 4099,
+     "per_call_prompt_cached": [
+      [
+       7667,
+       7424
+      ],
+      [
+       4968,
+       1408
+      ],
+      [
+       5296,
+       4864
+      ],
+      [
+       5497,
+       5120
+      ],
+      [
+       8563,
+       5632
+      ],
+      [
+       8936,
+       8704
+      ],
+      [
+       12481,
+       12032
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_1",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7680,
+     "predictor_cached": 7424,
+     "predictor_completion": 270,
+     "functions_offered_to_agent": 6,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 7,
+     "agent_prompt": 41259,
+     "agent_cached": 34688,
+     "agent_completion": 2262,
+     "per_call_prompt_cached": [
+      [
+       7680,
+       7424
+      ],
+      [
+       4288,
+       768
+      ],
+      [
+       4665,
+       4224
+      ],
+      [
+       4853,
+       4480
+      ],
+      [
+       5750,
+       4992
+      ],
+      [
+       6024,
+       5760
+      ],
+      [
+       7294,
+       6400
+      ],
+      [
+       8385,
+       8064
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_2",
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "predictor_prompt": 7681,
+     "predictor_cached": 7424,
+     "predictor_completion": 237,
+     "functions_offered_to_agent": 5,
+     "required_apis": 8,
+     "required_apis_among_offered": 4,
+     "all_required_among_offered": false,
+     "agent_turns": 49,
+     "agent_prompt": 709198,
+     "agent_cached": 686336,
+     "agent_completion": 8819,
+     "per_call_prompt_cached": [
+      [
+       7681,
+       7424
+      ],
+      [
+       4271,
+       256
+      ],
+      [
+       4649,
+       4224
+      ],
+      [
+       4990,
+       4608
+      ],
+      [
+       5179,
+       4992
+      ],
+      [
+       6233,
+       5248
+      ],
+      [
+       8045,
+       6912
+      ],
+      [
+       8378,
+       8064
+      ],
+      [
+       8695,
+       8320
+      ],
+      [
+       9051,
+       8704
+      ],
+      [
+       9400,
+       8960
+      ],
+      [
+       9726,
+       9344
+      ],
+      [
+       10099,
+       9728
+      ],
+      [
+       10516,
+       10112
+      ],
+      [
+       10843,
+       10496
+      ],
+      [
+       11212,
+       10880
+      ],
+      [
+       11539,
+       11136
+      ],
+      [
+       11908,
+       11520
+      ],
+      [
+       12235,
+       11904
+      ],
+      [
+       12604,
+       12160
+      ],
+      [
+       12931,
+       12544
+      ],
+      [
+       13300,
+       13056
+      ],
+      [
+       13627,
+       13312
+      ],
+      [
+       13996,
+       13568
+      ],
+      [
+       14323,
+       13952
+      ],
+      [
+       14692,
+       14336
+      ],
+      [
+       15019,
+       14592
+      ],
+      [
+       15388,
+       14976
+      ],
+      [
+       15715,
+       15360
+      ],
+      [
+       16084,
+       15744
+      ],
+      [
+       16411,
+       16000
+      ],
+      [
+       16780,
+       16384
+      ],
+      [
+       17107,
+       16768
+      ],
+      [
+       17476,
+       17152
+      ],
+      [
+       17803,
+       17408
+      ],
+      [
+       18172,
+       17792
+      ],
+      [
+       18499,
+       18176
+      ],
+      [
+       18868,
+       18432
+      ],
+      [
+       19195,
+       18816
+      ],
+      [
+       19564,
+       19200
+      ],
+      [
+       19891,
+       19584
+      ],
+      [
+       20260,
+       19840
+      ],
+      [
+       20587,
+       20224
+      ],
+      [
+       20956,
+       20608
+      ],
+      [
+       21283,
+       20864
+      ],
+      [
+       21652,
+       21248
+      ],
+      [
+       21979,
+       21632
+      ],
+      [
+       22348,
+       22016
+      ],
+      [
+       22675,
+       22272
+      ],
+      [
+       23044,
+       22912
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7682,
+     "predictor_cached": 7424,
+     "predictor_completion": 313,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 48388,
+     "agent_cached": 44160,
+     "agent_completion": 2747,
+     "per_call_prompt_cached": [
+      [
+       7682,
+       7424
+      ],
+      [
+       4734,
+       4480
+      ],
+      [
+       5154,
+       4736
+      ],
+      [
+       5493,
+       5120
+      ],
+      [
+       5673,
+       5504
+      ],
+      [
+       7275,
+       5760
+      ],
+      [
+       9688,
+       8448
+      ],
+      [
+       10371,
+       10112
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7672,
+     "predictor_cached": 7424,
+     "predictor_completion": 414,
+     "functions_offered_to_agent": 9,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 58404,
+     "agent_cached": 50944,
+     "agent_completion": 1495,
+     "per_call_prompt_cached": [
+      [
+       7672,
+       7424
+      ],
+      [
+       4699,
+       640
+      ],
+      [
+       5104,
+       4608
+      ],
+      [
+       5453,
+       4992
+      ],
+      [
+       6339,
+       5376
+      ],
+      [
+       6766,
+       6400
+      ],
+      [
+       7026,
+       6784
+      ],
+      [
+       7143,
+       6912
+      ],
+      [
+       7826,
+       7424
+      ],
+      [
+       8048,
+       7808
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7672,
+     "predictor_cached": 7424,
+     "predictor_completion": 507,
+     "functions_offered_to_agent": 9,
+     "required_apis": 9,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": false,
+     "agent_turns": 11,
+     "agent_prompt": 76221,
+     "agent_cached": 67584,
+     "agent_completion": 1635,
+     "per_call_prompt_cached": [
+      [
+       7672,
+       7424
+      ],
+      [
+       4696,
+       640
+      ],
+      [
+       5218,
+       4608
+      ],
+      [
+       5401,
+       5120
+      ],
+      [
+       6304,
+       5376
+      ],
+      [
+       6515,
+       6144
+      ],
+      [
+       6928,
+       6528
+      ],
+      [
+       7394,
+       6912
+      ],
+      [
+       7859,
+       7424
+      ],
+      [
+       8276,
+       7808
+      ],
+      [
+       8704,
+       8320
+      ],
+      [
+       8926,
+       8704
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7672,
+     "predictor_cached": 7424,
+     "predictor_completion": 239,
+     "functions_offered_to_agent": 6,
+     "required_apis": 9,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 11,
+     "agent_prompt": 69267,
+     "agent_cached": 60928,
+     "agent_completion": 1663,
+     "per_call_prompt_cached": [
+      [
+       7672,
+       7424
+      ],
+      [
+       4339,
+       384
+      ],
+      [
+       4875,
+       4352
+      ],
+      [
+       5195,
+       4736
+      ],
+      [
+       5382,
+       5120
+      ],
+      [
+       5762,
+       5376
+      ],
+      [
+       6115,
+       5760
+      ],
+      [
+       6300,
+       6016
+      ],
+      [
+       7182,
+       6272
+      ],
+      [
+       7617,
+       7168
+      ],
+      [
+       7990,
+       7424
+      ],
+      [
+       8510,
+       8320
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7665,
+     "predictor_cached": 7424,
+     "predictor_completion": 241,
+     "functions_offered_to_agent": 9,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 60632,
+     "agent_cached": 49792,
+     "agent_completion": 5782,
+     "per_call_prompt_cached": [
+      [
+       7665,
+       7424
+      ],
+      [
+       4722,
+       640
+      ],
+      [
+       5052,
+       4608
+      ],
+      [
+       5249,
+       4864
+      ],
+      [
+       8567,
+       5376
+      ],
+      [
+       10490,
+       8704
+      ],
+      [
+       10696,
+       10496
+      ],
+      [
+       15856,
+       15104
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7666,
+     "predictor_cached": 7424,
+     "predictor_completion": 236,
+     "functions_offered_to_agent": 8,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 58957,
+     "agent_cached": 48128,
+     "agent_completion": 3032,
+     "per_call_prompt_cached": [
+      [
+       7666,
+       7424
+      ],
+      [
+       4583,
+       640
+      ],
+      [
+       4994,
+       4480
+      ],
+      [
+       5183,
+       4864
+      ],
+      [
+       8962,
+       5376
+      ],
+      [
+       10894,
+       9088
+      ],
+      [
+       11098,
+       10880
+      ],
+      [
+       13243,
+       12800
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_3",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7666,
+     "predictor_cached": 7424,
+     "predictor_completion": 257,
+     "functions_offered_to_agent": 8,
+     "required_apis": 7,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 35537,
+     "agent_cached": 29184,
+     "agent_completion": 3442,
+     "per_call_prompt_cached": [
+      [
+       7666,
+       7424
+      ],
+      [
+       4582,
+       384
+      ],
+      [
+       4910,
+       4480
+      ],
+      [
+       5098,
+       4736
+      ],
+      [
+       5778,
+       5120
+      ],
+      [
+       5972,
+       5760
+      ],
+      [
+       9197,
+       8704
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7668,
+     "predictor_cached": 7424,
+     "predictor_completion": 313,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 50406,
+     "agent_cached": 42624,
+     "agent_completion": 2527,
+     "per_call_prompt_cached": [
+      [
+       7668,
+       7424
+      ],
+      [
+       5176,
+       640
+      ],
+      [
+       5732,
+       5120
+      ],
+      [
+       6074,
+       5632
+      ],
+      [
+       6660,
+       6016
+      ],
+      [
+       8203,
+       7168
+      ],
+      [
+       8857,
+       8576
+      ],
+      [
+       9704,
+       9472
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_2",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7668,
+     "predictor_cached": 7424,
+     "predictor_completion": 303,
+     "functions_offered_to_agent": 9,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 95887,
+     "agent_cached": 79872,
+     "agent_completion": 4244,
+     "per_call_prompt_cached": [
+      [
+       7668,
+       7424
+      ],
+      [
+       4986,
+       384
+      ],
+      [
+       5359,
+       4864
+      ],
+      [
+       5629,
+       5248
+      ],
+      [
+       6137,
+       5632
+      ],
+      [
+       9789,
+       6272
+      ],
+      [
+       13410,
+       9856
+      ],
+      [
+       15671,
+       13440
+      ],
+      [
+       15887,
+       15616
+      ],
+      [
+       19019,
+       18560
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7668,
+     "predictor_cached": 7424,
+     "predictor_completion": 405,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 13,
+     "agent_prompt": 228008,
+     "agent_cached": 204160,
+     "agent_completion": 9145,
+     "per_call_prompt_cached": [
+      [
+       7668,
+       7424
+      ],
+      [
+       5439,
+       768
+      ],
+      [
+       5914,
+       5376
+      ],
+      [
+       6342,
+       5888
+      ],
+      [
+       7393,
+       6272
+      ],
+      [
+       10975,
+       7552
+      ],
+      [
+       14646,
+       11136
+      ],
+      [
+       18358,
+       14848
+      ],
+      [
+       22063,
+       18560
+      ],
+      [
+       23588,
+       22144
+      ],
+      [
+       23832,
+       23680
+      ],
+      [
+       27550,
+       26880
+      ],
+      [
+       30631,
+       30080
+      ],
+      [
+       31277,
+       30976
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_1",
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "predictor_prompt": 7712,
+     "predictor_cached": 7424,
+     "predictor_completion": 742,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 49,
+     "agent_prompt": 3741876,
+     "agent_cached": 3597312,
+     "agent_completion": 8838,
+     "per_call_prompt_cached": [
+      [
+       7712,
+       7424
+      ],
+      [
+       4866,
+       512
+      ],
+      [
+       5320,
+       4864
+      ],
+      [
+       5535,
+       5248
+      ],
+      [
+       8678,
+       5504
+      ],
+      [
+       12058,
+       8832
+      ],
+      [
+       15240,
+       12032
+      ],
+      [
+       18469,
+       15232
+      ],
+      [
+       21762,
+       18432
+      ],
+      [
+       24980,
+       21760
+      ],
+      [
+       28188,
+       24960
+      ],
+      [
+       31332,
+       28160
+      ],
+      [
+       34499,
+       34304
+      ],
+      [
+       37683,
+       34432
+      ],
+      [
+       40903,
+       37632
+      ],
+      [
+       44084,
+       40832
+      ],
+      [
+       47236,
+       44032
+      ],
+      [
+       50438,
+       47232
+      ],
+      [
+       53659,
+       50432
+      ],
+      [
+       56905,
+       53632
+      ],
+      [
+       60073,
+       56832
+      ],
+      [
+       63300,
+       60032
+      ],
+      [
+       66583,
+       63232
+      ],
+      [
+       69802,
+       66560
+      ],
+      [
+       73022,
+       69760
+      ],
+      [
+       76216,
+       72960
+      ],
+      [
+       79447,
+       76160
+      ],
+      [
+       82632,
+       79488
+      ],
+      [
+       85768,
+       82560
+      ],
+      [
+       88991,
+       85760
+      ],
+      [
+       92203,
+       88960
+      ],
+      [
+       95461,
+       95232
+      ],
+      [
+       98670,
+       95488
+      ],
+      [
+       101913,
+       101760
+      ],
+      [
+       105063,
+       101888
+      ],
+      [
+       108245,
+       105088
+      ],
+      [
+       111533,
+       108288
+      ],
+      [
+       114711,
+       111488
+      ],
+      [
+       117907,
+       114688
+      ],
+      [
+       121153,
+       117888
+      ],
+      [
+       124349,
+       121088
+      ],
+      [
+       127489,
+       124288
+      ],
+      [
+       130689,
+       127488
+      ],
+      [
+       133897,
+       130688
+      ],
+      [
+       137076,
+       133888
+      ],
+      [
+       140335,
+       137088
+      ],
+      [
+       143511,
+       140288
+      ],
+      [
+       146788,
+       143488
+      ],
+      [
+       150037,
+       146816
+      ],
+      [
+       153177,
+       150016
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7711,
+     "predictor_cached": 7424,
+     "predictor_completion": 281,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 145458,
+     "agent_cached": 124416,
+     "agent_completion": 4134,
+     "per_call_prompt_cached": [
+      [
+       7711,
+       7424
+      ],
+      [
+       4863,
+       1408
+      ],
+      [
+       5376,
+       4864
+      ],
+      [
+       5587,
+       5248
+      ],
+      [
+       8759,
+       5632
+      ],
+      [
+       11938,
+       8832
+      ],
+      [
+       15904,
+       12672
+      ],
+      [
+       19420,
+       15872
+      ],
+      [
+       22890,
+       19712
+      ],
+      [
+       23697,
+       23296
+      ],
+      [
+       27024,
+       26880
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_3",
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "predictor_prompt": 7713,
+     "predictor_cached": 7424,
+     "predictor_completion": 340,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 49,
+     "agent_prompt": 3745656,
+     "agent_cached": 3596928,
+     "agent_completion": 12279,
+     "per_call_prompt_cached": [
+      [
+       7713,
+       7424
+      ],
+      [
+       5150,
+       512
+      ],
+      [
+       5687,
+       5248
+      ],
+      [
+       6024,
+       5632
+      ],
+      [
+       6209,
+       5888
+      ],
+      [
+       10239,
+       6272
+      ],
+      [
+       13584,
+       10368
+      ],
+      [
+       17099,
+       13824
+      ],
+      [
+       20333,
+       17152
+      ],
+      [
+       23606,
+       20352
+      ],
+      [
+       26944,
+       23680
+      ],
+      [
+       30206,
+       27008
+      ],
+      [
+       33522,
+       30208
+      ],
+      [
+       36838,
+       33536
+      ],
+      [
+       40094,
+       36864
+      ],
+      [
+       43343,
+       40192
+      ],
+      [
+       46568,
+       43392
+      ],
+      [
+       49845,
+       46592
+      ],
+      [
+       53096,
+       49920
+      ],
+      [
+       56366,
+       53120
+      ],
+      [
+       59665,
+       56448
+      ],
+      [
+       62949,
+       59776
+      ],
+      [
+       66183,
+       62976
+      ],
+      [
+       69457,
+       66176
+      ],
+      [
+       72726,
+       69504
+      ],
+      [
+       75985,
+       72832
+      ],
+      [
+       79311,
+       76032
+      ],
+      [
+       82670,
+       79360
+      ],
+      [
+       85975,
+       82688
+      ],
+      [
+       89244,
+       86016
+      ],
+      [
+       92609,
+       89344
+      ],
+      [
+       95937,
+       95744
+      ],
+      [
+       99272,
+       96000
+      ],
+      [
+       102580,
+       99328
+      ],
+      [
+       105830,
+       102656
+      ],
+      [
+       109077,
+       105856
+      ],
+      [
+       112389,
+       109184
+      ],
+      [
+       115608,
+       112384
+      ],
+      [
+       118892,
+       115712
+      ],
+      [
+       122144,
+       118912
+      ],
+      [
+       125430,
+       122240
+      ],
+      [
+       128745,
+       125440
+      ],
+      [
+       131997,
+       128768
+      ],
+      [
+       135347,
+       132096
+      ],
+      [
+       138648,
+       135424
+      ],
+      [
+       141902,
+       138752
+      ],
+      [
+       145205,
+       141952
+      ],
+      [
+       148434,
+       145280
+      ],
+      [
+       151712,
+       148480
+      ],
+      [
+       154980,
+       151808
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 236,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 30256,
+     "agent_cached": 23552,
+     "agent_completion": 792,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4670,
+       1152
+      ],
+      [
+       5060,
+       4608
+      ],
+      [
+       5262,
+       4992
+      ],
+      [
+       7512,
+       5248
+      ],
+      [
+       7752,
+       7552
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7670,
+     "predictor_cached": 7424,
+     "predictor_completion": 211,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 63546,
+     "agent_cached": 50944,
+     "agent_completion": 2183,
+     "per_call_prompt_cached": [
+      [
+       7670,
+       7424
+      ],
+      [
+       4669,
+       1280
+      ],
+      [
+       5058,
+       4608
+      ],
+      [
+       5263,
+       4992
+      ],
+      [
+       8796,
+       5248
+      ],
+      [
+       12293,
+       8832
+      ],
+      [
+       13619,
+       12288
+      ],
+      [
+       13848,
+       13696
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7672,
+     "predictor_cached": 7424,
+     "predictor_completion": 278,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 45196,
+     "agent_cached": 35584,
+     "agent_completion": 1507,
+     "per_call_prompt_cached": [
+      [
+       7672,
+       7424
+      ],
+      [
+       4671,
+       1280
+      ],
+      [
+       5063,
+       4608
+      ],
+      [
+       5260,
+       4992
+      ],
+      [
+       8849,
+       5248
+      ],
+      [
+       10568,
+       8832
+      ],
+      [
+       10785,
+       10624
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7664,
+     "predictor_cached": 7424,
+     "predictor_completion": 287,
+     "functions_offered_to_agent": 13,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 12,
+     "agent_prompt": 243330,
+     "agent_cached": 220416,
+     "agent_completion": 14741,
+     "per_call_prompt_cached": [
+      [
+       7664,
+       7424
+      ],
+      [
+       6028,
+       1152
+      ],
+      [
+       6356,
+       5888
+      ],
+      [
+       6541,
+       6272
+      ],
+      [
+       7463,
+       7296
+      ],
+      [
+       7657,
+       7424
+      ],
+      [
+       22227,
+       7936
+      ],
+      [
+       23102,
+       22784
+      ],
+      [
+       27002,
+       26496
+      ],
+      [
+       30114,
+       29568
+      ],
+      [
+       33223,
+       32768
+      ],
+      [
+       36332,
+       35840
+      ],
+      [
+       37285,
+       36992
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7664,
+     "predictor_cached": 7424,
+     "predictor_completion": 222,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 10,
+     "agent_prompt": 132966,
+     "agent_cached": 116608,
+     "agent_completion": 10180,
+     "per_call_prompt_cached": [
+      [
+       7664,
+       7424
+      ],
+      [
+       5463,
+       1536
+      ],
+      [
+       5792,
+       5376
+      ],
+      [
+       5994,
+       5632
+      ],
+      [
+       6639,
+       6016
+      ],
+      [
+       6840,
+       6656
+      ],
+      [
+       16040,
+       6912
+      ],
+      [
+       16544,
+       16256
+      ],
+      [
+       20055,
+       19584
+      ],
+      [
+       23326,
+       22784
+      ],
+      [
+       26273,
+       25856
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7664,
+     "predictor_cached": 7424,
+     "predictor_completion": 215,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 11,
+     "agent_prompt": 188706,
+     "agent_cached": 166784,
+     "agent_completion": 13090,
+     "per_call_prompt_cached": [
+      [
+       7664,
+       7424
+      ],
+      [
+       5368,
+       512
+      ],
+      [
+       5750,
+       5248
+      ],
+      [
+       5935,
+       5632
+      ],
+      [
+       6782,
+       5888
+      ],
+      [
+       6973,
+       6784
+      ],
+      [
+       20311,
+       7296
+      ],
+      [
+       20923,
+       20608
+      ],
+      [
+       24639,
+       24192
+      ],
+      [
+       27726,
+       27264
+      ],
+      [
+       30811,
+       30336
+      ],
+      [
+       33488,
+       33024
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7698,
+     "predictor_cached": 7552,
+     "predictor_completion": 742,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 29,
+     "agent_prompt": 978014,
+     "agent_cached": 951168,
+     "agent_completion": 45849,
+     "per_call_prompt_cached": [
+      [
+       7698,
+       7552
+      ],
+      [
+       4984,
+       0
+      ],
+      [
+       5390,
+       4992
+      ],
+      [
+       5592,
+       5248
+      ],
+      [
+       7094,
+       5760
+      ],
+      [
+       7384,
+       7040
+      ],
+      [
+       10572,
+       9600
+      ],
+      [
+       12899,
+       11904
+      ],
+      [
+       15211,
+       14208
+      ],
+      [
+       17534,
+       16512
+      ],
+      [
+       19839,
+       18816
+      ],
+      [
+       22174,
+       21120
+      ],
+      [
+       24485,
+       23552
+      ],
+      [
+       26803,
+       25856
+      ],
+      [
+       29100,
+       28160
+      ],
+      [
+       31194,
+       30336
+      ],
+      [
+       38239,
+       37632
+      ],
+      [
+       40447,
+       39808
+      ],
+      [
+       42650,
+       42112
+      ],
+      [
+       44860,
+       44288
+      ],
+      [
+       47047,
+       46464
+      ],
+      [
+       49268,
+       48640
+      ],
+      [
+       51471,
+       50944
+      ],
+      [
+       53669,
+       53120
+      ],
+      [
+       55837,
+       55296
+      ],
+      [
+       58063,
+       57472
+      ],
+      [
+       60887,
+       60288
+      ],
+      [
+       63227,
+       62592
+      ],
+      [
+       64850,
+       64384
+      ],
+      [
+       67244,
+       65024
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7702,
+     "predictor_cached": 7424,
+     "predictor_completion": 375,
+     "functions_offered_to_agent": 12,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 12,
+     "agent_prompt": 226826,
+     "agent_cached": 209792,
+     "agent_completion": 25977,
+     "per_call_prompt_cached": [
+      [
+       7702,
+       7424
+      ],
+      [
+       5201,
+       384
+      ],
+      [
+       5630,
+       5248
+      ],
+      [
+       5837,
+       5504
+      ],
+      [
+       7098,
+       6016
+      ],
+      [
+       7437,
+       7168
+      ],
+      [
+       12334,
+       10496
+      ],
+      [
+       17184,
+       15360
+      ],
+      [
+       21829,
+       20096
+      ],
+      [
+       29920,
+       28928
+      ],
+      [
+       33676,
+       32768
+      ],
+      [
+       39431,
+       38272
+      ],
+      [
+       41249,
+       39552
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7700,
+     "predictor_cached": 7424,
+     "predictor_completion": 594,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 12,
+     "agent_prompt": 227747,
+     "agent_cached": 210688,
+     "agent_completion": 27167,
+     "per_call_prompt_cached": [
+      [
+       7700,
+       7424
+      ],
+      [
+       4904,
+       256
+      ],
+      [
+       5312,
+       4864
+      ],
+      [
+       5540,
+       5248
+      ],
+      [
+       6758,
+       5632
+      ],
+      [
+       7134,
+       6912
+      ],
+      [
+       11920,
+       10112
+      ],
+      [
+       16566,
+       14720
+      ],
+      [
+       21717,
+       19712
+      ],
+      [
+       30145,
+       29184
+      ],
+      [
+       35050,
+       34048
+      ],
+      [
+       40488,
+       39424
+      ],
+      [
+       42213,
+       40576
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7666,
+     "predictor_cached": 7424,
+     "predictor_completion": 204,
+     "functions_offered_to_agent": 8,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 24980,
+     "agent_cached": 20224,
+     "agent_completion": 391,
+     "per_call_prompt_cached": [
+      [
+       7666,
+       7424
+      ],
+      [
+       4478,
+       896
+      ],
+      [
+       4823,
+       4352
+      ],
+      [
+       5018,
+       4736
+      ],
+      [
+       5265,
+       5120
+      ],
+      [
+       5396,
+       5120
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7666,
+     "predictor_cached": 7424,
+     "predictor_completion": 270,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 23352,
+     "agent_cached": 18304,
+     "agent_completion": 391,
+     "per_call_prompt_cached": [
+      [
+       7666,
+       7424
+      ],
+      [
+       4148,
+       512
+      ],
+      [
+       4493,
+       3968
+      ],
+      [
+       4691,
+       4352
+      ],
+      [
+       4943,
+       4608
+      ],
+      [
+       5077,
+       4864
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7666,
+     "predictor_cached": 7424,
+     "predictor_completion": 195,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 23334,
+     "agent_cached": 18560,
+     "agent_completion": 388,
+     "per_call_prompt_cached": [
+      [
+       7666,
+       7424
+      ],
+      [
+       4149,
+       768
+      ],
+      [
+       4493,
+       3968
+      ],
+      [
+       4686,
+       4352
+      ],
+      [
+       4935,
+       4608
+      ],
+      [
+       5071,
+       4864
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7681,
+     "predictor_cached": 7424,
+     "predictor_completion": 369,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 102410,
+     "agent_cached": 88192,
+     "agent_completion": 7979,
+     "per_call_prompt_cached": [
+      [
+       7681,
+       7424
+      ],
+      [
+       4907,
+       512
+      ],
+      [
+       5232,
+       4736
+      ],
+      [
+       5424,
+       5120
+      ],
+      [
+       6818,
+       5376
+      ],
+      [
+       7001,
+       6784
+      ],
+      [
+       12809,
+       11648
+      ],
+      [
+       19234,
+       13568
+      ],
+      [
+       19800,
+       19584
+      ],
+      [
+       21185,
+       20864
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7677,
+     "predictor_cached": 7424,
+     "predictor_completion": 469,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 74381,
+     "agent_cached": 61184,
+     "agent_completion": 3539,
+     "per_call_prompt_cached": [
+      [
+       7677,
+       7424
+      ],
+      [
+       5141,
+       512
+      ],
+      [
+       5468,
+       4992
+      ],
+      [
+       5664,
+       5376
+      ],
+      [
+       6573,
+       5632
+      ],
+      [
+       6767,
+       6528
+      ],
+      [
+       14002,
+       7808
+      ],
+      [
+       14888,
+       14720
+      ],
+      [
+       15878,
+       15616
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7678,
+     "predictor_cached": 7424,
+     "predictor_completion": 308,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 81708,
+     "agent_cached": 66816,
+     "agent_completion": 4744,
+     "per_call_prompt_cached": [
+      [
+       7678,
+       7424
+      ],
+      [
+       4899,
+       512
+      ],
+      [
+       5224,
+       4736
+      ],
+      [
+       5413,
+       5120
+      ],
+      [
+       6747,
+       5504
+      ],
+      [
+       7111,
+       6912
+      ],
+      [
+       16338,
+       8704
+      ],
+      [
+       17300,
+       17024
+      ],
+      [
+       18676,
+       18304
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7698,
+     "predictor_cached": 7424,
+     "predictor_completion": 297,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 99653,
+     "agent_cached": 81024,
+     "agent_completion": 16507,
+     "per_call_prompt_cached": [
+      [
+       7698,
+       7424
+      ],
+      [
+       5330,
+       256
+      ],
+      [
+       5667,
+       5504
+      ],
+      [
+       6030,
+       5632
+      ],
+      [
+       8120,
+       6144
+      ],
+      [
+       8941,
+       8064
+      ],
+      [
+       9127,
+       8960
+      ],
+      [
+       22109,
+       13440
+      ],
+      [
+       34329,
+       33024
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7698,
+     "predictor_cached": 7424,
+     "predictor_completion": 304,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 90315,
+     "agent_cached": 73728,
+     "agent_completion": 14411,
+     "per_call_prompt_cached": [
+      [
+       7698,
+       7424
+      ],
+      [
+       4957,
+       512
+      ],
+      [
+       5294,
+       4864
+      ],
+      [
+       5662,
+       5248
+      ],
+      [
+       7713,
+       5760
+      ],
+      [
+       8386,
+       7680
+      ],
+      [
+       8573,
+       8320
+      ],
+      [
+       19674,
+       12544
+      ],
+      [
+       30056,
+       28800
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7698,
+     "predictor_cached": 7424,
+     "predictor_completion": 286,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 13,
+     "agent_prompt": 257134,
+     "agent_cached": 231552,
+     "agent_completion": 21519,
+     "per_call_prompt_cached": [
+      [
+       7698,
+       7424
+      ],
+      [
+       5048,
+       384
+      ],
+      [
+       5380,
+       4864
+      ],
+      [
+       5741,
+       5248
+      ],
+      [
+       7838,
+       5888
+      ],
+      [
+       9999,
+       8320
+      ],
+      [
+       14161,
+       12032
+      ],
+      [
+       17588,
+       15360
+      ],
+      [
+       21092,
+       18816
+      ],
+      [
+       26239,
+       22016
+      ],
+      [
+       30749,
+       27136
+      ],
+      [
+       33976,
+       33280
+      ],
+      [
+       37272,
+       36608
+      ],
+      [
+       42051,
+       41600
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7673,
+     "predictor_cached": 7424,
+     "predictor_completion": 399,
+     "functions_offered_to_agent": 12,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 38349,
+     "agent_cached": 36352,
+     "agent_completion": 579,
+     "per_call_prompt_cached": [
+      [
+       7673,
+       7424
+      ],
+      [
+       5544,
+       5376
+      ],
+      [
+       5934,
+       5504
+      ],
+      [
+       6432,
+       5888
+      ],
+      [
+       6674,
+       6272
+      ],
+      [
+       6788,
+       6528
+      ],
+      [
+       6977,
+       6784
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7674,
+     "predictor_cached": 7424,
+     "predictor_completion": 365,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 37470,
+     "agent_cached": 31872,
+     "agent_completion": 578,
+     "per_call_prompt_cached": [
+      [
+       7674,
+       7424
+      ],
+      [
+       5385,
+       1664
+      ],
+      [
+       5787,
+       5376
+      ],
+      [
+       6286,
+       5632
+      ],
+      [
+       6539,
+       6144
+      ],
+      [
+       6644,
+       6400
+      ],
+      [
+       6829,
+       6656
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7675,
+     "predictor_cached": 7424,
+     "predictor_completion": 295,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 37068,
+     "agent_cached": 32000,
+     "agent_completion": 494,
+     "per_call_prompt_cached": [
+      [
+       7675,
+       7424
+      ],
+      [
+       5386,
+       2048
+      ],
+      [
+       5710,
+       5248
+      ],
+      [
+       6216,
+       5632
+      ],
+      [
+       6460,
+       6144
+      ],
+      [
+       6555,
+       6400
+      ],
+      [
+       6741,
+       6528
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7680,
+     "predictor_cached": 7424,
+     "predictor_completion": 493,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 46209,
+     "agent_cached": 37632,
+     "agent_completion": 2492,
+     "per_call_prompt_cached": [
+      [
+       7680,
+       7424
+      ],
+      [
+       4835,
+       1024
+      ],
+      [
+       5255,
+       4736
+      ],
+      [
+       5642,
+       5504
+      ],
+      [
+       9310,
+       5760
+      ],
+      [
+       9833,
+       9600
+      ],
+      [
+       11334,
+       11008
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_2",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7680,
+     "predictor_cached": 7424,
+     "predictor_completion": 472,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 69364,
+     "agent_cached": 57600,
+     "agent_completion": 4531,
+     "per_call_prompt_cached": [
+      [
+       7680,
+       7424
+      ],
+      [
+       5007,
+       1152
+      ],
+      [
+       5427,
+       4992
+      ],
+      [
+       5810,
+       5632
+      ],
+      [
+       9991,
+       5888
+      ],
+      [
+       13242,
+       10624
+      ],
+      [
+       13437,
+       13184
+      ],
+      [
+       16450,
+       16128
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7680,
+     "predictor_cached": 7424,
+     "predictor_completion": 368,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 75119,
+     "agent_cached": 64512,
+     "agent_completion": 3218,
+     "per_call_prompt_cached": [
+      [
+       7680,
+       7424
+      ],
+      [
+       4833,
+       1408
+      ],
+      [
+       5259,
+       4736
+      ],
+      [
+       5643,
+       5248
+      ],
+      [
+       9493,
+       5760
+      ],
+      [
+       11627,
+       9856
+      ],
+      [
+       11823,
+       11648
+      ],
+      [
+       12668,
+       12416
+      ],
+      [
+       13773,
+       13440
+      ]
+     ]
+    }
+   ]
+  },
+  "deepseek-v41-flash": {
+   "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+   "note": "per_call_prompt_cached lists one [prompt, cached] pair per LM call in order; entry 0 is the API-predictor call (no tools declared).",
+   "totals_without_predictor": {
+    "tasks": 57,
+    "passed": 48,
+    "agent_llm_calls": 523,
+    "prompt_tokens": 7486287,
+    "cached_prompt_tokens": 6576000,
+    "completion_tokens": 479052
+   },
+   "totals_predictor_only": {
+    "calls": 57,
+    "prompt_tokens": 446732,
+    "cached_prompt_tokens": 437888,
+    "completion_tokens": 25900
+   },
+   "distributions_without_predictor": {
+    "turns": {
+     "n": 57,
+     "min": 4,
+     "median": 8,
+     "mean": 9.18,
+     "p90": 10.0,
+     "max": 49
+    },
+    "prompt_tokens": {
+     "n": 57,
+     "min": 23499,
+     "median": 68336,
+     "mean": 131338.37,
+     "p90": 193405.2,
+     "max": 1391558
+    },
+    "completion_tokens": {
+     "n": 57,
+     "min": 355,
+     "median": 4297,
+     "mean": 8404.42,
+     "p90": 20266.2,
+     "max": 54985
+    }
+   },
+   "distributions_predictor": {
+    "prompt_tokens": {
+     "n": 57,
+     "min": 7822,
+     "median": 7831,
+     "mean": 7837.4,
+     "p90": 7862.4,
+     "max": 7872
+    },
+    "cached_prompt_tokens": {
+     "n": 57,
+     "min": 7616,
+     "median": 7680,
+     "mean": 7682.25,
+     "p90": 7744.0,
+     "max": 7808
+    },
+    "completion_tokens": {
+     "n": 57,
+     "min": 153,
+     "median": 388,
+     "mean": 454.39,
+     "p90": 647.0,
+     "max": 2197
+    },
+    "functions_offered": {
+     "n": 57,
+     "min": 6,
+     "median": 10,
+     "mean": 9.95,
+     "p90": 12.0,
+     "max": 13
+    }
+   },
+   "required_apis": {
+    "tasks_with_all_required_among_offered": 30,
+    "tasks_with_all_required_among_offered_and_passed": 25,
+    "tasks_not_all_required_among_offered_and_passed": 23,
+    "required_apis_total": 459,
+    "required_apis_among_offered_total": 422,
+    "required_apis_per_task": {
+     "n": 57,
+     "min": 6,
+     "median": 8,
+     "mean": 8.05,
+     "p90": 9.4,
+     "max": 10
+    }
+   },
+   "step_capped_tasks": {
+    "n": 2,
+    "task_ids": [
+     "df61dc5_1",
+     "4fab96f_2"
+    ],
+    "prompt_tokens_incl_predictor": 2693037,
+    "prompt_tokens_all_tasks_incl_predictor": 7933019,
+    "prompt_tokens_without_predictor_in_capped": 2677372
+   },
+   "totals_without_predictor_and_without_capped_tasks": {
+    "tasks": 55,
+    "passed": 48,
+    "agent_llm_calls": 425,
+    "prompt_tokens": 4808915,
+    "completion_tokens": 392097
+   },
+   "tasks": [
+    {
+     "task_id": "50e1ac9_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7840,
+     "predictor_cached": 7744,
+     "predictor_completion": 738,
+     "functions_offered_to_agent": 13,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 66140,
+     "agent_cached": 38784,
+     "agent_completion": 6368,
+     "per_call_prompt_cached": [
+      [
+       7840,
+       7744
+      ],
+      [
+       5469,
+       384
+      ],
+      [
+       5861,
+       5376
+      ],
+      [
+       6060,
+       5760
+      ],
+      [
+       10115,
+       5952
+      ],
+      [
+       10727,
+       10688
+      ],
+      [
+       27908,
+       10624
+      ]
+     ]
+    },
+    {
+     "task_id": "50e1ac9_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7839,
+     "predictor_cached": 7616,
+     "predictor_completion": 481,
+     "functions_offered_to_agent": 13,
+     "required_apis": 10,
+     "required_apis_among_offered": 10,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 135200,
+     "agent_cached": 110592,
+     "agent_completion": 6012,
+     "per_call_prompt_cached": [
+      [
+       7839,
+       7616
+      ],
+      [
+       6026,
+       576
+      ],
+      [
+       6455,
+       6144
+      ],
+      [
+       6655,
+       6464
+      ],
+      [
+       10748,
+       6528
+      ],
+      [
+       14865,
+       10624
+      ],
+      [
+       20231,
+       15168
+      ],
+      [
+       22112,
+       20160
+      ],
+      [
+       22946,
+       22080
+      ],
+      [
+       25162,
+       22848
+      ]
+     ]
+    },
+    {
+     "task_id": "50e1ac9_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7838,
+     "predictor_cached": 7680,
+     "predictor_completion": 724,
+     "functions_offered_to_agent": 13,
+     "required_apis": 10,
+     "required_apis_among_offered": 10,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 84883,
+     "agent_cached": 60160,
+     "agent_completion": 6118,
+     "per_call_prompt_cached": [
+      [
+       7838,
+       7680
+      ],
+      [
+       5367,
+       768
+      ],
+      [
+       5872,
+       5568
+      ],
+      [
+       6066,
+       5888
+      ],
+      [
+       10585,
+       6592
+      ],
+      [
+       11289,
+       10496
+      ],
+      [
+       15917,
+       12352
+      ],
+      [
+       29787,
+       18496
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7680,
+     "predictor_completion": 292,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 75195,
+     "agent_cached": 59008,
+     "agent_completion": 6730,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7680
+      ],
+      [
+       5155,
+       576
+      ],
+      [
+       5537,
+       5248
+      ],
+      [
+       5731,
+       5568
+      ],
+      [
+       9741,
+       6272
+      ],
+      [
+       10491,
+       10432
+      ],
+      [
+       17231,
+       13376
+      ],
+      [
+       21309,
+       17536
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7808,
+     "predictor_completion": 289,
+     "functions_offered_to_agent": 9,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 37071,
+     "agent_cached": 28736,
+     "agent_completion": 3616,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7808
+      ],
+      [
+       5094,
+       576
+      ],
+      [
+       5480,
+       5184
+      ],
+      [
+       5678,
+       5504
+      ],
+      [
+       9512,
+       6208
+      ],
+      [
+       11307,
+       11264
+      ]
+     ]
+    },
+    {
+     "task_id": "fac291d_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7808,
+     "predictor_completion": 455,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 63798,
+     "agent_cached": 46016,
+     "agent_completion": 9713,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7808
+      ],
+      [
+       5155,
+       1728
+      ],
+      [
+       5603,
+       5312
+      ],
+      [
+       5801,
+       5632
+      ],
+      [
+       10497,
+       6336
+      ],
+      [
+       11130,
+       11072
+      ],
+      [
+       25612,
+       15936
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7864,
+     "predictor_cached": 7680,
+     "predictor_completion": 566,
+     "functions_offered_to_agent": 11,
+     "required_apis": 10,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 62918,
+     "agent_cached": 54464,
+     "agent_completion": 1234,
+     "per_call_prompt_cached": [
+      [
+       7864,
+       7680
+      ],
+      [
+       5605,
+       448
+      ],
+      [
+       5953,
+       5632
+      ],
+      [
+       6317,
+       6016
+      ],
+      [
+       7207,
+       6464
+      ],
+      [
+       8851,
+       7360
+      ],
+      [
+       9415,
+       9088
+      ],
+      [
+       9683,
+       9600
+      ],
+      [
+       9887,
+       9856
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7862,
+     "predictor_cached": 7680,
+     "predictor_completion": 484,
+     "functions_offered_to_agent": 13,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 68336,
+     "agent_cached": 59264,
+     "agent_completion": 1503,
+     "per_call_prompt_cached": [
+      [
+       7862,
+       7680
+      ],
+      [
+       6239,
+       512
+      ],
+      [
+       6572,
+       6144
+      ],
+      [
+       6941,
+       6656
+      ],
+      [
+       7851,
+       7040
+      ],
+      [
+       9351,
+       8000
+      ],
+      [
+       10212,
+       9856
+      ],
+      [
+       10484,
+       10432
+      ],
+      [
+       10686,
+       10624
+      ]
+     ]
+    },
+    {
+     "task_id": "530b157_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7865,
+     "predictor_cached": 7680,
+     "predictor_completion": 233,
+     "functions_offered_to_agent": 12,
+     "required_apis": 10,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 62714,
+     "agent_cached": 55232,
+     "agent_completion": 1216,
+     "per_call_prompt_cached": [
+      [
+       7865,
+       7680
+      ],
+      [
+       5645,
+       2176
+      ],
+      [
+       5984,
+       5696
+      ],
+      [
+       6352,
+       6080
+      ],
+      [
+       7245,
+       6272
+      ],
+      [
+       8760,
+       7168
+      ],
+      [
+       9353,
+       9024
+      ],
+      [
+       9588,
+       9280
+      ],
+      [
+       9787,
+       9536
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7831,
+     "predictor_cached": 7680,
+     "predictor_completion": 376,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 52285,
+     "agent_cached": 38400,
+     "agent_completion": 8582,
+     "per_call_prompt_cached": [
+      [
+       7831,
+       7680
+      ],
+      [
+       4730,
+       448
+      ],
+      [
+       5253,
+       4928
+      ],
+      [
+       5493,
+       5312
+      ],
+      [
+       10007,
+       5824
+      ],
+      [
+       11104,
+       10880
+      ],
+      [
+       15698,
+       11008
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7829,
+     "predictor_cached": 7680,
+     "predictor_completion": 381,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 104246,
+     "agent_cached": 76736,
+     "agent_completion": 12683,
+     "per_call_prompt_cached": [
+      [
+       7829,
+       7680
+      ],
+      [
+       4769,
+       512
+      ],
+      [
+       5327,
+       4672
+      ],
+      [
+       5534,
+       5376
+      ],
+      [
+       10399,
+       5888
+      ],
+      [
+       10806,
+       10752
+      ],
+      [
+       15221,
+       11968
+      ],
+      [
+       20489,
+       17152
+      ],
+      [
+       31701,
+       20416
+      ]
+     ]
+    },
+    {
+     "task_id": "4ec8de5_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7829,
+     "predictor_cached": 7680,
+     "predictor_completion": 438,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 52173,
+     "agent_cached": 39936,
+     "agent_completion": 7425,
+     "per_call_prompt_cached": [
+      [
+       7829,
+       7680
+      ],
+      [
+       4728,
+       1280
+      ],
+      [
+       5139,
+       4608
+      ],
+      [
+       5365,
+       5184
+      ],
+      [
+       10410,
+       5696
+      ],
+      [
+       10813,
+       10752
+      ],
+      [
+       15718,
+       12416
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_1",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7829,
+     "predictor_cached": 7680,
+     "predictor_completion": 153,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 58627,
+     "agent_cached": 51584,
+     "agent_completion": 1523,
+     "per_call_prompt_cached": [
+      [
+       7829,
+       7680
+      ],
+      [
+       4713,
+       576
+      ],
+      [
+       5071,
+       4736
+      ],
+      [
+       5269,
+       4992
+      ],
+      [
+       6611,
+       5504
+      ],
+      [
+       6972,
+       6528
+      ],
+      [
+       7177,
+       7104
+      ],
+      [
+       7377,
+       7104
+      ],
+      [
+       7578,
+       7296
+      ],
+      [
+       7859,
+       7744
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_2",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7827,
+     "predictor_cached": 7680,
+     "predictor_completion": 298,
+     "functions_offered_to_agent": 8,
+     "required_apis": 7,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 62309,
+     "agent_cached": 53696,
+     "agent_completion": 2127,
+     "per_call_prompt_cached": [
+      [
+       7827,
+       7680
+      ],
+      [
+       4631,
+       448
+      ],
+      [
+       4968,
+       4544
+      ],
+      [
+       5180,
+       4992
+      ],
+      [
+       6768,
+       5056
+      ],
+      [
+       7709,
+       6656
+      ],
+      [
+       7924,
+       7616
+      ],
+      [
+       8132,
+       7872
+      ],
+      [
+       8345,
+       8256
+      ],
+      [
+       8652,
+       8256
+      ]
+     ]
+    },
+    {
+     "task_id": "b119b1f_3",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7827,
+     "predictor_cached": 7680,
+     "predictor_completion": 349,
+     "functions_offered_to_agent": 7,
+     "required_apis": 7,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 54253,
+     "agent_cached": 47744,
+     "agent_completion": 1533,
+     "per_call_prompt_cached": [
+      [
+       7827,
+       7680
+      ],
+      [
+       4285,
+       512
+      ],
+      [
+       4617,
+       4288
+      ],
+      [
+       4810,
+       4672
+      ],
+      [
+       6063,
+       5056
+      ],
+      [
+       6485,
+       5952
+      ],
+      [
+       6684,
+       6400
+      ],
+      [
+       6881,
+       6848
+      ],
+      [
+       7081,
+       7040
+      ],
+      [
+       7347,
+       6976
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7680,
+     "predictor_completion": 266,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 49837,
+     "agent_cached": 39872,
+     "agent_completion": 4297,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7680
+      ],
+      [
+       4928,
+       640
+      ],
+      [
+       5347,
+       4864
+      ],
+      [
+       5544,
+       5376
+      ],
+      [
+       8406,
+       5440
+      ],
+      [
+       11982,
+       11648
+      ],
+      [
+       13630,
+       11904
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7744,
+     "predictor_completion": 375,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": false,
+     "agent_turns": 5,
+     "agent_prompt": 37940,
+     "agent_cached": 28992,
+     "agent_completion": 4258,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7744
+      ],
+      [
+       4985,
+       640
+      ],
+      [
+       5395,
+       5056
+      ],
+      [
+       5591,
+       5312
+      ],
+      [
+       9108,
+       5504
+      ],
+      [
+       12861,
+       12480
+      ]
+     ]
+    },
+    {
+     "task_id": "d4e9306_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7808,
+     "predictor_completion": 253,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 46540,
+     "agent_cached": 39040,
+     "agent_completion": 4541,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7808
+      ],
+      [
+       4930,
+       4928
+      ],
+      [
+       5358,
+       5056
+      ],
+      [
+       5555,
+       5376
+      ],
+      [
+       8657,
+       5888
+      ],
+      [
+       9277,
+       8576
+      ],
+      [
+       12763,
+       9216
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7838,
+     "predictor_cached": 7680,
+     "predictor_completion": 334,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 11,
+     "agent_prompt": 206337,
+     "agent_cached": 173376,
+     "agent_completion": 7058,
+     "per_call_prompt_cached": [
+      [
+       7838,
+       7680
+      ],
+      [
+       4692,
+       576
+      ],
+      [
+       5149,
+       4864
+      ],
+      [
+       5522,
+       5056
+      ],
+      [
+       8810,
+       5824
+      ],
+      [
+       10487,
+       9664
+      ],
+      [
+       16245,
+       10368
+      ],
+      [
+       22068,
+       17088
+      ],
+      [
+       27937,
+       22976
+      ],
+      [
+       33830,
+       27840
+      ],
+      [
+       35475,
+       33728
+      ],
+      [
+       36122,
+       35392
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7840,
+     "predictor_cached": 7680,
+     "predictor_completion": 244,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 74941,
+     "agent_cached": 61504,
+     "agent_completion": 2720,
+     "per_call_prompt_cached": [
+      [
+       7840,
+       7680
+      ],
+      [
+       4691,
+       1216
+      ],
+      [
+       5073,
+       4608
+      ],
+      [
+       5438,
+       5184
+      ],
+      [
+       5641,
+       5568
+      ],
+      [
+       6777,
+       6016
+      ],
+      [
+       13722,
+       7744
+      ],
+      [
+       16578,
+       14208
+      ],
+      [
+       17021,
+       16960
+      ]
+     ]
+    },
+    {
+     "task_id": "0d8a4ee_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7841,
+     "predictor_cached": 7680,
+     "predictor_completion": 388,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 85677,
+     "agent_cached": 74752,
+     "agent_completion": 4054,
+     "per_call_prompt_cached": [
+      [
+       7841,
+       7680
+      ],
+      [
+       5026,
+       1088
+      ],
+      [
+       5416,
+       5120
+      ],
+      [
+       5783,
+       5312
+      ],
+      [
+       5969,
+       5888
+      ],
+      [
+       7603,
+       6272
+      ],
+      [
+       11833,
+       9024
+      ],
+      [
+       13506,
+       12544
+      ],
+      [
+       14958,
+       14016
+      ],
+      [
+       15583,
+       15488
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7680,
+     "predictor_completion": 414,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 75357,
+     "agent_cached": 67264,
+     "agent_completion": 3386,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7680
+      ],
+      [
+       4885,
+       768
+      ],
+      [
+       5278,
+       4800
+      ],
+      [
+       5649,
+       5376
+      ],
+      [
+       6566,
+       5568
+      ],
+      [
+       7074,
+       6720
+      ],
+      [
+       7544,
+       7296
+      ],
+      [
+       8243,
+       8000
+      ],
+      [
+       9179,
+       9088
+      ],
+      [
+       10342,
+       9088
+      ],
+      [
+       10597,
+       10560
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7680,
+     "predictor_completion": 382,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 11,
+     "agent_prompt": 97796,
+     "agent_cached": 89024,
+     "agent_completion": 2872,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7680
+      ],
+      [
+       4956,
+       832
+      ],
+      [
+       5350,
+       5056
+      ],
+      [
+       5736,
+       5440
+      ],
+      [
+       8630,
+       5952
+      ],
+      [
+       9142,
+       8768
+      ],
+      [
+       9380,
+       9344
+      ],
+      [
+       9783,
+       9536
+      ],
+      [
+       10186,
+       10112
+      ],
+      [
+       10680,
+       10368
+      ],
+      [
+       11841,
+       11584
+      ],
+      [
+       12112,
+       12032
+      ]
+     ]
+    },
+    {
+     "task_id": "37a8675_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7830,
+     "predictor_cached": 7744,
+     "predictor_completion": 541,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 63865,
+     "agent_cached": 56832,
+     "agent_completion": 2307,
+     "per_call_prompt_cached": [
+      [
+       7830,
+       7744
+      ],
+      [
+       4919,
+       768
+      ],
+      [
+       5313,
+       4992
+      ],
+      [
+       5699,
+       5440
+      ],
+      [
+       6600,
+       5824
+      ],
+      [
+       7120,
+       6784
+      ],
+      [
+       7602,
+       7296
+      ],
+      [
+       8033,
+       7872
+      ],
+      [
+       9140,
+       8832
+      ],
+      [
+       9439,
+       9024
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7824,
+     "predictor_cached": 7680,
+     "predictor_completion": 430,
+     "functions_offered_to_agent": 9,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 8,
+     "agent_prompt": 78456,
+     "agent_cached": 65472,
+     "agent_completion": 5987,
+     "per_call_prompt_cached": [
+      [
+       7824,
+       7680
+      ],
+      [
+       5118,
+       576
+      ],
+      [
+       5517,
+       5184
+      ],
+      [
+       5716,
+       5440
+      ],
+      [
+       6749,
+       5632
+      ],
+      [
+       9115,
+       6976
+      ],
+      [
+       11447,
+       9856
+      ],
+      [
+       15920,
+       15360
+      ],
+      [
+       18874,
+       16448
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_2",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7824,
+     "predictor_cached": 7616,
+     "predictor_completion": 306,
+     "functions_offered_to_agent": 8,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 100043,
+     "agent_cached": 86208,
+     "agent_completion": 7077,
+     "per_call_prompt_cached": [
+      [
+       7824,
+       7616
+      ],
+      [
+       4973,
+       768
+      ],
+      [
+       5373,
+       5056
+      ],
+      [
+       5568,
+       5376
+      ],
+      [
+       7879,
+       5760
+      ],
+      [
+       9621,
+       8064
+      ],
+      [
+       9829,
+       9536
+      ],
+      [
+       16757,
+       15552
+      ],
+      [
+       19148,
+       17024
+      ],
+      [
+       20895,
+       19072
+      ]
+     ]
+    },
+    {
+     "task_id": "3ab5b8b_3",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7824,
+     "predictor_cached": 7616,
+     "predictor_completion": 480,
+     "functions_offered_to_agent": 11,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 40803,
+     "agent_cached": 35008,
+     "agent_completion": 4005,
+     "per_call_prompt_cached": [
+      [
+       7824,
+       7616
+      ],
+      [
+       5296,
+       1024
+      ],
+      [
+       5737,
+       5440
+      ],
+      [
+       5934,
+       5632
+      ],
+      [
+       6613,
+       6080
+      ],
+      [
+       6836,
+       6784
+      ],
+      [
+       10387,
+       10048
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_1",
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "predictor_prompt": 7827,
+     "predictor_cached": 7680,
+     "predictor_completion": 297,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": false,
+     "agent_turns": 49,
+     "agent_prompt": 1285814,
+     "agent_cached": 1240000,
+     "agent_completion": 31970,
+     "per_call_prompt_cached": [
+      [
+       7827,
+       7680
+      ],
+      [
+       5510,
+       512
+      ],
+      [
+       6028,
+       5440
+      ],
+      [
+       6387,
+       5952
+      ],
+      [
+       6602,
+       6528
+      ],
+      [
+       7485,
+       7360
+      ],
+      [
+       7650,
+       7360
+      ],
+      [
+       7989,
+       7552
+      ],
+      [
+       8225,
+       8064
+      ],
+      [
+       8429,
+       8320
+      ],
+      [
+       8694,
+       8512
+      ],
+      [
+       9064,
+       8832
+      ],
+      [
+       9498,
+       9216
+      ],
+      [
+       9879,
+       9600
+      ],
+      [
+       10115,
+       9984
+      ],
+      [
+       10528,
+       10048
+      ],
+      [
+       10760,
+       10624
+      ],
+      [
+       10931,
+       10816
+      ],
+      [
+       11160,
+       11008
+      ],
+      [
+       11390,
+       11264
+      ],
+      [
+       12379,
+       11776
+      ],
+      [
+       12647,
+       12480
+      ],
+      [
+       12877,
+       12736
+      ],
+      [
+       14293,
+       12800
+      ],
+      [
+       18211,
+       14208
+      ],
+      [
+       18579,
+       18112
+      ],
+      [
+       23441,
+       19904
+      ],
+      [
+       27114,
+       23680
+      ],
+      [
+       30729,
+       27328
+      ],
+      [
+       33862,
+       30976
+      ],
+      [
+       34131,
+       34112
+      ],
+      [
+       34469,
+       34304
+      ],
+      [
+       34903,
+       34752
+      ],
+      [
+       36408,
+       36288
+      ],
+      [
+       37350,
+       37184
+      ],
+      [
+       37854,
+       37696
+      ],
+      [
+       38199,
+       38080
+      ],
+      [
+       39790,
+       39616
+      ],
+      [
+       41784,
+       40576
+      ],
+      [
+       44254,
+       41664
+      ],
+      [
+       44784,
+       44160
+      ],
+      [
+       45350,
+       45184
+      ],
+      [
+       50122,
+       48960
+      ],
+      [
+       51511,
+       51392
+      ],
+      [
+       52391,
+       51392
+      ],
+      [
+       54582,
+       54464
+      ],
+      [
+       55698,
+       55552
+      ],
+      [
+       58567,
+       55616
+      ],
+      [
+       59626,
+       58496
+      ],
+      [
+       63585,
+       59520
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7826,
+     "predictor_cached": 7616,
+     "predictor_completion": 404,
+     "functions_offered_to_agent": 9,
+     "required_apis": 9,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 135047,
+     "agent_cached": 109184,
+     "agent_completion": 7114,
+     "per_call_prompt_cached": [
+      [
+       7826,
+       7616
+      ],
+      [
+       5074,
+       576
+      ],
+      [
+       5536,
+       5184
+      ],
+      [
+       5788,
+       5440
+      ],
+      [
+       6631,
+       5952
+      ],
+      [
+       10334,
+       6528
+      ],
+      [
+       14044,
+       10560
+      ],
+      [
+       16384,
+       13952
+      ],
+      [
+       17845,
+       17792
+      ],
+      [
+       21858,
+       21440
+      ],
+      [
+       31553,
+       21760
+      ]
+     ]
+    },
+    {
+     "task_id": "df61dc5_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7826,
+     "predictor_cached": 7616,
+     "predictor_completion": 298,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 6,
+     "agent_prompt": 65833,
+     "agent_cached": 49664,
+     "agent_completion": 9268,
+     "per_call_prompt_cached": [
+      [
+       7826,
+       7616
+      ],
+      [
+       5512,
+       704
+      ],
+      [
+       5966,
+       5632
+      ],
+      [
+       6357,
+       6080
+      ],
+      [
+       7465,
+       6528
+      ],
+      [
+       16425,
+       7360
+      ],
+      [
+       24108,
+       23360
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7871,
+     "predictor_cached": 7680,
+     "predictor_completion": 978,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 5,
+     "agent_prompt": 40395,
+     "agent_cached": 27584,
+     "agent_completion": 2433,
+     "per_call_prompt_cached": [
+      [
+       7871,
+       7680
+      ],
+      [
+       5456,
+       640
+      ],
+      [
+       5887,
+       5376
+      ],
+      [
+       6119,
+       5952
+      ],
+      [
+       9360,
+       6336
+      ],
+      [
+       13573,
+       9280
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7872,
+     "predictor_cached": 7680,
+     "predictor_completion": 2197,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 7,
+     "agent_prompt": 74654,
+     "agent_cached": 57856,
+     "agent_completion": 6981,
+     "per_call_prompt_cached": [
+      [
+       7872,
+       7680
+      ],
+      [
+       5217,
+       512
+      ],
+      [
+       5570,
+       5312
+      ],
+      [
+       5780,
+       5632
+      ],
+      [
+       9032,
+       5952
+      ],
+      [
+       12338,
+       9216
+      ],
+      [
+       17348,
+       12224
+      ],
+      [
+       19369,
+       19008
+      ]
+     ]
+    },
+    {
+     "task_id": "383cbac_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7872,
+     "predictor_cached": 7680,
+     "predictor_completion": 996,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 68309,
+     "agent_cached": 47296,
+     "agent_completion": 4298,
+     "per_call_prompt_cached": [
+      [
+       7872,
+       7680
+      ],
+      [
+       5381,
+       640
+      ],
+      [
+       5723,
+       5440
+      ],
+      [
+       5936,
+       5632
+      ],
+      [
+       10556,
+       6272
+      ],
+      [
+       17696,
+       10432
+      ],
+      [
+       23017,
+       18880
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7829,
+     "predictor_cached": 7680,
+     "predictor_completion": 302,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 31393,
+     "agent_cached": 24640,
+     "agent_completion": 939,
+     "per_call_prompt_cached": [
+      [
+       7829,
+       7680
+      ],
+      [
+       4767,
+       640
+      ],
+      [
+       5194,
+       4864
+      ],
+      [
+       5469,
+       5312
+      ],
+      [
+       7804,
+       5696
+      ],
+      [
+       8159,
+       8128
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7829,
+     "predictor_cached": 7680,
+     "predictor_completion": 429,
+     "functions_offered_to_agent": 6,
+     "required_apis": 6,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 6,
+     "agent_prompt": 51126,
+     "agent_cached": 37376,
+     "agent_completion": 1708,
+     "per_call_prompt_cached": [
+      [
+       7829,
+       7680
+      ],
+      [
+       4728,
+       512
+      ],
+      [
+       5150,
+       4608
+      ],
+      [
+       5449,
+       5056
+      ],
+      [
+       9086,
+       5376
+      ],
+      [
+       12665,
+       8960
+      ],
+      [
+       14048,
+       12864
+      ]
+     ]
+    },
+    {
+     "task_id": "23cf851_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7831,
+     "predictor_cached": 7680,
+     "predictor_completion": 344,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 4,
+     "agent_prompt": 26316,
+     "agent_cached": 17088,
+     "agent_completion": 1101,
+     "per_call_prompt_cached": [
+      [
+       7831,
+       7680
+      ],
+      [
+       4768,
+       1344
+      ],
+      [
+       5196,
+       4672
+      ],
+      [
+       5460,
+       5120
+      ],
+      [
+       10892,
+       5952
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7822,
+     "predictor_cached": 7680,
+     "predictor_completion": 427,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 10,
+     "agent_prompt": 182117,
+     "agent_cached": 154688,
+     "agent_completion": 17137,
+     "per_call_prompt_cached": [
+      [
+       7822,
+       7680
+      ],
+      [
+       5449,
+       576
+      ],
+      [
+       5832,
+       5504
+      ],
+      [
+       6031,
+       5888
+      ],
+      [
+       7003,
+       6208
+      ],
+      [
+       7216,
+       7168
+      ],
+      [
+       22166,
+       7936
+      ],
+      [
+       23147,
+       23040
+      ],
+      [
+       30100,
+       29504
+      ],
+      [
+       36013,
+       30016
+      ],
+      [
+       39160,
+       38848
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7822,
+     "predictor_cached": 7744,
+     "predictor_completion": 544,
+     "functions_offered_to_agent": 8,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 7,
+     "agent_prompt": 73594,
+     "agent_cached": 47232,
+     "agent_completion": 11144,
+     "per_call_prompt_cached": [
+      [
+       7822,
+       7744
+      ],
+      [
+       5349,
+       512
+      ],
+      [
+       5731,
+       5440
+      ],
+      [
+       5933,
+       5760
+      ],
+      [
+       6603,
+       6080
+      ],
+      [
+       6818,
+       6528
+      ],
+      [
+       16228,
+       6784
+      ],
+      [
+       26932,
+       16128
+      ]
+     ]
+    },
+    {
+     "task_id": "57c3486_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7822,
+     "predictor_cached": 7744,
+     "predictor_completion": 462,
+     "functions_offered_to_agent": 10,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 107046,
+     "agent_cached": 81152,
+     "agent_completion": 14109,
+     "per_call_prompt_cached": [
+      [
+       7822,
+       7744
+      ],
+      [
+       5450,
+       2048
+      ],
+      [
+       5829,
+       5376
+      ],
+      [
+       6023,
+       5760
+      ],
+      [
+       6920,
+       6208
+      ],
+      [
+       20478,
+       7552
+      ],
+      [
+       27820,
+       20352
+      ],
+      [
+       34526,
+       33856
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7859,
+     "predictor_cached": 7680,
+     "predictor_completion": 499,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 10,
+     "agent_prompt": 297061,
+     "agent_cached": 253952,
+     "agent_completion": 47053,
+     "per_call_prompt_cached": [
+      [
+       7859,
+       7680
+      ],
+      [
+       5151,
+       576
+      ],
+      [
+       5550,
+       5184
+      ],
+      [
+       5772,
+       5632
+      ],
+      [
+       7292,
+       5888
+      ],
+      [
+       7623,
+       7168
+      ],
+      [
+       33442,
+       25088
+      ],
+      [
+       38752,
+       38528
+      ],
+      [
+       59030,
+       41088
+      ],
+      [
+       65923,
+       58944
+      ],
+      [
+       68526,
+       65856
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7863,
+     "predictor_cached": 7616,
+     "predictor_completion": 543,
+     "functions_offered_to_agent": 13,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 177297,
+     "agent_cached": 137280,
+     "agent_completion": 27897,
+     "per_call_prompt_cached": [
+      [
+       7863,
+       7616
+      ],
+      [
+       5504,
+       1344
+      ],
+      [
+       5900,
+       5568
+      ],
+      [
+       6127,
+       5824
+      ],
+      [
+       7260,
+       6272
+      ],
+      [
+       7567,
+       7424
+      ],
+      [
+       23269,
+       7488
+      ],
+      [
+       35467,
+       25664
+      ],
+      [
+       42144,
+       35520
+      ],
+      [
+       44059,
+       42176
+      ]
+     ]
+    },
+    {
+     "task_id": "68ee2c9_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7861,
+     "predictor_cached": 7680,
+     "predictor_completion": 641,
+     "functions_offered_to_agent": 9,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 208698,
+     "agent_cached": 178496,
+     "agent_completion": 30298,
+     "per_call_prompt_cached": [
+      [
+       7861,
+       7680
+      ],
+      [
+       4993,
+       512
+      ],
+      [
+       5394,
+       5056
+      ],
+      [
+       5618,
+       5440
+      ],
+      [
+       6792,
+       5760
+      ],
+      [
+       7112,
+       6976
+      ],
+      [
+       23410,
+       18048
+      ],
+      [
+       25948,
+       25920
+      ],
+      [
+       38749,
+       27584
+      ],
+      [
+       44405,
+       38784
+      ],
+      [
+       46277,
+       44416
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7616,
+     "predictor_completion": 387,
+     "functions_offered_to_agent": 6,
+     "required_apis": 6,
+     "required_apis_among_offered": 5,
+     "all_required_among_offered": false,
+     "agent_turns": 5,
+     "agent_prompt": 23499,
+     "agent_cached": 19072,
+     "agent_completion": 356,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7616
+      ],
+      [
+       4196,
+       576
+      ],
+      [
+       4526,
+       4224
+      ],
+      [
+       4725,
+       4544
+      ],
+      [
+       4974,
+       4864
+      ],
+      [
+       5078,
+       4864
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7744,
+     "predictor_completion": 341,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 23784,
+     "agent_cached": 19072,
+     "agent_completion": 372,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7744
+      ],
+      [
+       4234,
+       576
+      ],
+      [
+       4581,
+       4288
+      ],
+      [
+       4785,
+       4480
+      ],
+      [
+       5039,
+       4672
+      ],
+      [
+       5145,
+       5056
+      ]
+     ]
+    },
+    {
+     "task_id": "6bdbc26_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7825,
+     "predictor_cached": 7808,
+     "predictor_completion": 198,
+     "functions_offered_to_agent": 7,
+     "required_apis": 6,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": true,
+     "agent_turns": 5,
+     "agent_prompt": 23694,
+     "agent_cached": 19584,
+     "agent_completion": 355,
+     "per_call_prompt_cached": [
+      [
+       7825,
+       7808
+      ],
+      [
+       4234,
+       832
+      ],
+      [
+       4566,
+       4224
+      ],
+      [
+       4763,
+       4608
+      ],
+      [
+       5013,
+       4864
+      ],
+      [
+       5118,
+       5056
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7839,
+     "predictor_cached": 7680,
+     "predictor_completion": 454,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 93999,
+     "agent_cached": 80960,
+     "agent_completion": 4038,
+     "per_call_prompt_cached": [
+      [
+       7839,
+       7680
+      ],
+      [
+       5219,
+       640
+      ],
+      [
+       5558,
+       5248
+      ],
+      [
+       5752,
+       5568
+      ],
+      [
+       7143,
+       5888
+      ],
+      [
+       7348,
+       7296
+      ],
+      [
+       14316,
+       8640
+      ],
+      [
+       14901,
+       14848
+      ],
+      [
+       16443,
+       16256
+      ],
+      [
+       17319,
+       16576
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7837,
+     "predictor_cached": 7680,
+     "predictor_completion": 656,
+     "functions_offered_to_agent": 11,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 93775,
+     "agent_cached": 81152,
+     "agent_completion": 4152,
+     "per_call_prompt_cached": [
+      [
+       7837,
+       7680
+      ],
+      [
+       5222,
+       640
+      ],
+      [
+       5559,
+       5248
+      ],
+      [
+       5759,
+       5568
+      ],
+      [
+       6661,
+       5952
+      ],
+      [
+       6874,
+       6848
+      ],
+      [
+       14577,
+       8448
+      ],
+      [
+       15471,
+       15424
+      ],
+      [
+       16496,
+       16384
+      ],
+      [
+       17156,
+       16640
+      ]
+     ]
+    },
+    {
+     "task_id": "6171bbc_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7838,
+     "predictor_cached": 7680,
+     "predictor_completion": 297,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 10,
+     "agent_prompt": 109696,
+     "agent_cached": 99264,
+     "agent_completion": 5214,
+     "per_call_prompt_cached": [
+      [
+       7838,
+       7680
+      ],
+      [
+       4887,
+       4800
+      ],
+      [
+       5225,
+       4928
+      ],
+      [
+       5424,
+       5120
+      ],
+      [
+       6573,
+       5568
+      ],
+      [
+       6808,
+       6784
+      ],
+      [
+       7460,
+       7232
+      ],
+      [
+       16640,
+       9088
+      ],
+      [
+       17656,
+       17600
+      ],
+      [
+       19081,
+       18944
+      ],
+      [
+       19942,
+       19200
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_1",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7858,
+     "predictor_cached": 7680,
+     "predictor_completion": 298,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 184784,
+     "agent_cached": 153024,
+     "agent_completion": 18445,
+     "per_call_prompt_cached": [
+      [
+       7858,
+       7680
+      ],
+      [
+       5477,
+       448
+      ],
+      [
+       5875,
+       5568
+      ],
+      [
+       6268,
+       5952
+      ],
+      [
+       8219,
+       6464
+      ],
+      [
+       9067,
+       8384
+      ],
+      [
+       22337,
+       13568
+      ],
+      [
+       23048,
+       22976
+      ],
+      [
+       30251,
+       22976
+      ],
+      [
+       36649,
+       30144
+      ],
+      [
+       37593,
+       36544
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7856,
+     "predictor_cached": 7616,
+     "predictor_completion": 316,
+     "functions_offered_to_agent": 11,
+     "required_apis": 8,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": false,
+     "agent_turns": 9,
+     "agent_prompt": 140387,
+     "agent_cached": 125056,
+     "agent_completion": 15690,
+     "per_call_prompt_cached": [
+      [
+       7856,
+       7616
+      ],
+      [
+       5474,
+       1984
+      ],
+      [
+       5787,
+       5504
+      ],
+      [
+       6195,
+       5888
+      ],
+      [
+       8113,
+       6400
+      ],
+      [
+       8795,
+       8256
+      ],
+      [
+       20250,
+       13056
+      ],
+      [
+       21085,
+       21056
+      ],
+      [
+       31929,
+       30784
+      ],
+      [
+       32759,
+       32128
+      ]
+     ]
+    },
+    {
+     "task_id": "6c2c621_3",
+     "passed": false,
+     "failure_type": "evaluation_failed",
+     "predictor_prompt": 7858,
+     "predictor_cached": 7680,
+     "predictor_completion": 298,
+     "functions_offered_to_agent": 12,
+     "required_apis": 8,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": true,
+     "agent_turns": 11,
+     "agent_prompt": 243311,
+     "agent_cached": 217664,
+     "agent_completion": 22998,
+     "per_call_prompt_cached": [
+      [
+       7858,
+       7680
+      ],
+      [
+       5515,
+       448
+      ],
+      [
+       5908,
+       5568
+      ],
+      [
+       6294,
+       5824
+      ],
+      [
+       8247,
+       6464
+      ],
+      [
+       10517,
+       10496
+      ],
+      [
+       18398,
+       14208
+      ],
+      [
+       27572,
+       21248
+      ],
+      [
+       32538,
+       27456
+      ],
+      [
+       38345,
+       37504
+      ],
+      [
+       44375,
+       43904
+      ],
+      [
+       45602,
+       44544
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7831,
+     "predictor_cached": 7616,
+     "predictor_completion": 455,
+     "functions_offered_to_agent": 11,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 9,
+     "agent_prompt": 67798,
+     "agent_cached": 58944,
+     "agent_completion": 1378,
+     "per_call_prompt_cached": [
+      [
+       7831,
+       7616
+      ],
+      [
+       5554,
+       1280
+      ],
+      [
+       5918,
+       5632
+      ],
+      [
+       6443,
+       6016
+      ],
+      [
+       6750,
+       6592
+      ],
+      [
+       6925,
+       6656
+      ],
+      [
+       7148,
+       7104
+      ],
+      [
+       8343,
+       7040
+      ],
+      [
+       10306,
+       8256
+      ],
+      [
+       10411,
+       10368
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_2",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7832,
+     "predictor_cached": 7680,
+     "predictor_completion": 372,
+     "functions_offered_to_agent": 10,
+     "required_apis": 7,
+     "required_apis_among_offered": 6,
+     "all_required_among_offered": false,
+     "agent_turns": 8,
+     "agent_prompt": 62821,
+     "agent_cached": 53248,
+     "agent_completion": 1049,
+     "per_call_prompt_cached": [
+      [
+       7832,
+       7680
+      ],
+      [
+       5515,
+       1216
+      ],
+      [
+       5771,
+       5504
+      ],
+      [
+       5876,
+       5696
+      ],
+      [
+       6390,
+       5760
+      ],
+      [
+       6697,
+       6656
+      ],
+      [
+       9946,
+       6912
+      ],
+      [
+       11132,
+       10048
+      ],
+      [
+       11494,
+       11456
+      ]
+     ]
+    },
+    {
+     "task_id": "396c5a2_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7834,
+     "predictor_cached": 7616,
+     "predictor_completion": 457,
+     "functions_offered_to_agent": 11,
+     "required_apis": 7,
+     "required_apis_among_offered": 7,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 50072,
+     "agent_cached": 43840,
+     "agent_completion": 735,
+     "per_call_prompt_cached": [
+      [
+       7834,
+       7616
+      ],
+      [
+       5556,
+       2112
+      ],
+      [
+       5886,
+       5568
+      ],
+      [
+       6407,
+       5952
+      ],
+      [
+       6710,
+       6528
+      ],
+      [
+       8361,
+       6592
+      ],
+      [
+       8468,
+       8448
+      ],
+      [
+       8684,
+       8640
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_1",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7839,
+     "predictor_cached": 7680,
+     "predictor_completion": 366,
+     "functions_offered_to_agent": 9,
+     "required_apis": 9,
+     "required_apis_among_offered": 8,
+     "all_required_among_offered": false,
+     "agent_turns": 10,
+     "agent_prompt": 91851,
+     "agent_cached": 80384,
+     "agent_completion": 4017,
+     "per_call_prompt_cached": [
+      [
+       7839,
+       7680
+      ],
+      [
+       4835,
+       512
+      ],
+      [
+       5221,
+       4864
+      ],
+      [
+       5596,
+       5120
+      ],
+      [
+       9037,
+       5504
+      ],
+      [
+       9986,
+       9728
+      ],
+      [
+       10251,
+       10112
+      ],
+      [
+       10454,
+       10176
+      ],
+      [
+       11074,
+       10624
+      ],
+      [
+       11961,
+       11904
+      ],
+      [
+       13436,
+       11840
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_2",
+     "passed": false,
+     "failure_type": "step_cap_reached",
+     "predictor_prompt": 7838,
+     "predictor_cached": 7616,
+     "predictor_completion": 414,
+     "functions_offered_to_agent": 12,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 49,
+     "agent_prompt": 1391558,
+     "agent_cached": 1370816,
+     "agent_completion": 54985,
+     "per_call_prompt_cached": [
+      [
+       7838,
+       7616
+      ],
+      [
+       5147,
+       768
+      ],
+      [
+       5531,
+       5056
+      ],
+      [
+       5905,
+       5632
+      ],
+      [
+       6510,
+       5824
+      ],
+      [
+       6780,
+       6400
+      ],
+      [
+       7200,
+       7104
+      ],
+      [
+       7627,
+       7360
+      ],
+      [
+       8079,
+       7808
+      ],
+      [
+       9069,
+       8896
+      ],
+      [
+       9473,
+       9216
+      ],
+      [
+       9879,
+       9728
+      ],
+      [
+       12591,
+       12480
+      ],
+      [
+       13003,
+       12480
+      ],
+      [
+       13851,
+       13568
+      ],
+      [
+       14942,
+       13760
+      ],
+      [
+       17350,
+       17216
+      ],
+      [
+       17787,
+       17280
+      ],
+      [
+       18956,
+       18688
+      ],
+      [
+       22042,
+       20544
+      ],
+      [
+       22642,
+       22400
+      ],
+      [
+       23455,
+       23296
+      ],
+      [
+       24307,
+       23808
+      ],
+      [
+       25336,
+       25152
+      ],
+      [
+       25824,
+       25536
+      ],
+      [
+       26416,
+       26240
+      ],
+      [
+       27254,
+       27136
+      ],
+      [
+       28136,
+       27968
+      ],
+      [
+       28618,
+       28352
+      ],
+      [
+       29475,
+       29312
+      ],
+      [
+       30482,
+       30272
+      ],
+      [
+       32030,
+       31872
+      ],
+      [
+       32635,
+       32384
+      ],
+      [
+       33593,
+       33536
+      ],
+      [
+       34346,
+       34176
+      ],
+      [
+       35900,
+       35456
+      ],
+      [
+       37089,
+       36928
+      ],
+      [
+       37516,
+       37248
+      ],
+      [
+       39690,
+       39552
+      ],
+      [
+       40483,
+       40000
+      ],
+      [
+       42152,
+       41920
+      ],
+      [
+       46296,
+       46080
+      ],
+      [
+       53573,
+       53440
+      ],
+      [
+       54806,
+       54336
+      ],
+      [
+       55874,
+       55232
+      ],
+      [
+       56372,
+       56128
+      ],
+      [
+       57055,
+       56896
+      ],
+      [
+       62524,
+       62208
+      ],
+      [
+       66576,
+       65280
+      ],
+      [
+       69381,
+       68864
+      ]
+     ]
+    },
+    {
+     "task_id": "4fab96f_3",
+     "passed": true,
+     "failure_type": null,
+     "predictor_prompt": 7839,
+     "predictor_cached": 7616,
+     "predictor_completion": 560,
+     "functions_offered_to_agent": 10,
+     "required_apis": 9,
+     "required_apis_among_offered": 9,
+     "all_required_among_offered": true,
+     "agent_turns": 7,
+     "agent_prompt": 62818,
+     "agent_cached": 52736,
+     "agent_completion": 2873,
+     "per_call_prompt_cached": [
+      [
+       7839,
+       7616
+      ],
+      [
+       4908,
+       832
+      ],
+      [
+       5378,
+       5056
+      ],
+      [
+       5747,
+       5440
+      ],
+      [
+       9745,
+       6144
+      ],
+      [
+       11703,
+       10112
+      ],
+      [
+       11924,
+       11904
+      ],
+      [
+       13413,
+       13248
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "note": "Counts only. Source: logs/lm_calls.jsonl of the Part 4 runs; required_apis = dev ground truth required_apis (lower-cased, app.api); 'offered' = the function definitions declared in the agent's first call after the predictor."
+}

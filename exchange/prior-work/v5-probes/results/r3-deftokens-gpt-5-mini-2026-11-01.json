@@ -1,0 +1,63 @@
+{
+ "probe": "p2_tool_choice_probe",
+ "base": "https://api.openai.com/v1",
+ "started_utc": "2026-11-01T14:41:32Z",
+ "models": {
+  "gpt-5-mini": [
+   {
+    "cell": "deftokens n=0",
+    "status": 400,
+    "seconds": 0.78,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=10",
+    "status": 400,
+    "seconds": 0.72,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=50",
+    "status": 400,
+    "seconds": 0.89,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=100",
+    "status": 400,
+    "seconds": 1.13,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=200",
+    "status": 400,
+    "seconds": 0.51,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Invalid 'tools': array too long. Expected an array with maximum length 128, but got an array with length 200 instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"tools\",\n    \"code\": \"array_above_max_length\"\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=457",
+    "status": 400,
+    "seconds": 0.67,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Invalid 'tools': array too long. Expected an array with maximum length 128, but got an array with length 457 instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"tools\",\n    \"code\": \"array_above_max_length\"\n  }\n}"
+    }
+   }
+  ]
+ }
+}

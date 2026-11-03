@@ -1,0 +1,165 @@
+
+
+        Overview - TUD:AI
+
+          Skip to content
+
+Models
+
+We retain the right to change models so that we can provide models that suit your applications and our infrastructure best. You can, however, use one of the following model aliases for more reliable applications:
+
+alias-ha (general model, high availability)
+
+alias-huge (most powerful model)
+
+alias-code (coding support)
+
+alias-reasoning
+
+alias-image-generation (to generate images from text)
+
+alias-vision (to ask questions about images)
+
+alias-stt (speech-to-text)
+
+Most models also fall back to other models.
+
+The status page lists all models and their current status.
+
+Available Models
+
+Each model has its own page with the details you need to use it: the exact name for the API, the weights and hardware we run it on, its availability level, how its thinking can be controlled, and the limits we set.
+
+Chat
+
+All chat models can be used through /v1/chat/completions, /v1/responses and /v1/messages (Anthropic Messages API, beta).
+
+ DeepSeek-V4.1-Flash
+
+text, image → text · thinking · 1M context · HPC
+
+ GLM-5.3
+
+text → text · thinking · 512K context · HPC
+
+ GLM-5.3-Flash
+
+text, image → text · thinking · 1M context · HPC
+
+ MiniMax-M3
+
+text, image → text · thinking · 512K context · HPC
+
+ MiniMax-M3.1-Flash
+
+text, image → text · thinking · 1M context · HPC
+
+ Qwen3.8-27B
+
+text, image → text · thinking · 256K context · dedicated
+
+ Gemma-4-26B-A4B
+
+text, image → text · thinking · 256K context · dedicated
+
+ gpt-oss-120b
+
+text → text · thinking · 128K context · dedicated
+
+ Llama-3.3-70B-Instruct
+
+text → text · 64K context · dedicated
+
+Embeddings and Reranking
+
+ Qwen3-Embedding-4B
+
+text → vector (2,560 dimensions) · dedicated
+
+ EmbeddingGemma 2
+
+text, image, audio, video → vector (768 dimensions) · dedicated
+
+ Qwen3-Reranker-4B
+
+query, documents → relevance scores · dedicated
+
+Decisions
+
+All decision models can be used through /v1/systemone and /v1/decisions (OpenAI Decisions format).
+
+ Clef-Flash
+
+text, questions → answer probabilities · dedicated
+
+Image Generation
+
+ FLUX.2-klein-4B
+
+text, images → image · up to 3072×1728 · dedicated
+
+ FLUX.2-dev
+
+text, images → image · up to 2048×2048 · dedicated
+
+Speech
+
+ Whisper-large-v3-turbo
+
+audio → text · dedicated
+
+ OmniVoice
+
+text → audio · 6 voices · long texts · dedicated
+
+ tts-1-hd
+
+text → audio · 6 voices · dedicated
+
+Availability Levels
+
+Our models run on two different kinds of servers:
+
+Dedicated
+The model runs on GPU servers that are dedicated to this service. It is available around the clock,
+except during maintenance and updates.
+HPC
+The model runs as a Slurm job on the Capella HPC cluster of TU Dresden.
+This lets us offer much larger models, but they are less available than dedicated models:
+an HPC job runs for at most a week, and the next job starts only after the previous one has ended,
+so the model is offline while the new job waits in the queue and loads the model.
+Maintenance of the HPC cluster also takes the model offline.
+While the model is unavailable, requests go to its fallback models, if it has any.
+
+Thinking
+
+Many chat models think (reason) before they answer. The models differ in what they accept, so each model page lists the default, the accepted values of reasoning_effort, whether a numeric effort is possible, how to turn thinking off and whether the level actually changes how much the model thinks.
+
+reasoning_effort takes one of none, minimal, low, medium, high, xhigh and max. Any other value, including a number, is rejected with error 400. Some models reject some of these values as well, some accept them but treat several values the same, and some ignore the setting completely.
+
+There are two ways to control thinking. Which one works depends on the model:
+
+from openai import OpenAI
+
+client = OpenAI(base_url="https://llm.scads.ai/v1", api_key="<your API key>")
+
+# 1. The OpenAI parameter reasoning_effort
+client.chat.completions.create(
+    model="Qwen/Qwen3.8-27B",
+    messages=[{"role": "user", "content": "Hello"}],
+    reasoning_effort="medium",
+)
+
+# 2. Parameters for the model's chat template
+client.chat.completions.create(
+    model="Qwen/Qwen3.8-27B",
+    messages=[{"role": "user", "content": "Hello"}],
+    extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+)
+
+Rejected values return an error
+
+If a model does not accept a value, you get error 400 with the model's own message, for example
+Unexpected reasoning effort high. Supported types are xhigh (default), medium, and low.
+Such requests are not passed on to a fallback model.
+

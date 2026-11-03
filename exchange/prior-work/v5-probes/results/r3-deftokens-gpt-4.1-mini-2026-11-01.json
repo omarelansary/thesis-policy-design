@@ -1,0 +1,71 @@
+{
+ "probe": "p2_tool_choice_probe",
+ "base": "https://api.openai.com/v1",
+ "started_utc": "2026-11-01T14:41:15Z",
+ "models": {
+  "gpt-4.1-mini": [
+   {
+    "cell": "deftokens n=0",
+    "status": 200,
+    "seconds": 0.51,
+    "usage": {
+     "prompt": 8,
+     "cached": 0,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=10",
+    "status": 200,
+    "seconds": 0.6,
+    "usage": {
+     "prompt": 514,
+     "cached": 0,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=50",
+    "status": 200,
+    "seconds": 1.03,
+    "usage": {
+     "prompt": 4068,
+     "cached": 0,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=100",
+    "status": 200,
+    "seconds": 0.99,
+    "usage": {
+     "prompt": 8184,
+     "cached": 2816,
+     "completion": 1
+    },
+    "error": null
+   },
+   {
+    "cell": "deftokens n=200",
+    "status": 400,
+    "seconds": 0.46,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Invalid 'tools': array too long. Expected an array with maximum length 128, but got an array with length 200 instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"tools\",\n    \"code\": \"array_above_max_length\"\n  }\n}"
+    }
+   },
+   {
+    "cell": "deftokens n=457",
+    "status": 400,
+    "seconds": 0.72,
+    "usage": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Invalid 'tools': array too long. Expected an array with maximum length 128, but got an array with length 457 instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"tools\",\n    \"code\": \"array_above_max_length\"\n  }\n}"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,817 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:38:58Z",
+ "models": {
+  "Qwen/Qwen3.8-27B": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.37,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.26,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.18,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.89,
+    "usage": {
+     "prompt": 4619,
+     "cached": 0,
+     "completion": 57
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "b5b9f59d-cca4-42bb-89b6-a5534b0865d3",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0021084249999999997",
+      "x-litellm-response-cost-original": "0.0021084249999999997",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001963075",
+      "x-litellm-response-cost-output": "0.00014535",
+      "x-litellm-response-cost-reasoning": "6.885e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "748.6531734466553",
+      "x-litellm-overhead-duration-ms": "55.1953",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.86,
+    "usage": {
+     "prompt": 4619,
+     "cached": 1648,
+     "completion": 63
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "26ee0e69-6669-4f09-aa1d-37c1775adf52",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001563405",
+      "x-litellm-response-cost-original": "0.001563405",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001262675",
+      "x-litellm-response-cost-output": "0.00016065",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "8.415e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "694.3678855895996",
+      "x-litellm-overhead-duration-ms": "50.7278",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.71,
+    "usage": {
+     "prompt": 4619,
+     "cached": 1648,
+     "completion": 62
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "014cf35b-47d4-4f01-b0aa-a71130ddcccc",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0015608549999999999",
+      "x-litellm-response-cost-original": "0.0015608549999999999",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001262675",
+      "x-litellm-response-cost-output": "0.0001581",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "8.16e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "548.9749908447266",
+      "x-litellm-overhead-duration-ms": "58.4779",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.66,
+    "usage": {
+     "prompt": 4619,
+     "cached": 1648,
+     "completion": 54
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "25e36b85-d15d-4b1e-982a-b468eef81b11",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0015404549999999998",
+      "x-litellm-response-cost-original": "0.0015404549999999998",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001262675",
+      "x-litellm-response-cost-output": "0.00013769999999999999",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "6.12e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "510.667085647583",
+      "x-litellm-overhead-duration-ms": "63.216",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.76,
+    "usage": {
+     "prompt": 4619,
+     "cached": 1648,
+     "completion": 64
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "cd380118-d097-4ba3-a60d-536e603bcc4f",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001565955",
+      "x-litellm-response-cost-original": "0.001565955",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001262675",
+      "x-litellm-response-cost-output": "0.0001632",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "8.67e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "601.3848781585693",
+      "x-litellm-overhead-duration-ms": "48.1029",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.14,
+    "usage": {
+     "prompt": 4644,
+     "cached": 1648,
+     "completion": 135
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "3cb241a9-9629-4711-9e05-33d957c9ac8e",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00175763",
+      "x-litellm-response-cost-original": "0.00175763",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0012733000000000002",
+      "x-litellm-response-cost-output": "0.00034425000000000005",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.0002244",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "976.0940074920654",
+      "x-litellm-overhead-duration-ms": "67.9669",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 142,
+     "text_head": "\n\nI can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are currently permitted. Let me know if you'd like me to use one of those instead.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.22,
+    "usage": {
+     "prompt": 4644,
+     "cached": 1648,
+     "completion": 163
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "478c7139-1377-467b-8441-2e92a9688b92",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0018290300000000002",
+      "x-litellm-response-cost-original": "0.0018290300000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0012733000000000002",
+      "x-litellm-response-cost-output": "0.00041565000000000005",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.00026775000000000003",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1048.0492115020752",
+      "x-litellm-overhead-duration-ms": "61.5072",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 183,
+     "text_head": "\n\nI can't call `tool_07` right now \u2014 the current restriction limits usage to **tool_03**, **tool_04**, and **tool_05** only. Let me know if you'd like me to cal",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.96,
+    "usage": {
+     "prompt": 4644,
+     "cached": 1648,
+     "completion": 118
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "5f134189-357c-4090-b637-1909205f8228",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00171428",
+      "x-litellm-response-cost-original": "0.00171428",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0012733000000000002",
+      "x-litellm-response-cost-output": "0.0003009",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.0001785",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "793.0121421813965",
+      "x-litellm-overhead-duration-ms": "66.7062",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 142,
+     "text_head": "\n\nI can't use tool_07 right now \u2014 only tool_03, tool_04, and tool_05 are permitted. Let me know if you'd like me to call one of those instead.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 1.72,
+    "usage": {
+     "prompt": 4644,
+     "cached": 1648,
+     "completion": 112
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "1efe6993-f2ec-46eb-a57c-6a16c8d8dab5",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00169898",
+      "x-litellm-response-cost-original": "0.00169898",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0012733000000000002",
+      "x-litellm-response-cost-output": "0.0002856",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.00015810000000000002",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1516.0470008850098",
+      "x-litellm-overhead-duration-ms": "405.7519",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 142,
+     "text_head": "\n\nI can't call `tool_07` \u2014 you've restricted usage to only `tool_03`, `tool_04`, and `tool_05`. Would you like me to use one of those instead?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.25,
+    "usage": {
+     "prompt": 4644,
+     "cached": 1648,
+     "completion": 155
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": "vllm-0.32.0-fd9309b2",
+     "headers": {
+      "x-litellm-call-id": "b04680ad-5c89-4078-a55a-ef48f5d1a9db",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00180863",
+      "x-litellm-response-cost-original": "0.00180863",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0012733000000000002",
+      "x-litellm-response-cost-output": "0.00039525",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.0002499",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1090.8410549163818",
+      "x-litellm-overhead-duration-ms": "78.2721",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 164,
+     "text_head": "\n\nI can't call `tool_07` right now \u2014 you've restricted usage to `tool_03`, `tool_04`, and `tool_05` only. Let me know if you'd like me to call one of those inst",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.89,
+    "usage": {
+     "prompt": 4631,
+     "cached": 0,
+     "completion": 57
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "883d9627-9a70-49e1-a17a-ad84aa6e5664",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0021135249999999998",
+      "x-litellm-response-cost-original": "0.0021135249999999998",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001267775",
+      "x-litellm-response-cost-output": "0.00014535",
+      "x-litellm-response-cost-cache-creation": "0.0007004",
+      "x-litellm-response-cost-reasoning": "6.63e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "675.1708984375",
+      "x-litellm-overhead-duration-ms": "59.937",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 93,
+     "text_head": "\n\n<tool_call>\n<function=tool_07>\n<parameter=note>\nprobe\n</parameter>\n</function>\n</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.75,
+    "usage": {
+     "prompt": 4631,
+     "cached": 0,
+     "completion": 49
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "8a04adbd-b606-4a9f-a419-85e5aea356eb",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.002093125",
+      "x-litellm-response-cost-original": "0.002093125",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001267775",
+      "x-litellm-response-cost-output": "0.00012495000000000003",
+      "x-litellm-response-cost-cache-creation": "0.0007004",
+      "x-litellm-response-cost-reasoning": "4.5900000000000004e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "558.5150718688965",
+      "x-litellm-overhead-duration-ms": "54.4491",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 93,
+     "text_head": "\n\n<tool_call>\n<function=tool_07>\n<parameter=note>\nprobe\n</parameter>\n</function>\n</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.24,
+    "usage": {
+     "prompt": 4631,
+     "cached": 1648,
+     "completion": 58
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "a35bfd77-bc0d-4f35-8a97-8f3956969ea7",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001555755",
+      "x-litellm-response-cost-original": "0.001555755",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001267775",
+      "x-litellm-response-cost-output": "0.00014790000000000002",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "6.885e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1345.7520008087158",
+      "x-litellm-overhead-duration-ms": "858.3491",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 93,
+     "text_head": "\n\n<tool_call>\n<function=tool_07>\n<parameter=note>\nprobe\n</parameter>\n</function>\n</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.97,
+    "usage": {
+     "prompt": 4631,
+     "cached": 1648,
+     "completion": 65
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "f36298fc-d123-4d24-9a51-fff09cd99ae3",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001573605",
+      "x-litellm-response-cost-original": "0.001573605",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001267775",
+      "x-litellm-response-cost-output": "0.00016575000000000002",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "8.67e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "784.0569019317627",
+      "x-litellm-overhead-duration-ms": "58.5787",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 93,
+     "text_head": "\n\n<tool_call>\n<function=tool_07>\n<parameter=note>\nprobe\n</parameter>\n</function>\n</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.97,
+    "usage": {
+     "prompt": 4631,
+     "cached": 1648,
+     "completion": 76
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "Qwen/Qwen3.8-27B",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "93bf6ac6-a91d-4e38-a82b-26516f473ac8",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/Qwen/Qwen3.8-27B",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.001601655",
+      "x-litellm-response-cost-original": "0.001601655",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.001267775",
+      "x-litellm-response-cost-output": "0.00019380000000000002",
+      "x-litellm-response-cost-cache-read": "0.00014008",
+      "x-litellm-response-cost-reasoning": "0.00011475000000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "795.7398891448975",
+      "x-litellm-overhead-duration-ms": "56.6158",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "Qwen/Qwen3.8-27B",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 93,
+     "text_head": "\n\n<tool_call>\n<function=tool_07>\n<parameter=note>\nprobe\n</parameter>\n</function>\n</tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

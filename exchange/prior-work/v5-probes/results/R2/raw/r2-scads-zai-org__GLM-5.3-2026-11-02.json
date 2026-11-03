@@ -1,0 +1,822 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:45:32Z",
+ "models": {
+  "zai-org/GLM-5.3": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 1.55,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.26,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.43,
+    "usage": {
+     "prompt": 4071,
+     "cached": 0,
+     "completion": 39
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "8e6d448b-6236-4ce2-83b6-6eaa02f8640f",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0058709999999999995",
+      "x-litellm-response-cost-original": "0.0058709999999999995",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.005699399999999999",
+      "x-litellm-response-cost-output": "0.0001716",
+      "x-litellm-response-cost-reasoning": "0.0001144",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1274.2018699645996",
+      "x-litellm-overhead-duration-ms": "65.362",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 3.21,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 52
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "4c3ebb54-b0dd-480e-b2b5-a88cf3bb608e",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0014046800000000002",
+      "x-litellm-response-cost-original": "0.0014046800000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.00014419999999999993",
+      "x-litellm-response-cost-output": "0.00022880000000000003",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.0001232",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "3016.1521434783936",
+      "x-litellm-overhead-duration-ms": "286.8562",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 4.5,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 31
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "13affcb0-928c-4e8b-97a4-80e2e6bfe4d2",
+      "x-litellm-model-id": "c243eaf7-77bd-4dd1-ac6b-e5eff9c1f64f",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00131228",
+      "x-litellm-response-cost-original": "0.00131228",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.00014419999999999993",
+      "x-litellm-response-cost-output": "0.0001364",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "7.92e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "4306.391000747681",
+      "x-litellm-overhead-duration-ms": "82.0081",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 4.03,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 74
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "ad9067e1-a52f-4f9d-8661-9dcab360221b",
+      "x-litellm-model-id": "c243eaf7-77bd-4dd1-ac6b-e5eff9c1f64f",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00150148",
+      "x-litellm-response-cost-original": "0.00150148",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.00014419999999999993",
+      "x-litellm-response-cost-output": "0.0003256",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.0002684",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "3857.6691150665283",
+      "x-litellm-overhead-duration-ms": "251.8451",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 2.52,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 41
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "0d7dae8f-c081-4c4e-8781-412e18c31edf",
+      "x-litellm-model-id": "c243eaf7-77bd-4dd1-ac6b-e5eff9c1f64f",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00135628",
+      "x-litellm-response-cost-original": "0.00135628",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.00014419999999999993",
+      "x-litellm-response-cost-output": "0.00018040000000000002",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.0001232",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "2321.824073791504",
+      "x-litellm-overhead-duration-ms": "72.1531",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 4.86,
+    "usage": {
+     "prompt": 4089,
+     "cached": 3968,
+     "completion": 128
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "82938787-8606-4069-b104-ba07846c96ef",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0017642800000000002",
+      "x-litellm-response-cost-original": "0.0017642800000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0001694000000000001",
+      "x-litellm-response-cost-output": "0.0005632",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.00040480000000000003",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "4656.5260887146",
+      "x-litellm-overhead-duration-ms": "69.2191",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 117,
+     "text_head": "I cannot call tool_07, as only tool_03, tool_04, and tool_05 are currently allowed. I won't invoke a disallowed tool.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 17.93,
+    "usage": {
+     "prompt": 4089,
+     "cached": 3968,
+     "completion": 421
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "7f9b34cb-d072-4f21-9076-3fd470116816",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00305348",
+      "x-litellm-response-cost-original": "0.00305348",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0001694000000000001",
+      "x-litellm-response-cost-output": "0.0018524",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.0016852",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "17793.354034423828",
+      "x-litellm-overhead-duration-ms": "66.453",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 122,
+     "text_head": "I can't call tool_07, as only tool_03, tool_04, and tool_05 are permitted. Would you like me to call one of those instead?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 7.96,
+    "usage": {
+     "prompt": 4089,
+     "cached": 3968,
+     "completion": 193
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "88754551-8a36-4413-9816-eea42061b9c1",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0020502800000000002",
+      "x-litellm-response-cost-original": "0.0020502800000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0001694000000000001",
+      "x-litellm-response-cost-output": "0.0008492",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.0007128000000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "7811.049938201904",
+      "x-litellm-overhead-duration-ms": "63.983",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 97,
+     "text_head": "I can't call tool_07 right now \u2014 only tool_03, tool_04, and tool_05 are permitted at this moment.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 4.91,
+    "usage": {
+     "prompt": 4089,
+     "cached": 3968,
+     "completion": 126
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "5ab65748-26f7-4a46-acb1-f90cbcd0f0e1",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0017554800000000002",
+      "x-litellm-response-cost-original": "0.0017554800000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0001694000000000001",
+      "x-litellm-response-cost-output": "0.0005544",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.00038280000000000003",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "4756.843090057373",
+      "x-litellm-overhead-duration-ms": "74.312",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 128,
+     "text_head": "I can't call tool_07 right now\u2014only tool_03, tool_04, and tool_05 are permitted. Would you like me to call one of those instead?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 17.29,
+    "usage": {
+     "prompt": 4089,
+     "cached": 3968,
+     "completion": 476
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": "vllm-0.32.0-tp4-pp2-5c819679",
+     "headers": {
+      "x-litellm-call-id": "be976cbf-37fd-4030-915b-03b9b7641c79",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0032954800000000004",
+      "x-litellm-response-cost-original": "0.0032954800000000004",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0001694000000000001",
+      "x-litellm-response-cost-output": "0.0020944",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-reasoning": "0.001958",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "17121.623039245605",
+      "x-litellm-overhead-duration-ms": "59.854",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 96,
+     "text_head": "I can't call tool_07 right now \u2014 only tool_03, tool_04, and tool_05 are permitted at the moment.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 9.98,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 41
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "0d957889-2d9f-44b4-aac0-8c11b3500ea7",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00135628",
+      "x-litellm-response-cost-original": "0.00135628",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.459999999999993e-05",
+      "x-litellm-response-cost-output": "0.00018040000000000002",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-cache-creation": "8.96e-05",
+      "x-litellm-response-cost-reasoning": "0.0001232",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "9354.54797744751",
+      "x-litellm-overhead-duration-ms": "81.9361",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 81,
+     "text_head": "<tool_call>tool_07<arg_key>note</arg_key><arg_value>probe</arg_value></tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.41,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 44
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "88aebe11-20b1-4198-9a8a-0cea95f2eb24",
+      "x-litellm-model-id": "c243eaf7-77bd-4dd1-ac6b-e5eff9c1f64f",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00136948",
+      "x-litellm-response-cost-original": "0.00136948",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.459999999999993e-05",
+      "x-litellm-response-cost-output": "0.00019360000000000002",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-cache-creation": "8.96e-05",
+      "x-litellm-response-cost-reasoning": "0.0001364",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1112.2100353240967",
+      "x-litellm-overhead-duration-ms": "485.8811",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 81,
+     "text_head": "<tool_call>tool_07<arg_key>note</arg_key><arg_value>probe</arg_value></tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 1.22,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 59
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "43787807-b136-4773-9006-2b30f23246fb",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00143548",
+      "x-litellm-response-cost-original": "0.00143548",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.459999999999993e-05",
+      "x-litellm-response-cost-output": "0.0002596",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-cache-creation": "8.96e-05",
+      "x-litellm-response-cost-reasoning": "0.00020240000000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1009.6890926361084",
+      "x-litellm-overhead-duration-ms": "69.3753",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 81,
+     "text_head": "<tool_call>tool_07<arg_key>note</arg_key><arg_value>probe</arg_value></tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.97,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 47
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "08af9d10-1211-4329-af0e-fa23c0999931",
+      "x-litellm-model-id": "c243eaf7-77bd-4dd1-ac6b-e5eff9c1f64f",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00138268",
+      "x-litellm-response-cost-original": "0.00138268",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.459999999999993e-05",
+      "x-litellm-response-cost-output": "0.0002068",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-cache-creation": "8.96e-05",
+      "x-litellm-response-cost-reasoning": "0.0001496",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "750.816822052002",
+      "x-litellm-overhead-duration-ms": "74.0979",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 81,
+     "text_head": "<tool_call>tool_07<arg_key>note</arg_key><arg_value>probe</arg_value></tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.2,
+    "usage": {
+     "prompt": 4071,
+     "cached": 3968,
+     "completion": 48
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "zai-org/GLM-5.3",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "6cd912b6-35a2-4a79-81fa-b091f11499cc",
+      "x-litellm-model-id": "326291be-4824-4e31-85b5-9047e2f6bf4c",
+      "x-litellm-model-name": "openai/zai-org/GLM-5.3",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00138708",
+      "x-litellm-response-cost-original": "0.00138708",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "5.459999999999993e-05",
+      "x-litellm-response-cost-output": "0.0002112",
+      "x-litellm-response-cost-cache-read": "0.00103168",
+      "x-litellm-response-cost-cache-creation": "8.96e-05",
+      "x-litellm-response-cost-reasoning": "0.000154",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "885.8880996704102",
+      "x-litellm-overhead-duration-ms": "66.514",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "zai-org/GLM-5.3",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 81,
+     "text_head": "<tool_call>tool_07<arg_key>note</arg_key><arg_value>probe</arg_value></tool_call>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

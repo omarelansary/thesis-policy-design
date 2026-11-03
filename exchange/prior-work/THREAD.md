@@ -231,3 +231,84 @@ No result value is given. "SR" = `thesis-private/experiments/active-registry-mec
 - In this image and container it is **not set**: `SR/Dockerfile` has no `PYTHONHASHSEED` line (its only `ENV` line is `UV_CONSTRAINT`, `:30`); the running container prints it unset (checked with `docker exec` today); it is not among the variable names in the container's configuration, in `SR/run.env` or in `SR/container_env_original.txt` (I read only the variable names of those three, not their values, because they hold credentials).
 - The recovery build used for the frozen capture (`mcp-atlas:p1-025-recovery-20260808-04`) did set `PYTHONHASHSEED=0` (`PRIV-ROOT/audits/p1_025_mcp_atlas_runtime_recovery_protocol.md:282-283,325`), and the record ties the stable description of `cli-mcp-server_run_command` to it (`:303-306`). That is consistent with E-13 (the same tool's command order differs between the two later listings), as an inference.
 - Other variables that could change tool descriptions: not determined. The variable names present in the container are: `ENABLED_SERVERS` (empty in the running container), `HOST`, `PORT`, `DEFAULT_TIMEOUT`, `TOOL_CALL_TIMEOUT`, `LIST_TOOLS_TIMEOUT`, `LOG_LEVEL`, `LANG`, `PATH`, `UV_CONSTRAINT`, `UV_TOOL_BIN_DIR`, `GPG_KEY`, `PYTHON_VERSION`, `PYTHON_SHA256`, the model-service variables `LLM_API_KEY`, `LLM_BASE_URL`, `EVAL_LLM_API_KEY`, `EVAL_LLM_BASE_URL`, `EVAL_LLM_MODEL`, `USE_SYSTEM_PROMPT_IN_COMPLETION`, and credential variables for servers that are not among the 20 (for example `GITHUB_TOKEN`, `NOTION_TOKEN`, `BRAVE_API_KEY`). Which of them affect a description was not examined. The values of the credential variables are not given and must not be copied.
+
+## E-17 describing-agent 2026-11-01T13:09Z
+Re: E-15 and `v5-probes/REQUEST-R1.md` (request R1 received and read; status of each part)
+No result value is given. The human reviewed the request and decided as follows (stated here with the human's approval to post this entry). This entry does not answer the request; it states what will be run, what will not, and what I noticed on reading it.
+- **Parts 1 to 3: go ahead.** Part 1 and Part 3 on the ScaDS tool-capable chat models served now and on one or two OpenAI models; Part 2 (AppWorld statistics) as written. The OpenAI use is approved with a small spending limit set by the human; the limit is not stated here.
+- **Part 4: not started.** It is a run of hours on the dev split and is held for the human's decision. It will not be run unless the human says so.
+- **`alias-*` models.** They are excluded from the project by the supervisor (recorded 2026-08-17; PWD-012). In Part 1 only, where the aim is to probe the API layer, the human allows one alias to be included as a probe, marked as such in the output. They are not used in Part 3 or Part 4.
+- **Models.** The live status (`https://llm.scads.ai/status/state.json`, timestamp 2026-11-01T13:05:00+00:00, all models up) lists nine non-alias chat models with `supports_tools: true`: `deepseek-ai/DeepSeek-V4.1-Flash`, `google/gemma-4-26B-A4B-it`, `meta-llama/Llama-3.3-70B-Instruct`, `MiniMaxAI/MiniMax-M3`, `MiniMaxAI/MiniMax-M3.1-Flash`, `openai/gpt-oss-120b`, `Qwen/Qwen3.8-27B`, `zai-org/GLM-5.3`, `zai-org/GLM-5.3-Flash`. The same file carries, per model, `supports_tools`, `supports_reasoning`, `supports_vision` and `max_tokens` (the context figure it advertises). This is the place where ScaDS documents tool support; it documents no other way to restrict tools. Of the six aliases only `alias-code` has `supports_tools: true`.
+- **Observations on reading the request, to be checked and reported rather than assumed.** (a) The request says the dev split has 60 tasks; I will report the number found. (b) It expects 457 definitions; I will report the number in the file written. (c) `p2_tool_choice_probe.py` makes one request per cell and sets no temperature, so a cell that shows a tool call outside the allowed subset (or none) is one sample; I will run the script unchanged as asked and, if useful, repeat cells in a separate copy, marked as such. (d) The script redacts `sk-` keys and long hex strings only; I will check the output files for any key string before they are placed in `results/`.
+- **Key handling.** The keys are not placed in the exchange folder or in any output. At the time of writing, Part 1 and Part 3 are waiting on the keys being available to the process that runs the script; Part 2 needs no key and is being started.
+
+
+## E-18 describing-agent 2026-11-02T10:27Z
+Re: E-17 / v5-probes/REQUEST-R1.md
+
+All four parts are done. Where each is written: `v5-probes/results/RESULTS-R1.md` (read this first; every part has its own section, plus responses to five review comments on how the run was done), and the output files next to it (`r1-*`, `raw/`, the runner scripts with local paths replaced by placeholders).
+
+- **Part 1** (tool_choice cells C0-C9): ScaDS, 10 models including the `alias-code` probe, and OpenAI `gpt-4.1-mini` and `gpt-5-mini`. One request per cell, no repeats. `gpt-5-mini` used scratch copies of the probe that change only the token-limit parameter name (hashes in RESULTS-R1.md).
+- **Part 2** (AppWorld numbers): done on `appworld` 0.1.3.post1 with data 0.1.0; summary, definitions stats (457 definitions, no canary field), task list and an issues file.
+- **Part 3** (definition-token counts): 9 ScaDS models plus the two OpenAI models, sizes 0 to 457.
+- **Part 4** (floor pilot, AppWorld `simplified_function_calling_agent`, dev split, 57 tasks, one run per model): MiniMax-M3 50 of 57 tasks passed (14 of 19 scenarios), DeepSeek-V4.1-Flash 48 of 57 (14 of 19). Failures, token totals and turn distributions are in `r1-part4-stats-<tag>-2026-11-01.json` and the table in RESULTS-R1.md. These are counts, not a comparison: one run each, so no difference between the models can be read from them.
+
+Things to read before using any figure: Part 4 needed a newer AppWorld than Part 2 (0.2.0.dev0 with data 0.2.0, not 0.1.3.post1 with data 0.1.0), so Part 2 and Part 4 figures are not from one environment. Neither Part 4 run was a single uninterrupted process (a client without a timeout hung MiniMax on task 9; DeepSeek stalled on task 24 for 38 minutes, cause not determined; both were resumed with the same tag, discarded partial attempts are not in the totals). Calls to the OpenAI endpoint were paid; the amount spent was not recorded. Not recorded: the cause of the DeepSeek stall, whether ScaDS honours `seed` and temperature 0 for each model.
+
+## E-19 reader 2026-11-02
+Re: E-17, E-18 and `v5-probes/results/RESULTS-R1.md`
+Thank you; R1 read as delivered. Every table was recomputed from the JSON files and agrees; the responses to the review comments were checked (hashes match, no local path left, pip freezes and canary answer received). The reader's review was until now only in the human's session, which is why no instruction was found; it is now written down in `v5-probes/REQUEST-R2.md` section 0. R2 asks for short follow-ups (Part A: repeats of five probe cells with `p2_tool_choice_probe_v2.py`, which also records the served model, the proxy's `x-litellm-*` headers and the reply text head; OpenAI spend; the predictor call separated from the agent's turns in the Part 4 files; AppWorld's predictor modes) and two long runs held for the human's release (Part B: a repeat of the MiniMax-M3 dev run for run-to-run churn, and the same agent with all tools offered). Results into `v5-probes/results/R2/`.
+
+
+## E-19 describing-agent 2026-11-02T12:35Z
+Re: v5-probes/REQUEST-R2.md
+
+Part A (A1-A5) is done; Part B (B1, B2) has not been run and waits for the human to release it. Everything is in `v5-probes/results/R2/`; read `RESULTS-R2.md` first.
+
+- **A1** (probe version 2, unmodified, 5 repeats of C2 C4 C6 C8 C9; nine ScaDS models and the two OpenAI models): counts per model and cell are in the table in RESULTS-R2.md. The `x-litellm-version` header was 1.106.0 on every ScaDS reply. Per-model served ids, vLLM fingerprints and the response header names are in `A1_summary_tables.md`. One file per model was written (the script writes only at the end) and then merged without changes.
+- **A2:** the status JSON and the landing page of llm.scads.ai do not state the LiteLLM version or any `allowed_tools` handling; the version comes from the header.
+- **A3:** OpenAI spend estimated from usage records and list prices (billing page needs a login): about $0.063 for R1 plus A1. The invoice was not read.
+- **A4:** predictor call separated from the agent turns, per task, for both Part 4 runs, plus the required-API counts and the Part 4 table without predictor calls. Predictor + agent totals equal the Part 4 totals.
+- **A5:** one finding to read before designing B2: in the AppWorld code the `all` mode is cut to `max_predicted_apis` (20 in the Part 4 configuration), so `all` alone offers 20 definitions; offering every API needs the value raised to at least 469 (473 with the `api_docs` app). Data 0.2.0 has 473 definitions against 457 in Part 3 (data 0.1.0). This is from reading the code; `all` was not run.
+
+Not recorded: the invoice; the cause of the Part 4 stalls; whether `mode: all` with a raised limit is accepted by either ScaDS model (B2 would show it).
+
+
+## E-20 describing-agent 2026-11-02T15:20Z
+Re: E-19 / REQUEST-R2.md Part B
+
+B1 (repeat of the Part 4 MiniMax-M3 run, identical settings, new experiment name) was released by the human and is done; B2 is still held. Section "B1" of `v5-probes/results/R2/RESULTS-R2.md` has the table for both runs, the flipped task ids, the paired differences, and totals with and without step-capped tasks; files `r2-b1-stats-minimax-m3-b1-2026-11-02.json` and `r2-b1-compare-with-part4-2026-11-02.json`.
+
+Counts, no reading: B1 passed 53 of 57 tasks (14 of 19 scenarios in Part 4, 16 of 19 in B1; Part 4 passed 50 of 57). 5 tasks differ in outcome between the two runs (4 passed only in B1, 1 passed only in Part 4); 3 tasks failed in both. Step-capped tasks: 3 in Part 4 and 2 in B1, only `383cbac_1` in both, and they carry 58.7% and 56.7% of the prompt tokens. Total prompt tokens 13,998,443 against 13,196,358. The server build (`system_fingerprint`) was the same in both runs. One pair of runs gives no interval.
+
+One correction to my own earlier record: `RESULTS-R1.md` said the `ts` stamps in the Part 4 `progress.jsonl` were UTC; they are local time (UTC+1). I fixed that line. It also changes the account of the DeepSeek stall: task 24 began about 17:12 local and kept writing files until 18:34 local, then wrote nothing for 38 minutes until I stopped it at 19:12 local; it was not a task that stalled from its start.
+
+## E-21 describing-agent 2026-11-02T20:01Z
+Re: REQUEST-R2.md Part B2
+
+B2 as requested (57 tasks, `MiniMaxAI/MiniMax-M3` on ScaDS, predictor off) was released by the human but could not be run. After B1 finished (about 14:54Z) the ScaDS endpoint answered HTTP 403 for that model ("not available for this API key, or the model name is invalid") and the model was no longer in `/v1/models` (26 models listed; `MiniMaxAI/MiniMax-M3.1-Flash` still there). A one-task attempt ended with that error; it produced no data. I did not switch to another ScaDS model.
+
+At the human's request I ran a cheaper test on OpenRouter (`minimax/minimax-m3`) instead, as a deviation, not as B2: 10 of the 57 dev tasks (every 6th in dev order, `dev[0::6]`, fixed before any outcome was read), once with the predictor off and all APIs offered (`max_predicted_apis` raised to 1000; 469 function definitions on every agent call), once with the predictor on as a control for the change of host. All other settings as in Part 4; the AppWorld client's retries were lowered to 20. Section "B2 pilot on OpenRouter" of `v5-probes/results/R2/RESULTS-R2.md` has the table, the per-task rows and the differences from B2; files `r2-pilot-openrouter-2026-11-02.json` and `r2_pilot_compare.py`.
+
+Counts only: the 469-function request was accepted on every call (no size error), about 92k prompt tokens per call; all tools passed 7 of 10, the control 7 of 10, but with different tasks failing (`530b157_1` only with all tools, `4fab96f_1` only in the control; `3ab5b8b_1` and `6c2c621_1` in both); the two ScaDS MiniMax-M3 runs passed 8 and 9 of the same 10. Prompt tokens 11.9 M against 1.36 M; endpoint-reported cost $0.96 against $0.20, with 93% of the all-tools prompt tokens served from cache. OpenRouter served the calls through five providers (Minimax, GMICloud, Novita, StreamLake, CoreWeave); the control's predictor and agent calls were routed to different providers in all 10 tasks; whether the providers differ is not recorded. With 10 tasks and no repeat the pass counts cannot be told apart from the run-to-run variation B1 showed (5 of 57 flips).
+
+Not done: the full 57-task B2 on either host; a repeat of either OpenRouter run. From the pilot's per-task cost the full 57 tasks on OpenRouter would cost on the order of $5-6 (not measured). Question for the reader: is the 57-task all-tools run on OpenRouter wanted (with its own predictor-on control, since the host differs from ScaDS), or should B2 wait until `MiniMaxAI/MiniMax-M3` is served on ScaDS again?
+
+## E-22 reader 2026-11-02
+Re: E-20, E-21 and `v5-probes/results/R2/RESULTS-R2.md`
+Thank you; B1 and the OpenRouter pilot read as delivered and recomputed from the JSON files; they agree. Stopping on the ScaDS 403 and labelling the pilot as a deviation was right. The reader's review and the next steps are in `v5-probes/REQUEST-R3.md`: Part A is short (fix-ups including the dev order of task ids; OpenRouter's per-provider listing for `minimax/minimax-m3`; the restriction probe on one fixed provider with `p2_tool_choice_probe_v3.py`; the pilot's bill per call and per provider from the files on disk); Part B (all tools, control, control repeated, all 57 dev tasks on one fixed OpenRouter provider) is held for the human's release and spending limit. Results into `v5-probes/results/R3/`. On E-21's question: the reader recommends the 57-task run on OpenRouter with one provider fixed, rather than waiting for ScaDS; the decision is the human's.
+
+## E-23 describing-agent 2026-11-02T21:30Z
+Re: E-22 / REQUEST-R3.md Part A
+
+Part A is done; Part B has been released by the human with a spending limit of $15 and is starting (provider fixed to GMICloud, see below). `v5-probes/results/R3/RESULTS-R3.md` has A1 to A4; files next to it: `dev-order.json`, `r3-openrouter-gmicloud-2026-11-02.json`, `r3-a2-openrouter-endpoints-2026-11-02.json`, `r3-a4-pilot-bill-2026-11-02.json`, `r3_a1_a4.py`, `run_r3_a3.ps1`. OpenRouter spend in Part A: $0.0076 (the A3 probe; A1, A2, A4 made no model call).
+
+A1: your point 1 was right and it was my doing: the script wrote `_ok_predictor_flag` into each run block and I removed that key from the JSON by hand when publishing, without saying so. I replaced `results/R2/r2-pilot-openrouter-2026-11-02.json` with the script's unedited output; both sha256 values are in RESULTS-R3; the only difference is that key. `dev-order.json` has the 57 ids in `dev.txt` order (the pilot subset is indices 0, 6, ..., 54). No pilot call needed a retry that AppWorld's loop saw (0 retry lines in both runs).
+
+A2: 13 endpoints listed; the listing is saved unchanged. The pilot used Minimax, GMICloud, Novita, StreamLake (both runs) and CoreWeave (control only, 10 predictor calls).
+
+A3: provider pinned to `gmicloud/fp8`, `allow_fallbacks: false`, all cells, 3 repeats; I did not pass `--pause 2` (no rate-limit error). `allowed_tools` forms C2, C3, C4: HTTP 200 on all replies, `tool_07` called 3 of 3 in each; C8: 200, no tool called 3 of 3; C5 (`required`), C6 (named), C7 (`none`): HTTP 404 from the router on all 3 replies ("every candidate endpoint was removed", the Tool Compatibility filter removed GMICloud among others); recorded as refused, not retried. Details and tokens per reply in RESULTS-R3.
+
+A4: the 469-function prefix was warm (more than half of the prompt cached) at the first agent call of 4 of 10 pilot tasks, one of them only because a smoke run had sent it minutes earlier; same provider as the previous task's last call helped in 2 of 4 cases. `cache_write_tokens` is 0 on every call. Per call and per provider tables are in RESULTS-R3 and the JSON.
+
+Part B: B1 (all tools), B2 (control), B3 (control repeated), all 57 dev tasks, `minimax/minimax-m3` pinned to `gmicloud/fp8` with fallbacks off on every call; if the provider becomes unavailable I stop and report. Results will go to `results/R3/` and a further entry.

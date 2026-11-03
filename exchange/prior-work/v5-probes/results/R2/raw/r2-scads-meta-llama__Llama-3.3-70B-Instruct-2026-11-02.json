@@ -1,0 +1,811 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:12:43Z",
+ "models": {
+  "meta-llama/Llama-3.3-70B-Instruct": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.26,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.32,
+    "usage": {
+     "prompt": 4693,
+     "cached": 0,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "02f9af82-5549-49db-9156-385ff69c4c83",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0021248099999999995",
+      "x-litellm-response-cost-original": "0.0021248099999999995",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0021118499999999998",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1125.5779266357422",
+      "x-litellm-overhead-duration-ms": "62.5989",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.76,
+    "usage": {
+     "prompt": 4693,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "87b97c42-7623-4389-81df-8cc381afa345",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009661540000000001",
+      "x-litellm-response-cost-original": "0.0009661540000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.45000000000004e-06",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "558.0549240112305",
+      "x-litellm-overhead-duration-ms": "70.7288",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 1.63,
+    "usage": {
+     "prompt": 4693,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "bf2fa1ca-2d1f-40ab-89fb-9ca8af79f4bd",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009661540000000001",
+      "x-litellm-response-cost-original": "0.0009661540000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.45000000000004e-06",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1473.2468128204346",
+      "x-litellm-overhead-duration-ms": "72.964",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.72,
+    "usage": {
+     "prompt": 4693,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "5e5ae012-e013-4ea5-8e2b-5882c398a5a5",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009661540000000001",
+      "x-litellm-response-cost-original": "0.0009661540000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.45000000000004e-06",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "560.2099895477295",
+      "x-litellm-overhead-duration-ms": "67.791",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.71,
+    "usage": {
+     "prompt": 4693,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "db2df0f6-f9a1-44a8-b44f-c4c5e9363b88",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009661540000000001",
+      "x-litellm-response-cost-original": "0.0009661540000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.45000000000004e-06",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "542.2499179840088",
+      "x-litellm-overhead-duration-ms": "57.5671",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.72,
+    "usage": {
+     "prompt": 4715,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "f53fe152-0264-4d6b-b095-8b9ef4dd6fdc",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009760540000000001",
+      "x-litellm-response-cost-original": "0.0009760540000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.935000000000001e-05",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "549.4790077209473",
+      "x-litellm-overhead-duration-ms": "69.52",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 2.33,
+    "usage": {
+     "prompt": 4715,
+     "cached": 4688,
+     "completion": 24
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "74fc5d50-a014-4771-8261-4e4cb2d33c1f",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009764060000000002",
+      "x-litellm-response-cost-original": "0.0009764060000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.2150000000000051e-05",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.0009469760000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1681.4708709716797",
+      "x-litellm-overhead-duration-ms": "1111.0249",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.03,
+    "usage": {
+     "prompt": 4715,
+     "cached": 4688,
+     "completion": 24
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "e8968c41-4fc6-431b-b14c-c95bcc86e1fa",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009764060000000002",
+      "x-litellm-response-cost-original": "0.0009764060000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.2150000000000051e-05",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.0009469760000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "940.3481483459473",
+      "x-litellm-overhead-duration-ms": "406.8542",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.73,
+    "usage": {
+     "prompt": 4715,
+     "cached": 4688,
+     "completion": 24
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "4901b5f2-e8f6-4790-8f01-55026a8ae31e",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009764060000000002",
+      "x-litellm-response-cost-original": "0.0009764060000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.2150000000000051e-05",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.0009469760000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "566.0049915313721",
+      "x-litellm-overhead-duration-ms": "57.709",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.74,
+    "usage": {
+     "prompt": 4715,
+     "cached": 4688,
+     "completion": 18
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": "vllm-0.31.0-803ebedb",
+     "headers": {
+      "x-litellm-call-id": "4ed78a36-c3dc-4941-a0c1-d127dd564aec",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009720860000000002",
+      "x-litellm-response-cost-original": "0.0009720860000000002",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "1.2150000000000051e-05",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.0009469760000000001",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "598.6640453338623",
+      "x-litellm-overhead-duration-ms": "80.6611",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.57,
+    "usage": {
+     "prompt": 4694,
+     "cached": 0,
+     "completion": 24
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "19f62780-1f39-4856-a3e3-54123629ca72",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0021295800000000003",
+      "x-litellm-response-cost-original": "0.0021295800000000003",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.7000000000000114e-06",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-creation": "0.0021096",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1371.5941905975342",
+      "x-litellm-overhead-duration-ms": "93.8582",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 72,
+     "text_head": "{\"type\": \"function\", \"name\": \"tool_07\", \"parameters\": {\"note\": \"probe\"}}",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.77,
+    "usage": {
+     "prompt": 4694,
+     "cached": 4672,
+     "completion": 24
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "7aeb94a6-12de-4189-bb9c-9c2a84d890b8",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009709240000000001",
+      "x-litellm-response-cost-original": "0.0009709240000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.69999999999997e-06",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-cache-creation": "7.2e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "570.4560279846191",
+      "x-litellm-overhead-duration-ms": "63.344",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 72,
+     "text_head": "{\"type\": \"function\", \"name\": \"tool_07\", \"parameters\": {\"note\": \"probe\"}}",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.83,
+    "usage": {
+     "prompt": 4694,
+     "cached": 4672,
+     "completion": 24
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "2635c021-65be-43c7-9966-dba5a3cdf179",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009709240000000001",
+      "x-litellm-response-cost-original": "0.0009709240000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.69999999999997e-06",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-cache-creation": "7.2e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "650.134801864624",
+      "x-litellm-overhead-duration-ms": "59.9787",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 72,
+     "text_head": "{\"type\": \"function\", \"name\": \"tool_07\", \"parameters\": {\"note\": \"probe\"}}",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.7,
+    "usage": {
+     "prompt": 4694,
+     "cached": 4672,
+     "completion": 18
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "362eba4f-fe81-4393-b582-a5c7ad61ced2",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.000966604",
+      "x-litellm-response-cost-original": "0.000966604",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.69999999999997e-06",
+      "x-litellm-response-cost-output": "1.296e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-cache-creation": "7.2e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "530.8020114898682",
+      "x-litellm-overhead-duration-ms": "62.953",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 52,
+     "text_head": "{\"name\": \"tool_07\", \"parameters\": {\"note\": \"probe\"}}",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.82,
+    "usage": {
+     "prompt": 4694,
+     "cached": 4672,
+     "completion": 24
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "meta-llama/Llama-3.3-70B-Instruct",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "6af2a911-8c19-4cd3-83a5-945e9486e591",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0009709240000000001",
+      "x-litellm-response-cost-original": "0.0009709240000000001",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.69999999999997e-06",
+      "x-litellm-response-cost-output": "1.728e-05",
+      "x-litellm-response-cost-cache-read": "0.000943744",
+      "x-litellm-response-cost-cache-creation": "7.2e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "607.5549125671387",
+      "x-litellm-overhead-duration-ms": "56.3638",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "meta-llama/Llama-3.3-70B-Instruct",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 72,
+     "text_head": "{\"type\": \"function\", \"name\": \"tool_07\", \"parameters\": {\"note\": \"probe\"}}",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

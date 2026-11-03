@@ -1,0 +1,151 @@
+{
+ "probe": "p2_tool_choice_probe",
+ "base": "https://api.openai.com/v1",
+ "started_utc": "2026-11-01T14:39:40Z",
+ "models": {
+  "gpt-4.1-mini": [
+   {
+    "cell": "C0 base",
+    "status": 200,
+    "seconds": 2.24,
+    "usage": {
+     "prompt": 3426,
+     "cached": 0,
+     "completion": 15
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C1 base again",
+    "status": 200,
+    "seconds": 0.93,
+    "usage": {
+     "prompt": 3426,
+     "cached": 3328,
+     "completion": 15
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "status": 200,
+    "seconds": 0.91,
+    "usage": {
+     "prompt": 3426,
+     "cached": 3328,
+     "completion": 15
+    },
+    "tools_called": [
+     "tool_05"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C3 allowed-flat",
+    "status": 400,
+    "seconds": 0.59,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "error": {
+     "error_body": "{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'tool_choice.function'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"tool_choice.function\",\n    \"code\": \"missing_required_parameter\"\n  }\n}"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "status": 200,
+    "seconds": 0.71,
+    "usage": {
+     "prompt": 3426,
+     "cached": 0,
+     "completion": 15
+    },
+    "tools_called": [
+     "tool_05"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C5 required",
+    "status": 200,
+    "seconds": 0.59,
+    "usage": {
+     "prompt": 3426,
+     "cached": 3328,
+     "completion": 15
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "status": 200,
+    "seconds": 0.9,
+    "usage": {
+     "prompt": 3436,
+     "cached": 3328,
+     "completion": 5
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "stop",
+    "error": null
+   },
+   {
+    "cell": "C7 none",
+    "status": 200,
+    "seconds": 0.66,
+    "usage": {
+     "prompt": 3427,
+     "cached": 3328,
+     "completion": 9
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "status": 200,
+    "seconds": 0.79,
+    "usage": {
+     "prompt": 3447,
+     "cached": 3328,
+     "completion": 33
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "status": 200,
+    "seconds": 3.02,
+    "usage": {
+     "prompt": 3424,
+     "cached": 0,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_04"
+    ],
+    "finish_reason": null,
+    "error": null
+   }
+  ]
+ }
+}

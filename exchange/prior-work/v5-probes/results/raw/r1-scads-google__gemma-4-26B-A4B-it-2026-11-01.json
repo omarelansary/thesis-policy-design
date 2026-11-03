@@ -1,0 +1,141 @@
+{
+ "probe": "p2_tool_choice_probe",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-01T13:34:17Z",
+ "models": {
+  "google/gemma-4-26B-A4B-it": [
+   {
+    "cell": "C0 base",
+    "status": 200,
+    "seconds": 0.42,
+    "usage": {
+     "prompt": 4040,
+     "cached": 0,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C1 base again",
+    "status": 200,
+    "seconds": 0.36,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C3 allowed-flat",
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'mode': 'auto', 'tools': [{'type': 'function', 'name': 'tool_03'}, {'type': 'function', 'name': 'tool_04'}, {'type': 'function', 'name': 'tool_05'}]}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"400\"}}"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "status": 400,
+    "seconds": 0.38,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C5 required",
+    "status": 200,
+    "seconds": 0.39,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "status": 200,
+    "seconds": 0.64,
+    "usage": {
+     "prompt": 4040,
+     "cached": 0,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "error": null
+   },
+   {
+    "cell": "C7 none",
+    "status": 200,
+    "seconds": 0.63,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "status": 200,
+    "seconds": 0.51,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 29
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "status": 200,
+    "seconds": 0.89,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "error": null
+   }
+  ]
+ }
+}

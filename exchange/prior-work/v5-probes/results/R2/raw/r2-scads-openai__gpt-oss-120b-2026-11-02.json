@@ -1,0 +1,830 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:32:17Z",
+ "models": {
+  "openai/gpt-oss-120b": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.75,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.23,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.92,
+    "usage": {
+     "prompt": 3524,
+     "cached": 48,
+     "completion": 63
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "602a0025-6563-48eb-ab7e-5487d33e2acb",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038852",
+      "x-litellm-response-cost-original": "0.00038852",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0003476",
+      "x-litellm-response-cost-output": "3.78e-05",
+      "x-litellm-response-cost-cache-read": "3.1199999999999998e-06",
+      "x-litellm-response-cost-reasoning": "2.52e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "784.2559814453125",
+      "x-litellm-overhead-duration-ms": "60.281",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.15,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 64
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "5664eee4-06f6-40a4-87fa-50dcfe0199ac",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002676",
+      "x-litellm-response-cost-original": "0.0002676",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "3.84e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.58e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "946.9988346099854",
+      "x-litellm-overhead-duration-ms": "309.5818",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.81,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 86
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "e4fe68df-726e-4f21-9f47-dbb24e0dcdb9",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002808",
+      "x-litellm-response-cost-original": "0.0002808",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "5.16e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "3.9e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "622.4019527435303",
+      "x-litellm-overhead-duration-ms": "48.2109",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.79,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 71
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "d2e113fc-c5df-4c11-8d13-c3b85e42be08",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002718",
+      "x-litellm-response-cost-original": "0.0002718",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "4.26e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.9999999999999997e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "637.2230052947998",
+      "x-litellm-overhead-duration-ms": "59.207",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.74,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 60
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "a24d5482-8e5c-401c-9e1a-bc58c5516a57",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002652",
+      "x-litellm-response-cost-original": "0.0002652",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "3.6e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.34e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "555.2611351013184",
+      "x-litellm-overhead-duration-ms": "65.3393",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.12,
+    "usage": {
+     "prompt": 3545,
+     "cached": 3520,
+     "completion": 252
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "89048cde-39ad-47cd-8341-44d871761e65",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00038250000000000003",
+      "x-litellm-response-cost-original": "0.00038250000000000003",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.5000000000000066e-06",
+      "x-litellm-response-cost-output": "0.0001512",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "0.0001302",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1940.7339096069336",
+      "x-litellm-overhead-duration-ms": "498.6129",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 70,
+     "text_head": "I can\u2019t use\u202ftool_07; only tool_03, tool_04, and tool_05 are permitted.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 2.85,
+    "usage": {
+     "prompt": 3545,
+     "cached": 3536,
+     "completion": 323
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "ca1afd5c-948a-4152-8ef3-2cc67ed0e235",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00042454",
+      "x-litellm-response-cost-original": "0.00042454",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "8.999999999999948e-07",
+      "x-litellm-response-cost-output": "0.0001938",
+      "x-litellm-response-cost-cache-read": "0.00022984",
+      "x-litellm-response-cost-reasoning": "0.0001818",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "2701.13205909729",
+      "x-litellm-overhead-duration-ms": "67.6041",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 1.56,
+    "usage": {
+     "prompt": 3545,
+     "cached": 3536,
+     "completion": 163
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "5bb8862b-cdf2-4256-ae88-fdd8bafb63ee",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00032854",
+      "x-litellm-response-cost-original": "0.00032854",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "8.999999999999948e-07",
+      "x-litellm-response-cost-output": "9.779999999999999e-05",
+      "x-litellm-response-cost-cache-read": "0.00022984",
+      "x-litellm-response-cost-reasoning": "6.48e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1398.9441394805908",
+      "x-litellm-overhead-duration-ms": "42.0423",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 125,
+     "text_head": "I can\u2019t call\u202ftool_07\u202fas you\u2019ve limited usage to\u202ftool_03,\u202ftool_04,\u202fand\u202ftool_05. Let me know if you\u2019d like to use one of those.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 4.45,
+    "usage": {
+     "prompt": 3545,
+     "cached": 3536,
+     "completion": 400
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "bce702c5-dcec-49e9-9791-fc301c27e4c1",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00047074",
+      "x-litellm-response-cost-original": "0.00047074",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "8.999999999999948e-07",
+      "x-litellm-response-cost-output": "0.00024",
+      "x-litellm-response-cost-cache-read": "0.00022984",
+      "x-litellm-response-cost-reasoning": "0.0002196",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "4237.861156463623",
+      "x-litellm-overhead-duration-ms": "761.2083",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 78,
+     "text_head": "I can\u2019t call tool_07 because only tool_03, tool_04, and tool_05 are permitted.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.6,
+    "usage": {
+     "prompt": 3545,
+     "cached": 3536,
+     "completion": 175
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": "vllm-0.31.0-0c81045a",
+     "headers": {
+      "x-litellm-call-id": "bb255d3e-cd03-44cb-bb16-7e1dcf713c80",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00033574",
+      "x-litellm-response-cost-original": "0.00033574",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "8.999999999999948e-07",
+      "x-litellm-response-cost-output": "0.00010499999999999999",
+      "x-litellm-response-cost-cache-read": "0.00022984",
+      "x-litellm-response-cost-reasoning": "8.4e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1417.3789024353027",
+      "x-litellm-overhead-duration-ms": "49.1168",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 67,
+     "text_head": "I\u2019m not allowed to use tool_07; only tools 3, 4, and 5 may be used.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.0,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 54
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "aebb1e19-8863-4a4b-8d78-91ed4a7b6ace",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002616",
+      "x-litellm-response-cost-original": "0.0002616",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "3.24e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.0399999999999998e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "479.2659282684326",
+      "x-litellm-overhead-duration-ms": "84.94",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": [
+      "reasoning",
+      "function_call"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.85,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 74
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "95237012-ae29-460f-aae8-5ed3d1a2eb69",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00027360000000000004",
+      "x-litellm-response-cost-original": "0.00027360000000000004",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "4.44e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "3.24e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "645.4951763153076",
+      "x-litellm-overhead-duration-ms": "70.7333",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": [
+      "reasoning",
+      "function_call"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.72,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 56
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "5e2b72c6-3651-4dbd-80dc-bfddf9b47a70",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002628",
+      "x-litellm-response-cost-original": "0.0002628",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "3.3600000000000004e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.16e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "514.4920349121094",
+      "x-litellm-overhead-duration-ms": "74.2531",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": [
+      "reasoning",
+      "function_call"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.64,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 56
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "fb45f970-ad09-4b0d-8368-04b2e4aba373",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002628",
+      "x-litellm-response-cost-original": "0.0002628",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "3.3600000000000004e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "2.16e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "441.1790370941162",
+      "x-litellm-overhead-duration-ms": "52.047",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": [
+      "reasoning",
+      "function_call"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.92,
+    "usage": {
+     "prompt": 3524,
+     "cached": 3520,
+     "completion": 45
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "openai/gpt-oss-120b",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "952d3641-74a5-406c-a1be-305e7cb80160",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/openai/gpt-oss-120b",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002562",
+      "x-litellm-response-cost-original": "0.0002562",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "4.000000000000097e-07",
+      "x-litellm-response-cost-output": "2.7e-05",
+      "x-litellm-response-cost-cache-read": "0.0002288",
+      "x-litellm-response-cost-reasoning": "1.4999999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "423.6769676208496",
+      "x-litellm-overhead-duration-ms": "61.6629",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "openai/gpt-oss-120b",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": [
+      "reasoning",
+      "function_call"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

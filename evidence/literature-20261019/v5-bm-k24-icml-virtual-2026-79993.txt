@@ -1,0 +1,68 @@
+
+
+    ICML  When Top-k Truncation Is Not the Bottleneck: An Equivalence-Test Audit of LLM Logprob Calibration
+
+    ICML 2026
+
+    Skip to yearly menu bar
+    Skip to main content
+
+Main Navigation
+
+            ICML
+
+                        Help/FAQ
+
+                        Contact ICML
+
+                        Create Profile
+
+                        Code of Conduct
+
+                        Privacy Policy
+
+                        Press
+
+                        Journal To Conference Track
+
+                        Careers
+
+                        Downloads
+
+                        Inclusion
+
+                        Future Meetings
+
+                        My Stuff
+
+                     Login
+
+                            Poster
+ in 
+Workshop: ICML 2026 Hypothesis Testing Workshop
+
+When Top-k Truncation Is Not the Bottleneck: An Equivalence-Test Audit of LLM Logprob Calibration
+
+                    Robert Sneiderman
+
+                             Project Page
+
+                [
+                 OpenReview] 
+
+                             Abstract
+
+Equivalence claims in LLM evaluation need equivalence tests, not failed null-hypothesis significance tests: "we observed no effect" is not a valid statistical procedure for claiming two measurement conditions agree. We adopt Two One-Sided Tests (TOST) with pre-specified margins and paired-bootstrap inference as the right primitive for this class of audit. The protocol pairs an analytical leg (which equality the metric would satisfy if the channel were inert) with an empirical TOST at a pre-registered margin. As a running case study we apply it to API logprob top-k truncation in forced four-choice MCQA: an elementary argument bounds the truncation effect on renormalized confidence by the missing answer-token mass, and the empirical leg confirms TOST equivalence at DeltaECE=0.02 with |DeltaECE| <= 6e-5 across four self-hosted vLLM conditions. A pre-registered K=3 benchmark of channel pairs on GPQA Diamond stress-tests the joint decision rule and quantifies its resolution limit at DeltaBrier=0.015: all three pairs return inconclusive at n=198, with the temperature-swap CI alone excluding zero (one-sided direction detection). Applied to the rest of the pipeline, the same protocol returns non-equivalence with usable effect sizes, surfacing the confidence aggregator as the dominant non-truncation effect (|DeltaECE|=0.15 to 0.29). The methodological point is that LLM-evaluation audits stop being "small p-value somewhere" the moment a margin is fixed in advance and the inference is paired. Code, the CalProbe-167 stress set, item-level manifests, the pre-registration, and the deviation log are released as supplementary material.
+
+                                Show more
+
+Chat is not available.
+
+Successful Page Load
+
+                        ICML uses cookies for essential functions only. We do not sell your personal
+                        information.
+                        Our Privacy Policy » 
+
+                        Accept
+

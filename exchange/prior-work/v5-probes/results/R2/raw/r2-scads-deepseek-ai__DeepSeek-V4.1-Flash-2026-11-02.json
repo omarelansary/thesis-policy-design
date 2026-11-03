@@ -1,0 +1,808 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T10:59:33Z",
+ "models": {
+  "deepseek-ai/DeepSeek-V4.1-Flash": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.44,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.21,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.25,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.94,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 1.27,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 3.52,
+    "usage": {
+     "prompt": 4204,
+     "cached": 0,
+     "completion": 42
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "e80caa7f-ba90-499b-8a34-5f517dcaf105",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0006557999999999999",
+      "x-litellm-response-cost-original": "0.0006557999999999999",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0006305999999999999",
+      "x-litellm-response-cost-output": "2.52e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "3280.036211013794",
+      "x-litellm-overhead-duration-ms": "984.5042",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.87,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 41
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "7c3be876-4b2b-4c9a-a08c-170f2d6ef553",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "4.368e-05",
+      "x-litellm-response-cost-original": "4.368e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "2.4599999999999998e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "701.8859386444092",
+      "x-litellm-overhead-duration-ms": "51.4491",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.86,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 41
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "fb8c6a57-40da-4dc9-8c3a-c54cc52dddb7",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "4.368e-05",
+      "x-litellm-response-cost-original": "4.368e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "2.4599999999999998e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "671.4498996734619",
+      "x-litellm-overhead-duration-ms": "47.6968",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 2.41,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 64
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "af935548-c7c2-43cb-8ec5-3963d7097f75",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "5.748e-05",
+      "x-litellm-response-cost-original": "5.748e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "3.84e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "1.38e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "2239.3999099731445",
+      "x-litellm-overhead-duration-ms": "50.0259",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.95,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 62
+    },
+    "tools_called": [
+     "tool_03"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "632f0a1c-1735-44ce-bb10-bb16ad78cbfd",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "5.6279999999999996e-05",
+      "x-litellm-response-cost-original": "5.6279999999999996e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "3.7199999999999996e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "1.26e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "796.0300445556641",
+      "x-litellm-overhead-duration-ms": "77.1992",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.82,
+    "usage": {
+     "prompt": 4221,
+     "cached": 4160,
+     "completion": 141
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "388a56f7-8de9-4004-99b7-371dda9ed0bd",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00010622999999999999",
+      "x-litellm-response-cost-original": "0.00010622999999999999",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.149999999999999e-06",
+      "x-litellm-response-cost-output": "8.46e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "6.0599999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "2644.1588401794434",
+      "x-litellm-overhead-duration-ms": "66.6168",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 130,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted right now. Let me know if you'd like one of those instead.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.36,
+    "usage": {
+     "prompt": 4221,
+     "cached": 4160,
+     "completion": 98
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "698c3447-fda8-47d4-af83-44d29b8f3a34",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "8.042999999999999e-05",
+      "x-litellm-response-cost-original": "8.042999999999999e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.149999999999999e-06",
+      "x-litellm-response-cost-output": "5.879999999999999e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "4.2e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1196.2449550628662",
+      "x-litellm-overhead-duration-ms": "60.7708",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 89,
+     "text_head": "I can't call tool_07 \u2014 the current restriction allows only tool_03, tool_04, and tool_05.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 1.17,
+    "usage": {
+     "prompt": 4221,
+     "cached": 4160,
+     "completion": 90
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "b70b9580-c282-45a0-be86-c2906f1a3f05",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "7.562999999999999e-05",
+      "x-litellm-response-cost-original": "7.562999999999999e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.149999999999999e-06",
+      "x-litellm-response-cost-output": "5.4e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "3.7199999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "962.440013885498",
+      "x-litellm-overhead-duration-ms": "76.8411",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 82,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted right now.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 1.93,
+    "usage": {
+     "prompt": 4221,
+     "cached": 4160,
+     "completion": 165
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "67fc6de8-5ddd-422d-942a-44aa4a4a5953",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00012062999999999999",
+      "x-litellm-response-cost-original": "0.00012062999999999999",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.149999999999999e-06",
+      "x-litellm-response-cost-output": "9.9e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "7.439999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1776.7829895019531",
+      "x-litellm-overhead-duration-ms": "65.8772",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 141,
+     "text_head": "I can't call tool_07 \u2014 the instruction restricts use to tool_03, tool_04, and tool_05. Let me know if you'd like one of those called instead.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 1.46,
+    "usage": {
+     "prompt": 4221,
+     "cached": 4160,
+     "completion": 117
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": "vllm-0.32.0-tp4-ep-a70cb2c6",
+     "headers": {
+      "x-litellm-call-id": "12652993-d101-4635-8a30-339dcb4b72d7",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "9.183e-05",
+      "x-litellm-response-cost-original": "9.183e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "9.149999999999999e-06",
+      "x-litellm-response-cost-output": "7.02e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "4.4999999999999996e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1283.2229137420654",
+      "x-litellm-overhead-duration-ms": "188.5657",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 150,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are available under the current restriction. Let me know if you'd like one of those instead.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.83,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 56
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "a19d4086-5a8f-470f-8b42-8d897916e6d8",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "5.268e-05",
+      "x-litellm-response-cost-original": "5.268e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "3.36e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "9e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "1615.6010627746582",
+      "x-litellm-overhead-duration-ms": "65.8321",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 149,
+     "text_head": "\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"tool_07\">\n<\uff5cDSML\uff5c parameter name=\"note\" string=\"true\">probe</\uff5cDSML\uff5c parameter>\n</\uff5cDSML\uff5c invoke>\n</\uff5cDSML\uff5c calls>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.6,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 41
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "90a82b92-4900-464c-9101-b14b2b416f19",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "4.368e-05",
+      "x-litellm-response-cost-original": "4.368e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "2.4599999999999998e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "446.9599723815918",
+      "x-litellm-overhead-duration-ms": "52.1638",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 149,
+     "text_head": "\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"tool_07\">\n<\uff5cDSML\uff5c parameter name=\"note\" string=\"true\">probe</\uff5cDSML\uff5c parameter>\n</\uff5cDSML\uff5c invoke>\n</\uff5cDSML\uff5c calls>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.88,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 64
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "0d5e18eb-01e7-48ba-8a6a-abc0db58fee9",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "5.748e-05",
+      "x-litellm-response-cost-original": "5.748e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "3.84e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-reasoning": "1.38e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "678.0881881713867",
+      "x-litellm-overhead-duration-ms": "54.3101",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 149,
+     "text_head": "\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"tool_07\">\n<\uff5cDSML\uff5c parameter name=\"note\" string=\"true\">probe</\uff5cDSML\uff5c parameter>\n</\uff5cDSML\uff5c invoke>\n</\uff5cDSML\uff5c calls>",
+     "output_types": [
+      "reasoning",
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.64,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 41
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "294a69de-5a6b-4c1f-91f8-8edf3383e2d4",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "4.368e-05",
+      "x-litellm-response-cost-original": "4.368e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "2.4599999999999998e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "464.061975479126",
+      "x-litellm-overhead-duration-ms": "45.311",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 149,
+     "text_head": "\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"tool_07\">\n<\uff5cDSML\uff5c parameter name=\"note\" string=\"true\">probe</\uff5cDSML\uff5c parameter>\n</\uff5cDSML\uff5c invoke>\n</\uff5cDSML\uff5c calls>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.84,
+    "usage": {
+     "prompt": 4204,
+     "cached": 4160,
+     "completion": 51
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "20ff8a35-6a07-4cd3-9388-bd45840d6958",
+      "x-litellm-model-id": "36db0d32-527b-4a14-97e6-6df4d681d7e3",
+      "x-litellm-model-name": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "4.968e-05",
+      "x-litellm-response-cost-original": "4.968e-05",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "6.600000000000001e-06",
+      "x-litellm-response-cost-output": "3.06e-05",
+      "x-litellm-response-cost-cache-read": "1.2479999999999999e-05",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "638.3368968963623",
+      "x-litellm-overhead-duration-ms": "90.7359",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 191,
+     "text_head": "I'll call tool_07 with the requested note.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"tool_07\">\n<\uff5cDSML\uff5c parameter name=\"note\" string=\"true\">probe</\uff5cDSML\uff5c parameter>\n<",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

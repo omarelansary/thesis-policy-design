@@ -1,0 +1,796 @@
+{
+ "probe": "p2_tool_choice_probe_v2",
+ "repeat": 5,
+ "cells": [
+  "C2",
+  "C4",
+  "C6",
+  "C8",
+  "C9"
+ ],
+ "token_param": "max_tokens",
+ "base": "https://llm.scads.ai/v1",
+ "started_utc": "2026-11-02T11:06:15Z",
+ "models": {
+  "google/gemma-4-26B-A4B-it": [
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.45,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.27,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.26,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.43,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'auto', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_error\",\""
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 400,
+    "seconds": 0.2,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 400,
+    "seconds": 0.24,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 400,
+    "seconds": 0.22,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 4,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 5,
+    "status": 400,
+    "seconds": 0.19,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"litellm.BadRequestError: Invalid tool choice, tool_choice={'type': 'allowed_tools', 'allowed_tools': {'mode': 'required', 'tools': [{'type': 'function', 'function': {'name': 'tool_03'}}, {'type': 'function', 'function': {'name': 'tool_04'}}, {'type': 'function', 'function': {'name': 'tool_05'}}]}}. Please ensure tool_choice follows the OpenAI spec\",\"type\":\"invalid_request_erro"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.55,
+    "usage": {
+     "prompt": 4040,
+     "cached": 0,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "7134ab00-413f-4c36-bc95-69966cb75ab2",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0006156",
+      "x-litellm-response-cost-original": "0.0006156",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.000606",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "414.1550064086914",
+      "x-litellm-overhead-duration-ms": "61.744",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.6,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "7dc20b06-ef2a-4669-b45d-7d9df8d041b4",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "421.5371608734131",
+      "x-litellm-overhead-duration-ms": "78.989",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.53,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "bf97f5e7-3660-4073-89c6-dda1998894d9",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "389.73093032836914",
+      "x-litellm-overhead-duration-ms": "63.4689",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.62,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "3f38ef92-5787-4cde-b833-70bd65140fcd",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "429.2440414428711",
+      "x-litellm-overhead-duration-ms": "60.2469",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C6 named",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.44,
+    "usage": {
+     "prompt": 4040,
+     "cached": 0,
+     "completion": 16
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "20abdaa5-a523-4f63-a310-10984afce551",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0006156",
+      "x-litellm-response-cost-original": "0.0006156",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.000606",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "251.15585327148438",
+      "x-litellm-overhead-duration-ms": "69.9837",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.12,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 26
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "62b7bb95-5830-4131-ad90-c034c399b5b3",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00024135",
+      "x-litellm-response-cost-original": "0.00024135",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "3.375000000000001e-05",
+      "x-litellm-response-cost-output": "1.56e-05",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "822.2310543060303",
+      "x-litellm-overhead-duration-ms": "473.8271",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 109,
+     "text_head": "I cannot fulfill this request because it requires using `tool_07`, which is not in the allowed list of tools.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.11,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 29
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "141b3bda-9ce3-42d9-afae-163f98f15a67",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00024315",
+      "x-litellm-response-cost-original": "0.00024315",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "3.375000000000001e-05",
+      "x-litellm-response-cost-output": "1.74e-05",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "936.9678497314453",
+      "x-litellm-overhead-duration-ms": "738.2567",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 98,
+     "text_head": "I cannot fulfill this request because I am restricted to using only tool_03, tool_04, and tool_05.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.38,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 26
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "601b5c4a-8c2a-426c-9af9-59c497b7f343",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00024135",
+      "x-litellm-response-cost-original": "0.00024135",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "3.375000000000001e-05",
+      "x-litellm-response-cost-output": "1.56e-05",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "218.44196319580078",
+      "x-litellm-overhead-duration-ms": "51.446",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 87,
+     "text_head": "I cannot fulfill this request because only tool_03, tool_04, and tool_05 are permitted.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 4,
+    "status": 200,
+    "seconds": 0.38,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 29
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "06846c59-606b-449b-811d-dfeda3288d63",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00024315",
+      "x-litellm-response-cost-original": "0.00024315",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "3.375000000000001e-05",
+      "x-litellm-response-cost-output": "1.74e-05",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "228.63483428955078",
+      "x-litellm-overhead-duration-ms": "50.5157",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 98,
+     "text_head": "I cannot fulfill this request because I am restricted to using only tool_03, tool_04, and tool_05.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.74,
+    "usage": {
+     "prompt": 4065,
+     "cached": 3840,
+     "completion": 34
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": "vllm-0.31.0-f0427dc5",
+     "headers": {
+      "x-litellm-call-id": "3a171c9a-3e0c-435f-976e-bdffcff0a439",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.00024615",
+      "x-litellm-response-cost-original": "0.00024615",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "3.375000000000001e-05",
+      "x-litellm-response-cost-output": "2.0399999999999998e-05",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "578.6120891571045",
+      "x-litellm-overhead-duration-ms": "48.6281",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 102,
+     "text_head": "I cannot call tool_07 because it is currently restricted. I can only use tool_03, tool_04, or tool_05.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 0.61,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "eb6dad10-d5b1-4860-955e-959509307272",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "423.4199523925781",
+      "x-litellm-overhead-duration-ms": "65.5539",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 58,
+     "text_head": "<|tool_call>call:tool_07{note:<|\"|>probe<|\"|>}<tool_call|>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 0.63,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "0f9e22c6-4244-4f5f-9aee-73400cd184e5",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "459.5670700073242",
+      "x-litellm-overhead-duration-ms": "81.902",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 58,
+     "text_head": "<|tool_call>call:tool_07{note:<|\"|>probe<|\"|>}<tool_call|>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 0.6,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "4f513157-bc4e-48e6-a35f-c4784c9a307a",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "408.71191024780273",
+      "x-litellm-overhead-duration-ms": "46.91",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 58,
+     "text_head": "<|tool_call>call:tool_07{note:<|\"|>probe<|\"|>}<tool_call|>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 4,
+    "status": 200,
+    "seconds": 1.08,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "2a823ec5-dffa-4881-b3c0-9a98179beb5e",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "746.6938495635986",
+      "x-litellm-overhead-duration-ms": "368.7618",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 58,
+     "text_head": "<|tool_call>call:tool_07{note:<|\"|>probe<|\"|>}<tool_call|>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 5,
+    "status": 200,
+    "seconds": 0.42,
+    "usage": {
+     "prompt": 4040,
+     "cached": 3840,
+     "completion": 16
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "google/gemma-4-26B-A4B-it",
+     "system_fingerprint": null,
+     "headers": {
+      "x-litellm-call-id": "00b5f517-fe54-492c-a094-241b8f8bb8e2",
+      "x-litellm-model-id": "<hex-redacted>",
+      "x-litellm-model-name": "hosted_vllm/google/gemma-4-26B-A4B-it",
+      "x-litellm-version": "1.106.0",
+      "x-litellm-response-cost": "0.0002316",
+      "x-litellm-response-cost-original": "0.0002316",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "2.9999999999999997e-05",
+      "x-litellm-response-cost-output": "9.6e-06",
+      "x-litellm-response-cost-cache-read": "0.000192",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-response-duration-ms": "218.96100044250488",
+      "x-litellm-overhead-duration-ms": "79.282",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "google/gemma-4-26B-A4B-it",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0"
+     },
+     "text_len": 58,
+     "text_head": "<|tool_call>call:tool_07{note:<|\"|>probe<|\"|>}<tool_call|>",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}

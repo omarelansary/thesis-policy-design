@@ -1,0 +1,443 @@
+{
+ "versions": {
+  "appworld_package": "0.1.3.post1",
+  "appworld_data_version_file": "0.1.0",
+  "python": "3.12 (<home>/AppData/Local/Programs/Python/Python312)",
+  "os": "Windows 11",
+  "venv": "<local>/appworld-local/venv",
+  "APPWORLD_ROOT": "<local>/appworld-local/root"
+ },
+ "timestamps_utc": {
+  "start": "2026-11-01T13:09:24Z",
+  "end": "2026-11-01T13:20:44Z"
+ },
+ "definitions": {
+  "per_app": {
+   "amazon": {
+    "n": 66,
+    "min": 187,
+    "median": 473.0,
+    "mean": 529.42,
+    "p90": 932,
+    "max": 2212,
+    "total": 34942
+   },
+   "api_docs": {
+    "n": 4,
+    "min": 189,
+    "median": 296.0,
+    "mean": 325.75,
+    "p90": 522,
+    "max": 522,
+    "total": 1303
+   },
+   "file_system": {
+    "n": 26,
+    "min": 263,
+    "median": 486.5,
+    "mean": 584.19,
+    "p90": 1010,
+    "max": 1130,
+    "total": 15189
+   },
+   "gmail": {
+    "n": 42,
+    "min": 251,
+    "median": 427.0,
+    "mean": 701.24,
+    "p90": 1930,
+    "max": 2232,
+    "total": 29452
+   },
+   "phone": {
+    "n": 30,
+    "min": 176,
+    "median": 419.0,
+    "mean": 596.97,
+    "p90": 1336,
+    "max": 1381,
+    "total": 17909
+   },
+   "simple_note": {
+    "n": 17,
+    "min": 263,
+    "median": 378,
+    "mean": 485.47,
+    "p90": 694,
+    "max": 1571,
+    "total": 8253
+   },
+   "splitwise": {
+    "n": 65,
+    "min": 259,
+    "median": 453,
+    "mean": 601.74,
+    "p90": 1173,
+    "max": 2022,
+    "total": 39113
+   },
+   "spotify": {
+    "n": 91,
+    "min": 171,
+    "median": 371,
+    "mean": 527.01,
+    "p90": 968,
+    "max": 2586,
+    "total": 47958
+   },
+   "supervisor": {
+    "n": 6,
+    "min": 176,
+    "median": 190.0,
+    "mean": 293.5,
+    "p90": 210,
+    "max": 811,
+    "total": 1761
+   },
+   "todoist": {
+    "n": 56,
+    "min": 241,
+    "median": 442.0,
+    "mean": 569.46,
+    "p90": 1134,
+    "max": 1989,
+    "total": 31890
+   },
+   "venmo": {
+    "n": 54,
+    "min": 251,
+    "median": 432.0,
+    "mean": 518.06,
+    "p90": 833,
+    "max": 2259,
+    "total": 27975
+   }
+  },
+  "overall": {
+   "n": 457,
+   "min": 171,
+   "median": 429,
+   "mean": 559.62,
+   "p90": 1018,
+   "max": 2586,
+   "total": 255745
+  },
+  "n_definitions": 457,
+  "n_unique_names": 457,
+  "length_def": "len(json.dumps(tool)) of {\"type\",\"function\"} entry, canary_string removed, default separators, ensure_ascii=True",
+  "overall_including_canary_key": {
+   "n": 457,
+   "min": 245,
+   "median": 503,
+   "mean": 633.62,
+   "p90": 1092,
+   "max": 2660,
+   "total": 289563
+  },
+  "definitions_for_apps_used_in_train_dev_incl_supervisor": 224,
+  "note": "Function-calling names are prefixed <app>__<api>; file has 457 unique names; api_docs (4) and supervisor (6) are included"
+ },
+ "tasks": {
+  "tasks_per_split": {
+   "train": 90,
+   "dev": 57
+  },
+  "all_have_unique_ids": true,
+  "harness_errors": {},
+  "exec_failures": {},
+  "passed": {
+   "train": 90,
+   "dev": 57,
+   "all": 147
+  },
+  "failed_task_ids": [],
+  "calls_vs_logged_mismatch": [],
+  "calls_vs_gt_metadata_mismatch": [],
+  "api_calls_per_task_train": {
+   "n": 90,
+   "min": 5,
+   "median": 36.0,
+   "mean": 50.46,
+   "p90": 105,
+   "max": 244,
+   "total": 4541
+  },
+  "response_chars_raw_train": {
+   "n": 4541,
+   "min": 2,
+   "median": 109,
+   "mean": 216.72,
+   "p90": 460,
+   "max": 2164,
+   "total": 984130
+  },
+  "response_chars_jsondumps_train": {
+   "n": 4541,
+   "min": 2,
+   "median": 116,
+   "mean": 234.62,
+   "p90": 471,
+   "max": 2205,
+   "total": 1065405
+  },
+  "sum_response_chars_per_task_train": {
+   "n": 90,
+   "min": 974,
+   "median": 8598.0,
+   "mean": 10934.78,
+   "p90": 22102,
+   "max": 37078,
+   "total": 984130
+  },
+  "max_response_chars_per_task_train": {
+   "n": 90,
+   "min": 436,
+   "median": 1326.0,
+   "mean": 1338.89,
+   "p90": 1942,
+   "max": 2164,
+   "total": 120500
+  },
+  "api_calls_per_task_dev": {
+   "n": 57,
+   "min": 6,
+   "median": 34,
+   "mean": 56,
+   "p90": 132,
+   "max": 214,
+   "total": 3192
+  },
+  "response_chars_raw_dev": {
+   "n": 3192,
+   "min": 2,
+   "median": 110.0,
+   "mean": 249.94,
+   "p90": 682,
+   "max": 4719,
+   "total": 797820
+  },
+  "response_chars_jsondumps_dev": {
+   "n": 3192,
+   "min": 2,
+   "median": 113.0,
+   "mean": 268.97,
+   "p90": 730,
+   "max": 4732,
+   "total": 858544
+  },
+  "sum_response_chars_per_task_dev": {
+   "n": 57,
+   "min": 1111,
+   "median": 9307,
+   "mean": 13996.84,
+   "p90": 32938,
+   "max": 43066,
+   "total": 797820
+  },
+  "max_response_chars_per_task_dev": {
+   "n": 57,
+   "min": 436,
+   "median": 1361,
+   "mean": 1638.35,
+   "p90": 2003,
+   "max": 4719,
+   "total": 93386
+  },
+  "api_calls_per_task_all": {
+   "n": 147,
+   "min": 5,
+   "median": 36,
+   "mean": 52.61,
+   "p90": 125,
+   "max": 244,
+   "total": 7733
+  },
+  "response_chars_raw_all": {
+   "n": 7733,
+   "min": 2,
+   "median": 109,
+   "mean": 230.43,
+   "p90": 548,
+   "max": 4719,
+   "total": 1781950
+  },
+  "response_chars_jsondumps_all": {
+   "n": 7733,
+   "min": 2,
+   "median": 115,
+   "mean": 248.8,
+   "p90": 598,
+   "max": 4732,
+   "total": 1923949
+  },
+  "sum_response_chars_per_task_all": {
+   "n": 147,
+   "min": 974,
+   "median": 8843,
+   "mean": 12122.11,
+   "p90": 27193,
+   "max": 43066,
+   "total": 1781950
+  },
+  "max_response_chars_per_task_all": {
+   "n": 147,
+   "min": 436,
+   "median": 1338,
+   "mean": 1455.01,
+   "p90": 1951,
+   "max": 4719,
+   "total": 213886
+  },
+  "response_status_counts": {
+   "200": 7709,
+   "422": 24
+  },
+  "tasks_with_non200": 11,
+  "scenarios_train": {
+   "n_scenarios": 30,
+   "tasks_per_scenario": {
+    "n": 30,
+    "min": 3,
+    "median": 3.0,
+    "mean": 3,
+    "p90": 3,
+    "max": 3,
+    "total": 90
+   },
+   "tasks_per_scenario_hist": {
+    "3": 30
+   }
+  },
+  "tasks_using_app_train": {
+   "file_system": 15,
+   "phone": 30,
+   "simple_note": 12,
+   "spotify": 48,
+   "venmo": 21
+  },
+  "num_required_apps_per_task_train": {
+   "hist": {
+    "1": 60,
+    "2": 24,
+    "3": 6
+   },
+   "n": 90,
+   "min": 1,
+   "median": 1.0,
+   "mean": 1.4,
+   "p90": 2,
+   "max": 3,
+   "total": 126
+  },
+  "scenarios_dev": {
+   "n_scenarios": 19,
+   "tasks_per_scenario": {
+    "n": 19,
+    "min": 3,
+    "median": 3,
+    "mean": 3,
+    "p90": 3,
+    "max": 3,
+    "total": 57
+   },
+   "tasks_per_scenario_hist": {
+    "3": 19
+   }
+  },
+  "tasks_using_app_dev": {
+   "file_system": 6,
+   "phone": 18,
+   "simple_note": 3,
+   "spotify": 30,
+   "venmo": 21
+  },
+  "num_required_apps_per_task_dev": {
+   "hist": {
+    "1": 36,
+    "2": 21
+   },
+   "n": 57,
+   "min": 1,
+   "median": 1,
+   "mean": 1.37,
+   "p90": 2,
+   "max": 2,
+   "total": 78
+  },
+  "scenarios_all": {
+   "n_scenarios": 49,
+   "tasks_per_scenario": {
+    "n": 49,
+    "min": 3,
+    "median": 3,
+    "mean": 3,
+    "p90": 3,
+    "max": 3,
+    "total": 147
+   },
+   "tasks_per_scenario_hist": {
+    "3": 49
+   }
+  },
+  "tasks_using_app_all": {
+   "file_system": 21,
+   "phone": 48,
+   "simple_note": 15,
+   "spotify": 78,
+   "venmo": 42
+  },
+  "num_required_apps_per_task_all": {
+   "hist": {
+    "1": 96,
+    "2": 45,
+    "3": 6
+   },
+   "n": 147,
+   "min": 1,
+   "median": 1,
+   "mean": 1.39,
+   "p90": 2,
+   "max": 3,
+   "total": 204
+  },
+  "scenario_overlap_train_dev": 0,
+  "distinct_app_sets": 12,
+  "has__tb": 0
+ },
+ "issues": {
+  "n_total_excluding_PRs": 73,
+  "open": 12,
+  "closed": 61,
+  "file": "<local>/appworld-local/stats/r1_part2_issues.json"
+ },
+ "files": {
+  "tools": "<local>/appworld-local/appworld_fc_tools.json",
+  "tasks": "<local>/appworld-local/stats/r1_part2_tasks.jsonl",
+  "issues": "<local>/appworld-local/stats/r1_part2_issues.json",
+  "summary": "<local>/appworld-local/stats/r1_part2_summary.json",
+  "scripts": "<local>/appworld-local/scripts"
+ },
+ "response_length_definition": "response_chars_raw = len(HTTP response.text) of each tracked API call (admin-app calls excluded); response_chars_jsondumps = len(json.dumps(parsed response, default=str)) after AppWorld response_to_json (parse_datetimes default). API-call count = len(world.requester.requests) = len(ground_truth/api_calls.json) for all 147 tasks.",
+ "solution_execution": "world.task.ground_truth.compiled_solution_code + \"<newline>solution(apis, requester)\" executed via world.execute (same as appworld verify tasks), then world.evaluate(); AppWorld(task_id, experiment_name=\"r1_part2\", raise_on_failure=False, ground_truth_mode=\"full\", timeout_seconds=None)",
+ "commands": [
+  "C:/.../Python312/python.exe -m venv <local>/appworld-local/venv",
+  "venv/Scripts/python.exe -m pip install appworld",
+  "appworld install",
+  "appworld download data --root <local>/appworld-local/root  (APPWORLD_ROOT exported to same path)",
+  "PYTHONUTF8=1 VIRTUAL_ENV=<local>/appworld-local/venv venv/Scripts/python.exe scripts/run_solutions.py",
+  "venv/Scripts/python.exe scripts/defs.py ; scripts/summarize.py ; scripts/check_apps.py ; scripts/issues.py ; scripts/final.py",
+  "gh api --paginate \"repos/StonyBrookNLP/appworld/issues?state=all&per_page=100\" (read-only; 235 items incl. PRs, 73 issues)"
+ ],
+ "deviations_and_problems": [
+  "Windows: signal.SIGALRM missing -> AppWorld.execute timeout fails; worked around with timeout_seconds=None (no per-execution timeout; no hang occurred). Matches public issues #14/#157.",
+  "Windows: default cp1252 stdout/encoding raised UnicodeEncodeError inside world.evaluate(); fixed by PYTHONUTF8=1. Matches public issue #28 class. Two smoke tasks failed before this fix; those smoke outputs were discarded and the full run is clean.",
+  "IPython tried to use the parent shell VIRTUAL_ENV (a different project venv; only the env var of the child process was overridden, nothing installed/modified there); set VIRTUAL_ENV to the appworld venv for the run. Running with python -I additionally broke the 2nd world creation, so not used for the run.",
+  "`appworld install` unpacked the tests bundle to <home>/.appworld/tests (outside the appworld-local directory; AppWorld hard-coded location, not removed). It also unpacked app sources into the venv package dir.",
+  "Download from GitHub LFS/data worked natively (no Docker needed). data dir on disk contains all splits including test_normal/test_challenge task folders (732 task dirs); they were NOT opened/listed by name/loaded. Only datasets/train.txt and dev.txt were read via load_task_ids(\"train\"/\"dev\").",
+  "Actual split sizes: train=90, dev=57 (request expected dev=60). Only 5 apps (spotify, phone, venmo, file_system, simple_note) plus supervisor appear in train/dev; amazon, gmail, splitwise, todoist definitions exist in the 457 list but no train/dev task requires them.",
+  "AppWorld records only the request in its tracker; response lengths were captured by wrapping Requester._get/_post/_put/_patch/_delete and response_to_json in the runner (monkey-patch, no data modified). Response status 422 occurred 24 times in 11 tasks (reference solution paths, tasks still pass).",
+  "Issue notes (note_quote) are short phrases from public issue text, hand-curated for evaluation/environment-related issues, keyword-extracted snippets for others.",
+  "Definition lengths computed on {\"type\",\"function\"} (canary_string key stripped); including the key the totals are in overall_including_canary_key.",
+  "Solutions were run once (not twice); AppWorld is deterministic for fixed task data."
+ ]
+}

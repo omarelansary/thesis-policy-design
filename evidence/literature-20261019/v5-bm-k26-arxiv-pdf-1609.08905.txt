@@ -1,0 +1,1239 @@
+
+=== [page 1] ===
+Noname manuscript No.
+(will be inserted by the editor)
+Statistical comparison of classiﬁers through Bayesian hierarchical
+modelling
+Giorgio Corani · Alessio Benavoli · Janez Demˇsar ·
+Francesca Mangili · Marco Zaﬀalon
+Received: date / Accepted: date
+Abstract Usually one compares the accuracy of two competing classiﬁers via null hypothesis signif-
+icance tests (nhst). Yet the nhst tests suﬀer from important shortcomings, which can be overcome
+by switching to Bayesian hypothesis testing. We propose a Bayesian hierarchical model which jointly
+analyzes the cross-validation results obtained by two classiﬁers on multiple data sets. It returns the
+posterior probability of the accuracies of the two classiﬁers being practically equivalent or signiﬁ-
+cantly diﬀerent. A further strength of the hierarchical model is that, by jointly analyzing the results
+obtained on all data sets, it reduces the estimation error compared to the usual approach of averaging
+the cross-validation results obtained on a given data set.
+1 Introduction
+The statistical comparison of competing algorithms is fundamental in machine learning; it is typically
+carried through hypothesis testing. As an example in this paper we assume that one is interested in
+comparing the accuracy of two competing classiﬁers. However our discussion readily applies to any
+other measure of performance.
+Assume that two classiﬁers have been assessed via cross-validation on a single data set. The
+recommended approach for comparing them is the correlated t-test (Nadeau & Bengio, 2003). If
+instead one aims at comparing two classiﬁers on multiple data sets the recommended test is the signed-
+rank test (Demˇsar, 2006). Both tests are based on the frequentist framework of the null-hypothesis
+signiﬁcance tests (nhst), which has severe drawbacks.
+First, the nhst computes the probability of getting the observed (or a larger) diﬀerence in the data
+if the null hypothesis was true. It does not compute the probability of interest, which is the probability
+of one classiﬁer being more accurate than another given the observed results.
+Second, the claimed statistical signiﬁcances do not necessarily imply practical signiﬁcance. It has
+been pointed out (Hand et al., 2006) that the apparent superiority of a classiﬁer in a simulation may
+G. Corani, A. Benavoli F. Mangili and M. Zaﬀalon are with
+Istituto Dalle Molle di studi sull’Intelligenza Artiﬁciale (IDSIA), Manno, Switzerland
+J. Demˇsar is with
+Faculty of Computer and Information Science, University of Ljubljana, Slovenia
+E-mail:
+giorgio{alessio,francesca,zaﬀalon}@idsia.ch
+janez.demsar@fri.uni-lj.si
+arXiv:1609.08905v3  [cs.LG]  22 Nov 2016
+
+=== [page 2] ===
+2
+Giorgio Corani et al.
+be swamped by other sources of uncertainty when the classiﬁer is adopted in practice. This especially
+applies when the new classiﬁer provides only a thin advantage over the previous one. Yet the signed-
+rank test easily rejects the null hypothesis even when dealing with two classiﬁers separated by a thin
+diﬀerence, if the classiﬁers have been compared on a large collection of data sets. Null hypotheses
+can virtually always be rejected by increasing the sample size (Wasserstein & Lazar, 2016), since the
+p-value depends both on the actual diﬀerence between the two classiﬁers and number of collected
+observations.
+Another issue is that when the nhst does not reject the null, it provides no evidence in favor of
+the null hypothesis (Kruschke, 2015, Chap. 11): it simply states that there is not enough evidence for
+rejecting the null hypothesis. This prevents nhst tests from recognizing equivalent classiﬁers.
+These issues can be overcome by switching to Bayesian hypothesis testing, as exhaustively discussed
+by (Kruschke, 2015, Sec. 11). Recent applications of Bayesian hypothesis testing in machine learning
+have been proposed in (Lacoste et al., 2012; Corani & Benavoli, 2015); yet there is currently no
+Bayesian approach able to jointly analyze the cross-validation results obtained on multiple data sets.
+Let us introduce some notation. We have a collection of q data sets; the actual mean diﬀerence
+of accuracy on the i-th data set is δi. We can think of δi as the average diﬀerence of accuracy that
+we would obtain by repeating many times the procedure of sampling from the actual distribution as
+many instances as there are in the i-data set available to us, train the two classiﬁers and measure their
+diﬀerence of accuracy on a large test set. We cannot know the actual value of δi; thus we estimate it
+through cross-validation. The usual estimate of δi is the mean of the cross-validation results obtained
+on the i-th data set; this is also the maximum likelihood estimator (MLE) of δi.
+We propose the ﬁrst model that represents both the distribution p(δi) across the diﬀerent data
+sets and the distribution of the cross-validation results on the i-th data set given δi, modelling both
+the variance and the correlation of the cross-validation results on each data set.
+In order to detect equivalent classiﬁers, we introduce a region of practical equivalence (rope), as in
+Kruschke (2013). In particular we consider two classiﬁers to be practically equivalent if their diﬀerence
+of accuracy belongs to the interval (−0.01, 0.01). This constitutes a sensible default, even if there are
+no uniquely correct rope limits. We analyze how much of the posterior probability mass lies within
+the rope, at its left and at its right in order to detect classiﬁers which are practically equivalent or
+instead signiﬁcantly diﬀerent. With this, we can predict the probability that the δi new data set will
+lie in the rope or to the left or right of it.
+Compared to the signed-rank, the hierarchical test is more conservative as it rejects less easily the
+null hypothesis. The signed-rank assumes a point null hypothesis, while the null hypothesis of the
+hierarchical model contains all the values of the rope. Such a null hypothesis is more realistic and thus
+more diﬃcult to reject.
+Consequently, the hierarchical test tend to be less powerful and more likely to retain the null-
+hypothesis when the two classiﬁers are in fact diﬀerent. Yet this issue is mitigated by the fact that
+the posterior probabilities can be meaningfully interpreted even when they do not exceed the 95%
+threshold: the result of the test is not a binary decision but a probability.
+A further strength of the hierarchical model is that it reduces the estimation error of the δi’s
+compared to the traditional MLE approach. The hierarchical model estimates the distribution from
+which the δi’s are sampled. Then it jointly estimates the values of the δi’s. By doing so it applies
+shrinkage, namely the estimates ˆδi’ are closer to each other than in the MLE case. It is known that
+the shrinkage estimator yields lower mean squared error than MLE in the i.i.d. case (Murphy, 2012,
+Sec 6.3.3.2). We prove theoretically that the shrinkage estimator yields lower mean squared error than
+MLE also in the correlated case, such as that of cross-validation; moreover, we verify this statement
+in a variety of diﬀerent experiments.
+
+=== [page 3] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+3
+2 Existing approaches
+We have a collection of q data sets; the actual mean diﬀerence of accuracy on the i-th data set is δi.
+We can think of δi as the average diﬀerence of accuracy that we would obtain by repeating many
+times the procedure of sampling from the actual distribution as many instances as there are in the
+actually available data set, train the two classiﬁers and measure the diﬀerence of accuracy on a large
+test set.
+In reality we cannot know δi. We can however estimate it through cross-validation. Assume that
+we have performed m runs of k-fold cross-validation on each data set, providing both classiﬁers with
+paired folds. The diﬀerences of accuracy on each fold of cross-validation are xi = {xi1, xi2, . . . , xin},
+where n = mk. The mean and the standard deviation of the results on the i-th data set are ¯xi and si.
+The mean of the cross-validation results is also the maximum likelihood estimator (MLE) of δi.
+The values xi = {xi1, xi2, . . . , xin} are not independently sampled; they are instead sampled with
+correlation ρ because of the overlapping training sets built during cross-validation. Nadeau & Bengio
+(2003) prove that there is no unbiased estimator of the correlation and they approximate it as ρ = 1
+k,
+where k is the number of folds. They devise the correlated t-test, whose statistic is:
+t = xi/
+r
+ˆs2
+i ( 1
+n +
+ρ
+1 −ρ).
+(1)
+The denominator of the statistic is the standard error, which is informative about the accuracy of
+¯xi as an estimator of δi. The standard error of the correlated t-test accounts for the correlation of
+cross-validation results. The statistic of Eqn.(1) follows a t distribution with n-1 degrees of freedom.
+When the statistic exceeds the critical value, the test claims that δi is signiﬁcantly diﬀerent from zero.
+This is the standard approach for comparing two classiﬁers on a single data set.
+The signed-rank test is instead the recommended method (Demˇsar, 2006) to compare two classiﬁers
+on a collection of q diﬀerent data sets. It is usually applied after having performed cross-validation
+on each data set. The test analyzes the mean diﬀerences measured on each data set (¯x1, ¯x2, . . . , ¯xq)
+assuming them to be i.i.d.. This is a simplistic assumption: the ¯xi’s are not i.i.d. since they are
+characterized by diﬀerent uncertainty; indeed their standard errors are typically diﬀerent.
+The test statistic is:
+T + =
+P
+{i: ¯xi≥0}
+ri(|¯xi|) =
+P
+1≤i≤j≤n
+T +
+ij ,
+where ri(|¯xi|) is the rank of |¯xi| and
+T +
+ij =
+ 1 if ¯xi ≥¯xj,
+0 otherwise.
+For a large enough number of samples (e.g., q>10), the statistic under the null hypothesis is normally
+distributed. When the test rejects the null hypothesis, it claims that the median of the population of
+the δi’s is diﬀerent from zero.
+The two tests discussed so far are null-hypothesis signiﬁcance test (nhst) and as such they suﬀer
+from the drawbacks discussed in the introduction.
+Let us now consider the Bayesian approaches. Kruschke (2013) presents a Bayesian t-test coupled
+with the rope for i.i.d. observations. Because of the i.i.d. assumption, it cannot be applied to analyze the
+cross-validation results, which are correlated. The Bayesian correlated t-test by Corani & Benavoli
+(2015) can be used to this end. It computes the posterior distribution of δi on a single data set,
+assuming the cross-validation observations to be sampled from a multivariate normal distribution
+
+=== [page 4] ===
+4
+Giorgio Corani et al.
+whose components have the same mean δi, the same standard deviation σi and are equally cross-
+correlated with correlation ρ =
+1
+k. Thus the test borrows the correlation heuristic by Nadeau &
+Bengio (2003).
+As for the analysis on multiple data sets, Lacoste et al. (2012) compares two classiﬁers on multiple
+data sets by modelling each data set as an independent Bernoulli trial. The two possible outcomes
+of the Bernoulli trial the ﬁrst classiﬁer being more accurate than the second or vice versa. Corani &
+Benavoli (2015) estimate such probabilities using the Bayesian correlated t-test, applied independently
+on each data set. It is then possible computing the probability of the ﬁrst classiﬁer being more accurate
+than the second classiﬁer on more than half of the q data sets. A shortcoming of this approach is that
+its conclusions apply only to the q available data sets without generalizing to the population of data
+sets from which they have been sampled.
+3 The hierarchical model
+We propose a Bayesian hierarchical model for comparing two classiﬁers. Its core assumptions are:
+δ1...δq ∼t(δ0, σ0, ν),
+(2)
+σ1...σq ∼unif(0, ¯σ),
+(3)
+xi ∼MV N(1δi, Σi).
+(4)
+The i-th data set is characterized by the mean diﬀerence of accuracy between classiﬁers δi and the
+standard deviation σi. Thus we model each data sets as having its own estimation uncertainty. Notice
+that instead when applying the signed-rank test one has to assume that the ¯xi’s are i.i.d.
+The δi’s are assumed to be drawn from a Student distribution with mean δ0, scale factor σ0
+and degrees of freedom ν. We choose the Student distribution because it is more ﬂexible than the
+Gaussian, thanks to the additional parameter ν. When ν is small, the Student distribution has heavy
+tails; when ν is above 30, the Student distribution is practically a Gaussian. A Student distribution
+with low degrees of freedom is able to robustly model outlier data points, namely some δi’s which
+are far away from the others. Indeed the Student distribution is typically used for robust Bayesian
+estimation (Kruschke, 2013).
+We assume σi to be drawn from a uniform distribution over the interval (0, ¯σ). This kind of prior is
+recommended for the standard deviation by Gelman (2006), as it yields inferences which are insensitive
+on the value of ¯σ if ¯σ is large enough. We adopt ¯σ = 1000¯s where ¯s is the mean standard deviation
+observed on the diﬀerent data sets, ¯s = Pq
+i si/q. As we show in Sec. 4.8.1, we obtain the same posterior
+distribution if we change the upper bound to 100¯s.
+Equation (4) models the fact that the cross-validation measures xi = {xi1, xi2, . . . , xin} of the i-th
+data set are generated from a multivariate normal whose components are equally cross-correlated with
+correlation ρ, have same mean (δi) and same standard deviation (σi). These are standard assumptions
+for the cross-validation measures (Nadeau & Bengio, 2003; Corani & Benavoli, 2015). The normality
+assumption is sound since the average accuracy over the instances of the test set tends to be normally
+distributed by the central limit theorem.
+We complete the model with the prior on the parameters δ0, σ0 and ν of the high-level distribution.
+We assume δ0 to be uniformly distributed within 1 and -1. This choice works for all the measures
+bounded within ±1, such as accuracy, AUC, precision and recall. Other type of indicators might
+require diﬀerent bounds.
+For the standard deviation σ0 we adopt the prior unif(0, ¯s0), with ¯s0 = 1000s¯x, where s¯x is the
+standard deviation of the ¯xi’s. Also in this case we checked that the posterior distribution of σ0 is
+unchanged if we adopt ¯s0 = 1000s¯x or ¯s0 = 100s¯x as upper bound.
+
+=== [page 5] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+5
+The treatment of p(ν) is slightly more challenging. Kruschke (2013) proposes p(ν) to be a shifted
+exponential, which we re-parameterize as a Gamma(α,β) with α=1, β= 0.0345. Ju´arez & Steel (2010)
+proposes instead p(ν) = Gamma(2, 0.1). The main characteristics of those distributions are given in
+Tab. 1.
+The inferred model shows some sensitivity on the choice of p(ν). Yet both parameterizations
+are sensible and we have no strong reason to prefer one over another. We model this uncertainty
+by representing the coeﬃcients α and β as two random variables with their own prior distribution
+(hierarchical approach). In particular we assume p(ν) = Gamma(α, β), with α ∼unif(α, ¯α) and β ∼
+unif(β, ¯β), setting α=0.5, ¯α=5, β=0.05, ¯β=0.15. The mean and standard deviation of the limiting
+Gamma distribution are given in Table 1; they encompass a wide range of diﬀerent prior beliefs. In
+this way the model becomes more stable, showing only minor variations when the limiting ranges of
+α and β are modiﬁed. It also becomes more ﬂexible, and ﬁts better the data as we show later in the
+experimental section.
+α
+β
+mean
+sd
+p(ν <30)
+Kruschke (2013)
+2
+0.1
+20
+14
+0.80
+Ju´arez & Steel (2010)
+1
+0.0345
+29
+29
+0.64
+0.5
+0.05
+10
+14
+0.92
+0.5
+0.15
+3
+5
+0.99
+5
+0.05
+100
+45
+0.02
+5
+0.15
+33
+15
+0.47
+Table 1 Characteristics of the Gamma distribution for diﬀerent values of α and β. The last four rows show the char-
+acteristic of the extreme distributions assumed by our hierarchical model. The hierarchical model however contains
+all the priors corresponding to intermediate values of α and β.
+The priors for the parameters of the high-level distribution are thus:
+δ0 ∼unif(−1, 1)
+σ0 ∼unif(0, ¯
+σ0)
+ν ∼Gamma(α, β)
+α ∼unif(α, ¯α)
+β ∼unif(β, ¯β)
+3.1 The region of practical equivalence
+Our knowledge about a parameter is fully represented by the posterior distribution. Yet it is handy
+to summarize the posterior in order to take decisions. In (Corani & Benavoli, 2015) we summarized
+the posterior distribution by reporting the probability of positiveness and negativeness; however in
+this way we considered only the sign of the diﬀerences, neglecting their magnitude.
+A more informative summary of the posterior is obtained introducing a region of practical equiv-
+alence (rope), constituted by a range of parameter values that are practically equivalent to the null
+diﬀerence between the two classiﬁers. We thus summarize the posterior distribution by reporting how
+much probability lies within the rope, at its left and at its right. The limits of the rope are estab-
+lished by the analyst based on his experience; thus there are no uniquely correct limits for the rope
+(Kruschke, 2015, Chap. 12).
+
+=== [page 6] ===
+6
+Giorgio Corani et al.
+Dealing with the evaluation of classiﬁers, Hand et al. (2006) reports that the apparent superiority
+of a classiﬁer in a simulation may be swamped by other sources of uncertainty when adopted in
+practice. Examples of such sources of uncertainty are the presence of non-stationary distributions or
+unintended biases in the training samples. These thin improvements measured in simulations might
+hardly imply any advantage in practice.
+We thus consider two classiﬁers to be practically equivalent if their mean diﬀerence of accuracy lies
+within (-0.01,0.01). This constitutes a sensible default for the rope: yet a researcher could legitimately
+adopt a diﬀerent rope. If one is unsure about the limits of the rope, one could show how the results
+vary for diﬀerent rope widths. We provide an example in Sec. 4.9.
+The rope yields a realistic null hypothesis that can be veriﬁed. If a large mass of posterior proba-
+bility lies within the rope, we claim the two classiﬁers to be practically equivalent. A sound approach
+to detect equivalent classiﬁers could be very useful in online model selection (Krueger et al., 2015)
+where one should quickly discard algorithms that perform the same.
+3.2 The inference of the test
+We focus on estimating the posterior distribution of the diﬀerence of accuracy between the two
+classiﬁers on a future unseen data set. We compute the probability of left, rope and right being the
+most probable outcome on the next data set.
+Thus we compute the probability by which p(left) > max(p(rope), p(right)) or p(right) > max(p(rope), p(left))
+or p(rope) > max(p(left), p(right)). If one removes the rope, this inference is similar to the inference
+performed by the Bayesian sign-test.
+p(δ0,σ0, ν∣x
+n)∼δ0,σ0, ν
+δ0
+ν
+σ0
+-0.05
+0.00
+0.05
+pdf
+rope
+0.0
+0.1
+0.2
+0.3
+0.4
+-0.05
+0.00
+0.05
+pdf
+rope
+0.0
+0.1
+0.2
+0.3
+0.4
+-0.05
+0.00
+0.05
+pdf
+rope
+0.0
+0.1
+0.2
+0.3
+0.4
+1    
+3    
+2    
+1,2,3,...             
+Fig. 1 Diagram of the inference of the test.
+To compute such inference, we proceed as follows:
+1. initialize the counters nleft = nrope = nright = 0;
+
+=== [page 7] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+7
+2. for i = 1, 2, 3, . . . , Ns repeat
+– sample µ0, σ0, ν from the posterior of these parameters;
+– deﬁne the posterior of the mean diﬀerence accuracy on the next dataset, i.e., t(δnext; δ0, σ0, ν);
+– from t(δnext; δ0, σ0, ν) compute the three probabilities p(left) (integral on (−∞, r])), p(rope)
+(integral on [−r, r]) and p(right) (integral on [r, ∞));
+– determine the highest among p(left), p(rope), p(right) and increment the respective counter
+nleft, nrope, nright;
+3. compute P(left) = nleft/Ns, P(rope) = nrope/Ns and P(right) = nright/Ns;
+4. decision: when P(rope) > 1−α declare the two classiﬁers to be practically equivalent; when P(left) >
+1−α or P(right) > 1−α we declare the two classiﬁers to be signiﬁcantly diﬀerent in the respective
+directions.
+We have chosen r = 0.01 and, thus, our region of practical equivalence (rope) is (−0.01, 0.01). Fig-
+ure 1 shows a diagram of this inference schema and reports three sampled posteriors t(δnext; δ0, σ0, ν).
+For these three cases we have that (p(left), p(rope), p(right)) are respectively (from top to bottom)
+(0.08, 0.90, 0.02), (0.05, 0.67, 0.28), (1, 0, 0) and so after these three steps nleft = 1, nrope = 2, nright = 0
+(in the next experiments we will consider Ns = 4000).
+3.3 The shrinkage estimator for cross-validation
+The hierarchical model jointly estimates the δi’s by applying shrinkage to the ¯xi’s. In the uncorrelated
+case, the shrinkage estimator is known to be more accurate than the MLE. In this section we show
+that the shrinkage estimator is more accurate than MLE also in the correlated case, such as the data
+generated by cross-validation. This allows the hierarchical model to be more accurate than the existing
+method in the estimation of the δi’s.
+The δi’s of the hierarchical model are independent given the parameters of the higher-level distri-
+bution. If such parameters were known, the δi’s would be conditionally independent and they would
+be independently estimated. Instead such parameters are unknown, causing the δ0 and the δi’s to be
+jointly estimated. As a result the estimate of each δi is informed by data collected also on all the other
+data sets. Intuitively, each data set informs the higher-level parameters, which in turn constrains and
+improves the parameters of the individual data sets (Kruschke, 2013, Chap. 9).
+To show this, we assume the cross-validation results on the q data sets to be generated by the
+hierarchical model:
+δi ∼p(δi),
+xi ∼MV N(1δi, Σ).
+(5)
+where for simplicity we assumed the variances σ2
+i of the individual data sets to be equal to σ2 and
+known. Thus all data sets have the same covariance matrix Σ, which is deﬁned as follows: the variances
+equal σ2 and the correlations equal ρ. Note that Eqn. (5) coincides with (4). This is a general model
+that makes no assumptions about the distribution p(δi). We denote the ﬁrst two moments of p(δi) as
+E[δi] = δ0 and Var[δi] = σ2
+0.
+We study the MAP estimates of the parameters δ1, . . . , δm, δo, σ2o, which asymptotically tend to
+the Bayesian estimates. A hierarchical model is being ﬁtted to the data. Such model is a simpliﬁed
+version of that presented in Sec. 3. In particular p(δi) is Gaussian for analytical tractability.
+P(¯x, δ, δ0, σ2
+0) =
+qQ
+i=1
+N(xi; 1δi, Σ)N(δi; δo, σ2o)p(δo, σ2o).
+(6)
+
+=== [page 8] ===
+8
+Giorgio Corani et al.
+This model is misspeciﬁed since p(δi) is generally not Gaussian. Nevertheless, it correctly estimates
+the mean and variance of p(δi), as we show in the following.
+Proposition 1 The derivatives of the logarithm of P(¯x, δ, δ0, σ2
+0) are:
+d
+dδi
+ln(P(·)) = δo −δi
+σ2o
++ ¯xi −δi
+σ2n
+,
+d
+dδo ln(P(·)) =
+−qδo +
+qP
+i=1
+δi
+σ2o
++
+d
+dδo ln(p(δo, σ2
+o)),
+d
+dσo ln(P(·)) =
+qδ2o +
+qP
+i=1
+δ2
+i −2δo
+qP
+i=1
+δi −qσ2o
+σ3o
++
+d
+dσo ln(p(δo, σ2
+o)).
+If we further assume that p(δo, σ2o) ≈constant (ﬂat prior), by equating the derivatives to zero, we
+derive the following consistent estimators:
+σ2
+o = 1
+q
+q
+X
+i=1
+(ˆδi −ˆδo)2,
+(7)
+ˆδi =
+ˆσ2o¯xi + σ2n 1
+q
+qP
+i=1
+¯xi
+ˆσ2o + σ2n
+= w¯xi + (1 −w) 1
+q
+q
+X
+i=1
+¯xi,
+(8)
+where w = ˆσ2o/(ˆσ2o + σ2n) and, to keep a simple notation, we have not explicited the expression ˆσo as
+a function of ¯xi, σ2n. Notice that the estimator ˆδi shrinks the estimate towards 1
+q
+Pq
+i=1 ¯xi that is an
+estimate of δ0. Hence, the Bayesian hierarchical model consistently estimates δ0 and σ2
+0 from data and
+converges to the shrinkage estimator ˆδi(xi) = w¯xi + (1 −w)δ0.
+It is known that the shrinkage estimator achieves a lower error than MLE in case of uncorrelated
+data; see (Murphy, 2012, Sec 6.3.3.2) and the references therein. However there is currently no analysis
+of shrinkage with correlated data, such as those yielded by cross-validation. We study this problem in
+the following.
+Consider the generative model (5). The likelihood regarding the i-th data set is:
+p(xi|δi, Σ) = N(xi; 1δi, Σ) = exp(−1
+2(xi −1δi)T Σ−1(xi −1δi))
+(2π)n/2p
+|Σ|
+.
+(9)
+Let us denote by δ the vector of the δi’s. The joint probability of data and parameters is:
+P(δ, x1, . . . , xq) =
+q
+Y
+i=1
+N(xi; 1δi, Σ)p(δi).
+Let us focus on the i-th group, denoting by ˆδi(xi) an estimator of δi. The mean squared error (MSE)
+of the estimator w.r.t. the true joint model P(δi, xi) is:
+ZZ 
+δi −ˆδi(xi)
+2
+N(xi; 1δi, Σ)p(δi)dxidδi.
+(10)
+
+=== [page 9] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+9
+Proposition 2 The MSE of the maximum likelihood estimator is:
+MSEMLE =
+ZZ
+(δi −¯xi)2 N(xi; 1δi, Σ)p(δi)dxidδi
+= 1
+n2 1T Σ1,
+which we denote in the following also as σ2n =
+1
+n2 1T Σ1.
+Now consider the shrinkage estimator ˆδi(xi) = w¯xi + (1 −w)δ0 with w ∈(0, 1), which pulls the MLE
+estimate ¯xi towards the mean δ0 of the upper-level distribution.
+Proposition 3 The MSE of the shrinkage estimator is:
+MSESHR =
+ZZ
+(δi −w¯xi −(1 −w)δ0)2 N(xi; 1δi, Σ)p(δi)dxidδi
+= w2σ2
+n + (1 −w)2σ2
+0.
+As we have seen, the hierarchical model converges to the shrinkage estimator with w = σ2
+0/(σ2
+0 + σ2n).
+Then:
+MSESHR = w2σ2
+n + (1 −w)2σ2
+0 = σ4
+0 + σ2nσ2
+0
+(σ2
+0 + σ2n)2 σ2
+n
+=
+σ2
+0
+(σ2
+0 + σ2n)σ2
+n < σ2
+n = MSEMLE.
+Therefore, the shrinkage estimator achieves a smaller mean squared error than the MLE.
+3.4 Implementation and code availability
+We implemented the hierarchical model in Stan (Carpenter et al., 2016), a language for Bayesian
+inference. In order to improve the computational eﬃciency, we exploit a quadratic matrix form to
+compute simultaneously the likelihood of the q data sets. This provides a speedup of about one order
+of magnitude compared to the naive implementation in which the likelihoods are computed separately
+on each data set. Inferring the hierarhical model on the results of 10 runs of 10-folds cross-validation
+on 50 data sets (a total of 5000 observations) takes about three minutes on a standard laptop.
+The Stan code is available from https://github.com/BayesianTestsML/tutorial/tree/master/
+hierarchical. The same repository provides the R code of all the simulations of Sec. 4.
+4 Experiments
+4.1 Estimation of the δi’s under misspeciﬁcation of p(δi)
+According to the proofs of Sec. 3, the shrinkage estimator of the δi’s has lower mean squared error
+than the maximum likelihood estimator, constituted by the arithmetic mean of the cross-validation
+results. This result holds even if the p(δi) of the hierarchical model is misspeciﬁed: it only requires
+the hierarchical model to reliably estimate the ﬁrst two moments of p(δi).
+To verify this theoretical result we design the following experiment. We consider these numbers of
+data sets: q = {5, 10, 50}. For each value of q we repeat 500 experiments consisting of:
+
+=== [page 10] ===
+10
+Giorgio Corani et al.
+– sampling of the δi’s (δ1, δ2, . . . , δq) from the bimodal mixture
+p(δi) = π1N(δi|µ1, σ1) + π2N(δi|µ2, σ2)
+with k=2, µ1=0.005, µ2=0.02, σ1=σ2=σ=0.001, π1 = π2 = 0.5.
+– For each δi:
+– implement two classiﬁers whose actual diﬀerence of accuracy is δi, following the procedure
+given in Appendix;
+– perform 10 runs of 10-folds cross-validation with the two classiﬁers;
+– measure the mean of the cross-validation results ¯xi (MLE).
+– Infer the hierarchical model using the results referring to the q data sets;
+– obtain the shrinkage estimates of each δi;
+– measure MSEMLE and MSESHR as deﬁned in Sec. 3.3.
+q
+Mean Squared Error
+MLE
+Shrinkage
+5
+.00036
+.00017
+10
+.00036
+.00014
+50
+.00036
+.00012
+Table 2 Estimation error of the δi’s. The scale of the actual errors on the estimation of the δi’s can be realized
+considering that for instance 0.022=.0004.
+As reported in Tab. 2, MSESHR is generally 50% lower than MSEMLE for every value of q. This
+veriﬁes our theoretical ﬁndings. It also shows that the mean of the cross-validation estimates is a quite
+noisy estimator of δi, even if 10 repetitions of cross-validation are performed. The problem is that all
+such results are correlated and thus they have limited informative content.
+Interestingly, the MSE of the shrinkage estimator decreases with q. Thus the presence of more data
+sets allows to better estimate the moments of p(δi), improving the shrinkage estimates as well. Instead
+the error of the MLE does not vary with q since the parameters of each data set are independently
+estimated.
+In the uncorrelated case it is well-known that, on average, the shrunken estimate is much closer
+to the true parameters than the MLE is. Our results extend this ﬁnding to the correlated case.
+4.2 Comparison of equivalent classiﬁers
+In this section we adopt a Cauchy distribution as p(δi); this is an idealized situation in which the
+hierarchical model can recover the actual p(δi). We will relax this assumption in Sec. 4.7.
+We simulate the null hypothesis of the signed-rank setting the median of the Cauchy to δ0 = 0. We
+set the scale factor of the distribution to 1/6 of the rope length; this implies that 80% of the sampled
+δi’s lies within the rope, which is by far the most probable outcome.
+We consider the following numbers of data sets: q = {10, 20, 30, 40, 50}. For each value of q we
+repeat 500 experiments consisting of:
+– sampling the δi’s (δ1, δ2, . . . , δq) from p(δi);
+– for each δi:
+– implement two classiﬁers whose actual diﬀerence of accuracy is δi, following the procedure
+given in Appendix;
+
+=== [page 11] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+11
+– perform 10 runs of 10-fold cross-validation with the two classiﬁers;
+– analyze the results through the signed-rank and the hierarchical model.
+Fig. 2 Behavior of the hierarchical classiﬁer when dealing with two equivalent classiﬁers.
+The signed-rank test (α=0.05) rejects the null hypothesis about 5% of the times for each value
+of q. It is thus correctly calibrated. Yet, it provides no valuable insights. When it does not reject H0
+(95% of the times), it does not allow claiming that the null hypothesis is true. When it rejects the
+null (5% of the times), it draws a wrong conclusion since δ0=0.
+The hierarchical model draws more sensible conclusions. The posterior probability p(rope) increases
+with q (Fig. 2): the presence of more data sets provides more evidence that they are equivalent. For
+q=50 (the typical size of a machine learning study), the average p(rope) reported in simulations is
+larger than 90%. Fig. 2 reports also on equivalence recognition, which is the proportion of simulations
+in which p(rope) exceeds 95%. Equivalence recognition increases with q, reaching about 0.7 for q=50.
+Moreover in our simulations the hierarchical model never estimated p(left)>95% or p(right)>95%,
+so it made no Type I errors. In fact nsht is tied to commit a 5% Type I error when the null hypothesis
+is true; but this is not the case of Bayesian estimation with rope, which instead generally makes less
+Type I errors (Kruschke, 2013) than nhst. As we described earlier, this is at least in part a conse-
+quence of using a whole interval instead of just a single point for the null-hypothesis, which makes
+the null-hypothesis more diﬃcult to reject.
+Running the signed-rank twice? We cannot detect practically equivalent classiﬁers by running
+twice the signed-rank test, e.g., once with null hypothesis δ0 =0.01 and once with the null hypothesis
+δ0 =-0.01. Even if the signed-rank test does not reject the null in both cases, we still cannot aﬃrm
+that the two classiﬁers are equivalent, since non-rejection of the null does not allow claiming that the
+null is true.
+4.3 Comparison of practically equivalent classiﬁers
+We now simulate two classiﬁers whose actual diﬀerence of accuracy is practically irrelevant but dif-
+ferent from zero. We consider two classiﬁers whose average diﬀerence is δ0=0.005, thus within the
+rope.
+We consider q = {10, 20, 30, 40, 50}. For each value of q we repeat 500 experiments as follows:
+
+=== [page 12] ===
+12
+Giorgio Corani et al.
+– set p(δi) as a Cauchy distribution with δ0=0.005 and the same scale factor as in previous experi-
+ments (the rope remains by far the most probable outcome for the sampled δi’s);
+– sample the δi’s (δ1, δ2, . . . , δq) from p(δi);
+– implement for each δi two classiﬁers whose actual diﬀerence of accuracy is δi and perform 10 runs
+of 10-fold cross-validation;
+– analyze the cross-validation results through the signed-rank and the hierarchical model.
+The signed-ranked test is more likely to reject the null hypothesis as the number of data sets
+increases (Fig. 3). When 50 data sets are available, the signed-rank rejects the null in about 25% of
+the simulations, despite the trivial diﬀerence between the two classiﬁers. Indeed one can reject the
+null of the signed-rank test when comparing two almost equivalent classiﬁers, by comparing them on
+enough data sets. As reported in the ASA statement on p-value (Wasserstein & Lazar, 2016) even a
+tiny eﬀect can produce a small p-value if the sample size is large enough.
+The behavior of the hierarchical test is the opposite and more sensible. With increasing number of
+data sets on which the classiﬁers show similar performance, the researcher should be more convinced
+that the two classiﬁers are practically equivalent. The hierarchical test indeed increases the posterior
+probability of rope (Fig. 4). It is slightly less eﬀective in recognizing equivalence than in the previous
+experiment since δ0 is now closer to the limit of the rope. When q=50, it declares equivalence detec-
+
+=== [page 13] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+13
+tion with 95% conﬁdence in about 40% of the simulated cases. In our simulations it never claims a
+signiﬁcant diﬀerence, namely it never estimates p(left) or p(right) to be larger than 95%.
+The hierarchical test is thus eﬀective at detecting classiﬁers that are (actually or practically)
+equivalent. This is impossible for the signed-rank test: it gives the correct answer that the classiﬁers
+are diﬀerent, but in terms of the single-point hypothesis. On the contrary, the hierarchical test claims
+that they are the same in terms of the interval-based hypothesis.
+Moreover the signed-rank (α=0.05) is tied to commit 5% Type I errors under the null hypothesis,
+even in presence of inﬁnite data. The hierarchical model is free from this constraint and in our
+simulation it made no Type I errors at all.
+The hierarchical model is thus more conservative than the signed rank test. The price to be paid is
+that it might be less powerful at claiming signiﬁcance when comparing two classiﬁers whose accuracies
+are truly diﬀerent. We investigate this setting in the next section.
+4.4 Simulation of practically diﬀerent classiﬁers
+We now simulate two classiﬁers which are signiﬁcantly diﬀerent. We consider diﬀerent values of δ0:
+{0.015, 0.02, 0.025, 0.03}. We set the scale factor of the Cauchy to σ0=0.01 and the number of data
+sets to q=50.
+We repeat 500 experiments for each value of δ0, organized as in the previous sections. We then
+check the power of the two tests for each value of δ0. The power of the signed-rank is the proportion
+of simulations in which it rejects the null hypothesis (α=0.05). The power of the hierarchical test is
+the proportion of simulations in which it estimate p(right)>0.95.
+The hierarchical model is necessarily less powerful than the signed-rank: to declare the two clas-
+siﬁers as signiﬁcantly diﬀerent, the signed-rank has to reject the null hypothesis δ0 = 0, while the
+hierarchical model needs to have a posterior mass larger than 0.95 in the region to the right of the
+rope. As shown in Fig. 5, the signed-rank test is indeed more powerful, especially when δ0 lies just
+slightly outside the rope. The two tests show similar power when δ0 is larger than 0.02.
+
+=== [page 14] ===
+14
+Giorgio Corani et al.
+4.5 Discussion
+The main experimental ﬁndings so far are as follows. First, the shrinkage estimator of the δi’s yields
+a lower mean squared error than the MLE estimator, even under misspeciﬁcation of p(δi).
+Second, the hierarchical model is eﬀective at detecting equivalent classiﬁers; this is instead impos-
+sible for the nhst test.
+Third, the hierarchical model is more conservative than the signed-rank test: it rejects more rarely
+the null hypothesis, as a consequence of its null hypothesis being more realistic. For this reason it
+commits less Type I error than the signed-rank.
+However, it is less powerful than the signed-rank: when comparing two signiﬁcantly diﬀerent classi-
+ﬁers, the hierarchical test claims 95% signiﬁcance less frequently than the signed-rank. The diﬀerence
+in power is not necessarily a large one, as shown in the previous simulation.
+Moreover the probabilities returned by the hierarchical model can be interpreted in a more ﬂexible
+way than simply checking if there is an outcome whose posterior probability is larger than 95%, as
+we discuss in the next section.
+4.6 Interpreting posterior odds
+The ratio of posterior probabilities (posterior odds) shows the extent to which the data support one
+hypothesis over the other. For instance we can compare the support for left and right by computing
+the posterior odds o(left, right) =
+p(left)
+p(right). When o(left, right) > 1 there is evidence in favor of left;
+when o(left, right) < 1 there is evidence in favor of right. Rules of thumb for interpreting the amount of
+evidence corresponding to posterior odds are discussed by Raftery (1995) and summarized in Tab. 3:
+Posterior Odds
+Evidence
+1–3
+weak
+3–20
+positive
+>20
+strong
+Table 3 Grades of evidence corresponding to posterior odds.
+Thus even if none of the three probabilities exceeds the 95% threshold, we can still draw mean-
+ingful conclusions by interpreting the posterior odds. We will adopt this approach in the following
+simulations.
+The p-values cannot be interpreted in a similar fashion, since they are aﬀected both by sample size
+and eﬀect size. In particular (Wasserstein & Lazar, 2016) show that smaller p-values do not necessarily
+imply the presence of larger eﬀects and larger p-values do not imply a lack of eﬀect. A tiny eﬀect can
+produce a small p-value if the sample size is large enough, and large eﬀects may produce unimpressive
+p-values if the sample size is small.
+4.7 Experiments with Friedman’s functions
+The results presented in the previous sections refer to conditions in which the actual p(δi) (misspeciﬁed
+or not) is analytically known. In this section we perform experiments in which the δi’s are not sampled
+from an analytical distribution; rather, they are due to diﬀerent settings of sample size, noise etc. The
+
+=== [page 15] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+15
+actual p(δi) of the next section has no analytical form and thus the p(δi) of the hierarchical model is
+unavoidably misspeciﬁed. This is a challenging setting for checking the conclusion of the hierarchical
+model.
+We generate data sets via the three functions (F#1, F#2 and F#3) proposed by Friedman (1991).
+Function F#1 contains ten features x1, . . . , x10, each uniformly distributed over [0, 1]. Only ﬁve
+features are used to generate the response y:
+F#1 : y = 10sin(πx1x2) + 20(x3 −0.5)2 + 10x4 + 5x5 + ϵ1,
+where ϵ1 ∼N(0, 1). To turn this regression problem into a classiﬁcation problem, we discretize y in two
+bins. The two bins are separated by the median of y, which we independently estimate on a sample
+of 10,000 generated instances.
+Functions F#2 and F#3 have four features x1, . . . , x4 uniformly distributed over the ranges:
+0 ≤x1 ≤100,
+40π ≤x2 ≤560π,
+0 ≤x3 ≤1,
+1 ≤x4 ≤11.
+The functions are:
+F#2 : y = (x2
+1 + (x2x3 −(1/x2x4))2)0.5 + ϵ2
+F#3 : y = arctan
+x2x3 −(1/x2x4)
+x1
+
++ ϵ3
+where ϵ2 ∼N(0, σ2ϵ2) and ϵ3 ∼N(0, σ2ϵ3). The original paper sets σϵ2=125 and σϵ3=0.1. Also in this
+case we turn the problems from regression to classiﬁcation by discretizing the response variable in two
+bins, delimited by its median.
+We consider 18 settings for each function, obtained by varying the sample size (n) and the standard
+deviation of the noise (considering also twice and half the original values). As a further factor we either
+consider only the original features or we add further twenty normally distributed random features.
+We have overall 54 settings: 18 settings for each function. They are summarized in Table 4.
+Function type
+σϵ
+n
+random Feats
+Tot settings
+F#1
+{0.5,1,2}
+{30,100,1000}
+{0,20}
+3 · 3 · 2 =18
+F#2
+{62.5,125,250}
+{30,100,1000}
+{0,20}
+3 · 3 · 2 =18
+F#3
+{0.05,0.1,0.2}
+{30,100,1000}
+{0,20}
+3 · 3 · 2 =18
+Table 4 Settings used for generating data with the Friedman functions.
+As a pair of classiﬁers we consider linear discriminant analysis (lda) and classiﬁcation trees (cart),
+as implemented in the caret package for R, without any hyper-parameter tuning. As ﬁrst step we
+need to measure the actual δi between two given classiﬁers in each setting, which then allows us to
+know the population of the δi’s.
+Our second step will be to check the conclusions of the signed-rank test and of the hierarchical
+model when they are provided with cross-validation results referring to a subset of settings.
+
+=== [page 16] ===
+16
+Giorgio Corani et al.
+Measuring δi
+First we need to measure the actual diﬀerence of accuracy δi between lda and cart in the i-th setting.
+Taking advantage of the synthetic nature of the data, we adopt the following procedure:
+– for j=1:500
+– sample training data according to the speciﬁcs of the i-th setting: <function type, n, σϵ, number
+of random features >;
+– ﬁt lda and cart on the generated training data;
+– sample a large test set (5000 instances) and measure the diﬀerence of accuracy dij between
+cart and lda;
+– set δi ≃1/500 P
+j dij .
+Our procedure yields accurate estimates since each repetition is provided with independent data
+and has available a large test set.
+For instance in a certain setting two classiﬁers have mean diﬀerence of accuracy ¯x=0.09, with
+standard deviation s=0.06. The 95% conﬁdence interval of their diﬀerence is tight:
+¯x ± 1.96 ·
+s
+√n = 0.09 ± 1.96 · 0.06
+√
+500 = [0.085 −0.095].
+If instead we had performed 500 runs of 10-folds cross-validation obtaining the same value of ¯x
+and s, the conﬁdence interval of our estimates would be about 3.5 times larger, as the standard error
+would be s
+q
+1
+n +
+ρ
+1−ρ instead of
+s
+√n, as shown in Eqn.(1).
+Ground-truth
+We compute the δi of each setting using the above procedure. The ground-truth is that lda is signiﬁ-
+cantly more accurate than cart. More in detail, 65% of the δi’s belong to the region to the right of the
+rope (lda being signiﬁcantly more accurate than cart). Thus right is is the most probable outcome of
+the next δi. Moreover, the mean of the δi’s is δ0=0.02 in favor of lda.
+Assessing the conclusions of the tests
+We run 200 times the following procedure:
+– random selection 12 out of 18 settings for each Friedman function, thus selecting 36 settings;
+– in each setting:
+– generate a data set according to the speciﬁc of the setting;
+– run 10 runs of 10-folds cross-validation of lda and cart using paired folds;
+– analyze the cross-validation results on the q=36 data sets using the signed rank and the hierarchical
+test.
+We start checking the power of the tests, deﬁned as the proportion of simulations in which the null
+hypothesis is rejected (signed-rank) or the posterior probability p(right) exceeds 95% (hierarchical
+test).
+The two tests have roughly the same power: 28% for the signed-rank and 27.5% for the hierarchical
+test. In the remaining simulations the signed-rank does not reject H0; in those cases it conveys no
+information since the p-values cannot be interpreted.
+We can instead interpret the posterior odds yielded by the hierarchical model, obtaining the
+following results:
+
+=== [page 17] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+17
+– in 11% of the simulations both o(right, rope) and o(right, left) are larger than 20, providing strong
+evidence in favor of lda even if p(right) does not exceed 95%;
+– in a further 33% of the simulations both o(right, rope) and o(right, left) are larger than 3, providing
+at least positive evidence in favor of lda.
+We have moreover to point out a 2% of simulations in which the posterior odds provide erroneously
+positive evidence for rope over both right and left. In no case there is positive evidence for left over
+either rope or right.
+Thus the interpretation of posterior odds allows drawing meaningful conclusions even when the
+95% threshold is not exceeded. The probabilities are sensibly estimated, even if p(δi) is unavoidably
+misspeciﬁed.
+As a further check we compare MSEMLE and MSEShr. Also in this case MSEMLE is much lower
+than MSEShr (Fig 6 ), with an average reduction of about 60%. This further conﬁrms the properties
+of the shrinkage estimator.
+4.8 Sensitivity analysis on real-world data sets
+We now consider real data sets. In this case we cannot know the actual δi’s: we could repeat a few
+hundred times cross-validation but the resulting estimates would have large uncertainty as already
+discussed.
+We exploit this setting to perform sensitivity analysis and to further compare the conclusions
+drawn by the hierarchical model and of the signed-rank test.
+We consider 54 data sets taken from the WEKA data sets page1. We consider ﬁve classiﬁers: naive
+Bayes (nbc), averaged-one dependence estimator (aode), hidden naive Bayes (hnb), decision tree (j48),
+grafted decision tree (j48gr). Witten et al. (2011) provides a summary description of all such classiﬁers
+with pointers to the relevant papers. We perform 10 runs of 10-folds cross-validation for each classiﬁer
+on each data set. We run all experiments using the WEKA2 software.
+A fundamental step of Bayesian analysis is to check how the posterior conclusions depend on the
+chosen prior and how the model ﬁts the data. The hierarchical model shows some sensitivity on the
+choice of p(δi), being instead robust to the other assumptions (see later for further discussion). The
+1 http://www.cs.waikato.ac.nz/ml/weka/datasets.html
+2 http://www.cs.waikato.ac.nz/ml/weka/
+
+=== [page 18] ===
+18
+Giorgio Corani et al.
+Student distribution is more ﬂexible than the Gaussian and we have found that it consistently provides
+better ﬁt to the data. Yet, the model conclusions are sometimes sensitive on the prior on the degrees
+of freedom p(ν) of the Student.
+In Table 5 we compare the posterior inferences of the model, using the prior p(ν) = Gamma(2, 0.1)
+(proposed in a diﬀerent context by Ju´arez & Steel (2010)) or using the more ﬂexible model described
+in Sec. 3, where the the parameters of the Gamma are described as further random variables with
+their own prior distributions. Such two variants are referred to as Gamma(2,0.1) and hierarchical in
+Table 5.
+Hierarchical
+Gamma(2,0.1)
+pair
+left
+rope
+right
+left
+rope
+right
+nbc-hnb
+1.00
+0.00
+0.00
+1.00
+0.00
+0.00
+nbc-j48
+0.80
+0.02
+0.18
+0.80
+0.01
+0.20
+nbc-j48gr
+0.84
+0.02
+0.14
+0.84
+0.01
+0.15
+hnb-j48
+0.03
+0.10
+0.87
+0.03
+0.02
+0.95
+hnb-j48gr
+0.03
+0.07
+0.90
+0.03
+0.02
+0.95
+j48-j48gr
+0.00
+1.00
+0.00
+0.00
+1.00
+0.00
+Table 5 Posterior probabilities computed by two variants of the hierarchical model.
+In some cases the estimates of the two models diﬀer by some points (Tab. 5). This means that
+the actual high-level distribution from which the δi’s are sampled is not a Student (or a Gaussian),
+otherwise the estimate of the two models would converge.
+Which model better ﬁts the data? We respond this question adopting a visual approach. We start
+considering that the shrinkage estimates of the δi’s are identical between the two models. We thus
+compute the density plot of the shrinkage estimates (our best estimate of the δi’s). We take such
+density as the ground truth (this is actually our best approximation to the ground truth) and we plot
+it in thick black (Fig. 7). Then we sample 8000 δi’s from both variants of the model, obtaining two
+further densities. We then plot the three densities for each pair of classiﬁers (Fig. 7). We produce all
+the density plots using the default kernel density estimation provided in R. In general the hierarchical
+model, being more ﬂexible, ﬁts better the data than the model equipped with a simple Gamma prior.
+4.8.1 Sensitivity on the prior on σ0 and σi
+The model conclusions are moreover robust with respect to the speciﬁcation of the priors p(σi) and
+p(σ0). Recall that σi is the standard deviation on the i-th data set while σ0 is the standard deviation
+of the high-level distribution.
+Our model assumes σi ∼unif(0, ¯σ) where ¯σ = 1000¯s where ¯s is the average of the sample standard
+deviations of the diﬀerent data sets. The posterior distributions of the standard deviation obtained
+with this prior are insensitive on the choice of ¯s as long as ¯s is large enough (Kruschke, 2013; Gelman,
+2006). Indeed we experimentally veriﬁed that we obtained identical posterior estimates of the standard
+deviations adopting as upper bound ¯σ = 1000¯s or ¯σ = 100¯s.
+The same consideration applies to σ0, whose prior is p(σ0) = unif(0, ¯s0). We obtain the same
+posterior distribution for σ0 using as upper bound ¯s0 = 1000s¯x or ¯s0 = 100s¯x, where s¯x is the
+standard deviation of the ¯xi’s.
+
+=== [page 19] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+19
+4.9 Comparing the signed-rank and the hierarchical test
+We compare the conclusions of the hierarchical model and of the signed-rank test on the same cases
+of the previous section. The results are given in Tab. 6.
+Both the signed-rank and the hierarchical test claim with 95% conﬁdence hnb to be signiﬁcantly
+more accurate than nbc.
+In the following comparisons apart from the last one, the two tests do not draw any conclusion
+with 95% conﬁdence. The signed-rank does not reject the null hypothesis, while the hierarchical test
+does not achieve probability larger than 95%.
+When the signed-rank test does not reject the null hypothesis, it draws a non-informative con-
+clusion. We can instead always interpret the posterior odds yielded by the hierarchical model. When
+comparing nbc and j48, there is a positive evidence for right (j48 being more accurate than nbc) over
+left and strong evidence for right over rope. We thus conclude that there is positive evidence of j48
+
+=== [page 20] ===
+20
+Giorgio Corani et al.
+Hierarchical
+Signed-rank
+pair
+left
+rope
+right
+p-value
+nbc-hnb
+1.00
+0.00
+0.00
+0.00
+nbc-j48
+0.80
+0.02
+0.18
+0.46
+nbc-j48gr
+0.84
+0.02
+0.14
+0.39
+hnb-j48
+0.03
+0.10
+0.87
+0.07
+hnb-j48gr
+0.03
+0.07
+0.90
+0.08
+j48-j48gr
+0.00
+1.00
+0.00
+0.00
+Table 6 Posterior probabilities of the hierarchical model and p-values of the signed-rank.
+being practically more accurate than nbc. Similarly, we conclude that there is positive evidence of
+j48gr being practically more accurate than nbc
+When comparing hnb and j48, there is strong evidence for right (hnb being more accurate than
+j48) over both left and rope. We conclude that there is strong evidence of j48 being practically more
+accurate than hnb. We draw the same conclusion when comparing hnb and j48gr.
+The two test draw opposite conclusions when comparing j48 and j48gr. The signed-rank declares
+j48gr to be signiﬁcantly more accurate than j48 (p-value 0.00) while the hierarchical model declares
+them to be practically equivalent, with p(rope)=1. The reason why the two tests achieved opposite
+conclusions is that the diﬀerences have a consistent sign but are small-sized. In most data sets the
+signs of the diﬀerence is in favor of j48gr; this leads the signed rank test to claim signiﬁcance. Yet the
+diﬀerences lies mostly within the rope (Fig. 8). The hierarchical model shrinks them further towards
+the overall mean and eventually claims the two classiﬁers to be practically equivalent. The posterior
+probabilities remain unchanged even adopting the half-sized rope (-0.005, 0.005). Reducing further
+the rope does not seem meaningful and thus we conclude that, once the magnitude of the diﬀerences
+is taken into consideration, the accuracy of j48 and j48gr are practically equivalent, even if most signs
+are in favor of j48gr.
+5 Conclusions
+The proposed approach is a realistic model of the data generated by cross-validation across multiple
+data sets. It is the ﬁrst approach that represents both the distribution of the δi’s across data sets and
+the distribution of the cross-validation results on the i-th data set given δi and σi.
+
+=== [page 21] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+21
+Compared to the signed-rank, it is more conservative as it rejects less easily the null hypothesis.
+In fact the signed-rank assumes a point null hypothesis, while the null hypothesis of the hierarchical
+model contains all the values of the rope. This is a more realistic null hypothesis which is more diﬃcult
+to reject.
+This allows the hierarchical test to detect classiﬁers which are practically equivalent. Being more
+conservative, the hierarchical test is generally less powerful than the signed-rank: when faced with
+two classiﬁers which are signiﬁcantly diﬀerent, it rejects the null hypothesis with more diﬃculty.
+Yet the interpretation of the posterior odds allows drawing meaningful conclusions even when the
+posterior probabilities do not exceed 95%.
+The hierarchical model yields more accurate estimates of the δi’s than the usual maximum like-
+lihood estimator, because it jointly estimates the various δi’s applying shrinkage. Our results show
+that the shrinkage estimator yields consistently lower mean squared error than the MLE in a variety
+of challenging experiments.
+It is possible to visually verify the ﬁt oﬀered by model by comparing the ﬁtted posterior distri-
+bution p(δi) to the density of the shrinkage estimates. In most cases we have found that the Student
+distribution provides a satisfactory ﬁt. Yet an interesting research direction is thus the adoption of
+a non-parametric approach for modelling p(δi), thus overcoming the Student assumption. This is a
+non-trivial task which we leave for future research.
+Acknowledgments
+The research in this paper has been partially supported by the Swiss NSF grants ns. IZKSZ2 162188
+and n. 200021 146606.
+6 Appendix
+6.1 Implementing two classiﬁers with known diﬀerence of accuracy
+On the i-th data set we need to simulate two classiﬁer whose actual diﬀerence of accuracy is δi. We
+start by sampling the instances from a naive Bayes model with two features. Let us denote by C
+the class variables with states are {c0, c1} and by F and G the two features with states {f0, f1} and
+{g0, g1}. The naive Bayes model is thus G ←C →F. The parameters of the conditional probability
+tables are: P(c0)=0.5; P(f0|c0) = θf; P(f0|c1) = 1−θf; P(g0|c0) = θg; P(g0|c1) = 1−θg with θf > 0.5.
+The remaining elements of the conditional probability tables are the complement to 1 of the above
+elements. We set θf=0.9 and θg = θf + δi. We sample the data set from this naive Bayes model.
+During cross-validation we train and test the two competing classiﬁers C →F and C →G. Their
+expected accuracies are θf and θg respectively, and thus their expected diﬀerence of accuracy is
+θf −θg = δi. Consider classiﬁer C →F. Assume that the marginal probabilities of the class have been
+correctly estimated. The classiﬁcation thus depends only on the conditional probability of the feature
+given the class If F=f0 the most probable class is c0 as long as ˆP(c0|f0) > 0.5, where ˆP denotes the
+conditional probability estimated from data. The accuracy of this prediction is θf. It F=f1, the most
+probable class is c1 as long as ˆP(c1|f1) = θf > 0.5. Also the accuracy of this prediction is θf. If the
+bias of conditional probability ( ˆP(c0|f0) >0.5 and ˆP(c1|f1) >0.5) is correctly estimated the accuracy
+of classiﬁer C →F on a large test set is θf. Analogously, the accuracy of classiﬁer C →G in the same
+conditions is θg, so that their diﬀerence is δi. Since the sampled data set have ﬁnite size the mean
+diﬀerence of accuracy ¯xi measured by cross-validation will ﬂuctuate with some variance around δi.
+
+=== [page 22] ===
+22
+Giorgio Corani et al.
+6.2 Proofs
+Proof of Proposition 1 Consider the hierarchical model:
+P(¯x, δ, δ0, σ2
+0)
+=
+qQ
+i=1
+N(xi; 1δi, Σ)N(δi; δo, σ2o)p(δo, σ2o)
+(11)
+We aim at computing the derivative of the log(P(¯x, δ, δ0, σ2
+0)) w.r.t. the parameter δi, δ0, σ2o. Consider
+the quadratic term from the ﬁrst and second Gaussian:
+1
+2(xi −1δi)T Σ−1(xi −1δi) +
+1
+2σ2o
+(δi −δo)2;
+its derivatives w.r.t. δi is 1T Σ−1(xi −1δi) +
+1
+σ2o (δi −δo). Exploiting the fact that
+1T Σ−1(xi −1δi) = 1T Σ−1(xi −1¯xi + 1¯xi −1δi)
+= 1T Σ−1(1¯xi −1δi),
+it follows that
+d
+δi
+ln(P(·)) ∝1
+σ2n
+(¯xi −δi) +
+1
+2σ2o
+(δi −δo)2,
+where σ2n =
+1
+1T Σ−11 =
+1
+n2 1T Σ1. The latter equality can be derived by Corani & Benavoli (2015)[Ap-
+pendix], i.e.,
+1
+1T Σ−11 =
+n
+1 + (n −1)ρ = 1
+n2 1T Σ1.
+The other derivatives can be computed easily.
+Proof of Proposition 2 Let us consider the likelihood:
+p(xi|δi, Σ) = N(xi; 1δi, Σ)
+= exp(−1
+2(xi −1δi)T Σ−1(xi −1δi))
+(2π)n/2p
+|Σ|
+.
+(12)
+Let us deﬁne ¯xi = Pn
+j=1 xij/n. The MSE of the maximum likelihood estimator is:
+MSEMLE =
+ZZ
+(δi −¯xi)2 N(xi; 1δi, Σ)p(δi)dxidδi.
+Consider that (δi −¯xi)2 =
+
+δi −1
+n1T xi
+2
+where
+1
+n1T is a linear transformation of the variable xi.
+From the properties of the Normal distribution, it follows that
+Z 
+δi −1
+n1T xi
+2
+N(xi; 1δi, Σ)dxi = 1
+n2 1T Σ1
+and since
+Z
+( 1
+n2 1T Σ1)p(δi)dxidδi = 1
+n2 1T Σ1,
+we derive the ﬁrst result.
+
+=== [page 23] ===
+Statistical comparison of classiﬁers through Bayesian hierarchical modelling
+23
+Proof of Proposition 3 The MSE of the shrunken estimator can be obtained in a similar way. First
+observe that
+(δi −w¯xi −(1 −w)δ0)2
+= w2 (δi −¯xi)2 + (1 −w)2 (δi −δ0)2
++ 2w(1 −w) (δi −¯xi) (δi −δ0)
+and its expected value w.r.t. N(xi; δi, σ2n)p(δi) is:
+Z h
+w2σ2
+n + (1 −w)2 (δi −δ0)2i
+p(δi)dδi
+= w2σ2
+n + (1 −w)2σ2
+0,
+(13)
+where we have denoted σ2n =
+1
+n2 1T Σ1.
+
+=== [page 24] ===
+24
+Giorgio Corani et al.
+References
+Carpenter, Bob, Lee, Daniel, Brubaker, Marcus A, Riddell, Allen, Gelman, Andrew, Goodrich, Ben,
+Guo, Jiqiang, Hoﬀman, Matt, Betancourt, Michael, and Li, Peter. Stan: A probabilistic program-
+ming language. Journal of Statistical Software, in press, 2016.
+Corani, Giorgio and Benavoli, Alessio. A Bayesian approach for comparing cross-validated algorithms
+on multiple data sets. Machine Learning, 100(2):285–304, 2015.
+Demˇsar, Janez.
+Statistical comparisons of classiﬁers over multiple data sets.
+Journal of Machine
+Learning Research, 7:1–30, 2006.
+Friedman, Jerome H. Multivariate adaptive regression splines. The Annals of Statistics, 19(1):1–67,
+1991.
+Gelman, Andrew. Prior distributions for variance parameters in hierarchical models (comment on
+article by Browne and Draper). Bayesian analysis, 1(3):515–534, 2006.
+Hand, David J et al. Classiﬁer technology and the illusion of progress. Statistical science, 21(1):1–14,
+2006.
+Ju´arez, Miguel A and Steel, Mark FJ. Model-based clustering of non-Gaussian panel data based on
+skew-t distributions. Journal of Business & Economic Statistics, 28(1):52–66, 2010.
+Krueger, Tammo, Panknin, Danny, and Braun, Mikio. Fast cross-validation via sequential testing.
+Journal of Machine Learning Research, 16:1103–1155, 2015.
+Kruschke, John. Doing Bayesian data analysis: A tutorial with R, Jags and Stan. Academic Press, 2015.
+Kruschke, John K. Bayesian estimation supersedes the t–test. Journal of Experimental Psychology:
+General, 142(2):573, 2013.
+Lacoste, Alexandre, Laviolette, Fran¸cois, and Marchand, Mario.
+Bayesian comparison of machine
+learning algorithms on single and multiple datasets. In Proc.of the Fifteenth International Conference
+on Artiﬁcial Intelligence and Statistics (AISTATS-12), pp. 665–675, 2012.
+Murphy, Kevin P. Machine learning: a probabilistic perspective. MIT press, 2012.
+Nadeau, Claude and Bengio, Yoshua. Inference for the generalization error. Machine Learning, 52(3):
+239–281, 2003.
+Raftery, Adrian E. Bayesian model selection in social research. Sociological methodology, 25:111–164,
+1995.
+Wasserstein, Ronald L and Lazar, Nicole A. The ASA’s statement on p-values: context, process, and
+purpose. The American Statistician, 2016.
+Witten, Ian H, Frank, Eibe, and Hall, Mark. Data Mining: Practical machine learning tools and techniques
+(third edition). Morgan Kaufmann, 2011.

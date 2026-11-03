@@ -1,0 +1,698 @@
+{
+ "probe": "p2_tool_choice_probe_v3",
+ "extra_body": {
+  "provider": {
+   "order": [
+    "gmicloud/fp8"
+   ],
+   "allow_fallbacks": false
+  }
+ },
+ "repeat": 3,
+ "cells": null,
+ "token_param": "max_tokens",
+ "base": "https://openrouter.ai/api/v1",
+ "started_utc": "2026-11-02T20:49:42Z",
+ "models": {
+  "minimax/minimax-m3": [
+   {
+    "cell": "C0 base",
+    "rep": 1,
+    "status": 200,
+    "seconds": 3.06,
+    "usage": {
+     "prompt": 4393,
+     "cached": 128,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.001056624
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C0 base",
+    "rep": 2,
+    "status": 200,
+    "seconds": 2.33,
+    "usage": {
+     "prompt": 4406,
+     "cached": 162,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.001053216
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C0 base",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.07,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.00023856
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C1 base again",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.56,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C1 base again",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.86,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C1 base again",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.21,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.00023856
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.29,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.00023856
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.78,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C2 allowed-chat",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.07,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 39,
+     "cache_write": 0,
+     "cost": 0.00024912
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 40,
+     "text_head": "I'll call tool_07 with the note 'probe'.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C3 allowed-flat",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.19,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C3 allowed-flat",
+    "rep": 2,
+    "status": 200,
+    "seconds": 2.05,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 33,
+     "cache_write": 0,
+     "cost": 0.00024336
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 20,
+     "text_head": "I'll call that tool.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C3 allowed-flat",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.85,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.00023856
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.22,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 2,
+    "status": 200,
+    "seconds": 2.32,
+    "usage": {
+     "prompt": 4393,
+     "cached": 4352,
+     "completion": 28,
+     "cache_write": 0,
+     "cost": 0.000245616
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 0,
+     "text_head": "",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C4 allowed-required",
+    "rep": 3,
+    "status": 200,
+    "seconds": 3.12,
+    "usage": {
+     "prompt": 4406,
+     "cached": 4405,
+     "completion": 38,
+     "cache_write": 0,
+     "cost": 0.00024816
+    },
+    "tools_called": [
+     "tool_07"
+    ],
+    "finish_reason": "tool_calls",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 36,
+     "text_head": "I'll call tool_07 with note 'probe'.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C5 required",
+    "rep": 1,
+    "status": 404,
+    "seconds": 0.17,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, together, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback r"
+    }
+   },
+   {
+    "cell": "C5 required",
+    "rep": 2,
+    "status": 404,
+    "seconds": 0.15,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, together, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback r"
+    }
+   },
+   {
+    "cell": "C5 required",
+    "rep": 3,
+    "status": 404,
+    "seconds": 0.13,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, together, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback r"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 1,
+    "status": 404,
+    "seconds": 0.15,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback removed cor"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 2,
+    "status": 404,
+    "seconds": 0.14,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback removed cor"
+    }
+   },
+   {
+    "cell": "C6 named",
+    "rep": 3,
+    "status": 404,
+    "seconds": 0.14,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, streamlake/fp8, parasail/fp8, novita/fp8, minimax, modelrun/fp8, mara; Filter by Fallback removed cor"
+    }
+   },
+   {
+    "cell": "C7 none",
+    "rep": 1,
+    "status": 404,
+    "seconds": 0.14,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, together, parasail/fp8, novita/fp8; Filter by Fallback removed coreweave/fp4, streamlake/fp8, venice/"
+    }
+   },
+   {
+    "cell": "C7 none",
+    "rep": 2,
+    "status": 404,
+    "seconds": 0.15,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, together, parasail/fp8, novita/fp8; Filter by Fallback removed coreweave/fp4, streamlake/fp8, venice/"
+    }
+   },
+   {
+    "cell": "C7 none",
+    "rep": 3,
+    "status": 404,
+    "seconds": 0.16,
+    "usage": null,
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": null,
+    "error": {
+     "error_body": "{\"error\":{\"message\":\"No endpoints found for minimax/minimax-m3. Every candidate endpoint was removed during routing: Filter by Tier Endpoint Rows removed deepinfra/fp8/flex (Excluded tier endpoint rows the request did not opt into); Filter by Tool Compatibility removed gmicloud/fp8, deepinfra/fp8, together, parasail/fp8, novita/fp8; Filter by Fallback removed coreweave/fp4, streamlake/fp8, venice/"
+    }
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 1,
+    "status": 200,
+    "seconds": 1.89,
+    "usage": {
+     "prompt": 4428,
+     "cached": 162,
+     "completion": 30,
+     "cache_write": 0,
+     "cost": 0.001060416
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 97,
+     "text_head": "tool_07 isn't in the currently allowed list (only tool_03, tool_04, tool_05), so I can't call it.",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.88,
+    "usage": {
+     "prompt": 4428,
+     "cached": 4427,
+     "completion": 40,
+     "cache_write": 0,
+     "cost": 0.000251136
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 145,
+     "text_head": "I'm restricted to tool_03, tool_04, and tool_05 right now, so I can't call tool_07. Would you like me to call one of the permitted tools instead?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C8 instruction-only",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.01,
+    "usage": {
+     "prompt": 4428,
+     "cached": 4427,
+     "completion": 39,
+     "cache_write": 0,
+     "cost": 0.000250176
+    },
+    "tools_called": [],
+    "finish_reason": "stop",
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": "GMICloud",
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 139,
+     "text_head": "I can't call tool_07 \u2014 only tool_03, tool_04, and tool_05 are permitted now.\n\nWhich of the allowed tools should I call, and with what note?",
+     "output_types": null
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 1,
+    "status": 200,
+    "seconds": 2.33,
+    "usage": {
+     "prompt": 2910,
+     "cached": 2490,
+     "completion": 88,
+     "cache_write": null,
+     "cost": 0.0003048
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": null,
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 270,
+     "text_head": "I don't have a tool named `tool_07` available \u2014 only `tool_03`, `tool_04`, and `tool_05` exist in my tool list, so I can't call `tool_07` (and I won't invent it",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 2,
+    "status": 200,
+    "seconds": 1.73,
+    "usage": {
+     "prompt": 2897,
+     "cached": 2432,
+     "completion": 25,
+     "cache_write": null,
+     "cost": 0.000252336
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": null,
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 71,
+     "text_head": "tool_07 isn\u2019t available; I can only call tool_03, tool_04, and tool_05.",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   },
+   {
+    "cell": "C9 responses-api",
+    "rep": 3,
+    "status": 200,
+    "seconds": 2.49,
+    "usage": {
+     "prompt": 2910,
+     "cached": 2909,
+     "completion": 35,
+     "cache_write": null,
+     "cost": 0.000173472
+    },
+    "tools_called": [],
+    "finish_reason": null,
+    "meta": {
+     "served_model": "minimax/minimax-m3",
+     "provider": null,
+     "system_fingerprint": null,
+     "headers": {},
+     "text_len": 118,
+     "text_head": "I don't have a tool_07 available \u2014 only tool_03, tool_04, and tool_05. Would you like me to call one of those instead?",
+     "output_types": [
+      "message"
+     ]
+    },
+    "error": null
+   }
+  ]
+ }
+}
