@@ -1,10 +1,15 @@
 """Deterministic table of guard cases. Runs tools/guard.py from a THROWAWAY copy of the workspace skeleton
 (tools/ + config/ + a fake thread), so message counting never touches real thread state.
 Run: python ops/tests/guard_cases.py     (exit 1 if any case fails)"""
-import json, os, pathlib, shutil, subprocess, sys, tempfile
+import json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 SRC = pathlib.Path(__file__).resolve().parents[2]
 TMP = pathlib.Path(tempfile.mkdtemp(prefix="tpd-guardtest-"))
+if re.match(r"/tmp/claude-\d+/", TMP.as_posix()):
+    # The guard exempts Claude Code's whole scratchpad tree (AUTH-021), which would turn the "outside the workspace" cases
+    # into allowed writes. Use a temp folder outside it.
+    shutil.rmtree(TMP, ignore_errors=True)
+    TMP = pathlib.Path(tempfile.mkdtemp(prefix="tpd-guardtest-", dir="/var/tmp"))
 WS = TMP / "thesis-policy-design"
 (WS / "tools").mkdir(parents=True)
 shutil.copy(SRC / "tools" / "guard.py", WS / "tools" / "guard.py")
@@ -12,6 +17,12 @@ shutil.copytree(SRC / "config", WS / "config")
 (WS / "ops" / "threads" / "T-20260101-01").mkdir(parents=True)
 w = str(WS)
 ID = "a18792284f77dc047"
+# Platform-appropriate locations outside the workspace (AUTH-021: the cases used to hardcode C:\Users\omr, which meant nothing on Linux).
+# The guard blocks on the folder NAMES (research-clean*, thesis-back*) and on being outside the workspace, so the exact parent is free.
+WIN = os.name == "nt"
+DOCS = r"C:\Users\omr\Documents" if WIN else "/home/omr/Documents"
+DOCSF = DOCS.replace("\\", "/")
+SCRATCH_OK = r"C:\Users\omr\AppData\Local\Temp\claude\sess\scratchpad\f.txt" if WIN else "/tmp/claude-1000/sess/scratchpad/f.txt"
 
 
 def run(d):
@@ -33,9 +44,11 @@ B = lambda cmd: {"tool_name": "Bash", "tool_input": {"command": cmd}, "cwd": w}
 # --- lead writes
 case("lead write inside (abs)", W(w + r"\findings\x.md"), 0)
 case("lead write inside (rel)", W("findings/x.md"), 0)
-case("lead write outside (abs)", W(r"C:\Users\omr\Documents\other\x.md"), 2)
+case("lead write outside (abs)", W(DOCSF + "/other/x.md"), 2)
 case("lead write ../ escape", W("../x.md"), 2)
-case("lead write origin", W(r"C:\Users\omr\Documents\research-cleanroom\a.md"), 2)
+case("lead write origin", W(DOCSF + "/research-cleanroom/a.md"), 2)
+case("lead write in the session scratchpad (allowed)", W(SCRATCH_OK), 0)
+case("lead write in a look-alike /tmp path (blocked)", W(SCRATCH_OK.replace("claude", "claudx")), 2)
 case("lead write immutable sources.json", W(w + r"\evidence\sources.json"), 2)
 case("lead write immutable via traversal", W("design/../evidence/governing/INDEX.json"), 2)
 case("lead write .git/config (T6a)", W(".git/config"), 2)
@@ -60,13 +73,16 @@ case("proposer other agent's thread file", W("ops/threads/T-20260101-01/design-c
 case("unknown agent type (Explore)", W("findings/a.md", "Explore"), 2)
 # --- reads
 case("Read inside workspace", {"tool_name": "Read", "tool_input": {"file_path": w + r"\CLAUDE.md"}, "cwd": w}, 0)
-case("Read origin path", {"tool_name": "Read", "tool_input": {"file_path": r"C:\Users\omr\Documents\research-cleanroom\CLAUDE.md"}, "cwd": w}, 2)
-case("Read outside workspace", {"tool_name": "Read", "tool_input": {"file_path": r"C:\Users\omr\Documents\notes.txt"}, "cwd": w}, 2)
+case("Read origin path", {"tool_name": "Read", "tool_input": {"file_path": DOCS + (r"\research-cleanroom\CLAUDE.md" if WIN else "/research-cleanroom/CLAUDE.md")}, "cwd": w}, 2)
+case("Read outside workspace", {"tool_name": "Read", "tool_input": {"file_path": DOCS + (r"\notes.txt" if WIN else "/notes.txt")}, "cwd": w}, 2)
+case("Read outside workspace (system file)", {"tool_name": "Read", "tool_input": {"file_path": "/etc/passwd"}, "cwd": w}, 2)
+case("Read in the session scratchpad (allowed)", {"tool_name": "Read", "tool_input": {"file_path": SCRATCH_OK}, "cwd": w}, 0)
+case("Read earlier session transcripts", {"tool_name": "Read", "tool_input": {"file_path": DOCSF.rsplit("/", 1)[0] + "/.claude/projects/x/a.jsonl"}, "cwd": w}, 2)
 case("Read ../ relative", {"tool_name": "Read", "tool_input": {"file_path": "../x.md"}, "cwd": w}, 2)
-case("Glob wildcard dir + parent path (T1)", {"tool_name": "Glob", "tool_input": {"pattern": "research-clean*/CLAUDE.md", "path": r"C:\Users\omr\Documents"}, "cwd": w}, 2)
-case("Glob absolute parent pattern", {"tool_name": "Glob", "tool_input": {"pattern": "C:/Users/omr/Documents/*/CLAUDE.md"}, "cwd": w}, 2)
+case("Glob wildcard dir + parent path (T1)", {"tool_name": "Glob", "tool_input": {"pattern": "research-clean*/CLAUDE.md", "path": DOCS}, "cwd": w}, 2)
+case("Glob absolute parent pattern", {"tool_name": "Glob", "tool_input": {"pattern": DOCSF + "/*/CLAUDE.md"}, "cwd": w}, 2)
 case("Glob inside workspace", {"tool_name": "Glob", "tool_input": {"pattern": "evidence/**/*.md"}, "cwd": w}, 0)
-case("Grep parent dir + glob key (T2)", {"tool_name": "Grep", "tool_input": {"pattern": "Stage", "path": r"C:\Users\omr\Documents", "glob": "research-cleanroom/**"}, "cwd": w}, 2)
+case("Grep parent dir + glob key (T2)", {"tool_name": "Grep", "tool_input": {"pattern": "Stage", "path": DOCS, "glob": "research-cleanroom/**"}, "cwd": w}, 2)
 case("Grep inside workspace", {"tool_name": "Grep", "tool_input": {"pattern": "Stage", "path": "evidence"}, "cwd": w}, 0)
 case("Grep glob with ..", {"tool_name": "Grep", "tool_input": {"pattern": "x", "glob": "../*/CLAUDE.md"}, "cwd": w}, 2)
 # --- shell text
@@ -74,12 +90,15 @@ case("Bash ls ../research-clean* (T3)", B("ls ../research-clean*"), 2)
 case("Bash cd ..", B("cd .. && ls"), 2)
 case("Bash parent dir ls (msys form)", B("ls /" + str(TMP).replace("\\", "/").replace(":", "", 1).lstrip("/")), 2)
 case("Bash parent dir ls (windows form)", B("dir " + str(TMP)), 2)
-case("Bash origin + sanctioned-name comment (T4)", B("cat C:/Users/omr/Documents/research-cleanroom/CLAUDE.md # tools/verify_workspace.py"), 2)
+case("Bash sibling directory (parent form)", B("cat " + str(TMP).replace("\\", "/") + "/other/secret.txt"), 2)
+case("Bash sibling with the workspace name as a prefix", B("cat " + str(TMP).replace("\\", "/") + "/" + WS.name + "-independent/x"), 2)
+case("Bash own file by absolute path", B("cat " + w.replace("\\", "/") + "/CLAUDE.md"), 0)
+case("Bash origin + sanctioned-name comment (T4)", B("cat " + DOCSF + "/research-cleanroom/CLAUDE.md # tools/verify_workspace.py"), 2)
 case("Bash sanctioned tool", B("python tools/origin_extract.py --list-sources"), 0)
 case("Bash verify", B("python tools/verify_workspace.py --quick"), 0)
 case("Bash own absolute path", B("cd " + w.replace("\\", "/") + " && git status"), 0)
 case("Bash 'git log' file with dots in name", B("git log --oneline -- a..b"), 0)
-case("PowerShell origin", {"tool_name": "PowerShell", "tool_input": {"command": r"Get-Content C:\Users\omr\Documents\research-cleanroom\CLAUDE.md"}, "cwd": w}, 2)
+case("PowerShell origin", {"tool_name": "PowerShell", "tool_input": {"command": "Get-Content " + DOCS + (r"\research-cleanroom\CLAUDE.md" if WIN else "/research-cleanroom/CLAUDE.md")}, "cwd": w}, 2)
 case("Bash writes settings.local.json", B("echo {} > .claude/settings.local.json"), 2)
 case("PowerShell writes settings.local.json", {"tool_name": "PowerShell", "tool_input": {"command": "Set-Content .claude/settings.local.json x"}, "cwd": w}, 2)
 # --- git push (AUTH-020)

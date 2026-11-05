@@ -31,12 +31,24 @@ agent = data.get("agent_type")  # absent for the lead session
 FORBIDDEN = re.compile(
     r"research-clean|cleanroom|thesis-back|claude_forensic|forensic_rescue|"
     r"[\\/]\.claude[\\/](projects|history|file-history|plans|backups|session-env)", re.I)
-_drive = WS.parts[0][0]
-PARENT = re.compile(
-    r"(?:" + _drive + r":|/" + _drive + r")" + "".join(r"[\\/]+" + re.escape(p) for p in WS.parent.parts[1:])
-    + r"(?![\\/]+" + re.escape(WS.name) + r"(?![\w.-]))", re.I)
+WIN = os.name == "nt"
+# PARENT matches the workspace's parent directory and its siblings (anything under it except this workspace itself).
+# Windows: drive letter in C:/ and MSYS /c/ forms. POSIX (AUTH-021): the absolute parent path; on Linux there is no drive letter,
+# so the Windows form built from WS.parts[0] ('/') never matched and the rule failed open.
+if WIN:
+    _drive = WS.parts[0][0]
+    PARENT = re.compile(
+        r"(?:" + _drive + r":|/" + _drive + r")" + "".join(r"[\\/]+" + re.escape(p) for p in WS.parent.parts[1:])
+        + r"(?![\\/]+" + re.escape(WS.name) + r"(?![\w.-]))", re.I)
+elif len(WS.parent.parts) > 1:
+    PARENT = re.compile(
+        r"(?<![\w.-])" + "".join(r"/+" + re.escape(p) for p in WS.parent.parts[1:])
+        + r"(?![\\/]+" + re.escape(WS.name) + r"(?![\w.-]))")
+else:  # workspace directly under the filesystem root: no parent directory to protect
+    PARENT = re.compile(r"(?!)")
 DOTDOT = re.compile(r"(^|[\s\"'=(])\.\.(?=[\\/\s;&|)\"']|$)")
-SCRATCH = re.compile(r"[\\/]AppData[\\/]Local[\\/]Temp[\\/]claude[\\/]", re.I)
+# Claude Code's per-session scratchpad: %LOCALAPPDATA%/Temp/claude/... on Windows, /tmp/claude-<uid>/... on Linux (AUTH-021)
+SCRATCH = re.compile(r"[\\/]AppData[\\/]Local[\\/]Temp[\\/]claude[\\/]|^/tmp/claude-\d+/", re.I)
 ALWAYS_IMMUTABLE = ["evidence/governing/**", "evidence/sources.json", "evidence/restricted.json", "evidence/origin-index.tsv",
                     "config/origin.json", ".git/**", ".claude/settings.local.json"]
 CREATE_ONLY = ["requirements/intake/20*"]  # recorded intake texts: a new file may be created, an existing one may not be changed (edit tools only)
@@ -56,7 +68,7 @@ def is_abs(p):
 def norm(p, cwd=None):
     """Absolute, normalised, forward-slash path ('..' and '.' resolved)."""
     p = str(p).replace("\\", "/")
-    m = re.match(r"^/([A-Za-z])/(.*)$", p)  # MSYS style /c/Users/...
+    m = re.match(r"^/([A-Za-z])/(.*)$", p) if WIN else None  # MSYS style /c/Users/... (Windows only: on Linux /c/... is a real path)
     if m:
         p = m.group(1) + ":/" + m.group(2)
     if not is_abs(p):
@@ -114,7 +126,7 @@ def check_read_path(label, v):
         block(f"direct access to '{v}' is not allowed. Use `python tools/origin_extract.py`.")
     if DOTDOT.search(v):
         block(f"{label} '{v}' uses '..'. Stay inside the workspace.")
-    static = re.split(r"[*?\[]", v.replace("\\", "/"), 1)[0]  # the part before any wildcard must stay inside
+    static = re.split(r"[*?\[]", v.replace("\\", "/"), maxsplit=1)[0]  # the part before any wildcard must stay inside
     if static:
         r = rel(static.rstrip("/") or ".")
         if outside(r) and not SCRATCH.search(r):
