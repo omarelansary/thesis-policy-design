@@ -277,6 +277,48 @@ for d_, (typ, pre) in TYPES.items():
             rep("FAIL", f"duplicate id {d.get('id')}")
         ids[d.get("id")] = p
 reqs = set(re.findall(r"\bREQ-[A-Za-z0-9-]+\b", (WS / "requirements/REGISTER.md").read_text(encoding="utf-8")))
+
+# Stored literature (AUTH-022): a finding may cite, in `evidence_lines`, files that `tools/litfetch.py` stored under
+# evidence/literature-20261019/ and listed in MANIFEST.jsonl, either by workspace path or by bare file name. A citation counts only if
+# the file is listed in the manifest (by id, or by id plus the stored extension), exists, and its SHA-256 equals the manifest's text_sha256.
+# Line ranges are not checked. Entries that name other paths are ignored here.
+LIT_DIR = WS / "evidence/literature-20261019"
+_lit_rows = {}
+try:
+    for _l in (LIT_DIR / "MANIFEST.jsonl").read_text(encoding="utf-8").splitlines():
+        if _l.strip():
+            _r = json.loads(_l)
+            _lit_rows[_r["id"]] = _r
+except (OSError, ValueError, KeyError):
+    pass
+_lit_cache = {}
+
+
+def lit_check(entry):
+    """Returns (counts, problem): counts is True for a verified stored-literature citation, None if the entry is not a literature citation."""
+    s = str(entry).strip().split()[0] if str(entry).strip() else ""
+    s = s.replace("\\", "/")
+    if s.startswith("evidence/literature-20261019/"):
+        s = s[len("evidence/literature-20261019/"):]
+    elif "/" in s or s.startswith(("EXT-", "FND-", "REQ-")):
+        return None, None
+    if not s or "/" in s or not re.search(r"\.[A-Za-z0-9]{1,5}$", s):
+        return None, None
+    if s in _lit_cache:
+        return _lit_cache[s]
+    row = _lit_rows.get(s) or _lit_rows.get(s.rsplit(".", 1)[0])
+    if row is None:
+        res = (False, f"{s}: not listed in evidence/literature-20261019/MANIFEST.jsonl")
+    elif not (LIT_DIR / s).is_file():
+        res = (False, f"{s}: listed in the manifest but the file is missing")
+    elif hashlib.sha256((LIT_DIR / s).read_bytes()).hexdigest() != row.get("text_sha256"):
+        res = (False, f"{s}: SHA-256 differs from the manifest's text_sha256")
+    else:
+        res = (True, None)
+    _lit_cache[s] = res
+    return res
+
+
 for p, d, typ, pre in recs:
     refs = []
     for k in ("evidence", "basis", "target"):
@@ -289,7 +331,18 @@ for p, d, typ, pre in recs:
         elif r.startswith("REQ-"):
             need(r in reqs, f"{p.name}: reference {r} resolves", f"{p.name}: unknown requirement {r}")
     if typ == "finding":
-        need(any(str(r).startswith("EXT-") for r in refs), f"{p.name}: finding cites an extract", f"{p.name}: finding without EXT evidence")
+        _el = d.get("evidence_lines")
+        _el = _el if isinstance(_el, list) else ([_el] if isinstance(_el, str) and _el else [])
+        _lit = [lit_check(e) for e in _el]
+        _lit_good = sum(1 for c, _ in _lit if c)
+        _lit_bad = [m for c, m in _lit if c is False]
+        if _lit_bad:
+            rep("FAIL", f"{p.name}: {len(_lit_bad)} cited stored-literature file(s) fail the manifest check, first: {_lit_bad[0]}")
+        if any(str(r).startswith("EXT-") for r in refs):
+            need(True, f"{p.name}: finding cites an extract", "")
+        else:
+            need(_lit_good > 0, f"{p.name}: finding cites {_lit_good} hash-verified stored-literature file(s)",
+                 f"{p.name}: finding without EXT evidence and without a hash-verified stored-literature citation")
     if typ == "hypothesis":
         need(bool(d.get("falsifier")), f"{p.name}: falsifier stated", f"{p.name}: hypothesis without falsifier")
     if d.get("status") == "approved":

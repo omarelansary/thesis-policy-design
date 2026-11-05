@@ -13,14 +13,16 @@ Enforces, as far as a hook can:
   5. SendMessage: recipients are limited to subagent ids (a + 16 hex) and "main"; and every message of a thread is
      counted in ops/threads/<thread>/messages.log against the cap in config/limits.json. With no active thread
      (ops/threads/ACTIVE.json written by the lead from a TASK.md) messaging is refused.
-  6. git push (AUTH-020): a command that runs git push is refused unless it is exactly `git push origin v5-audit`
-     or `git push -u origin v5-audit`; force, delete, mirror, all, main and every other branch are refused.
+  6. git push (AUTH-020, AUTH-022): a command that runs git push is refused unless it is exactly `git push origin <branch>` or
+     `git push -u origin <branch>` with <branch> = v5-audit or linux-from-v5-audit--portable-guard-and-short-state; force, delete,
+     mirror, all, main and every other branch are refused. "Runs git push" is found on tokens, including through env, command, sudo,
+     xargs, git's global options, aliases set with -c, bash -c / sh -c / python -c strings and heredocs fed to a shell.
 Limits (see ops/SAFEGUARDS.md): Bash/PowerShell command text is matched by pattern, so an obfuscated command, an
 interpreter one-liner or an unusual wildcard can still evade rule 1; rule 3 does not cover writes made through Bash;
 whether a foreign agent id resolves to another session is untested. verify_workspace.py detects some tampering afterwards.
 Exit code 2 blocks the call and returns the stderr message to the model. Other failures are fail-closed via onFailure=block.
 """
-import datetime, json, os, pathlib, re, sys
+import datetime, json, os, pathlib, re, shlex, sys
 
 WS = pathlib.Path(__file__).resolve().parents[1]
 data = json.load(sys.stdin)
@@ -158,13 +160,76 @@ def thread_gate():
         f.write(f"{datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')}\t{agent or 'lead'}\t->\t{to}\t{n + 1}/{cap}\n")
 
 
-PUSH = re.compile(r"(^|[;&|(]\s*)git\b[^;&|\n]*\bpush\b")
-PUSH_OK = re.compile(r"\s*git push( -u)? origin v5-audit\s*")
+# --- git push (AUTH-020, widened and hardened by AUTH-021/022) ---------------------------------------------------------------
+# A command that runs `git push` is refused unless it is exactly one of the allowed forms. "Runs git push" is decided on tokens, not on
+# a regex anchored at the start of the command, so `env git push`, `command git push`, `git -C x push`, `bash -c "git push ..."`,
+# `git -c alias.p=push p` and a push inside a heredoc fed to a shell are all found, while `git commit -m "mention git push"`,
+# `git log --grep push` and `grep "git push" file` are not pushes. Limits: variables (`$G push`), command substitution that builds the
+# word `git`, a push configured in .git/config or a global git config, and scripts that build the command from fragments are not seen.
+PUSH_OK = re.compile(r"\s*git push( -u)? origin (v5-audit|linux-from-v5-audit--portable-guard-and-short-state)\s*")
+GIT_VALUE_OPTS = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--super-prefix", "--config-env", "--attr-source"}
+LOOSE_PUSH = re.compile(r"\bgit\b[^;&|\n]*\bpush\b", re.I)
+RUNNERS = {"bash", "sh", "zsh", "dash", "ksh", "fish", "csh", "tcsh", "eval", "source", "pwsh", "powershell", "cmd", "python", "python3",
+           "perl", "ruby", "node", "php", "lua", "ssh", "su", "watch", "parallel"}
+RUNNER_WORD = re.compile(r"(?<![\w.-])(" + "|".join(sorted(RUNNERS)) + r")(?![\w-])", re.I)
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1")
+
+
+def _tokens(text):
+    try:
+        lx = shlex.shlex(text.replace("`", " ; "), posix=True, punctuation_chars=True)
+        lx.whitespace_split = True
+        lx.commenters = ""
+        return list(lx)
+    except ValueError:  # unbalanced quotes
+        return None
+
+
+def _split_heredocs(cmd):
+    """(command text without heredoc bodies, [(body, text before the <<)])"""
+    lines, out, bodies, i = cmd.split("\n"), [], [], 0
+    while i < len(lines):
+        line = lines[i]
+        out.append(line)
+        i += 1
+        for m in HEREDOC.finditer(line):
+            body = []
+            while i < len(lines) and lines[i].strip() != m.group(2):
+                body.append(lines[i])
+                i += 1
+            i += 1
+            bodies.append(("\n".join(body), line[:m.start()]))
+    return "\n".join(out), bodies
+
+
+def runs_git_push(cmd):
+    text, bodies = _split_heredocs(cmd)
+    for body, before in bodies:  # a heredoc fed to a shell or interpreter is a script
+        if RUNNER_WORD.search(before) and LOOSE_PUSH.search(body):
+            return True
+    toks = _tokens(text)
+    if toks is None:
+        return bool(LOOSE_PUSH.search(text))
+    scripts = any(t.replace("\\", "/").rsplit("/", 1)[-1].lower() in RUNNERS for t in toks)
+    for i, t in enumerate(toks):
+        if scripts and LOOSE_PUSH.search(t):  # bash -c "git push ...", python -c "...['git','push']..."
+            return True
+        if t.replace("\\", "/").rsplit("/", 1)[-1].lower() in ("git", "git.exe"):
+            j = i + 1
+            while j < len(toks) and toks[j].startswith("-"):
+                a = toks[j]
+                if (a == "-c" and j + 1 < len(toks) and toks[j + 1].lower().startswith("alias.")) or a.lower().startswith(("-calias.", "--config-env=alias.")):
+                    return True  # an alias can be anything, including push
+                j += 2 if a in GIT_VALUE_OPTS else 1
+            if j < len(toks) and toks[j].lower() == "push":
+                return True
+    return False
 
 
 def check_push(cmd):
-    if PUSH.search(cmd) and not PUSH_OK.fullmatch(cmd):
-        block("git push is allowed only as `git push origin v5-audit` or `git push -u origin v5-audit`, on its own (AUTH-020).")
+    if runs_git_push(cmd) and not PUSH_OK.fullmatch(cmd):
+        block("git push is allowed only as `git push origin v5-audit` or `git push -u origin v5-audit` (AUTH-020), or the same for the branch "
+              "linux-from-v5-audit--portable-guard-and-short-state (AUTH-022), on its own.")
 
 
 if tool == "SendMessage":
