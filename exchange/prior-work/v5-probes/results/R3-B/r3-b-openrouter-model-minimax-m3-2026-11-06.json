@@ -1,0 +1,222 @@
+{
+ "source": "https://openrouter.ai/api/v1/models (public, no key), fetched 2026-11-06T07:10Z with curl; the entry for minimax/minimax-m3 copied unchanged; sha256 of the full response c4ebe54ea64e97817e73daba359ccd8b9b57f87a3a5df47c92aa8ac3255736e2 (the full response is not kept)",
+ "entry": {
+  "id": "minimax/minimax-m3",
+  "canonical_slug": "minimax/minimax-m3-20260531",
+  "hugging_face_id": "MiniMaxAI/Minimax-M3",
+  "name": "MiniMax: MiniMax M3",
+  "created": 1780245374,
+  "description": "MiniMax-M3 is a multimodal foundation model from MiniMax. It supports text, image, and video inputs with text output, a 1M-token context window, and is suited for long-horizon agentic work, coding,...",
+  "context_length": 1048576,
+  "architecture": {
+   "modality": "text+image+video->text",
+   "input_modalities": [
+    "text",
+    "image",
+    "video"
+   ],
+   "output_modalities": [
+    "text"
+   ],
+   "tokenizer": "Other",
+   "instruct_type": null
+  },
+  "pricing": {
+   "prompt": "0.0000003",
+   "completion": "0.0000012",
+   "input_cache_read": "0.00000006"
+  },
+  "top_provider": {
+   "context_length": 524288,
+   "max_completion_tokens": 512000,
+   "is_moderated": false
+  },
+  "per_request_limits": null,
+  "supported_parameters": [
+   "frequency_penalty",
+   "include_reasoning",
+   "logit_bias",
+   "logprobs",
+   "max_tokens",
+   "min_p",
+   "presence_penalty",
+   "reasoning",
+   "repetition_penalty",
+   "response_format",
+   "seed",
+   "stop",
+   "structured_outputs",
+   "temperature",
+   "tool_choice",
+   "tools",
+   "top_k",
+   "top_logprobs",
+   "top_p"
+  ],
+  "default_parameters": {
+   "temperature": 1,
+   "top_p": 0.95,
+   "top_k": null,
+   "frequency_penalty": null,
+   "presence_penalty": null,
+   "repetition_penalty": null
+  },
+  "supported_voices": null,
+  "knowledge_cutoff": null,
+  "expiration_date": null,
+  "links": {
+   "details": "/api/v1/models/minimax/minimax-m3-20260531/endpoints"
+  },
+  "endpoints": [
+   "/api/v1/chat/completions",
+   "/api/v1/completions",
+   "/api/v1/messages",
+   "/api/v1/responses"
+  ],
+  "benchmarks": {
+   "design_arena": [
+    {
+     "arena": "agents",
+     "category": "agenticgamedev",
+     "elo": 1114,
+     "win_rate": 44.9,
+     "rank": 18
+    },
+    {
+     "arena": "agents",
+     "category": "androidnative",
+     "elo": 1158,
+     "win_rate": 44.5,
+     "rank": 24
+    },
+    {
+     "arena": "agents",
+     "category": "blender3d",
+     "elo": 1072,
+     "win_rate": 47.8,
+     "rank": 15
+    },
+    {
+     "arena": "agents",
+     "category": "codetovideo",
+     "elo": 1223,
+     "win_rate": 56.4,
+     "rank": 6
+    },
+    {
+     "arena": "agents",
+     "category": "fullstack",
+     "elo": 1191,
+     "win_rate": 47.2,
+     "rank": 19
+    },
+    {
+     "arena": "agents",
+     "category": "htmlslides",
+     "elo": 1076,
+     "win_rate": 46.7,
+     "rank": 14
+    },
+    {
+     "arena": "agents",
+     "category": "mobileapps",
+     "elo": 1173,
+     "win_rate": 46.4,
+     "rank": 27
+    },
+    {
+     "arena": "agents",
+     "category": "pdf",
+     "elo": 1280,
+     "win_rate": 62.2,
+     "rank": 4
+    },
+    {
+     "arena": "agents",
+     "category": "python-pptxslides",
+     "elo": 1163,
+     "win_rate": 47.5,
+     "rank": 17
+    },
+    {
+     "arena": "agents",
+     "category": "spreadsheet",
+     "elo": 1101,
+     "win_rate": 48.4,
+     "rank": 19
+    },
+    {
+     "arena": "agents",
+     "category": "webapps",
+     "elo": 1191,
+     "win_rate": 47.6,
+     "rank": 23
+    },
+    {
+     "arena": "models",
+     "category": "3d",
+     "elo": 1206,
+     "win_rate": 50.1,
+     "rank": 47
+    },
+    {
+     "arena": "models",
+     "category": "asciiart",
+     "elo": 1155,
+     "win_rate": 46.1,
+     "rank": 43
+    },
+    {
+     "arena": "models",
+     "category": "codecategories",
+     "elo": 1245,
+     "win_rate": 50.5,
+     "rank": 43
+    },
+    {
+     "arena": "models",
+     "category": "dataviz",
+     "elo": 1234,
+     "win_rate": 51.2,
+     "rank": 45
+    },
+    {
+     "arena": "models",
+     "category": "gamedev",
+     "elo": 1211,
+     "win_rate": 45.6,
+     "rank": 50
+    },
+    {
+     "arena": "models",
+     "category": "svg",
+     "elo": 1158,
+     "win_rate": 44.7,
+     "rank": 45
+    },
+    {
+     "arena": "models",
+     "category": "uicomponent",
+     "elo": 1241,
+     "win_rate": 50.5,
+     "rank": 45
+    },
+    {
+     "arena": "models",
+     "category": "website",
+     "elo": 1255,
+     "win_rate": 51.5,
+     "rank": 42
+    }
+   ],
+   "artificial_analysis": {
+    "intelligence_index": 18.9,
+    "coding_index": 58.6,
+    "agentic_index": 29.5
+   }
+  },
+  "reasoning": {
+   "mandatory": false
+  }
+ }
+}

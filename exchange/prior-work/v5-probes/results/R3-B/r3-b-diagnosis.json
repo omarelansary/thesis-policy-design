@@ -1,0 +1,460 @@
+{
+ "note": "Counts only; no task text, no model output. Produced by diagnose_partb.py; inputs are the local AppWorld logs of B1-B3 and the Windows-side files in v5-probes/results.",
+ "reasoning_in_replies": {
+  "B1": {
+   "replies": 475,
+   "reasoning_field_nonempty": 0,
+   "reasoning_content_nonempty": 0,
+   "reasoning_details_nonempty": 0,
+   "think_tag_in_content": 0,
+   "reasoning_tokens_sum": 0,
+   "completion_tokens_sum": 266291
+  },
+  "B2": {
+   "replies": 602,
+   "reasoning_field_nonempty": 0,
+   "reasoning_content_nonempty": 0,
+   "reasoning_details_nonempty": 0,
+   "think_tag_in_content": 0,
+   "reasoning_tokens_sum": 0,
+   "completion_tokens_sum": 305502
+  },
+  "B3": {
+   "replies": 560,
+   "reasoning_field_nonempty": 0,
+   "reasoning_content_nonempty": 0,
+   "reasoning_details_nonempty": 0,
+   "think_tag_in_content": 0,
+   "reasoning_tokens_sum": 0,
+   "completion_tokens_sum": 334715
+  }
+ },
+ "completion_tokens_per_call": {
+  "part4_scads": {
+   "tasks": 57,
+   "median_completion_per_call": 445.3,
+   "mean_completion_per_call": 625.2
+  },
+  "repeat_scads": {
+   "tasks": 57,
+   "median_completion_per_call": 451.4,
+   "mean_completion_per_call": 572.9
+  },
+  "B1_gmicloud": {
+   "tasks": 57,
+   "median_completion_per_call": 235.7,
+   "mean_completion_per_call": 477.9
+  },
+  "B2_gmicloud": {
+   "tasks": 57,
+   "median_completion_per_call": 238.1,
+   "mean_completion_per_call": 458.7
+  },
+  "B3_gmicloud": {
+   "tasks": 57,
+   "median_completion_per_call": 220.2,
+   "mean_completion_per_call": 512.7
+  }
+ },
+ "probe_cells": {
+  "scads_r1": {
+   "probe": "p2_tool_choice_probe",
+   "cells": {
+    "C0 base": [
+     {
+      "completion": 58,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C1 base again": [
+     {
+      "completion": 77,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C5 required": [
+     {
+      "completion": 51,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C6 named": [
+     {
+      "completion": 50,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C7 none": [
+     {
+      "completion": 43,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": []
+     }
+    ],
+    "C8 instruction-only": [
+     {
+      "completion": 95,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": []
+     }
+    ],
+    "C9 responses-api": [
+     {
+      "completion": 88,
+      "text_len": null,
+      "output_types": null,
+      "tools_called": []
+     }
+    ]
+   }
+  },
+  "scads_r2": {
+   "probe": "p2_tool_choice_probe_v2",
+   "cells": {
+    "C6 named": [
+     {
+      "completion": 60,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 45,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 43,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 41,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 63,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C8 instruction-only": [
+     {
+      "completion": 109,
+      "text_len": 109,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 144,
+      "text_len": 86,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 121,
+      "text_len": 72,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 132,
+      "text_len": 129,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 96,
+      "text_len": 90,
+      "output_types": null,
+      "tools_called": []
+     }
+    ],
+    "C9 responses-api": [
+     {
+      "completion": 56,
+      "text_len": 153,
+      "output_types": [
+       "reasoning",
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 63,
+      "text_len": 153,
+      "output_types": [
+       "reasoning",
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 48,
+      "text_len": 153,
+      "output_types": [
+       "reasoning",
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 60,
+      "text_len": 153,
+      "output_types": [
+       "reasoning",
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 61,
+      "text_len": 153,
+      "output_types": [
+       "reasoning",
+       "message"
+      ],
+      "tools_called": []
+     }
+    ]
+   }
+  },
+  "gmicloud_r3a3": {
+   "probe": "p2_tool_choice_probe_v3",
+   "cells": {
+    "C0 base": [
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C1 base again": [
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C2 allowed-chat": [
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 39,
+      "text_len": 40,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C3 allowed-flat": [
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 33,
+      "text_len": 20,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C4 allowed-required": [
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 28,
+      "text_len": 0,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     },
+     {
+      "completion": 38,
+      "text_len": 36,
+      "output_types": null,
+      "tools_called": [
+       "tool_07"
+      ]
+     }
+    ],
+    "C8 instruction-only": [
+     {
+      "completion": 30,
+      "text_len": 97,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 40,
+      "text_len": 145,
+      "output_types": null,
+      "tools_called": []
+     },
+     {
+      "completion": 39,
+      "text_len": 139,
+      "output_types": null,
+      "tools_called": []
+     }
+    ],
+    "C9 responses-api": [
+     {
+      "completion": 88,
+      "text_len": 270,
+      "output_types": [
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 25,
+      "text_len": 71,
+      "output_types": [
+       "message"
+      ],
+      "tools_called": []
+     },
+     {
+      "completion": 35,
+      "text_len": 118,
+      "output_types": [
+       "message"
+      ],
+      "tools_called": []
+     }
+    ]
+   }
+  }
+ },
+ "predictor_coverage": {
+  "B2": {
+   "all_required_offered_failed": 18,
+   "some_required_missing_failed": 11,
+   "all_required_offered_passed": 18,
+   "some_required_missing_passed": 10
+  },
+  "B3": {
+   "some_required_missing_failed": 12,
+   "all_required_offered_failed": 21,
+   "all_required_offered_passed": 15,
+   "some_required_missing_passed": 9
+  }
+ },
+ "pilot_subset_passed_of_10": {
+  "or_b2_pilot": 7,
+  "or_control": 7,
+  "scads_part4": 8,
+  "scads_b1": 9,
+  "linux_B1": 5,
+  "linux_B2": 6,
+  "linux_B3": 5
+ }
+}
