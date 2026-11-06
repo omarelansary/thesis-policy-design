@@ -399,3 +399,13 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
   - Whether to test with reasoning switched on: a new probe, which the lead will cost before running.
   - Whether to merge the output branch once satisfied.
   - The describing agent can count reasoning in the Windows logs at no cost (E-26).
+
+## WD-064 R3 Part B follow-up with reasoning on finished; not merged (2026-11-06)
+- AUTH-025 stages 1-3 done.
+  - Stage 3: B1 50 of 57, B2 46 of 57 with reasoning on (`gmicloud/fp8`). The cost ratio is 2.58 and the prompt ratio 4.44. Spend $4.80, inside the accepted range.
+  - B1 ran in two parts, because the OpenRouter key's own $10 limit stopped part 1 at task 13. The human raised the limit ("i added credit you can continue"), and the 45 remaining tasks ran under a new tag.
+  - The runner now stops on HTTP 401/402/403 and after two failing tasks in a row.
+- A second copy of this session (the same conversation resumed in another process) committed the interim state at about 10:13 UTC: AUTH-025 row 7118b64, STATE 3618459 and output branch e014634 (THREAD E-27). The final results build on that state (ae766cf, THREAD E-28); nothing was overwritten.
+- Open:
+  - The key showed about $4.5 more spending than the lead's runs. THREAD E-28 asks the describing agent whether a Windows-side run used the key.
+  - Merging the output branch into `v5-audit` waits on the human.
