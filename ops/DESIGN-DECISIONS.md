@@ -387,3 +387,15 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Branches: `v5-r3-part-a-check` (9e4d7f6) was merged into `v5-audit` as a fast-forward and `v5-audit` pushed (AUTH-020). This branch was rebased onto it (conflicts only in `ops/STATE.md`, where the short version was kept and updated, and `ops/DESIGN-DECISIONS.md`, where both sides were kept; checked: verifier fail=0, guard cases and citation cases 0 failures). The pushed copy of this branch is stale until the human force-pushes. Not yet run on Windows (unchanged).
 - Part B: AUTH-024 lets the lead run it here (the describing agent is unavailable; the human holds the OpenRouter key). Output goes to a new branch cut from `v5-audit` (results in `exchange/prior-work/v5-probes/results/R3-B/`), merged locally, then `git push origin v5-audit`.
 - Cost estimate for the human to approve [I] (from the 10-task pilot bill in `results/R3/r3-a4-pilot-bill-2026-11-02.json`, scaled by 5.7 to 57 tasks and priced at GMICloud fp8: $0.24 in, $0.96 out, $0.048 cache read per million tokens): B1 all tools about $4.7 (pilot cache share 93%), B2 control about $1.0, B3 about $1.0, total about $6.7; with a 1.5 margin about $10. If the GMICloud cache does not work at all, B1 alone would cost about $17 and the total about $20; the pilot's cache share, and A3's cache reads on GMICloud, make that unlikely. Uncertainty: the pilot is 10 tasks, per-task cost spans $0.02 to $0.24 because step-capped tasks dominate, so a factor of two either way is plausible. The run order is B1, B2, B3; the lead stops a run at 1.5 times its approved estimate.
+
+## WD-063 R3 Part B run, diagnosed, not merged (2026-11-06)
+- Run: B1, B2 and B3 ran 2026-11-05 20:38 to 23:30 UTC on OpenRouter with `gmicloud/fp8` pinned, for $4.26 against the approved $6.7 (AUTH-024). The output branch `v5-r3-part-b-results` (e988bcb, then 36ffac5) is cut from `v5-audit` 9e4d7f6; it is local, not pushed and not merged.
+- The human (2026-11-06): "donot merge diagnose first and reuse the winodws outputs as refrence fro the windows run bec at the moment there is no way to run windows and test it so you need to investgate deeply". The diagnosis used only files already in the repository from the Windows side, plus local logs. It made no model call; its one network access was a public, keyless read of OpenRouter's model listing.
+- Findings, recorded in RESULTS-R3-B *Diagnosis* and THREAD E-26:
+  - The lead's own environment check was wrong (`raise_on_failure` left at its default); the corrected check passes 57 of 57.
+  - The runner and the predictor are not shown to cause the gap.
+  - OpenRouter/GMICloud returned no reasoning on any of 1,637 replies, while ScaDS reasons. That is the most likely cause of the accuracy gap and is untested.
+- Next, for the human:
+  - Whether to test with reasoning switched on: a new probe, which the lead will cost before running.
+  - Whether to merge the output branch once satisfied.
+  - The describing agent can count reasoning in the Windows logs at no cost (E-26).
