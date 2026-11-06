@@ -409,3 +409,13 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Open:
   - The key showed about $4.5 more spending than the lead's runs. THREAD E-28 asks the describing agent whether a Windows-side run used the key.
   - Merging the output branch into `v5-audit` waits on the human.
+
+## WD-065 GLM-5.3 runs started; MiniMax-M3 repeat done; not merged (2026-11-06)
+- **AUTH-026** (the human: "So them", read as "Do them"): GLM-5.3 on ScaDS, free, reasoning on by default.
+  - The first smoke was stopped by the lead's own time limit. The second finished, but GLM called `complete_task` at once and failed.
+  - Then B1, B2, B1 repeat and B2 repeat, detached (`nohup`). ScaDS needs a median of 67 s per B1 call at about 88,000 prompt tokens, so the sequence takes days.
+- **AUTH-027** (the human: "let them work in the background and go run the repeats"): the MiniMax-M3 reasoning-on B1 and B2 repeated on OpenRouter, $4.43.
+  - Result: B1 45, B2 46; no accuracy difference is visible.
+  - The cost ratio held: 2.19 in the repeat, 2.58 in the first runs.
+  - Recorded on `v5-r3-part-b-results` (THREAD E-29).
+- **ScaDS status check** (the human asked, 2026-11-06): `MiniMaxAI/MiniMax-M3` is no longer served (403, not listed). `MiniMax-M3.1-Flash` is up, with tools, but returned no reasoning even when asked; the Windows probes of 11-01/02 agree. This check is not yet in the results file.
