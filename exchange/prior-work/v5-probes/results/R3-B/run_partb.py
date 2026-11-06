@@ -193,12 +193,19 @@ with AppWorld.initializer(update_defaults=True, experiment_name=exp, **agent.app
         except Exception as e:
             rec["exception"] = type(e).__name__
             print(traceback.format_exc())
+            CUR["consecutive_exceptions"] = CUR.get("consecutive_exceptions", 0) + 1
+        else:
+            CUR["consecutive_exceptions"] = 0
         rec["steps"] = agent.step_number
         rec["seconds"] = round(now() - t0, 1)
         rec["lm_calls_ok"] = CUR["calls"] - calls0
         stats["tasks"][tid] = rec
         save_stats()
         log(f"task {i}/{len(ids)} {tid}: steps {rec['steps']}, ok-calls {rec['lm_calls_ok']}, {rec['seconds']} s, exception {rec['exception']}, spend so far ${CUR['spend']:.4f}")
+        if CUR.get("consecutive_exceptions", 0) >= 2:  # added 2026-11-06 after a key limit made every call fail for 16 tasks
+            log(f"STOP after task {i} ({tid}): two tasks in a row ended with an exception"); stats["stopped_by_consecutive_exceptions"] = True
+            save_stats(); exit_code = 4
+            break
 
 # ---- evaluation with AppWorld's own evaluator, then merge with the trace (counts only)
 done = [t for t in ids if t in stats["tasks"] and stats["tasks"][t].get("exception") is None]
