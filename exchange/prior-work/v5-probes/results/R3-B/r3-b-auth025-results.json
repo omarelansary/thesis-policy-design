@@ -1,0 +1,322 @@
+{
+ "note": "AUTH-025 (2026-11-06). Counts only. Reasoning switched on with OpenRouter's reasoning {enabled: true}; provider gmicloud/fp8 pinned, allow_fallbacks false; otherwise the settings of B1/B2.",
+ "stage2_control_reasoning_on_10_pilot_tasks": {
+  "tag": "s2-ctrl-reasoning",
+  "passed": 9,
+  "cost": 0.1667,
+  "same_tasks_passed": {
+   "B2_no_reasoning": 6,
+   "B3_no_reasoning": 5,
+   "part4_scads": 8
+  },
+  "same_tasks_cost_B2_no_reasoning": 0.1265,
+  "per_task": {
+   "50e1ac9_1": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 153781,
+    "cached": 116736,
+    "completion": 8753,
+    "reasoning_tokens": 5855,
+    "replies_with_reasoning": 9,
+    "cost": 0.022897,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "530b157_1": {
+    "passed": true,
+    "lm_calls": 8,
+    "prompt": 94194,
+    "cached": 77824,
+    "completion": 2385,
+    "reasoning_tokens": 1169,
+    "replies_with_reasoning": 5,
+    "cost": 0.009954,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "b119b1f_1": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 73928,
+    "cached": 66304,
+    "completion": 2140,
+    "reasoning_tokens": 1103,
+    "replies_with_reasoning": 6,
+    "cost": 0.007067,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "0d8a4ee_1": {
+    "passed": true,
+    "lm_calls": 9,
+    "prompt": 80222,
+    "cached": 68096,
+    "completion": 3633,
+    "reasoning_tokens": 1176,
+    "replies_with_reasoning": 8,
+    "cost": 0.009667,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "3ab5b8b_1": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 119604,
+    "cached": 95393,
+    "completion": 8060,
+    "reasoning_tokens": 2085,
+    "replies_with_reasoning": 8,
+    "cost": 0.018127,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "383cbac_1": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 62593,
+    "cached": 47488,
+    "completion": 2829,
+    "reasoning_tokens": 2121,
+    "replies_with_reasoning": 6,
+    "cost": 0.00862,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "57c3486_1": {
+    "passed": true,
+    "lm_calls": 14,
+    "prompt": 298528,
+    "cached": 255104,
+    "completion": 17569,
+    "reasoning_tokens": 1823,
+    "replies_with_reasoning": 13,
+    "cost": 0.039533,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "6bdbc26_1": {
+    "passed": true,
+    "lm_calls": 6,
+    "prompt": 32819,
+    "cached": 27520,
+    "completion": 930,
+    "reasoning_tokens": 711,
+    "replies_with_reasoning": 2,
+    "cost": 0.003486,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "6c2c621_1": {
+    "passed": false,
+    "lm_calls": 10,
+    "prompt": 139903,
+    "cached": 121728,
+    "completion": 17581,
+    "reasoning_tokens": 1741,
+    "replies_with_reasoning": 8,
+    "cost": 0.027083,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "4fab96f_1": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 174647,
+    "cached": 144000,
+    "completion": 6209,
+    "reasoning_tokens": 2942,
+    "replies_with_reasoning": 10,
+    "cost": 0.020228,
+    "providers": [
+     "GMICloud"
+    ]
+   }
+  }
+ },
+ "stage3_B1_reasoning_on_partial": {
+  "tag": "b1r-all-tools-reasoning",
+  "completed_tasks": 12,
+  "passed": 12,
+  "cost_12_tasks": 0.6832,
+  "same_tasks_passed": {
+   "B1_no_reasoning": 4,
+   "part4_scads": 12
+  },
+  "same_tasks_cost_B1_no_reasoning": 0.4544,
+  "stopped": "the OpenRouter key's own total limit ($10.00, set by the human in their OpenRouter account; the message said $10.01 of $10.00 used) was reached in task 13 (b119b1f_1) after 33 successful calls ($0.3155); every later call was refused (HTTP 402 once, then 403 'Key limit exceeded'); the runner retried instead of stopping (fixed afterwards: it now stops on 401/402/403); the process was then stopped from outside during task 29; task 13 is not counted; B2 with reasoning was not started",
+  "calls_ok": 146,
+  "calls_refused": {
+   "402": 1,
+   "403": 337
+  },
+  "cost_total_reported": 1.0249,
+  "per_task": {
+   "50e1ac9_1": {
+    "passed": true,
+    "lm_calls": 8,
+    "prompt": 703287,
+    "cached": 600832,
+    "completion": 9430,
+    "reasoning_tokens": 5284,
+    "replies_with_reasoning": 7,
+    "cost": 0.062482,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "50e1ac9_2": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 579700,
+    "cached": 563328,
+    "completion": 5707,
+    "reasoning_tokens": 3945,
+    "replies_with_reasoning": 6,
+    "cost": 0.036448,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "50e1ac9_3": {
+    "passed": true,
+    "lm_calls": 8,
+    "prompt": 654371,
+    "cached": 641280,
+    "completion": 4168,
+    "reasoning_tokens": 2426,
+    "replies_with_reasoning": 7,
+    "cost": 0.037925,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "fac291d_1": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 570938,
+    "cached": 555904,
+    "completion": 5609,
+    "reasoning_tokens": 1993,
+    "replies_with_reasoning": 6,
+    "cost": 0.035676,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "fac291d_2": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 573805,
+    "cached": 562176,
+    "completion": 11798,
+    "reasoning_tokens": 6072,
+    "replies_with_reasoning": 6,
+    "cost": 0.041101,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "fac291d_3": {
+    "passed": true,
+    "lm_calls": 8,
+    "prompt": 668106,
+    "cached": 647936,
+    "completion": 10053,
+    "reasoning_tokens": 4180,
+    "replies_with_reasoning": 7,
+    "cost": 0.045593,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "530b157_1": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 818994,
+    "cached": 807296,
+    "completion": 3546,
+    "reasoning_tokens": 1811,
+    "replies_with_reasoning": 6,
+    "cost": 0.044962,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "530b157_2": {
+    "passed": true,
+    "lm_calls": 23,
+    "prompt": 2637992,
+    "cached": 2469939,
+    "completion": 40514,
+    "reasoning_tokens": 34834,
+    "replies_with_reasoning": 19,
+    "cost": 0.197783,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "530b157_3": {
+    "passed": true,
+    "lm_calls": 10,
+    "prompt": 830652,
+    "cached": 744704,
+    "completion": 3264,
+    "reasoning_tokens": 1658,
+    "replies_with_reasoning": 7,
+    "cost": 0.059507,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "4ec8de5_1": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 580112,
+    "cached": 560384,
+    "completion": 7003,
+    "reasoning_tokens": 4383,
+    "replies_with_reasoning": 7,
+    "cost": 0.038356,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "4ec8de5_2": {
+    "passed": true,
+    "lm_calls": 8,
+    "prompt": 669241,
+    "cached": 651648,
+    "completion": 8551,
+    "reasoning_tokens": 5542,
+    "replies_with_reasoning": 7,
+    "cost": 0.04371,
+    "providers": [
+     "GMICloud"
+    ]
+   },
+   "4ec8de5_3": {
+    "passed": true,
+    "lm_calls": 7,
+    "prompt": 584579,
+    "cached": 562560,
+    "completion": 7677,
+    "reasoning_tokens": 4569,
+    "replies_with_reasoning": 6,
+    "cost": 0.039657,
+    "providers": [
+     "GMICloud"
+    ]
+   }
+  }
+ }
+}

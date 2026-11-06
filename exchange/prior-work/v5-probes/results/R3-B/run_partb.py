@@ -24,6 +24,7 @@ ap.add_argument("--max-spend", type=float, required=True, help="stop the run whe
 ap.add_argument("--ids", nargs="*", help="task ids (must be in dev.txt); default all 57 in dev.txt order")
 ap.add_argument("--limit", type=int, help="only the first N of the selected ids (smoke tests)")
 ap.add_argument("--dry-run", action="store_true", help="build everything, call nothing")
+ap.add_argument("--reasoning", action="store_true", help="AUTH-025: send OpenRouter's reasoning {enabled: true} (reasoning is optional for this model there and off unless asked)")
 args = ap.parse_args()
 
 # ---- environment (before any appworld import)
@@ -91,6 +92,8 @@ lmm.OpenAI = lambda **kw: _OpenAI(timeout=300.0, **kw)
 # ---- patch 2: provider pin + counts-only trace of every raw call (including failed ones)
 _orig_get = lmm.get_raw_lm_caller
 EXTRA = {"provider": {"order": [args.provider], "allow_fallbacks": False}}
+if args.reasoning:
+    EXTRA["reasoning"] = {"enabled": True}
 
 def _get(*a, **kw):
     caller = _orig_get(*a, **kw)
@@ -106,6 +109,8 @@ def _get(*a, **kw):
             rec.update(status="error", error=type(e).__name__, http=getattr(e, "status_code", None), latency_s=round(now() - t0, 2))
             with open(TRACE, "a") as f:
                 f.write(json.dumps(rec) + "\n")
+            if getattr(e, "status_code", None) in (401, 402, 403):  # key, credit or key-limit refusal: retrying cannot help, stop the run
+                raise SpendLimit(f"endpoint refused with HTTP {e.status_code} ({type(e).__name__}); run stopped") from None
             raise
         d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
         u = d.get("usage") or {}
@@ -116,7 +121,8 @@ def _get(*a, **kw):
         CUR["spend"] += float(cost); CUR["calls"] += 1
         rec.update(status="ok", provider=d.get("provider"), model=d.get("model"), system_fingerprint=d.get("system_fingerprint"),
                    prompt=u.get("prompt_tokens"), cached=det.get("cached_tokens"), cache_write=det.get("cache_write_tokens"),
-                   completion=u.get("completion_tokens"), cost=cost, finish=ch.get("finish_reason"),
+                   completion=u.get("completion_tokens"), reasoning_tokens=(u.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+                   reasoning_chars=len(msg.get("reasoning") or ""), history_msgs_with_reasoning=sum(bool(m.get("reasoning") or m.get("reasoning_details")) for m in ckw.get("messages", []) if isinstance(m, dict)), cost=cost, finish=ch.get("finish_reason"),
                    n_tool_calls=len(msg.get("tool_calls") or []), latency_s=round(now() - t0, 2))
         with open(TRACE, "a") as f:
             f.write(json.dumps(rec) + "\n")
@@ -157,13 +163,13 @@ if bad:
     sys.exit(f"not dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-log(f"run {args.tag}: {len(ids)} dev tasks, mode {args.predictor_mode}, max_predicted_apis {P}, provider {args.provider}, max-spend {args.max_spend}, appworld {__import__('appworld').__version__}")
+log(f"run {args.tag}: {len(ids)} dev tasks, mode {args.predictor_mode}, max_predicted_apis {P}, provider {args.provider}, reasoning {args.reasoning}, max-spend {args.max_spend}, appworld {__import__('appworld').__version__}")
 agent = Agent.from_dict(agent_config)
 if args.dry_run:
     log("dry run: agent built, no call made")
     sys.exit(0)
 
-stats = {"tag": args.tag, "predictor_mode": args.predictor_mode, "max_predicted_apis": P, "model": args.model, "provider_pinned": args.provider,
+stats = {"tag": args.tag, "reasoning": args.reasoning, "predictor_mode": args.predictor_mode, "max_predicted_apis": P, "model": args.model, "provider_pinned": args.provider,
          "started": utc(), "tasks": {}}
 def save_stats():
     (RUN / "stats.json").write_text(json.dumps(stats, indent=1))
@@ -208,7 +214,8 @@ stats["totals"] = {
     "calls_ok": sum(c["status"] == "ok" for c in calls), "calls_error": sum(c["status"] != "ok" for c in calls),
     "prompt": sum(c.get("prompt") or 0 for c in calls), "cached": sum(c.get("cached") or 0 for c in calls),
     "cache_write": sum(c.get("cache_write") or 0 for c in calls), "completion": sum(c.get("completion") or 0 for c in calls),
-    "cost": round(sum(c.get("cost") or 0 for c in calls), 6),
+    "cost": round(sum(c.get("cost") or 0 for c in calls), 6), "reasoning_tokens": sum(c.get("reasoning_tokens") or 0 for c in calls),
+    "replies_with_reasoning": sum(bool(c.get("reasoning_chars")) for c in calls),
     "providers": sorted({str(c.get("provider")) for c in calls if c["status"] == "ok"}),
 }
 stats["finished"] = utc()
