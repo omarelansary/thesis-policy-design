@@ -20,6 +20,7 @@ ap.add_argument("--predictor-mode", choices=["predicted", "all"], required=True)
 ap.add_argument("--max-predicted-apis", type=int, required=True)
 ap.add_argument("--model", default="minimax/minimax-m3")
 ap.add_argument("--provider", default="gmicloud/fp8", help="OpenRouter provider tag to pin")
+ap.add_argument("--host", choices=["openrouter", "scads"], default="openrouter", help="AUTH-026: scads = https://llm.scads.ai/v1 with SCADS_API_KEY, no provider pin, reasoning as served")
 ap.add_argument("--max-spend", type=float, required=True, help="stop the run when the summed reported cost reaches this many dollars")
 ap.add_argument("--ids", nargs="*", help="task ids (must be in dev.txt); default all 57 in dev.txt order")
 ap.add_argument("--limit", type=int, help="only the first N of the selected ids (smoke tests)")
@@ -39,10 +40,13 @@ def load_env():
                 if v and k not in os.environ:
                     os.environ[k] = v
 load_env()
-BASE = "https://openrouter.ai/api/v1"
-key = os.environ.get("OPENROUTER_API_KEY", "")
+KEYVAR = "SCADS_API_KEY" if args.host == "scads" else "OPENROUTER_API_KEY"
+BASE = (os.environ.get("SCADS_BASE_URL") or "https://llm.scads.ai/v1") if args.host == "scads" else "https://openrouter.ai/api/v1"
+if args.host == "scads" and args.reasoning:
+    sys.exit("--reasoning is an OpenRouter request field; on ScaDS reasoning is as served; nothing was run")
+key = os.environ.get(KEYVAR, "")
 if not key and not args.dry_run:
-    sys.exit("OPENROUTER_API_KEY is not set (put it in ~/r3-work/.env or export it); nothing was run")
+    sys.exit(f"{KEYVAR} is not set (put it in ~/r3-work/.env or export it); nothing was run")
 RUN = HERE / "runs" / args.tag
 if RUN.exists():
     sys.exit(f"{RUN} already exists: every run needs a new tag (AppWorld issue #203); nothing was run")
@@ -91,7 +95,7 @@ lmm.OpenAI = lambda **kw: _OpenAI(timeout=300.0, **kw)
 
 # ---- patch 2: provider pin + counts-only trace of every raw call (including failed ones)
 _orig_get = lmm.get_raw_lm_caller
-EXTRA = {"provider": {"order": [args.provider], "allow_fallbacks": False}}
+EXTRA = {"provider": {"order": [args.provider], "allow_fallbacks": False}} if args.host == "openrouter" else None
 if args.reasoning:
     EXTRA["reasoning"] = {"enabled": True}
 
@@ -100,7 +104,8 @@ def _get(*a, **kw):
     def wrapped(**ckw):
         if CUR["spend"] >= args.max_spend:
             raise SpendLimit(f"spend {CUR['spend']:.4f} reached --max-spend {args.max_spend}")
-        ckw["extra_body"] = EXTRA
+        if EXTRA is not None:
+            ckw["extra_body"] = EXTRA
         rec = {"t_elapsed_s": round(now(), 1), "task": CUR["task"], "predictor_call": "tools" not in ckw, "n_messages": len(ckw.get("messages", [])), "n_tools": len(ckw.get("tools") or [])}
         t0 = now()
         try:
@@ -122,7 +127,7 @@ def _get(*a, **kw):
         rec.update(status="ok", provider=d.get("provider"), model=d.get("model"), system_fingerprint=d.get("system_fingerprint"),
                    prompt=u.get("prompt_tokens"), cached=det.get("cached_tokens"), cache_write=det.get("cache_write_tokens"),
                    completion=u.get("completion_tokens"), reasoning_tokens=(u.get("completion_tokens_details") or {}).get("reasoning_tokens"),
-                   reasoning_chars=len(msg.get("reasoning") or ""), history_msgs_with_reasoning=sum(bool(m.get("reasoning") or m.get("reasoning_details")) for m in ckw.get("messages", []) if isinstance(m, dict)), cost=cost, finish=ch.get("finish_reason"),
+                   reasoning_chars=len(msg.get("reasoning") or msg.get("reasoning_content") or ""), history_msgs_with_reasoning=sum(bool(m.get("reasoning") or m.get("reasoning_details") or m.get("reasoning_content")) for m in ckw.get("messages", []) if isinstance(m, dict)), cost=cost, finish=ch.get("finish_reason"),
                    n_tool_calls=len(msg.get("tool_calls") or []), latency_s=round(now() - t0, 2))
         with open(TRACE, "a") as f:
             f.write(json.dumps(rec) + "\n")
@@ -136,7 +141,8 @@ model_config = {
     "client_name": "openai", "api_type": "chat_completions", "name": args.model, "base_url": BASE,
     "temperature": 0.0, "seed": 100, "drop_reasoning_content": False,
     # AppWorld's own cost caps only; the real cost is the endpoint's usage.cost in the trace. GMICloud fp8 prices per token.
-    "cost_per_token": {"input_cache_hit": 4.8e-08, "input_cache_miss": 2.4e-07, "input_cache_write": 0.0, "output": 9.6e-07},
+    "cost_per_token": ({"input_cache_hit": 4.8e-08, "input_cache_miss": 2.4e-07, "input_cache_write": 0.0, "output": 9.6e-07} if args.host == "openrouter"
+                       else {"input_cache_hit": 0.0, "input_cache_miss": 0.0, "input_cache_write": 0.0, "output": 0.0}),  # ScaDS reports no cost
     "retry_after_n_seconds": 15, "use_cache": False, "max_retries": 20,
 }
 agent_config = {
@@ -163,7 +169,7 @@ if bad:
     sys.exit(f"not dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-log(f"run {args.tag}: {len(ids)} dev tasks, mode {args.predictor_mode}, max_predicted_apis {P}, provider {args.provider}, reasoning {args.reasoning}, max-spend {args.max_spend}, appworld {__import__('appworld').__version__}")
+log(f"run {args.tag}: host {args.host}, model {args.model}, {len(ids)} dev tasks, mode {args.predictor_mode}, max_predicted_apis {P}, provider {args.provider}, reasoning {args.reasoning}, max-spend {args.max_spend}, appworld {__import__('appworld').__version__}")
 agent = Agent.from_dict(agent_config)
 if args.dry_run:
     log("dry run: agent built, no call made")
