@@ -444,3 +444,9 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - X1 was answered by the describing agent (PWD-019, THREAD E-31/E-32) and checked by the lead (E-33). The tested Executor was upstream `main` at `98d606b`, configured but not patched.
 - The human then asked what V5 needs from the open-source project. The lead's answer: its reusable parts, already taken from its documentation (`03` section 4a, 2026-10-22), and, only for a baseline run, what to run (PWD-017, PWD-019).
 - The human closed the investigation for now (INT-T-025, REQ-U1107-14). It reopens if a baseline run is decided, if Joaa answers Q-J33, or if a V5 part comes to depend on Executor behaviour not yet described. Records on `v5-r3-part-b-results`.
+
+## WD-070 P5 harness written; run plan and cost estimate (2026-11-07)
+- The human said "yes you can start it ... i also agree on paying but tell me how much would it cost". The harness `design/package-v5/tools/p5_break_even.py` is on the new output branch `v5-p5-break-even`, cut from `v5-audit` (96f1db0). It was tested only against a local mock server; no real request has been sent.
+- **Part A, ScaDS GLM-5.3:** 94 requests, free. It runs after the GLM B2 run ends, which is expected the night of 7 to 8 November or the morning of 8 November.
+- **Part B, OpenAI `gpt-5.4-mini`:** 73 requests. Estimate about $0.80, stop at $1.20, from the stored price page of 2026-10-19, which must be read again on the day of the run. The human agreed to pay in principle; the run still waits for the human to accept this figure and to add an `OPENAI_API_KEY` to `~/r3-work/.env`.
+- The harness's search plus `call_tool` mechanism is not P2's choice. The stub definitions keep the bulk in the parameter schema, because OpenAI's deferral keeps names and descriptions visible.
