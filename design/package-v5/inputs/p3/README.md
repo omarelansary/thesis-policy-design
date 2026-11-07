@@ -1,6 +1,6 @@
 # P3: uninstructed search for a deferred tool (preparation, 2026-11-07)
 
-Status: harness written and tested against a local mock server; **no request sent to any model yet**. Covered by the human's
+Status: **run 1 done 2026-11-07** (three models, 1,762 requests including smoke tests, $1.675 of the $10 stop; reading in `RESULTS-P3-RUN1.md`). Harness tested against a local mock server first. Covered by the human's
 INT-T-028 and INT-T-029 (P3 on OpenRouter, about 20 tasks built over AppWorld's real definitions, stop at $10 in total, models
 proposed by the lead and confirmed by the human before any run); the P3 AUTH row is still to be entered in
 `ops/AUTHORIZATIONS.md` with the operations-branch records (`ops/OPEN-TASKS.md`). Question and cells: `05` P3, HYP-0019.
