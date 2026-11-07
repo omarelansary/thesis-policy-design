@@ -1,6 +1,8 @@
 """PROPOSED, not adopted: a vendor-hosted-search variant of D-01 (calc/regime_bill.py), written after P5's OpenAI side check
 (design/package-v5/inputs/p5/RESULTS-P5-B.md, repeat with harness revision 2). D-01 stays as it is until the human decides (AUTH-028
-stop rule: the as-written predictions were contradicted by 2.2 to 7.9 times at 100-300 tools). Derived arithmetic [D], one party.
+stop rule: the as-written predictions were contradicted by 2.2 to 7.9 times at 100-300 tools). The human decided on 2026-11-07
+(INT-T-027): D-01 stays the working equation, this stays a proposal, and revision is decided after P5 part A on ScaDS.
+Derived arithmetic [D], one party.
 
 What it changes against D-01's server mode, each from the side check's measurements (gpt-5.4-mini, stub catalogue):
   v   share of a deferred definition that stays billed (OpenAI keeps name and description visible): 0.30 for individually deferred

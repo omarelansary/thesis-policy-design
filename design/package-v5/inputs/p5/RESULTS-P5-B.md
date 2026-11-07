@@ -43,7 +43,7 @@ The harness was revised for part A (revision 2: a fresh marker per cold session,
 - **Most of that gap is the billed share v.** At 300 tools the cold ratio is 0.06 with v = 0, 0.09 with v = 0.036 (namespaces) and 0.35 with v = 0.30 (functions). The non-tool part X does not move n*, because it adds to both arms; it only pulls the ratio towards 1.
 - **The variant fits the side check's cold cells within 0.01 to 0.10, except functions at 10 tools (1.03 against 1.19).** This is a fit to the same data, not a test.
 
-Whether to adopt it as a revision of D-01 is the human's decision.
+**Decision (the human, 2026-11-07, INT-T-027): D-01 stays the working equation; the variant stays a proposal; whether to revise D-01 is decided after P5 part A on ScaDS, which tests D-01's own client mode.** Nothing is adopted.
 
 **Still the side check, not P5's test:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
 
@@ -111,7 +111,7 @@ Every session searched once (twice at `deferred_ns` 100), called the needed tool
   - The search tool costs 300 tokens; here the searchable surface costs 1,300 to 16,000 tokens.
   - Every session starts cold, and only the tool block is priced; here the sessions started warm, and the rest of the session (about 2,200 to 2,600 equivalents) is the same in both arms, which pulls every ratio towards 1.
 - **D-01's formula with the measured parameters** (the surface from calibration, the tokens added by the first search, each session's start state, and eager's non-tool part) reproduces `deferred_fn` within 0.01 to 0.06. For `deferred_ns` the gap is 0.05 to 0.11, apart from the cache-miss cell. So D-01's structure holds; its default parameters do not fit vendor-hosted search.
-- **AUTH-028 stop rule.** The as-written predictions are contradicted by more than any spread seen here, so this is reported before the next item. Revising D-01 (a vendor-hosted variant with a visible deferred part, a measured surface, appended tokens per search, a warm-start case and the non-tool part) is a design change that AUTH-028 does not cover. It is proposed for the human's decision, not made.
+- **AUTH-028 stop rule.** The as-written predictions are contradicted by more than any spread seen here, so this is reported before the next item. Revising D-01 (a vendor-hosted variant with a visible deferred part, a measured surface, appended tokens per search, a warm-start case and the non-tool part) is a design change that AUTH-028 does not cover. It is proposed for the human's decision, not made; the human deferred that decision until part A (INT-T-027).
 
 ## 4. Limits
 - One session per cell and one run; cache state not controlled (warm from calibration); two cache misses.
