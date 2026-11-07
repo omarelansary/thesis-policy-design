@@ -33,9 +33,9 @@ The harness was revised for part A (revision 2: a fresh marker per cold session,
 **Reading [I]:**
 - **Break-even (cold start): between 10 and 30 tools in both arms.** At 10 tools deferral costs 12-20% more; at 30 it saves about 30%.
 - **The two cold sessions agree within 0.02**, except the 300-tool namespace cell (0.03, because of the different load).
-- **A warm start shrinks deferral's advantage.** It lowers both bills, but eager's more, because eager's cached prefix is larger; the warm ratios are 0.04 to 0.13 higher than the cold ones.
-- **D-01 as written** (server mode, its defaults) predicts 1.32, 0.44, 0.13 and 0.044. That is close at 10 tools; at 100 and 300 tools the measured ratio is 2.2 to 7.9 times the prediction. This is far more than the cold-session spread, so the AUTH-028 stop rule applies (reported here; the revision of D-01 is the human's decision).
-- **D-01's formula with the measured parameters** reproduces the cold cells within 0.01 to 0.07 (`deferred_fn`) and 0.01 to 0.07 (`deferred_ns`).
+- **A warm start shrinks deferral's advantage.** It lowers both bills, but eager's more, because eager's cached prefix is larger; the warm ratios are 0.04 to 0.17 higher than the cold ones.
+- **D-01 as written** (server mode, its defaults) predicts 1.32, 0.44, 0.13 and 0.044. At 10 tools it overstates deferral's cost (1.32 against 1.12 to 1.20); at 30 to 300 tools it understates it. At 100 and 300 tools the measured ratio is 2.2 to 7.9 times the prediction. This is far more than the cold-session spread, so the AUTH-028 stop rule applies (reported here; the revision of D-01 is the human's decision).
+- **D-01's formula with the measured parameters** reproduces the cold cells within 0.01 to 0.07 at 30 to 300 tools in both arms; at 10 tools it is 0.14 to 0.15 too low.
 - **What D-01's defaults miss on vendor-hosted search:** the deferred part that stays billed (30% for functions), the searchable surface (1,300 to 16,000 tokens instead of 300), the tokens a search loads (about 310 for one function, up to 1,360 for a namespace), and the non-tool part of the session (about 2,100 to 2,500 equivalents in both arms).
 
 **Still the side check, not P5's test:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
