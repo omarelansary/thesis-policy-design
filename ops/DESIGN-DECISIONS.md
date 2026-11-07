@@ -434,3 +434,8 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - The ledger workbook was not edited. There is no `openpyxl` on Linux and installs are not authorized. The answers and the proposed status changes are listed per question in `ANSWERS-20261107.md`, to be applied on Windows or by the human.
 - `requirements/THESIS_QUESTION.md` is unchanged. The human says the professor and Joaa set the question; whether REQ-O14F-01's sentence is the wording to enter is asked of the human.
 - `design/tool-exposure-policy-proposal.md` is archived in place (banner; the author is the human). It was not moved, because records cite its path.
+
+## WD-068 Follow-up answers: P5 route, research question entered as pointers (2026-11-07)
+- INT-T-024 (on `v5-r3-part-b-results`, d7595b7, REQ-U1107-10..13). The P5 route is added to AUTH-028: ScaDS GLM-5.3 after GLM B2 ends; the OpenAI billing check only after an accepted estimate.
+- `requirements/THESIS_QUESTION.md` now holds the supervisor's 14 October wording verbatim (INT-T-003 L150, L159) and pointers to the 21 October scope (REQ-O21-01, -07, -08) and to how the work reads it (REQ-J22-02, REQ-U21-07). The lead wrote no new formulation. The 21 October document the human linked is INT-T-002 and was not downloaded again.
+- Q-U16 is declined. Q-U17: keep; the human's thesis workspace with `thesis-private` is the source for request X1.
