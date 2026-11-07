@@ -57,6 +57,9 @@ The rule did no harm where the tool exists: D-rule target 20 / 19 / 20, W-rule 1
   safe outcome as the target: no state-changing substitute and no claim of success.
 Either revision can be run on the same 20 tasks and three models for about $1.80, inside the $6.57 left.
 
+**Note added 2026-11-08 after run 3 (`RESULTS-P3-RUN3.md` section 4.3):** in run 3, plain sessions with no rule made 3 claims
+of the same kind. So false claims are not specific to the listing; the listing's rise in substitute actions stands.
+
 ## Limits
 As run 1 (20 single-need tasks by the lead, stub results, one provider, one run per cell, temperature 0). The per-request
 `rule_stage` field in run 2's local logs repeats the session's last stage on searches where the rule did not fire (fixed in the

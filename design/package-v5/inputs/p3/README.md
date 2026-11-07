@@ -1,6 +1,7 @@
 # P3: uninstructed search for a deferred tool (preparation, 2026-11-07)
 
-Status: **run 2 done 2026-11-07** (`RESULTS-P3-RUN2.md`: repeat holds; the no-match rule as designed is not recommended, a revision is proposed; P3 total $3.430 of $10). Earlier: **run 1 done 2026-11-07** (three models, 1,762 requests including smoke tests, $1.675 of the $10 stop; reading in `RESULTS-P3-RUN1.md`). Harness tested against a local mock server first. Covered by the human's
+Status: **run 3 done 2026-11-08** (`RESULTS-P3-RUN3.md`: the revised rule `rule2` removed run 2's harm but is a weak stop,
+because models keep searching after the note; a hard client-side stop is proposed; P3 total $4.156 of $10). Earlier: **run 2 done 2026-11-07** (`RESULTS-P3-RUN2.md`: repeat holds; the no-match rule as designed is not recommended, a revision is proposed; P3 total $3.430 of $10). Earlier: **run 1 done 2026-11-07** (three models, 1,762 requests including smoke tests, $1.675 of the $10 stop; reading in `RESULTS-P3-RUN1.md`). Harness tested against a local mock server first. Covered by the human's
 INT-T-028 and INT-T-029 (P3 on OpenRouter, about 20 tasks built over AppWorld's real definitions, stop at $10 in total, models
 proposed by the lead and confirmed by the human before any run); the P3 AUTH row is still to be entered in
 `ops/AUTHORIZATIONS.md` with the operations-branch records (`ops/OPEN-TASKS.md`). Question and cells: `05` P3, HYP-0019.
@@ -42,3 +43,12 @@ tool is deterministic and the same for every model.
   index variant is dropped (no visible effect in run 1). Same 20 tasks, same three models and provider.
 - **Turn cap 12** (was 6), only as a safety backstop and reported as such, so `plain` shows how long models search unaided.
 - Not in run 2: tasks that need several tools (a possible run 3).
+
+## Run 3 (INT-T-032, 2026-11-08)
+- **The revised rule (variant `rule2`):** no app listing. The client keeps a scope, the set of apps of each search's best
+  (top-1) result. A search counts as new only if it shows an unseen tool of a scope app; otherwise its whole result is the note
+  that the catalogue has no further tool for this need. A model that started in the wrong app can still reach the right one,
+  because a best match in a new app widens the scope. No count, no threshold; system text unchanged.
+- **Cells:** D, A, W as `plain` and `rule2` (no expose-all cell); same 20 tasks, three models, provider; turn cap 12 as a
+  backstop only. Final replies are kept locally to 400 characters for classification.
+- Not in run 3: tasks that need several tools (recommended for a later run, the human's decision).

@@ -20,9 +20,10 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       here. Then run the full verifier there.
 - [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
-- [ ] **P3 record and decision** (runs 1 and 2 done 2026-11-07, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` and
-      `RESULTS-P3-RUN2.md`; $3.43 of $10): enter the P3 AUTH row (INT-T-028..031) and WD with the operations-branch records; the
-      human decides on the revised no-match rule proposed in RESULTS-P3-RUN2 section 4 (run 3) and on multi-tool tasks.
+- [ ] **P3 record and decision** (runs 1 to 3 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
+      `RESULTS-P3-RUN3.md`; $4.156 of $10): enter the P3 AUTH row (INT-T-028..032) and WD with the operations-branch records; the
+      human decides on the hard stop proposed in RESULTS-P3-RUN3 section 4.4 (withdraw search_tools when the note is returned,
+      about $0.40 to $0.75) and on multi-tool tasks (recommended later).
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
