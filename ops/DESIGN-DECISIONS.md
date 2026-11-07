@@ -439,3 +439,8 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - INT-T-024 (on `v5-r3-part-b-results`, d7595b7, REQ-U1107-10..13). The P5 route is added to AUTH-028: ScaDS GLM-5.3 after GLM B2 ends; the OpenAI billing check only after an accepted estimate.
 - `requirements/THESIS_QUESTION.md` now holds the supervisor's 14 October wording verbatim (INT-T-003 L150, L159) and pointers to the 21 October scope (REQ-O21-01, -07, -08) and to how the work reads it (REQ-J22-02, REQ-U21-07). The lead wrote no new formulation. The 21 October document the human linked is INT-T-002 and was not downloaded again.
 - Q-U16 is declined. Q-U17: keep; the human's thesis workspace with `thesis-private` is the source for request X1.
+
+## WD-069 Executor investigation closed for now (2026-11-07)
+- X1 was answered by the describing agent (PWD-019, THREAD E-31/E-32) and checked by the lead (E-33). The tested Executor was upstream `main` at `98d606b`, configured but not patched.
+- The human then asked what V5 needs from the open-source project. The lead's answer: its reusable parts, already taken from its documentation (`03` section 4a, 2026-10-22), and, only for a baseline run, what to run (PWD-017, PWD-019).
+- The human closed the investigation for now (INT-T-025, REQ-U1107-14). It reopens if a baseline run is decided, if Joaa answers Q-J33, or if a V5 part comes to depend on Executor behaviour not yet described. Records on `v5-r3-part-b-results`.
