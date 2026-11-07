@@ -38,6 +38,13 @@ The harness was revised for part A (revision 2: a fresh marker per cold session,
 - **D-01's formula with the measured parameters** reproduces the cold cells within 0.01 to 0.07 at 30 to 300 tools in both arms; at 10 tools it is 0.14 to 0.15 too low.
 - **What D-01's defaults miss on vendor-hosted search:** the deferred part that stays billed (30% for functions), the searchable surface (1,300 to 16,000 tokens instead of 300), the tokens a search loads (about 310 for one function, up to 1,360 for a namespace), and the non-tool part of the session (about 2,100 to 2,500 equivalents in both arms).
 
+**Break-even against size of saving (proposed variant, `calc/regime_bill_hosted.py` and its stdout; not adopted) [D].** D-01's server mode was rewritten with the measured terms: the billed share v of a deferred definition, the search tool's surface, the tokens a search loads, the non-tool part and the start state. Three things follow:
+- **The break-even barely moves.** With d = 171 and T = 5 it is 11 tools (individually deferred functions, cold) and 13 (namespaces, cold); 16 and 22 when warm. D-01-like defaults give 11. The measured break-even, between 10 and 30, agrees. **D-01's break-even holds; what it gets wrong is how much deferral saves above it.**
+- **Most of that gap is the billed share v.** At 300 tools the cold ratio is 0.06 with v = 0, 0.09 with v = 0.036 (namespaces) and 0.35 with v = 0.30 (functions). The non-tool part X does not move n*, because it adds to both arms; it only pulls the ratio towards 1.
+- **The variant fits the side check's cold cells within 0.01 to 0.10, except functions at 10 tools (1.03 against 1.19).** This is a fit to the same data, not a test.
+
+Whether to adopt it as a revision of D-01 is the human's decision.
+
 **Still the side check, not P5's test:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
 
 Status: run complete, all 12 cells. Labels: [O] measured from the usage records, [D] arithmetic, [I] reading. **One session per cell, one model, one stub catalogue:** read as a first measurement, not an estimate with a range. No accuracy claim.
