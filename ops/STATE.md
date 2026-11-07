@@ -6,10 +6,10 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 - **V5 audit** (AUTH-020) is a conceptual package. Start at `design/package-v5/00-README.md`. Working draft V5-R = DPR-0007. Nothing is validated, approved or final. The benchmark register is `17`; its section 5 holds the probe results.
 - **Probes R1-R3 done (2026-11-01 to 11-06; results `exchange/prior-work/v5-probes/results/`).** AppWorld, MiniMax-M3, OpenRouter with one provider: offering all 469 definitions costs 2.2-2.6 times the predictor subset, with about 96% of the prompt in cache reads; no accuracy difference is visible in four runs (B1 50/45, B2 46/46 of 57, with reasoning on); the reasoning mode must be fixed per run: off, the model passed only 24-28; AUTH-024/025/027 spend: $4.26, $4.80, $4.43; R3 Part B, its follow-ups and the docs refresh of 2026-11-07 are on output branch `v5-r3-part-b-results`, **not merged (the human: wait)**.
 - **Running:** GLM-5.3 on ScaDS (AUTH-026, free): B1 done (23 of 57), B2 running, then stop (no repeats; the human, 2026-11-07).
-- **Next experiment proposed:** P5 break-even (`12` sections 3 and 5); needs an authorization.
-- **Questions for the human, all in one place:** `design/ledger/notes/QUESTIONS-FOR-YOU-20261107.md`: `17` section 9 proposals; the new ledger proposals in `08` section 5; P5; 19 unanswered ledger questions (Q-U28 to Q-U33 and the first `08` proposals are answered and applied).
-- **Waiting on the supervisor:** Q-J31 to Q-J33 (`design/ledger/notes/QUESTIONS-FOR-JOAA-20261022.md`).
-- **Thesis question:** not yet supplied (`requirements/THESIS_QUESTION.md`; the human's decision). No policy has been selected.
+- **P5 authorized (AUTH-028, 2026-11-07), P5 only;** route and models not yet chosen by the human, so nothing has run. Executor description requested from the human's agent (`exchange/prior-work/REQUEST-X1-executor.md`, THREAD E-30).
+- **The human answered the questions guide on 2026-11-07** (INT-T-023, REQ-U1107-01..09; per question: `design/ledger/notes/ANSWERS-20261107.md`, on `v5-r3-part-b-results`). `17` section 9 is postponed; `08` section 5 was rechecked, unchanged; the workbook is not yet edited (no `openpyxl` on Linux). Still open: Q-U09 wording, Q-U15, Q-U16, Q-U17 (Windows), Q-U25, Q-U27.
+- **Waiting on the supervisor:** his verdict on V5 (not yet given); Q-J31 to Q-J33 depend on it, and Q-J33 also on the Executor description.
+- **Thesis question:** set by the professor and Joaa (the human, 2026-11-07); `requirements/THESIS_QUESTION.md` still empty until the human confirms the wording (REQ-O14F-01 is the fullest recorded). No policy has been selected.
 
 ## B. Standing decisions of the human (details: `requirements/REGISTER.md` section H)
 - Minimise the bill on average over turns and sessions, with accuracy nearly the same; no margin or budget; model-agnostic billing equation (DPR-0006).
@@ -20,7 +20,7 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 - The human's `.workspace/` stays untracked and is never pushed.
 
 ## C. Operating rules
-- Authorizations in force include AUTH-020 (V5 audit), AUTH-024 to AUTH-027 (R3 probes and follow-ups) and AUTH-021 to AUTH-023 (machine portability, see D).
+- Authorizations in force include AUTH-020 (V5 audit), AUTH-024 to AUTH-027 (R3 probes and follow-ups), AUTH-028 (P5) and AUTH-021 to AUTH-023 (machine portability, see D).
 - Run allow-listed commands alone, never chained (WD-042, WD-043). The guard allows only `git push [-u] origin v5-audit` and the same for the Linux branch; the human pushes anything else.
 - Agents: evidence-steward, design-proposer, design-challenger; protocol `ops/PROTOCOL.md`.
 - Research outputs go on a branch cut from `v5-audit` and reach it by merge, only when the human says so (WD-061).

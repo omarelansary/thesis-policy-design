@@ -426,3 +426,11 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - The research-doc refresh (`17`, `12`, `00-README`, `08` section 5, RESULTS-R3-B summary, the questions guide `design/ledger/notes/QUESTIONS-FOR-YOU-20261107.md`) is on the output branch `v5-r3-part-b-results` (36373a9) and mentions no operating system, machine or branch.
 - `STATE.md` is rewritten under 6 KB and 40 lines, with research status (A-C) and machines and branches (D) in separate sections. The previous text is archived verbatim in `STATE-ARCHIVE.md`.
 - Corrected: the old STATE line "Waiting on the human: Q-U28..Q-U32 and the ledger proposals in 08 (workbook not edited)" was wrong. Q-U28 to Q-U33 are answered, and the `08` proposals were applied on 2026-10-22 after Q-U31 (95 Change log rows).
+
+## WD-067 The human's answers of 2026-11-07 recorded; P5 authorized (AUTH-028); Executor description requested (2026-11-07)
+- A new lead session took over the previous session's task at the human's request (INT-T-023 line 6). The research records are on the output branch `v5-r3-part-b-results` (commit 5099066): intake INT-T-023, register REQ-U1107-01..09, `design/ledger/notes/ANSWERS-20261107.md`, and `exchange/prior-work/REQUEST-X1-executor.md` (THREAD E-30).
+- `17` section 9 is postponed by the human. `08` section 5 was rechecked against the result files and left unchanged. Five rows hold. EC5's "dominate" and N-26's "55 of 57" are narrower than written (21-59%; 46-55 of 57 over four runs). C-D09 and Q-U14 need the P5 update.
+- P5 is authorized (AUTH-028), P5 only. Route and models are not yet chosen, so no call has been made.
+- The ledger workbook was not edited. There is no `openpyxl` on Linux and installs are not authorized. The answers and the proposed status changes are listed per question in `ANSWERS-20261107.md`, to be applied on Windows or by the human.
+- `requirements/THESIS_QUESTION.md` is unchanged. The human says the professor and Joaa set the question; whether REQ-O14F-01's sentence is the wording to enter is asked of the human.
+- `design/tool-exposure-policy-proposal.md` is archived in place (banner; the author is the human). It was not moved, because records cite its path.
