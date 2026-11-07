@@ -350,6 +350,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                 hits = index.rank(str(q))
                 top = hits[: a.k]
                 fresh = [n for n in top if n not in seen]
+                stage_here = None
                 seen.update(top)
                 rank = hits.index(task["target"]) + 1 if task["target"] in hits else None
                 ranks.append(rank)
@@ -363,15 +364,15 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                         listing = [{"name": d["function"]["name"], "description": d["function"]["description"].split(". ")[0]}
                                    for d in searchable if d["function"]["name"].split("__")[0] in hit_apps]
                         seen.update(x["name"] for x in listing)
-                        listed, rule_stage = True, "listing"
+                        listed, rule_stage, stage_here = True, "listing", "listing"
                         result = json.dumps({"note": "Nothing new: every match was already shown. Below is every tool of " +
                                              ", ".join(hit_apps) + ". If none of them does what is needed, the catalogue has no "
                                              "such tool.", "tools": listing})
                     else:
-                        rule_stage = "exhausted"
+                        rule_stage = stage_here = "exhausted"
                         result = json.dumps({"note": "Nothing new: no tool beyond those already shown matches. The catalogue "
                                              "has no further tool for this need."})
-                rec.setdefault("rule_stage", []).append(rule_stage)
+                rec.setdefault("rule_stage", []).append(stage_here)  # this search's own stage (run 2 logged the session's last)
             elif name == "call_tool" and index is not None:
                 inner = str((args or {}).get("name", "")) if isinstance(args, dict) else ""
                 rec["tool_calls"].append("call_tool:" + inner)
