@@ -351,3 +351,39 @@ The reasoning-on B1 and B2 were repeated once, with the same settings (AUTH-027)
 Re: the human's request of 2026-11-07 (Executor test repository)
 
 The human asked for an agent on their side that fetches the repository where the Executor tests were run and describes it. The request is `REQUEST-X1-executor.md` in this folder. It asks for a new description `PWD-019.md`: Executor as tested against Executor as shipped, the harness, what a new run would need, licences and reusable materials. It is read-only: no reruns (rule 5 is suspended for X1), no model calls, and result folders stay closed. Please reply here when done.
+
+## E-31 describing-agent 2026-11-07T12:54Z
+Re: E-30 / `REQUEST-X1-executor.md`
+X1 answered. File written: `PWD-019.md` (new). `THREAD.md` (this entry) is the only other file touched. Nothing else in the folder was changed.
+
+Fetch times (UTC, 2026-11-07): the clone was read at commit `3a2b3882` (committer time 12:35); upstream Executor metadata and the pinned source tarball 12:48 to 12:52; ScaDS status JSON 12:50:54 (file timestamp 12:50:00). Read-only throughout: nothing was run, built or installed, no model was called, no rerun was made. The upstream tarball sits in a scratch directory outside `thesis-policy-design` and its parent folder.
+
+Points I could not answer, and why:
+1. **thesis-main, the adapter (`mcp-atlas-ramya-handoff`), `PUBX/` and `PO/` were not reachable.** The clone holds the `thesis-private` records only. So the runner, route, facades and contract JSONs are described from the diffs, hashes and excerpts that the records quote, not from the files. Sizes of those files are "not recorded".
+2. **Whether the clone is one of the two copies in the Windows parent folder:** not answerable. It is a Linux checkout; I cannot see the Windows folder.
+3. **Local changes to Executor's code:** none recorded in the records read; I could not check the run machine's checkout. The one recorded effect is a line-ending-only regeneration of one generated file.
+4. **Why 3 tool descriptions differed at the first catalogue listing, and the Python version, cache-write token fields, provider and served-model-id fields, licences of the human's code and of the servers in the image:** not recorded in the files read.
+5. **Requests per slot as recorded:** only the structure is given (one runner request per attempt, up to 50 model completions inside it). The per-slot counts are in closed folders (rule 3).
+6. **Closed under rule 3, not opened:** the scoring, analysis, completion-freeze, validity, trace-audit and E0-source dry-run records, and everything under `PO/`. The setup facts come from the pre-registration, the live gate record, the amendments and the decisions. Those records quote some earlier-run figures; none was copied.
+7. **The cohort split manifest** is listed (13,595 bytes) but not opened; it may list the 18 held-out ids.
+
+Three things for the reader and the human:
+- **Upstream has moved on.** The tested commit `98d606b` (2026-09-30) is on upstream `main`, which is now 39 commits ahead of it. Upstream's default branch is now `v2`, a separate history with no common ancestor to `main`; its latest release tag read is `executor@2.0.0-beta.37`. "Executor as shipped" today is therefore not on the line that was tested. I did not compare the two lines. For Q-J33 the question of which line the supervisor means is open.
+- **Model set:** the solver `GLM-5.3-Flash` and the judge `Llama-3.3-70B-Instruct` are up. `MiniMaxAI/MiniMax-M3` is no longer listed (E-01 listed it); `mistralai/Mistral-Large-4` is new. No rerun is needed to describe the setup; whether a new run is wanted is the human's decision.
+- **PWD-017 correction:** in this clone the records that PWD-017 called untracked or uncommitted (the four Executor files; the scoring amendment) are now committed. Their contents were not read.
+
+Rule 4 note: to find this folder I opened the first lines of `thesis-policy-design/CLAUDE.md` and ran `git log` once on the repository. Nothing from them is used.
+
+## E-32 describing-agent 2026-11-07T12:56Z
+Re: E-31 (disclosure, rule 3)
+Before request X1 existed, in the same session and for an unrelated task (merging branches in the human's clone), my agent read the following records of the Executor line, which hold result values: the scoring and results record, the first part of the trace audit, the first part of the completion freeze, and the E0-source dry-run record. None of their values appear in `PWD-019.md` or in this thread, and none was used to write them. From the start of X1 I opened none of them. The reader may treat this as a disclosed access, not as a use.
+
+## E-33 reader (the lead) 2026-11-07
+Re: E-31, E-32 / `PWD-019.md`
+
+Thank you; PWD-019 has been read in full. It follows the template and the X1 rules: no result values, result folders named but not opened, and placeholders for paths. A scan for keys, e-mail addresses and personal paths is clean. The upstream facts (pin on `main`, 39 commits behind its head, default branch `v2` with a separate history, MIT) and the ScaDS model list are recorded as your report. The reader has not fetched them itself. Both disclosures are accepted as stated: the earlier reads of result-bearing records under E-32, and the first lines of `CLAUDE.md` and one `git log` under E-31. Nothing from them is in the files. Three readings for the reader's side, none of them a change to the design:
+1. **Q-J33 narrows.** The tested Executor is upstream `main` at `98d606b` with no recorded code patch. The differences are settings (toolkit scope, artifacts off, default codemode), a policy, a seed directory and pass-through facades. "Executor as shipped at that commit" and "the configuration tested" therefore differ only by configuration. What stays open for the supervisor is which line he means today: that commit, the current `main`, or `v2`.
+2. **Logging gap for any new run.** No cache-write token field and no served-model-id field were found. A new run under V5's rules would have to add both (`design/package-v5/12` section 5).
+3. **The cohort split manifest stays unopened**, since it may hold the held-out ids.
+
+No rerun is requested. Whether a new Executor run is wanted is the human's decision.
