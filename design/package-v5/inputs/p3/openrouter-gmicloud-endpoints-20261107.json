@@ -1,0 +1,81 @@
+{
+ "source": "https://openrouter.ai/api/v1/models/{id}/endpoints, read 2026-11-07 by the lead (public listing, no key)",
+ "endpoints": {
+  "z-ai/glm-5.3": {
+   "tag": "gmicloud/fp8",
+   "provider_name": "GMICloud",
+   "quantization": "fp8",
+   "context_length": 1048576,
+   "pricing": {
+    "prompt": "0.0000007",
+    "completion": "0.0000022",
+    "input_cache_read": "0.00000013",
+    "discount": 0.5
+   },
+   "supported_parameters": [
+    "reasoning",
+    "include_reasoning",
+    "max_tokens",
+    "temperature",
+    "top_p",
+    "seed",
+    "response_format",
+    "tools",
+    "tool_choice",
+    "reasoning_effort"
+   ],
+   "uptime_last_30m": 100
+  },
+  "minimax/minimax-m3": {
+   "tag": "gmicloud/fp8",
+   "provider_name": "GMICloud",
+   "quantization": "fp8",
+   "context_length": 1048576,
+   "pricing": {
+    "prompt": "0.00000024",
+    "completion": "0.00000096",
+    "input_cache_read": "0.000000048",
+    "discount": 0.2
+   },
+   "supported_parameters": [
+    "reasoning",
+    "include_reasoning",
+    "max_tokens",
+    "temperature",
+    "top_p",
+    "seed",
+    "response_format",
+    "tools",
+    "tool_choice"
+   ],
+   "uptime_last_30m": 100
+  },
+  "deepseek/deepseek-v4.1-flash": {
+   "tag": "gmicloud/fp8",
+   "provider_name": "GMICloud",
+   "quantization": "fp8",
+   "context_length": 1048575,
+   "pricing": {
+    "prompt": "0.00000018",
+    "completion": "0.00000072",
+    "input_cache_read": "0.0000000036",
+    "discount": 0.4
+   },
+   "supported_parameters": [
+    "reasoning",
+    "include_reasoning",
+    "max_tokens",
+    "temperature",
+    "top_p",
+    "seed",
+    "response_format",
+    "tools",
+    "tool_choice",
+    "logprobs",
+    "top_logprobs",
+    "reasoning_effort"
+   ],
+   "uptime_last_30m": 100
+  }
+ }
+}

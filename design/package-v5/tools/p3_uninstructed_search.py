@@ -24,6 +24,9 @@ was called (directly or through call_tool), whether it was called without having
 other catalogue calls, and the usage of each request (prompt, cached, completion, reasoning tokens, cost). Outcome classes, from
 `05`: zero searches, search then correct call, wrong-tool call, answer without a tool.
 
+A session that reaches --turn-cap while still calling tools is complete with the outcome 'turn cap reached' (unless the
+target or another catalogue tool was already called, which then decides its class).
+
 Stops: HTTP 401, 402 or 403; two failed requests in a row; --max-requests; spend (--prior-spend plus this run's reported cost)
 reaching --max-spend (INT-T-029: $10 in total across all P3 runs). Keys only from the environment variable --key-env; never
 printed or written. Logs (local folder only): requests.jsonl, sessions.jsonl, run-meta.json. --analyze writes a summary with
@@ -284,7 +287,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
     names_visible = {d["function"]["name"] for d in tools}
     names_searchable = {d["function"]["name"] for d in searchable or []}
     msgs = [{"role": "system", "content": system}, {"role": "user", "content": task["prompt"]}]
-    called, seen, ranks, searches, complete, nreq = [], set(), [], 0, False, 0
+    called, seen, ranks, searches, complete, nreq, capped = [], set(), [], 0, False, 0, False
     for step in range(1, a.turn_cap + 1):
         if n_req >= a.max_requests:
             stop = "max-requests"
@@ -318,6 +321,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
         rec.update(u, provider=j.get("provider"), served_model=j.get("model"), finish=j["choices"][0].get("finish_reason"),
                    tool_calls=[], search_queries=[], search_target_rank=[])
         if not tcs:
+            rec["reply_head"] = scrub(msg.get("content") or "")[:240]  # local log only, for adjudicating 'answer without a tool'
             req_log.write(json.dumps(rec) + "\n"); req_log.flush()
             complete = True
             break
@@ -365,14 +369,18 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
         req_log.write(json.dumps(rec) + "\n"); req_log.flush()
         if a.pause:
             time.sleep(a.pause)
+    else:
+        capped = complete = True  # the turn cap ended the session while the model was still calling tools
     target = task["target"]
     cat_calls = [(n, v) for n, v in called if n not in CORE_NAMES and n in defs]
     target_called = any(n == target for n, _ in cat_calls)
     others = [n for n, _ in cat_calls if n != target]
     if not complete:
         outcome = "incomplete"
+    elif capped and not target_called and not others:
+        outcome = "turn cap reached, searched" if searches else "turn cap reached, zero searches"
     elif cell == "A":
-        outcome = ("wrong-tool call" if others else "searched, no call" if searches else "answer without a tool, zero searches")
+        outcome = ("wrong-tool call" if others else "called the absent tool by name" if target_called else "searched, no call" if searches else "answer without a tool, zero searches")
     elif target_called:
         first_other = others and [n for n, _ in cat_calls].index(others[0]) < [n for n, _ in cat_calls].index(target)
         outcome = ("correct after a wrong call" if first_other else "search then correct call" if searches else
@@ -381,7 +389,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
         outcome = "wrong-tool call"
     else:
         outcome = "answer without a tool, searched" if searches else "answer without a tool, zero searches"
-    srec = dict(session=si, task=task["id"], cell=cell, variant=variant, complete=complete, requests=nreq, searches=searches,
+    srec = dict(session=si, task=task["id"], cell=cell, variant=variant, complete=complete, capped=capped, requests=nreq, searches=searches,
                 target_best_rank=min([r for r in ranks if r], default=None), target_called=target_called,
                 target_called_unseen=any(n == target and not v for n, v in cat_calls),
                 distractor_called=any(n == task["distractor"] for n, _ in cat_calls), other_catalogue_calls=len(others),
