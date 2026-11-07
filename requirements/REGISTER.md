@@ -166,6 +166,10 @@ Relation recorded: REQ-U21-03 allows reusing earlier work after verification, wh
 | REQ-U1107-07 | INT-T-023 line 22 | user-intent | Joaa has not yet accepted or rejected V5 (the human's report, 2026-11-07). |
 | REQ-U1107-08 | INT-T-023 line 29 | user-intent | The research question was set by the professor and Joaa, not by the human. `requirements/THESIS_QUESTION.md` is unchanged: whether REQ-O14F-01 is the wording to enter, or a written version exists, is asked of the human. |
 | REQ-U1107-09 | INT-T-023 line 54 | user-intent | Q-J31 to Q-J33 mostly wait on Joaa's acceptance or rejection of V5; the Executor part waits on the Executor investigation (REQ-U1107-06) and Joaa's answer, and the investigation is meant to remove that dependency. |
+| REQ-U1107-10 | INT-T-024 line 1 | user-decision | P5 route accepted as the lead proposed: ScaDS, GLM-5.3, for the break-even part, after the AUTH-026 GLM B2 run ends; a small OpenAI run for whether deferred definitions are billed, only after the human accepts the lead's dollar estimate (added to AUTH-028). |
+| REQ-U1107-11 | INT-T-024 line 2 | user-decision | Q-U09: the 21 October meeting (INT-T-002, the same document) is a source of the research question beside the 14 October wording. Both are entered as pointers in `requirements/THESIS_QUESTION.md`, without rewording. |
+| REQ-U1107-12 | INT-T-024 line 3 | user-decision | Q-U16: the dated near-miss-source note is declined (ledger C-D14). |
+| REQ-U1107-13 | INT-T-024 line 4 | user-decision | Q-U17 and request X1: the human's thesis workspace with `thesis-private` holds the Executor work. The human will clone it for the describing agent, which explores the Executor work there. |
 
 Relations recorded: REQ-J22-02 settles H.2's count-versus-tokens relation for this work in favour of the bill (with REQ-U21-07); REQ-J22-01 replaces V5-R's "memory-informed offering off by default" with "memory-informed offering in the tested policy"; REQ-J22-01 and REQ-J22-02 are the student's answers for the supervisor, so the supervisor's own confirmation remains possible.
 

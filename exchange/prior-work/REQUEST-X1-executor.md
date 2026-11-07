@@ -11,7 +11,7 @@
 4. **No secrets or personal data.** Write no keys, tokens, key identifiers, e-mail addresses, private hostnames or personal paths. Use placeholders such as `<repo>` and `<home>`.
 
 ## What to describe (write `PWD-019.md` in the template of `README.md`, plus the extra sections below)
-1. **Where it is.** Repository names, remote URLs if public (otherwise "private"), branch and commit of each part read, and the date fetched. PWD-017 names `thesis-main`, `mcp-atlas-ramya-handoff` (branch `g8-mech-pilot`), `PUBX/`, `PRIV/` and `PO/`. Say which of these you could reach.
+1. **Where it is.** The human will clone their thesis workspace, which holds the Executor work in `thesis-private`, for you to explore (INT-T-024 line 4). Repository names, remote URLs if public (otherwise "private"), branch and commit of each part read, and the date fetched. PWD-017 names `thesis-main`, `mcp-atlas-ramya-handoff` (branch `g8-mech-pilot`), `PUBX/`, `PRIV/` and `PO/`. Say which of these you could reach, and whether the clone is one of the two copies of the thesis workspace that were reported in the Windows parent folder.
 2. **Executor as tested against Executor as shipped.**
    - The Executor commit used (PWD-017 says `98d606b`), its upstream repository and how far it is behind or ahead of upstream at fetch time (commit count and date).
    - Every local change to Executor's own code or configuration: file, kind of change (patch, setting, wrapper), and its stated purpose.
