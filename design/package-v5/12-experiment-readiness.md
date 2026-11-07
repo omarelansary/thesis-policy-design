@@ -1,6 +1,6 @@
 # 12. Experiment readiness: what can start, what cannot, and what the authorization would need to say
 
-Status: provisional, lead, 2026-10-27; section 5 added 2026-11-07 (what requests R1 to R3 changed). This is an assessment and a draft scope, not an authorization: no experiment, harness code or API call by the lead is authorized by it (AUTH-020 limits; REQ-U22-16 says the human will extend AUTH-020 when told the lead is ready). The loop rule of `05` stands: small items, read the result, revise, then the next item (REQ-U21-06).
+Status: provisional, lead, 2026-10-27; section 5 added 2026-11-07 (what requests R1 to R3 changed). **2026-11-07: the human authorized P5 as drafted in sections 3 and 5 (INT-T-023 lines 12-13, REQ-U1107-03); recorded with its limits as AUTH-028 in `ops/AUTHORIZATIONS.md` on the operations branch. P1 to P4 remain unauthorized. The route and models are still the human's choice before any run.** This is an assessment and a draft scope, not an authorization: no experiment, harness code or API call by the lead is authorized by it (AUTH-020 limits; REQ-U22-16 says the human will extend AUTH-020 when told the lead is ready). The loop rule of `05` stands: small items, read the result, revise, then the next item (REQ-U21-06).
 
 ## 1. Readiness by loop item
 | Item (`05`) | Question | Ready? | What exists | What is missing |

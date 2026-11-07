@@ -1,4 +1,5 @@
 <!-- STATUS BANNER added by the lead on 2026-10-19 (AUTH-010). Provenance of this file: UNKNOWN; it was untracked, dated 2026-10-19, with no authorization record. It is an INPUT DRAFT, not a workspace record. Known defects: the 292k-token figure is attributed to the benchmark's authors but comes from the benchmark repository's development document via the project's S4F digest (see package-v4/03 section 2); the power figures are two-sided versions of a one-sided problem; section 6 numbers other than those re-read in package-v4/01 are unverified until findings/SUM-0004. The supervisor-facing document is design/package-v4/01-supervisor-brief.md. -->
+<!-- ARCHIVED 2026-11-07 (lead, on the human's answer to Q-U12, INT-T-023 line 33): author now known: the human, who wrote it as a proposal for the supervisor and then sent the slide deck (INT-T-019) instead, followed by the 21 October meeting. Kept in place and not removed, because other records cite this path; not a current design record. -->
 
 # A tool-exposure policy for LLM agents: proposal for discussion
 

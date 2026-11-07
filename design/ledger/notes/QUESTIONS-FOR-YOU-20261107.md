@@ -1,5 +1,7 @@
 # Questions for you (2026-11-07): where they are and how to answer
 
+**Status 2026-11-07 (later the same day): answered by the human** (INT-T-023, REQ-U1107-01..09). Item 1 is postponed. Item 2 was rechecked without change. Item 3: P5 is authorized (AUTH-028). Item 4: per-question findings and proposed workbook entries are in `ANSWERS-20261107.md` (the workbook itself is not yet edited). Still open for you: Q-U09 (which wording of the research question to enter), Q-U16 (add or decline; recommendation: decline), Q-U17 (check the parent folder on Windows), Q-U15, Q-U25 and Q-U27; P5's route and models.
+
 This file only collects them. The questions themselves live where the table says. Answer in the place named, or reply in the chat quoting the id, and the lead records your words verbatim.
 
 ## 1. Proposals in the benchmark register: `design/package-v5/17-benchmark-register.md` section 9

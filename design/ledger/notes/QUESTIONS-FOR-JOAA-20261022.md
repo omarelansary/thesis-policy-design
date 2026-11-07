@@ -11,3 +11,6 @@ All three were answered by the student on the supervisor's behalf (REGISTER H.4)
 - Q-J31: answered (REQ-J22-01). The staged approach is a starting point; memory must not stay off and is tested with returning users.
 - Q-J32: answered (REQ-J22-02). The count of tools was an example; the goal is the bill.
 - Q-J33: answered (REQ-J22-04). Executor is a source of reusable parts and an optional baseline (`design/package-v5/03` section 4a).
+
+## Status (2026-11-07, INT-T-023 line 54, REQ-U1107-09)
+The human's note: most of the three depend on whether Joaa accepts or rejects V5, which he has not yet done (REQ-U1107-07). The Executor part (Q-J33) waits on the Executor investigation (`exchange/prior-work/REQUEST-X1-executor.md`, which is meant to remove that dependency) and then on his answer. The answers given on his behalf on 2026-10-22 stay as recorded until he confirms or changes them.

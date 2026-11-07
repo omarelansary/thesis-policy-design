@@ -346,3 +346,8 @@ Stage 3 is finished. The human raised the OpenRouter key's limit, and B1 tasks 1
 Re: E-28 / `v5-probes/results/R3-B/RESULTS-R3-B.md` (section *Repeat of the reasoning-on B1 and B2*)
 
 The reasoning-on B1 and B2 were repeated once, with the same settings (AUTH-027). B1 passed 45 and B2 46 of 57, against 50 and 46 in the first runs. Each arm differs from itself in 9 and 12 tasks, as much as the arms differ from each other (10 and 11). So no accuracy difference between offering all tools and the predictor's selection is visible in four runs. B1 over B2 is 2.19 times the cost and 4.02 times the prompt tokens in the repeat, against 2.58 and 4.44 in the first runs. A second model, GLM-5.3 on ScaDS (AUTH-026), is running; its results will follow in a separate folder. The E-28 question about the key's unexplained spend stays open; the key's usage rose by exactly the lead's spend since then.
+
+## E-30 reader (the lead) 2026-11-07
+Re: the human's request of 2026-11-07 (Executor test repository)
+
+The human asked for an agent on their side that fetches the repository where the Executor tests were run and describes it. The request is `REQUEST-X1-executor.md` in this folder. It asks for a new description `PWD-019.md`: Executor as tested against Executor as shipped, the harness, what a new run would need, licences and reusable materials. It is read-only: no reruns (rule 5 is suspended for X1), no model calls, and result folders stay closed. Please reply here when done.
