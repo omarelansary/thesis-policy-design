@@ -1,6 +1,6 @@
 # 12. Experiment readiness: what can start, what cannot, and what the authorization would need to say
 
-Status: provisional, lead, 2026-10-27. This is an assessment and a draft scope, not an authorization: no experiment, harness code or API call by the lead is authorized by it (AUTH-020 limits; REQ-U22-16 says the human will extend AUTH-020 when told the lead is ready). The loop rule of `05` stands: small items, read the result, revise, then the next item (REQ-U21-06).
+Status: provisional, lead, 2026-10-27; section 5 added 2026-11-07 (what requests R1 to R3 changed). This is an assessment and a draft scope, not an authorization: no experiment, harness code or API call by the lead is authorized by it (AUTH-020 limits; REQ-U22-16 says the human will extend AUTH-020 when told the lead is ready). The loop rule of `05` stands: small items, read the result, revise, then the next item (REQ-U21-06).
 
 ## 1. Readiness by loop item
 | Item (`05`) | Question | Ready? | What exists | What is missing |
@@ -23,3 +23,10 @@ Every harness takes the model as a run-time argument and writes it into each out
 
 ## 4. What I can do now without any authorization
 Write the P3 task set and catalogue specification (desk work); regenerate the frontier page and sort the 24 "before any implementation" ledger rows under V5; keep records current. None needs the key.
+
+## 5. Update 2026-11-07: what requests R1 to R3 changed (`17` section 5; results in `exchange/prior-work/v5-probes/results/`)
+- **P5.** Still the first loop item, and still unrun as specified (stub catalogues of several sizes). R3 Part B adds one measured point on a real route and benchmark: AppWorld with 469 definitions on every call costs 2.2 to 2.6 times the bill of AppWorld's own predictor subset on MiniMax-M3 (OpenRouter, one provider). About 96% of the all-tools prompt was billed as cache reads, and there were no cache-write charges. The curve over catalogue size, and so the break-even, still needs P5.
+- **P2.** Partly informed. AppWorld's predictor offers a per-task subset by removing definitions, which is not V5's fixed-prefix offering. In four runs on one model it showed no visible accuracy difference against all tools: means 47.5 and 46 of 57, with 9 to 12 tasks changing between identical runs. The mechanism question of the table above is unchanged.
+- **Run settings any authorization must fix and record:** the provider (pinned, no fallback), the reasoning mode (hosts differ in the default; with it off, MiniMax-M3 passed 24 to 28 of 57, with it on 45 to 50), the AppWorld `raise_on_failure` setting for reference-solution checks, a new experiment name per run (AppWorld issue #203), a client timeout, and a stop when the key or endpoint refuses calls.
+- **Repeats.** Identical runs differed in 5 (ScaDS) and 9 to 12 (OpenRouter) of 57 tasks. A comparison of arms needs at least two runs per arm, or more tasks, before "nearly the same" accuracy can be read (`17` section 9, item 3).
+- **Model availability.** ScaDS stopped serving MiniMax-M3 between 2026-11-02 and 11-06. Served models can disappear without notice, so each harness should record the served model id per call.
