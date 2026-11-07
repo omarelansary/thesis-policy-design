@@ -1,5 +1,11 @@
 # RESULTS-P5-B: OpenAI hosted tool search, gpt-5.4-mini (AUTH-028 part B; lead, 2026-11-07)
 
+**What this is and is not (the human, 2026-11-07: "this test does not count as P5 test yet").** It is a side check of a vendor mechanism: whether OpenAI bills deferred definitions that are never loaded. **It is not P5's test.** P5 asks for the break-even on our own route, ScaDS with client-side deferral (`05` P5; `04` section 5), and that is part A, not yet run. Two faults of this run also rule it out as a template:
+- Its sessions started warm from the calibration requests, so the cache state was not controlled.
+- It had one session per cell, so there is no spread to judge against.
+
+The harness was revised for part A (revision 2: a fresh marker per cold session, two cold and one warm session per cell; `README.md`). The figures below stand as what this run measured.
+
 Status: run complete, all 12 cells. Labels: [O] measured from the usage records, [D] arithmetic, [I] reading. **One session per cell, one model, one stub catalogue:** read as a first measurement, not an estimate with a range. No accuracy claim.
 
 ## Setup

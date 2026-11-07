@@ -1,9 +1,9 @@
 # P5 break-even: harness, run plan and cost estimate (AUTH-028; lead, 2026-11-07)
 
-Status (2026-11-07, later): **part B (OpenAI) is done**: `RESULTS-P5-B.md`, $0.149 in all. **Part A (ScaDS) is not run**; it waits for the GLM B2 run to end. Results will go in this folder, one subfolder per route and model.
+Status (2026-11-07, later): **P5's test (part A, ScaDS, our route) has not been run.** The OpenAI run (part B) is a side check of vendor billing, not P5's test: `RESULTS-P5-B.md`, $0.149. Its lessons changed the harness (revision 2, below).
 
 ## Harness
-`design/package-v5/tools/p5_break_even.py` (standard library only; SHA-256 at writing: `5e19e674...ff54ff`; the run records the hash of the version that ran in `run-meta.json`).
+`design/package-v5/tools/p5_break_even.py` (standard library only). Revision 1 (`5e19e674...ff54ff`) ran part B; **revision 2** (`87905175...045409`) is for part A; each run records the hash of the version that ran in `run-meta.json`).
 - **Catalogue:** stub tools generated from a fixed seed. Each is about 1,100 characters of JSON (about 275 tokens; D-01 assumed 250), with a short description and the bulk in the parameter schema. The needed tool, `orders_get_shipping_status`, is in every catalogue and never in the deferral core.
 - **Task:** one session of three user turns: the status of order 4471, the same for 4472, then both in one sentence. The harness answers every tool call with fixed stub data.
 - **Arms:**
@@ -16,10 +16,20 @@ Status (2026-11-07, later): **part B (OpenAI) is done**: `RESULTS-P5-B.md`, $0.1
 - **Analysis:** `--analyze` reports the bill ratio of deferral to expose-all per size, in DPR-0006 fresh-token equivalents.
 - **Mechanism caveat:** search plus `call_tool` is this harness's way of keeping `tools` fixed on ScaDS. It is not the client-side mechanism P2 still has to choose (`17` section 9, item 8).
 
+## Revision 2 (2026-11-07, after part B)
+- **Cold starts are forced.** A fresh random marker leads the description of tool 0, the first definition in both arms. On ScaDS GLM-5.3 the tools come before the system text (`10` section 9), so the marker has to sit in a tool to make the whole prefix new.
+- **Repeats.** Each size and arm gets 2 cold sessions, each with its own marker, which gives a spread. Then 1 warm session reuses the last marker, which gives the warm start that D-01 only describes as a difference (table E).
+- **Calibration requests get markers of their own**, so they cannot warm a session.
+- **Analysis.** `design/package-v5/tools/p5_analyze.py` compares the ScaDS results with D-01 in its client mode (search is a separate request), with both the cached-core and the uncached-core variants.
+- **Request count (mock run): 138** (6 calibration, 88 cold, 44 warm). That is above AUTH-028's "at most about 100 requests per model". Options:
+  - (a) Raise the cap to about 140 for this free route (recommended).
+  - (b) Keep 100: 2 cold sessions and no warm session (about 94 requests).
+  - (c) Keep 100: 1 cold and 1 warm session (about 94).
+
 ## Run plan
 | Part | Route, model | Requests (from the mock run) | Cost | When |
 |---|---|---|---|---|
-| A. Break-even curve | ScaDS, `zai-org/GLM-5.3`, reasoning as served | 94 (1 + 5 calibration; 2 sessions x 4 sizes x 2 arms) | free | After the AUTH-026 GLM B2 run ends (AUTH-028). On 2026-11-07 at 13:20 UTC it was at task 21 of 57 after 9.5 h, so roughly 10 to 16 h more: the night of 7 to 8 November or the morning of 8 November. At B2's latency (about 1 min per call) part A takes about 1.5 to 2.5 h. |
+| A. Break-even curve | ScaDS, `zai-org/GLM-5.3`, reasoning as served | 138 with revision 2 (option a), or about 94 (options b, c) | free | After the AUTH-026 GLM B2 run ends (AUTH-028). On 2026-11-07 at 13:20 UTC it was at task 21 of 57 after 9.5 h, so roughly 10 to 16 h more: the night of 7 to 8 November or the morning of 8 November. At B2's latency of 2026-11-06 (about 1 min per call), 138 requests take about 2 to 3.5 h. |
 | B. Are deferred definitions billed? | OpenAI, `gpt-5.4-mini`, Responses API, reasoning effort low | 73 (13 calibration; 1 session x 4 sizes x 3 arms) | **about $0.80; stop at $1.20** | Any time, independent of ScaDS. Needs an OpenAI key in `~/r3-work/.env` as `OPENAI_API_KEY`: that file holds only OpenRouter and ScaDS keys now. |
 
 **How the OpenAI estimate is made.** Prices are from the stored OpenAI price page of 2026-10-19 (`evidence/literature-20261019/price-openai-20261019.md`, standard tier): `gpt-5.4-mini` costs $0.75 per million input tokens, $0.075 cached and $4.50 output.

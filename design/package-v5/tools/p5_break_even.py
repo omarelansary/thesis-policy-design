@@ -24,6 +24,12 @@ Routes and arms
 Calibration (per route): one request with no tools and one per size and arm with the user message "Reply with OK." gives tokens per
 definition, and for the OpenAI deferred arms whether unloaded definitions are billed.
 
+COLD START (revision 2, 2026-11-07, after part B): a fresh random marker leads the description of tool 0, the first definition in
+every arm, so the whole prefix is new: on ScaDS GLM-5.3 the template puts the tools first and the system text after them
+(`10` section 9), so a marker in the system text would not reach the tool block. Each cold session gets its own marker; a warm
+session reuses the last cold one of its cell; calibration requests get markers of their own, so they cannot warm a session.
+Revision 1 had no marker; its part B sessions started warm from the calibration requests (RESULTS-P5-B).
+
 Stops: HTTP 401, 402 or 403; two failed requests in a row; --max-requests; --max-spend (OpenAI, from usage and --price).
 Keys only from the environment (SCADS_API_KEY and SCADS_BASE_URL, or OPENAI_API_KEY); never printed or written. Output: one JSON
 line per request (counts and tool names only, no message text) and a summary JSON; use --analyze on the JSONL afterwards.
@@ -37,17 +43,18 @@ Examples (Linux):
       --max-spend 1.5 --out design/package-v5/inputs/p5/openai-gpt54mini
   python3 design/package-v5/tools/p5_break_even.py --analyze design/package-v5/inputs/p5/scads-glm53/requests.jsonl
 """
-import argparse, hashlib, json, os, random, re, sys, time, urllib.error, urllib.request
+import argparse, hashlib, json, os, random, re, secrets, sys, time, urllib.error, urllib.request
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--route", choices=["scads", "openai"])
 ap.add_argument("--model")
 ap.add_argument("--sizes", default="10,30,100,300")
 ap.add_argument("--arms", default=None, help="default: expose_all,deferral (scads); eager,deferred_fn,deferred_ns (openai)")
-ap.add_argument("--sessions", type=int, default=2, help="identical sessions per size and arm; the second shows a warm start")
+ap.add_argument("--sessions", type=int, default=2, help="cold sessions per size and arm, each with a fresh marker (see COLD START)")
+ap.add_argument("--warm-sessions", type=int, default=1, help="then sessions that reuse the last cold session's marker (warm start)")
 ap.add_argument("--no-calibration", action="store_true")
 ap.add_argument("--turn-cap", type=int, default=6)
-ap.add_argument("--max-requests", type=int, default=100)
+ap.add_argument("--max-requests", type=int, default=100, help="AUTH-028: at most about 100 per model unless the human raises it")
 ap.add_argument("--max-spend", type=float, default=0.0, help="dollars; 0 = no cap (ScaDS is free)")
 ap.add_argument("--price", default="", help="input,cached_input,cache_write,output dollars per million tokens (OpenAI)")
 ap.add_argument("--reasoning-effort", default="low", help="OpenAI only; ScaDS serves reasoning as configured and it is recorded")
@@ -228,15 +235,22 @@ if a.route == "openai" and a.max_spend and not PRICE:
     sys.exit("--max-spend on the OpenAI route needs --price input,cached,cache_write,output; nothing was sent")
 
 
-def chat_tools(arm, n):
+def marked(defs, nonce):
+    if not nonce:
+        return defs
+    first = dict(defs[0], description=f"[{nonce}] " + defs[0]["description"])
+    return [first] + defs[1:]
+
+
+def chat_tools(arm, n, nonce=None):
     defs = CAT[:n] if arm == "expose_all" else CORE + [SEARCH, CALL]
-    return [{"type": "function", "function": t} for t in defs]
+    return [{"type": "function", "function": t} for t in marked(defs, nonce)]
 
 
-def resp_tools(arm, n):
+def resp_tools(arm, n, nonce=None):
     if arm == "eager":
-        return [{"type": "function", **t} for t in CAT[:n]]
-    core = [{"type": "function", **t} for t in CORE]
+        return [{"type": "function", **t} for t in marked(CAT[:n], nonce)]
+    core = [{"type": "function", **t} for t in marked(CORE, nonce)]
     rest = CAT[5:n]
     if arm == "deferred_fn":
         return core + [{"type": "function", "defer_loading": True, **t} for t in rest] + [{"type": "tool_search"}]
@@ -269,6 +283,7 @@ BASE = (os.environ.get("SCADS_BASE_URL") or "https://llm.scads.ai/v1") if a.rout
 os.makedirs(a.out, exist_ok=True)
 LOG = open(os.path.join(a.out, "requests.jsonl"), "a", encoding="utf-8", newline="\n")
 STATE = {"requests": 0, "fails_in_row": 0, "spend": 0.0, "stopped": None}
+CUR = {}
 
 
 def scrub(s):
@@ -311,7 +326,7 @@ def call(phase, arm, n, session, turn, step, body):
     status, j, lat, err = post("/chat/completions" if a.route == "scads" else "/responses", body)
     rec = dict(t=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), route=a.route, model_requested=a.model,
                model_served=(j or {}).get("model"), phase=phase, arm=arm, n=n, session=session, turn=turn, step=step,
-               status=status, latency_s=lat, n_tools_array=len(body.get("tools") or []), body_chars=len(json.dumps(body)), error=err)
+               start=CUR.get("start"), marker=CUR.get("nonce"), status=status, latency_s=lat, n_tools_array=len(body.get("tools") or []), body_chars=len(json.dumps(body)), error=err)
     rec.update(usage_of(j) if j else dict(prompt=None, cached=None, cache_write=None, completion=None, reasoning=None))
     names = []
     if j and a.route == "scads":
@@ -367,15 +382,17 @@ def base_body(tools, system, messages):
 
 def calibration():
     msg = [{"role": "user", "content": "Reply with OK."}]
+    CUR.update(start="calibration", nonce=None)
     call("calibration", "none", 0, 0, 0, 0, base_body(None, SYSTEM, msg))
     for arm in ARMS:
         for n in (SIZES[:1] if arm == "deferral" else SIZES):  # the deferral core is the same at every size
-            tl = chat_tools(arm, n) if a.route == "scads" else resp_tools(arm, n)
+            CUR["nonce"] = secrets.token_hex(6)
+            tl = chat_tools(arm, n, CUR["nonce"]) if a.route == "scads" else resp_tools(arm, n, CUR["nonce"])
             call("calibration", arm, n, 0, 0, 0, base_body(tl, SYSTEM + (SYSTEM_DEFER if arm == "deferral" else ""), msg))
 
 
 def session_scads(arm, n, s):
-    tools, system, msgs = chat_tools(arm, n), SYSTEM + (SYSTEM_DEFER if arm == "deferral" else ""), []
+    tools, system, msgs = chat_tools(arm, n, CUR["nonce"]), SYSTEM + (SYSTEM_DEFER if arm == "deferral" else ""), []
     for ti, u in enumerate(USER_TURNS, 1):
         msgs.append({"role": "user", "content": u})
         for step in range(1, a.turn_cap + 1):
@@ -401,7 +418,7 @@ def session_scads(arm, n, s):
 
 
 def session_openai(arm, n, s):
-    tools, items = resp_tools(arm, n), []
+    tools, items = resp_tools(arm, n, CUR["nonce"]), []
     for ti, u in enumerate(USER_TURNS, 1):
         items.append({"role": "user", "content": u})
         for step in range(1, a.turn_cap + 1):
@@ -427,9 +444,15 @@ meta = dict(script_sha256=hashlib.sha256(open(__file__, "rb").read()).hexdigest(
             catalogue_sha256=hashlib.sha256(json.dumps(CAT).encode()).hexdigest(), target=TARGET)
 if not a.no_calibration:
     calibration()
-for s in range(1, a.sessions + 1):  # every first session before any warm repeat, so a request cap cuts repeats first
+last = {}
+for s in range(1, a.sessions + a.warm_sessions + 1):  # cold sessions first, then warm ones, so a request cap cuts warm ones first
     for n in SIZES:
         for arm in ARMS:
+            if s <= a.sessions:
+                last[(arm, n)] = secrets.token_hex(6)
+                CUR.update(start="cold", nonce=last[(arm, n)])
+            else:
+                CUR.update(start="warm", nonce=last[(arm, n)])
             (session_scads if a.route == "scads" else session_openai)(arm, n, s)
 meta.update(finished=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), requests=STATE["requests"], spend=round(STATE["spend"], 4),
             stopped=STATE["stopped"])
