@@ -22,7 +22,12 @@ search result is the complete list of the tools (name and first sentence of the 
 to, with a note that if none of them fits, the catalogue has no such tool; any later search that again finds nothing new (or a
 search with no match at all) gets a note that the catalogue has no further tool for this need. The note states a fact about the
 catalogue; the system text does not change, and what the model does next is what is measured. --turn-cap stays as a safety
-backstop only (run 2: 12), reported separately, never the rule. The system text never tells the model to search; search_tools and call_tool carry their own short
+backstop only (run 2: 12), reported separately, never the rule.
+REVISED NO-MATCH RULE (variant rule2, run 3, INT-T-032; after run 2 showed the listing invited substitutes and false claims): no
+listing. The scope is the set of apps of the best match (top 1) of each search so far, this one included. A search counts as new
+only if its top --k holds a tool not shown before that belongs to an app in the scope; otherwise its result is only the note that
+the catalogue has no further tool for this need. Rewording that drags unrelated apps' tools into ranks 2 and 3 no longer keeps the
+search open; a search whose best match is in a new app widens the scope. Still no count and no threshold. The system text never tells the model to search; search_tools and call_tool carry their own short
 descriptions, as a vendor's search tool does. search_tools returns the top --k definitions by BM25 over name, description and
 parameter names (the harness's ranker, not a V5 choice); call_tool runs any catalogue tool by name.
 
@@ -295,7 +300,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
     names_searchable = {d["function"]["name"] for d in searchable or []}
     msgs = [{"role": "system", "content": system}, {"role": "user", "content": task["prompt"]}]
     called, seen, ranks, searches, complete, nreq, capped = [], set(), [], 0, False, 0, False
-    listed, rule_stage = False, None
+    listed, rule_stage, scope = False, None, set()
     for step in range(1, a.turn_cap + 1):
         if n_req >= a.max_requests:
             stop = "max-requests"
@@ -329,7 +334,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
         rec.update(u, provider=j.get("provider"), served_model=j.get("model"), finish=j["choices"][0].get("finish_reason"),
                    tool_calls=[], search_queries=[], search_target_rank=[])
         if not tcs:
-            rec["reply_head"] = scrub(msg.get("content") or "")[:240]  # local log only, for adjudicating 'answer without a tool'
+            rec["reply_head"] = scrub(msg.get("content") or "")[:400]  # local log only, for adjudicating 'answer without a tool'
             req_log.write(json.dumps(rec) + "\n"); req_log.flush()
             complete = True
             break
@@ -369,6 +374,13 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                                              ", ".join(hit_apps) + ". If none of them does what is needed, the catalogue has no "
                                              "such tool.", "tools": listing})
                     else:
+                        rule_stage = stage_here = "exhausted"
+                        result = json.dumps({"note": "Nothing new: no tool beyond those already shown matches. The catalogue "
+                                             "has no further tool for this need."})
+                if variant == "rule2":  # REVISED NO-MATCH RULE (run 3): no listing; novelty only within the matched app(s)
+                    if top:
+                        scope.add(top[0].split("__")[0])
+                    if not [n for n in fresh if n.split("__")[0] in scope]:
                         rule_stage = stage_here = "exhausted"
                         result = json.dumps({"note": "Nothing new: no tool beyond those already shown matches. The catalogue "
                                              "has no further tool for this need."})
