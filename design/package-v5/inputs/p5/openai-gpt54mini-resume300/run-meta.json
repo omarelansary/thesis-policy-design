@@ -1,0 +1,40 @@
+{
+ "script_sha256": "5e19e67494816ed559b25ce20ed235e98a8cb105598733a48faa0fef94ff54ff",
+ "args": {
+  "route": "openai",
+  "model": "gpt-5.4-mini",
+  "sizes": "300",
+  "arms": null,
+  "sessions": 1,
+  "no_calibration": true,
+  "turn_cap": 6,
+  "max_requests": 30,
+  "max_spend": 0.6,
+  "price": "0.75,0.075,0,4.5",
+  "reasoning_effort": "low",
+  "max_output": 2048,
+  "timeout": 300.0,
+  "pause": 0.0,
+  "seed": 5,
+  "def_chars": 1000,
+  "out": "design/package-v5/inputs/p5/openai-gpt54mini-resume300",
+  "dry_run": false,
+  "analyze": null
+ },
+ "started": "2026-11-07T13:59:29Z",
+ "base_host": "api.openai.com",
+ "sizes": [
+  300
+ ],
+ "arms": [
+  "eager",
+  "deferred_fn",
+  "deferred_ns"
+ ],
+ "catalogue_sha256": "c7623caf8d49cc9dea064a7529e23bf4cbf912e5ec75506d88f750b48d9704dc",
+ "target": "orders_get_shipping_status",
+ "finished": "2026-11-07T14:00:12Z",
+ "requests": 15,
+ "spend": 0.035,
+ "stopped": null
+}

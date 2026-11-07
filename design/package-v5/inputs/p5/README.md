@@ -1,6 +1,6 @@
 # P5 break-even: harness, run plan and cost estimate (AUTH-028; lead, 2026-11-07)
 
-Status: the harness is written and tested against a local mock server only. **No real request has been sent.** Results will go in this folder, one subfolder per route and model.
+Status (2026-11-07, later): **part B (OpenAI) is done**: `RESULTS-P5-B.md`, $0.149 in all. **Part A (ScaDS) is not run**; it waits for the GLM B2 run to end. Results will go in this folder, one subfolder per route and model.
 
 ## Harness
 `design/package-v5/tools/p5_break_even.py` (standard library only; SHA-256 at writing: `5e19e674...ff54ff`; the run records the hash of the version that ran in `run-meta.json`).

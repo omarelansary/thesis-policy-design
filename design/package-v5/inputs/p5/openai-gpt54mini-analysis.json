@@ -1,0 +1,636 @@
+{
+ "logs": [
+  {
+   "file": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "sha256": "937ff6c3b2040bc5f9df298f05f0d3753629447e77eac08617ad606ad019384f"
+  },
+  {
+   "file": "design/package-v5/inputs/p5/openai-gpt54mini-resume300/requests.jsonl",
+   "sha256": "447ab85e6092bda3afdf8ff8ff2e23548cafd1969e4759c7b384a88ab5462353"
+  },
+  {
+   "file": "design/package-v5/inputs/p5/openai-gpt54mini-resume10/requests.jsonl",
+   "sha256": "9605de941e4e6d381aaacb1e65ec09e9b85f29b55c14a3adad79f9d476efaeca"
+  }
+ ],
+ "price": {
+  "input": 0.75,
+  "cached": 0.075,
+  "write": 0.0,
+  "output": 4.5,
+  "r": 0.1,
+  "w": 1.0,
+  "o": 6.0
+ },
+ "requests_total": 80,
+ "requests_ok": 77,
+ "dollars_all_requests": 0.1451,
+ "calibration": [
+  {
+   "arm": "deferred_fn",
+   "n": 10,
+   "prompt": 1523,
+   "cached": 1408,
+   "tokens_per_tool": 148.7,
+   "billed_tokens_per_deferred_tool": 127.2,
+   "share_of_full_definition": 0.747
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 30,
+   "prompt": 2530,
+   "cached": 0,
+   "tokens_per_tool": 83.1,
+   "billed_tokens_per_deferred_tool": 65.6,
+   "share_of_full_definition": 0.384
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 100,
+   "prompt": 6032,
+   "cached": 0,
+   "tokens_per_tool": 60.0,
+   "billed_tokens_per_deferred_tool": 54.1,
+   "share_of_full_definition": 0.317
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 300,
+   "prompt": 16065,
+   "cached": 4480,
+   "tokens_per_tool": 53.4,
+   "billed_tokens_per_deferred_tool": 51.4,
+   "share_of_full_definition": 0.3
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 10,
+   "prompt": 1355,
+   "cached": 0,
+   "tokens_per_tool": 131.9,
+   "billed_tokens_per_deferred_tool": 93.6,
+   "share_of_full_definition": 0.55
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 30,
+   "prompt": 1769,
+   "cached": 0,
+   "tokens_per_tool": 57.8,
+   "billed_tokens_per_deferred_tool": 35.2,
+   "share_of_full_definition": 0.206
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 100,
+   "prompt": 2337,
+   "cached": 0,
+   "tokens_per_tool": 23.0,
+   "billed_tokens_per_deferred_tool": 15.2,
+   "share_of_full_definition": 0.089
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 300,
+   "prompt": 2716,
+   "cached": 0,
+   "tokens_per_tool": 8.9,
+   "billed_tokens_per_deferred_tool": 6.2,
+   "share_of_full_definition": 0.036
+  },
+  {
+   "arm": "eager",
+   "n": 10,
+   "prompt": 1738,
+   "cached": 0,
+   "tokens_per_tool": 170.2
+  },
+  {
+   "arm": "eager",
+   "n": 30,
+   "prompt": 5159,
+   "cached": 0,
+   "tokens_per_tool": 170.8
+  },
+  {
+   "arm": "eager",
+   "n": 100,
+   "prompt": 17129,
+   "cached": 3712,
+   "tokens_per_tool": 170.9
+  },
+  {
+   "arm": "eager",
+   "n": 300,
+   "prompt": 51368,
+   "cached": 16000,
+   "tokens_per_tool": 171.1
+  }
+ ],
+ "sessions": [
+  {
+   "arm": "deferred_fn",
+   "n": 10,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 9891,
+   "cached": 7680,
+   "cache_write": 0,
+   "completion": 266,
+   "reasoning": 60,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.764,
+   "fresh": 2211,
+   "bill_fresh_equiv": 4575.0,
+   "dollars": 0.003431,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 10,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 9074,
+   "cached": 7424,
+   "cache_write": 0,
+   "completion": 233,
+   "reasoning": 45,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.762,
+   "fresh": 1650,
+   "bill_fresh_equiv": 3790.4,
+   "dollars": 0.002843,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "eager",
+   "n": 10,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini-resume10/requests.jsonl",
+   "requests": 5,
+   "prompt": 9443,
+   "cached": 8576,
+   "cache_write": 0,
+   "completion": 226,
+   "reasoning": 27,
+   "searches": 0,
+   "target_calls": 2,
+   "first_request_cached_share": 0.954,
+   "fresh": 867,
+   "bill_fresh_equiv": 3080.6,
+   "dollars": 0.00231,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 30,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 14921,
+   "cached": 13184,
+   "cache_write": 0,
+   "completion": 245,
+   "reasoning": 50,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.854,
+   "fresh": 1737,
+   "bill_fresh_equiv": 4525.4,
+   "dollars": 0.003394,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 30,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 12867,
+   "cached": 8064,
+   "cache_write": 0,
+   "completion": 247,
+   "reasoning": 44,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.683,
+   "fresh": 4803,
+   "bill_fresh_equiv": 7091.4,
+   "dollars": 0.005319,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "eager",
+   "n": 30,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 26550,
+   "cached": 25216,
+   "cache_write": 0,
+   "completion": 211,
+   "reasoning": 20,
+   "searches": 0,
+   "target_calls": 2,
+   "first_request_cached_share": 0.966,
+   "fresh": 1334,
+   "bill_fresh_equiv": 5121.6,
+   "dollars": 0.003841,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 100,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 32430,
+   "cached": 30848,
+   "cache_write": 0,
+   "completion": 265,
+   "reasoning": 55,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.928,
+   "fresh": 1582,
+   "bill_fresh_equiv": 6256.8,
+   "dollars": 0.004693,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 100,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 16678,
+   "cached": 13824,
+   "cache_write": 0,
+   "completion": 281,
+   "reasoning": 80,
+   "searches": 2,
+   "target_calls": 2,
+   "first_request_cached_share": 0.686,
+   "fresh": 2854,
+   "bill_fresh_equiv": 5922.4,
+   "dollars": 0.004442,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "eager",
+   "n": 100,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini/requests.jsonl",
+   "requests": 5,
+   "prompt": 86396,
+   "cached": 85376,
+   "cache_write": 0,
+   "completion": 231,
+   "reasoning": 30,
+   "searches": 0,
+   "target_calls": 2,
+   "first_request_cached_share": 0.993,
+   "fresh": 1020,
+   "bill_fresh_equiv": 10943.6,
+   "dollars": 0.008208,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 300,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini-resume300/requests.jsonl",
+   "requests": 5,
+   "prompt": 82599,
+   "cached": 81024,
+   "cache_write": 0,
+   "completion": 255,
+   "reasoning": 49,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.977,
+   "fresh": 1575,
+   "bill_fresh_equiv": 11207.4,
+   "dollars": 0.008406,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 300,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini-resume300/requests.jsonl",
+   "requests": 5,
+   "prompt": 21062,
+   "cached": 17152,
+   "cache_write": 0,
+   "completion": 275,
+   "reasoning": 73,
+   "searches": 1,
+   "target_calls": 2,
+   "first_request_cached_share": 0.628,
+   "fresh": 3910,
+   "bill_fresh_equiv": 7275.2,
+   "dollars": 0.005456,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  },
+  {
+   "arm": "eager",
+   "n": 300,
+   "session": 1,
+   "log": "design/package-v5/inputs/p5/openai-gpt54mini-resume300/requests.jsonl",
+   "requests": 5,
+   "prompt": 257594,
+   "cached": 256256,
+   "cache_write": 0,
+   "completion": 213,
+   "reasoning": 19,
+   "searches": 0,
+   "target_calls": 2,
+   "first_request_cached_share": 0.997,
+   "fresh": 1338,
+   "bill_fresh_equiv": 28241.6,
+   "dollars": 0.021181,
+   "served_models": [
+    "gpt-5.4-mini-2026-03-17"
+   ]
+  }
+ ],
+ "ratios": [
+  {
+   "arm": "deferred_fn",
+   "n": 10,
+   "session": 1,
+   "bill_ratio": 1.485,
+   "dollar_ratio": 1.485
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 10,
+   "session": 1,
+   "bill_ratio": 1.23,
+   "dollar_ratio": 1.231
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 30,
+   "session": 1,
+   "bill_ratio": 0.884,
+   "dollar_ratio": 0.884
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 30,
+   "session": 1,
+   "bill_ratio": 1.385,
+   "dollar_ratio": 1.385
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 100,
+   "session": 1,
+   "bill_ratio": 0.572,
+   "dollar_ratio": 0.572
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 100,
+   "session": 1,
+   "bill_ratio": 0.541,
+   "dollar_ratio": 0.541
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 300,
+   "session": 1,
+   "bill_ratio": 0.397,
+   "dollar_ratio": 0.397
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 300,
+   "session": 1,
+   "bill_ratio": 0.258,
+   "dollar_ratio": 0.258
+  }
+ ],
+ "d01_comparison": [
+  {
+   "arm": "deferred_fn",
+   "n": 10,
+   "measured_session_ratio": 1.485,
+   "d01_as_written_tool_block_ratio": 1.322,
+   "d01_measured_params_session_ratio": 1.107,
+   "measured_params": {
+    "d": 170.2,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 1487,
+    "appended_tokens_first_search": 313,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2229.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 10,
+   "measured_session_ratio": 1.23,
+   "d01_as_written_tool_block_ratio": 1.322,
+   "d01_measured_params_session_ratio": 1.082,
+   "measured_params": {
+    "d": 170.2,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 1319,
+    "appended_tokens_first_search": 317,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2229.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 30,
+   "measured_session_ratio": 0.884,
+   "d01_as_written_tool_block_ratio": 0.44,
+   "d01_measured_params_session_ratio": 0.828,
+   "measured_params": {
+    "d": 170.8,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 2494,
+    "appended_tokens_first_search": 310,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2559.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 30,
+   "measured_session_ratio": 1.385,
+   "d01_as_written_tool_block_ratio": 0.44,
+   "d01_measured_params_session_ratio": 0.85,
+   "measured_params": {
+    "d": 170.8,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 1733,
+    "appended_tokens_first_search": 661,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2559.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 100,
+   "measured_session_ratio": 0.572,
+   "d01_as_written_tool_block_ratio": 0.132,
+   "d01_measured_params_session_ratio": 0.533,
+   "measured_params": {
+    "d": 170.9,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 5996,
+    "appended_tokens_first_search": 308,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2398.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 100,
+   "measured_session_ratio": 0.541,
+   "d01_as_written_tool_block_ratio": 0.196,
+   "d01_measured_params_session_ratio": 0.43,
+   "measured_params": {
+    "d": 170.9,
+    "T": 5,
+    "D": 2,
+    "surface_tokens": 2301,
+    "appended_tokens_first_search": 830,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2398.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_fn",
+   "n": 300,
+   "measured_session_ratio": 0.397,
+   "d01_as_written_tool_block_ratio": 0.044,
+   "d01_measured_params_session_ratio": 0.39,
+   "measured_params": {
+    "d": 171.1,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 16029,
+    "appended_tokens_first_search": 310,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2576.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  },
+  {
+   "arm": "deferred_ns",
+   "n": 300,
+   "measured_session_ratio": 0.258,
+   "d01_as_written_tool_block_ratio": 0.044,
+   "d01_measured_params_session_ratio": 0.206,
+   "measured_params": {
+    "d": 171.1,
+    "T": 5,
+    "D": 1,
+    "surface_tokens": 2680,
+    "appended_tokens_first_search": 1351,
+    "warm_start_eager": true,
+    "warm_start_deferral": true,
+    "non_tool_bill": 2576.6
+   },
+   "d01_defaults": {
+    "K": 3,
+    "search_tool": 300,
+    "core": 5,
+    "deferred_part_billed": 0,
+    "start": "cold"
+   }
+  }
+ ]
+}
