@@ -420,3 +420,9 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
   - Recorded on `v5-r3-part-b-results` (THREAD E-29).
 - **ScaDS status check** (the human asked, 2026-11-06): `MiniMaxAI/MiniMax-M3` is no longer served (403, not listed). `MiniMax-M3.1-Flash` is up, with tools, but returned no reasoning even when asked; the Windows probes of 11-01/02 agree. This check is not yet in the results file.
 - 2026-11-07, AUTH-026 narrowed by the human ("i choose option 2 Finish GLM B2, then stop"): GLM-5.3 B1 finished (23 of 57; 2 of 741 calls timed out, then retried). B2 continues to the end. The repeats of both are dropped: the lead stopped the sequence script at about 09:20 UTC, and the B2 process runs on alone. Reason: ScaDS is overloaded (B2 median 61 s per call, 13 of 112 calls timed out at 15 min), and GLM is weak and erratic here (3 of 11 B2 tasks completed at the first step), so repeats add little.
+
+## WD-066 STATE.md rewritten and split; docs refresh kept apart from machine notes (2026-11-07)
+- The human: "do docs refresh, but seprate windowstolinux stuff from real work stuff donot contaminate the ledger work with stupid stuff as operating system change".
+- The research-doc refresh (`17`, `12`, `00-README`, `08` section 5, RESULTS-R3-B summary, the questions guide `design/ledger/notes/QUESTIONS-FOR-YOU-20261107.md`) is on the output branch `v5-r3-part-b-results` (36373a9) and mentions no operating system, machine or branch.
+- `STATE.md` is rewritten under 6 KB and 40 lines, with research status (A-C) and machines and branches (D) in separate sections. The previous text is archived verbatim in `STATE-ARCHIVE.md`.
+- Corrected: the old STATE line "Waiting on the human: Q-U28..Q-U32 and the ledger proposals in 08 (workbook not edited)" was wrong. Q-U28 to Q-U33 are answered, and the `08` proposals were applied on 2026-10-22 after Q-U31 (95 Change log rows).
