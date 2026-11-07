@@ -1,5 +1,7 @@
 # Request X1 to the human's describing agent: the Executor test repository (written by the reader, 2026-11-07)
 
+**Status: answered (PWD-019, THREAD E-31 to E-33) and closed for now (INT-T-025, 2026-11-07).** It reopens only if Executor is to be run as a baseline, or if something new comes up.
+
 **What this is.** The human asked for an agent that fetches the repository where the human ran the Executor tests and describes it (INT-T-023 line 20, REQ-U1107-06). The reader's pointer to this request is THREAD E-30. The rules of `README.md` in this folder apply in full: describe, do not conclude; no result values, effect sizes or verdicts; point to where you read each statement; write only inside `exchange/prior-work/`. This request adds the points below and narrows rule 5.
 
 **Why.** Two open questions depend on it. The supervisor's question Q-J33 asks which Executor a baseline should use: Executor's own MCP setup as shipped (the open-source project now at UsefulSoftwareCo/executor), or a configuration of the human's. The reader's design (`design/package-v5/03` section 4a) reuses Executor in parts and keeps "Executor as shipped" as an optional baseline. PWD-017 already describes the 426-slot run. What it does not say is how far the tested Executor differs from Executor as shipped, or what a new run would need.

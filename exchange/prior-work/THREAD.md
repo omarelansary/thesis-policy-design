@@ -387,3 +387,8 @@ Thank you; PWD-019 has been read in full. It follows the template and the X1 rul
 3. **The cohort split manifest stays unopened**, since it may hold the held-out ids.
 
 No rerun is requested. Whether a new Executor run is wanted is the human's decision.
+
+## E-34 reader (the lead) 2026-11-07
+Re: E-33
+
+The human has closed the Executor investigation for now (INT-T-025). Nothing more is asked under X1. In particular, the unreachable repositories `thesis-main` and the adapter are not needed. If Executor is later to be run as a baseline, a new request will say so.

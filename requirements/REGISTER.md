@@ -170,6 +170,7 @@ Relation recorded: REQ-U21-03 allows reusing earlier work after verification, wh
 | REQ-U1107-11 | INT-T-024 line 2 | user-decision | Q-U09: the 21 October meeting (INT-T-002, the same document) is a source of the research question beside the 14 October wording. Both are entered as pointers in `requirements/THESIS_QUESTION.md`, without rewording. |
 | REQ-U1107-12 | INT-T-024 line 3 | user-decision | Q-U16: the dated near-miss-source note is declined (ledger C-D14). |
 | REQ-U1107-13 | INT-T-024 line 4 | user-decision | Q-U17 and request X1: the human's thesis workspace with `thesis-private` holds the Executor work. The human will clone it for the describing agent, which explores the Executor work there. |
+| REQ-U1107-14 | INT-T-025 line 1 | user-decision | The Executor investigation is closed for now. What V5 needs from Executor is already taken: the reusable parts, from its documentation (`design/package-v5/03` section 4a); the tested setup, from PWD-017 and PWD-019. It reopens when something new comes up: the human or Joaa decides to run Executor as a baseline, Joaa answers Q-J33, or a V5 part depends on Executor behaviour not yet described. |
 
 Relations recorded: REQ-J22-02 settles H.2's count-versus-tokens relation for this work in favour of the bill (with REQ-U21-07); REQ-J22-01 replaces V5-R's "memory-informed offering off by default" with "memory-informed offering in the tested policy"; REQ-J22-01 and REQ-J22-02 are the student's answers for the supervisor, so the supervisor's own confirmation remains possible.
 

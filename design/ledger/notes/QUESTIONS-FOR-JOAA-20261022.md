@@ -15,3 +15,4 @@ All three were answered by the student on the supervisor's behalf (REGISTER H.4)
 ## Status (2026-11-07, INT-T-023 line 54, REQ-U1107-09)
 The human's note: most of the three depend on whether Joaa accepts or rejects V5, which he has not yet done (REQ-U1107-07). The Executor part (Q-J33) waits on the Executor investigation (`exchange/prior-work/REQUEST-X1-executor.md`, which is meant to remove that dependency) and then on his answer. The answers given on his behalf on 2026-10-22 stay as recorded until he confirms or changes them.
 - 2026-11-07, after X1 (PWD-019): the tested Executor was upstream `main` at `98d606b`, configured but not patched. Upstream's default branch is now `v2`, a separate history. Q-J33 therefore narrows to: which Executor line, that commit, current `main` or `v2`?
+- 2026-11-07 (INT-T-025): the Executor investigation is closed for now. Q-J33 matters only if Executor is run as a baseline, so it is asked of Joaa only then.
