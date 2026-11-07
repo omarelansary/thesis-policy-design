@@ -28,7 +28,7 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 ## D. Machines and branches (operations only; not research)
 - **This branch, `linux-from-v5-audit--portable-guard-and-short-state`, carries only the Windows/Linux switch:** the cross-platform guard and tests, the verifier fix, the SSH remote on Linux, the Linux-run AUTH rows and this file. No research content. It is rebased onto `v5-audit` after each merge; the human force-pushes it.
 - **Not yet tested on Windows.** Before merging it into `v5-audit`, run on Windows: `python tools/verify_workspace.py`, `python ops/tests/guard_cases.py`, `python ops/tests/finding_citation_cases.py` (WD-059).
-- **Linux notes:**; `python` must exist (symlink to `python3`); 224 WARN lines are expected: origin extracts cannot be re-verified there; AppWorld and the run scripts live in `~/r3-work` (outside the repository); the API keys are in `~/r3-work/.env`, which the human empties when done.
+- **Linux notes:** `python` must exist (symlink to `python3`); 224 WARN lines are expected: origin extracts cannot be re-verified there; AppWorld and the run scripts live in `~/r3-work` (outside the repository); the API keys are in `~/r3-work/.env`, which the human empties when done.
 - **Open for the human:** whether Bash `git commit` should ask first again.
 
 ## Next action for any session
