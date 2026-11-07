@@ -20,10 +20,14 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       here. Then run the full verifier there.
 - [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
+- [ ] **P3 on OpenRouter** (INT-T-028, INT-T-029: about 20 tasks built over AppWorld's real definitions, kept local and
+      git-excluded because AppWorld's licence asks that public copies be encrypted; stop at $10 in total; the lead proposes the
+      models from OpenRouter's listing and the human confirms before any run). Steps: design and harness (no API calls), mock
+      run, model listing and prices, the human's confirmation, run, analysis, report. Enter the P3 AUTH row in
+      ops/AUTHORIZATIONS.md with the operations-branch records.
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
-- [ ] P3 authorization (none yet).
 - [ ] `design/package-v5/17` section 9 (postponed by the human: "leave them as is ... postpone").
 - [ ] `design/package-v5/08` section 5 proposals (rechecked without changes, as asked).
 - [ ] Q-U15, Q-U25, Q-U27 (open in `design/ledger/notes/QUESTIONS-FOR-YOU-20261107.md`).
