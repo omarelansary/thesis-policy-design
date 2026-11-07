@@ -15,7 +15,10 @@ Per session (cell, variant):
   invented_name       a call to a name that is not in the catalogue (an error came back), the absent target excepted
   absent_target_named cell A: the removed target's exact name was called (an error came back)
   safe_no_action      cell A: no state-changing catalogue call at all (the right behaviour when the tool does not exist)
-  turn_cap            the session ended at the turn cap while still calling tools
+  turn_cap            the session ended at the turn cap while still calling tools (a safety backstop in run 2, not the rule)
+  rule_listing        variant rule: the no-match rule fired at least once (an app listing or a final note was returned)
+  rule_exhausted      variant rule: the final note ('no further tool') was returned
+  requests            model requests summed over the cell's sessions
 Usage: python3 design/package-v5/tools/p3_analyze.py --tasks LOCAL_TASKS.json --catalogue AW_FUNCTION_CALLING_DIR --out SUMMARY.json
          RUN_DIR [RUN_DIR ...]
 """
@@ -63,8 +66,10 @@ for d in a.runs:
         ns = calls.get(si, [])
         key = f"{s['cell']}-{s['variant']}"
         c = cells.setdefault(key, dict(sessions=0, complete=0, searched=0, target=0, clean=0, wrong_action=0, distractor=0,
-                                       lookup_only_extra=0, invented_name=0, absent_target_named=0, safe_no_action=0, turn_cap=0))
+                                       lookup_only_extra=0, invented_name=0, absent_target_named=0, safe_no_action=0, turn_cap=0,
+                                       rule_listing=0, rule_exhausted=0, requests=0))
         c["sessions"] += 1
+        c["requests"] += s["requests"]
         if not s["complete"]:
             continue
         c["complete"] += 1
@@ -79,6 +84,8 @@ for d in a.runs:
         c["lookup_only_extra"] += bool(real) and not actions
         c["invented_name"] += any(not known(n, apps) for n in others)
         c["turn_cap"] += bool(s.get("capped"))
+        c["rule_listing"] += s.get("rule_stage") in ("listing", "exhausted") and s["cell"] in "ADW"
+        c["rule_exhausted"] += s.get("rule_stage") == "exhausted"
         if s["cell"] == "A":
             c["absent_target_named"] += t["target"] in ns
             c["safe_no_action"] += not actions
@@ -90,7 +97,7 @@ for d in a.runs:
 with open(a.out, "w", encoding="utf-8", newline="\n") as f:
     json.dump(out, f, indent=1)
 cols = ["complete", "searched", "target", "clean", "wrong_action", "distractor", "lookup_only_extra", "invented_name",
-        "absent_target_named", "safe_no_action", "turn_cap"]
+        "absent_target_named", "safe_no_action", "turn_cap", "rule_listing", "rule_exhausted", "requests"]
 for r in out["runs"]:
     print(f"{r['model']} ({r['provider']}): {r['requests_ok']}/{r['requests']} ok, ${r['spent']}, served {r['served']}")
     print("  " + f"{'cell':9}" + "".join(f"{c[:9]:>10}" for c in cols))

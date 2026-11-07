@@ -14,8 +14,15 @@ Cells (one session = one user turn, at most --turn-cap model requests)
   D  deferred        tools = core + search_tools + call_tool; target searchable
   A  absent          as D, target removed from the searchable catalogue                 (the right answer is to say so)
   W  wrong visible   as D, plus the distractor's definition visible in tools
-D, A and W each run in two prompt variants: plain, and index (one line naming the apps reachable beyond the listed tools, without
-saying how to reach them). The system text never tells the model to search; search_tools and call_tool carry their own short
+D, A and W each run in variants: plain; index (one line naming the apps reachable beyond the listed tools, without saying how to
+reach them; run 1); rule (run 2, INT-T-031: the NO-MATCH RULE below, system text as plain).
+NO-MATCH RULE (deterministic, no count of turns or searches and no score threshold): the client remembers every tool a search has
+shown in the session. A search whose top --k results were all shown before has found nothing new. The first time that happens, the
+search result is the complete list of the tools (name and first sentence of the description) of the app(s) those results belong
+to, with a note that if none of them fits, the catalogue has no such tool; any later search that again finds nothing new (or a
+search with no match at all) gets a note that the catalogue has no further tool for this need. The note states a fact about the
+catalogue; the system text does not change, and what the model does next is what is measured. --turn-cap stays as a safety
+backstop only (run 2: 12), reported separately, never the rule. The system text never tells the model to search; search_tools and call_tool carry their own short
 descriptions, as a vendor's search tool does. search_tools returns the top --k definitions by BM25 over name, description and
 parameter names (the harness's ranker, not a V5 choice); call_tool runs any catalogue tool by name.
 
@@ -288,6 +295,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
     names_searchable = {d["function"]["name"] for d in searchable or []}
     msgs = [{"role": "system", "content": system}, {"role": "user", "content": task["prompt"]}]
     called, seen, ranks, searches, complete, nreq, capped = [], set(), [], 0, False, 0, False
+    listed, rule_stage = False, None
     for step in range(1, a.turn_cap + 1):
         if n_req >= a.max_requests:
             stop = "max-requests"
@@ -341,6 +349,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                 q = (args or {}).get("query", "") if isinstance(args, dict) else ""
                 hits = index.rank(str(q))
                 top = hits[: a.k]
+                fresh = [n for n in top if n not in seen]
                 seen.update(top)
                 rank = hits.index(task["target"]) + 1 if task["target"] in hits else None
                 ranks.append(rank)
@@ -348,6 +357,21 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                 rec["search_queries"].append(scrub(str(q))[:200])
                 rec["search_target_rank"].append(rank)
                 result = json.dumps([defs[n]["function"] for n in top]) if top else json.dumps({"result": "no matching tools"})
+                if variant == "rule" and not fresh:  # NO-MATCH RULE (run 2): this search brought nothing not already shown
+                    if top and not listed:
+                        hit_apps = sorted({n.split("__")[0] for n in top})
+                        listing = [{"name": d["function"]["name"], "description": d["function"]["description"].split(". ")[0]}
+                                   for d in searchable if d["function"]["name"].split("__")[0] in hit_apps]
+                        seen.update(x["name"] for x in listing)
+                        listed, rule_stage = True, "listing"
+                        result = json.dumps({"note": "Nothing new: every match was already shown. Below is every tool of " +
+                                             ", ".join(hit_apps) + ". If none of them does what is needed, the catalogue has no "
+                                             "such tool.", "tools": listing})
+                    else:
+                        rule_stage = "exhausted"
+                        result = json.dumps({"note": "Nothing new: no tool beyond those already shown matches. The catalogue "
+                                             "has no further tool for this need."})
+                rec.setdefault("rule_stage", []).append(rule_stage)
             elif name == "call_tool" and index is not None:
                 inner = str((args or {}).get("name", "")) if isinstance(args, dict) else ""
                 rec["tool_calls"].append("call_tool:" + inner)
@@ -393,7 +417,7 @@ for si, (task, cell, variant) in enumerate(SESSIONS, 1):
                 target_best_rank=min([r for r in ranks if r], default=None), target_called=target_called,
                 target_called_unseen=any(n == target and not v for n, v in cat_calls),
                 distractor_called=any(n == task["distractor"] for n, _ in cat_calls), other_catalogue_calls=len(others),
-                core_calls=sum(1 for n, _ in called if n in CORE_NAMES), outcome=outcome)
+                core_calls=sum(1 for n, _ in called if n in CORE_NAMES), rule_stage=rule_stage, outcome=outcome)
     ses_log.write(json.dumps(srec) + "\n"); ses_log.flush()
     print(f"[{si}/{len(SESSIONS)}] {task['id']} {cell}-{variant:5} {outcome}; searches {searches}; requests {n_req}; "
           f"spent ${spent:.4f}", flush=True)
