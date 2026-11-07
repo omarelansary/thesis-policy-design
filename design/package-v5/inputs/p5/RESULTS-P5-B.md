@@ -6,6 +6,40 @@
 
 The harness was revised for part A (revision 2: a fresh marker per cold session, two cold and one warm session per cell; `README.md`). The figures below stand as what this run measured.
 
+## Repeat with harness revision 2 (2026-11-07, 15:09-15:14 UTC): use these figures; the first run's sections below are kept as recorded
+- **Approval and spend.** The human accepted the repeat at "about $0.40, stop at $0.60" (INT-T-026). It took 193 requests, all HTTP 200, and cost $0.445. The OpenAI side check cost $0.594 in all (first run $0.149).
+- **Files:**
+  - Harness revision 2: `87905175...045409`.
+  - Log `openai-gpt54mini-r2/requests.jsonl`: `795277a0...4f8b10`.
+  - Analysis `openai-gpt54mini-r2-analysis.json`: `c47dab03...297e51`.
+  - Script `p5_analyze.py`: `452e3cf7...22c8f9`.
+- **Design:** 13 calibration requests with markers of their own; per size and arm, 2 cold sessions (fresh marker in tool 0), then 1 warm session reusing the second cold session's marker.
+- **The control worked [O].** Every cold session started with 0 cached tokens. Warm sessions started 60-99.6% cached, with one exception: the eager warm session at 30 tools started with 0 cached, so the warm ratios at 30 are not readable.
+
+**Billed tokens per deferred definition (calibration, unchanged from the first run) [O].** Individually deferred functions bill 51.5 tokens of 171 at 300 tools (30%). In namespaces it is 6.2 (3.6%).
+
+**Bill ratio deferral / eager, whole session, fresh-token equivalents [O]** (cold = mean of the 2 cold sessions, the two values in brackets)
+
+| n | deferred_fn cold | deferred_ns cold | deferred_fn warm | deferred_ns warm |
+|---|---|---|---|---|
+| 10 | 1.19 (1.18, 1.20) | 1.12 (1.12, 1.13) | 1.33 | 1.29 |
+| 30 | 0.70 (0.71, 0.70) | 0.67 (0.67, 0.67) | not readable* | not readable* |
+| 100 | 0.44 (0.44, 0.44) | 0.29 (0.29, 0.29) | 0.58 | 0.42 |
+| 300 | 0.35 (0.35, 0.35) | 0.11 (0.10, 0.13)** | 0.39 | 0.21 |
+
+`*` The eager warm session at 30 tools missed the cache (see above).
+`**` The two cold sessions loaded different amounts with their first search: 325 and 1,360 tokens (in the second, the whole namespace of the needed tool). What hosted search loads varies between identical sessions.
+
+**Reading [I]:**
+- **Break-even (cold start): between 10 and 30 tools in both arms.** At 10 tools deferral costs 12-20% more; at 30 it saves about 30%.
+- **The two cold sessions agree within 0.02**, except the 300-tool namespace cell (0.03, because of the different load).
+- **A warm start shrinks deferral's advantage.** It lowers both bills, but eager's more, because eager's cached prefix is larger; the warm ratios are 0.04 to 0.13 higher than the cold ones.
+- **D-01 as written** (server mode, its defaults) predicts 1.32, 0.44, 0.13 and 0.044. That is close at 10 tools; at 100 and 300 tools the measured ratio is 2.2 to 7.9 times the prediction. This is far more than the cold-session spread, so the AUTH-028 stop rule applies (reported here; the revision of D-01 is the human's decision).
+- **D-01's formula with the measured parameters** reproduces the cold cells within 0.01 to 0.07 (`deferred_fn`) and 0.01 to 0.07 (`deferred_ns`).
+- **What D-01's defaults miss on vendor-hosted search:** the deferred part that stays billed (30% for functions), the searchable surface (1,300 to 16,000 tokens instead of 300), the tokens a search loads (about 310 for one function, up to 1,360 for a namespace), and the non-tool part of the session (about 2,100 to 2,500 equivalents in both arms).
+
+**Still the side check, not P5's test:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
+
 Status: run complete, all 12 cells. Labels: [O] measured from the usage records, [D] arithmetic, [I] reading. **One session per cell, one model, one stub catalogue:** read as a first measurement, not an estimate with a range. No accuracy claim.
 
 ## Setup

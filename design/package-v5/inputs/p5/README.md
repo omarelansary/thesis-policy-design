@@ -1,6 +1,6 @@
 # P5 break-even: harness, run plan and cost estimate (AUTH-028; lead, 2026-11-07)
 
-Status (2026-11-07, later): **P5's test (part A, ScaDS, our route) has not been run.** The OpenAI run (part B) is a side check of vendor billing, not P5's test: `RESULTS-P5-B.md`, $0.149. Its lessons changed the harness (revision 2, below).
+Status (2026-11-07, later): **P5's test (part A, ScaDS, our route) has not been run.** The OpenAI runs (part B) are a side check of vendor billing, not P5's test: `RESULTS-P5-B.md`. The first run cost $0.149; the repeat with revision 2 cost $0.445 (2 cold and 1 warm session per cell; INT-T-026). Part A's cap is raised to about 140 requests (INT-T-026); it waits for GLM B2 to end. Its lessons changed the harness (revision 2, below).
 
 ## Harness
 `design/package-v5/tools/p5_break_even.py` (standard library only). Revision 1 (`5e19e674...ff54ff`) ran part B; **revision 2** (`87905175...045409`) is for part A; each run records the hash of the version that ran in `run-meta.json`).
