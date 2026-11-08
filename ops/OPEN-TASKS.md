@@ -22,8 +22,9 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
 - [ ] **P3 record and decision** (runs 1 to 3 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
       `RESULTS-P3-RUN3.md`; $4.156 of $10): enter the P3 AUTH row (INT-T-028..032) and WD with the operations-branch records; the
-      human decides on the hard stop proposed in RESULTS-P3-RUN3 section 4.4 (withdraw search_tools when the note is returned,
-      about $0.40 to $0.75) and on multi-tool tasks (recommended later).
+      order is agreed (INT-T-033): research done (`design/package-v5/inputs/p3/STOP-RULE-RESEARCH-20261108.md`, 7 of 10
+      searches, 6 of 20 fetches); next, the human approves run 4 as proposed there (section 4: two-need tasks; plain, rule2,
+      stop-reply, stop-search; about $2 to $3), then the lead writes the tasks and runs it.
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
