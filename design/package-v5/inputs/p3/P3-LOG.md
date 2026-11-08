@@ -34,6 +34,7 @@ deterministic, not a number of turns).
 | INT-T-036 | 11-08 | Chooses option (a): design a per-need rule by replay on run 4's logs; document runs, decisions, reasons, results and conclusions |
 | INT-T-037 | 11-08 | Approves run 5: plain against DRY, about $1.40 |
 | INT-T-038 | 11-08 | Chooses option (ii): DRY plus a one-sentence instruction, on MiniMax, DeepSeek and GLM; accepts going over $10 (lead's ceiling $10.60) |
+| INT-T-039 | 11-08 | **Closes P3:** DRY plus the instruction into V5-R as the provisional stop (V5-R17); an instruction-only arm in the end-to-end study; model differences recorded for model choice |
 
 ## 2. Runs
 | Run | Commit | What changed, and why | Requests / spend | Result [O] | Conclusion [I] |
@@ -67,6 +68,6 @@ deterministic, not a number of turns).
    them; they need a separate safeguard on state-changing calls, which only the end-to-end study can score.
 
 ## 4. Open
-- **Next:** the human decides on `RESULTS-P3-RUN6.md` section 3 (lead recommends closing P3).
+- **P3 is closed** (INT-T-039, 2026-11-08). Applied: V5-R17 in `04` (provisional, OURS, with open items a-c), its traceability row in `06`, P3 status and an end-to-end arm in `05`. Open for the end-to-end study: the instruction-only arm, and the stop's treatment of the tools array (V5-R02).
 - **Records for the operations branch:** P3 AUTH row (INT-T-028 to INT-T-036), WD entries, STATE pointer (`ops/OPEN-TASKS.md`).
 - **Where the stop rule is tested:** P3, then the V5-R arm of the end-to-end study (`STOP-RULE-RESEARCH-20261108.md` section 5).

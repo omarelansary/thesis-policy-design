@@ -20,10 +20,11 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       here. Then run the full verifier there.
 - [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
-- [ ] **P3 record and decision** (runs 1 to 6 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
-      `RESULTS-P3-RUN6.md`; $9.953): enter the P3 AUTH row (INT-T-028..038) and WD with the operations-branch records; option (a)
-      done (INT-T-036, `RESULTS-P3-REPLAY-A.md`): DRY ran as run 5, DRY plus instruction as run 6; the human decides on
-      RESULTS-P3-RUN6 section 3 (lead recommends closing P3); keep `design/package-v5/inputs/p3/P3-LOG.md` up to date with every run and decision.
+- [ ] **P3 records on the operations branch** (P3 closed 2026-11-08, INT-T-039; record in `design/package-v5/inputs/p3/P3-LOG.md`;
+      $9.953 of the $10 stop): enter the P3 AUTH row (INT-T-028..039, including the run 6 ceiling of INT-T-038) and WD entries
+      (runs 1-6, V5-R17 with its open items) with the other operations-branch records.
+- [ ] **End-to-end study, from P3** (`05` section 3, V5-R17 open items a-c): instruction-only arm; the stop's treatment of the
+      tools array (V5-R02); model differences as an input to model choice. Waits for the end-to-end authorization.
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).

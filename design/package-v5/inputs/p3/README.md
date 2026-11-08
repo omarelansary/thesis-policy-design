@@ -1,6 +1,6 @@
 # P3: uninstructed search for a deferred tool (preparation, 2026-11-07)
 
-Status: **run 4 done 2026-11-08** (`RESULTS-P3-RUN4.md`: two-need tasks; a session-wide forced reply loses the doable need, withdrawing only search does not end the loop; a per-need rule is proposed, to be designed from run 4's logs; P3 total $7.786 of $10). Earlier: **run 3 done 2026-11-08** (`RESULTS-P3-RUN3.md`: the revised rule `rule2` removed run 2's harm but is a weak stop,
+Status: **P3 closed 2026-11-08** (INT-T-039; runs 1-6, $9.953; the full record is `P3-LOG.md`; the outcome is V5-R17 in `04`, provisional). Earlier: **run 4 done 2026-11-08** (`RESULTS-P3-RUN4.md`: two-need tasks; a session-wide forced reply loses the doable need, withdrawing only search does not end the loop; a per-need rule is proposed, to be designed from run 4's logs; P3 total $7.786 of $10). Earlier: **run 3 done 2026-11-08** (`RESULTS-P3-RUN3.md`: the revised rule `rule2` removed run 2's harm but is a weak stop,
 because models keep searching after the note; a hard client-side stop is proposed; P3 total $4.156 of $10). Earlier: **run 2 done 2026-11-07** (`RESULTS-P3-RUN2.md`: repeat holds; the no-match rule as designed is not recommended, a revision is proposed; P3 total $3.430 of $10). Earlier: **run 1 done 2026-11-07** (three models, 1,762 requests including smoke tests, $1.675 of the $10 stop; reading in `RESULTS-P3-RUN1.md`). Harness tested against a local mock server first. Covered by the human's
 INT-T-028 and INT-T-029 (P3 on OpenRouter, about 20 tasks built over AppWorld's real definitions, stop at $10 in total, models
 proposed by the lead and confirmed by the human before any run); the P3 AUTH row is still to be entered in
@@ -58,3 +58,10 @@ tool is deterministic and the same for every model.
 - **Tasks:** 20 two-need tasks built locally from the run 1-3 tasks (`local/tasks2.json`), in kinds P, AF and AS.
 - **Variants:** plain, plainB, note, stopreply, stopsearch.
 - Design reasons are in `STOP-RULE-RESEARCH-20261108.md` (revision 2, with the six scout reports in `stop-research-scouts-20261108/`).
+
+## Runs 5 and 6, and closure (INT-T-037..039, 2026-11-08)
+- **Run 5:** DRY live (`RESULTS-P3-RUN5.md`).
+- **Run 6:** DRY plus a one-sentence instruction (`RESULTS-P3-RUN6.md`), the first variant that met the requirement on two-need
+  tasks.
+- **Closure:** the human closed P3 with that combination carried into V5-R as V5-R17 (`04`), and an instruction-only arm placed
+  in the end-to-end study (`05` section 3).
