@@ -13,6 +13,7 @@
 - **Probes R1 to R3 (2026-11-01 to 11-06; `17` section 5; results in `exchange/prior-work/v5-probes/results/`):**
   - AppWorld is inspected: 469 definitions in data 0.2.0, and reference solutions pass.
   - Offering all 469 definitions on every call costs about 2.2 to 2.6 times AppWorld's own predictor subset on MiniMax-M3, with about 96% of the prompt billed as cache reads. Accuracy shows no visible difference in four runs, where identical runs already differ in 9 to 12 of 57 tasks.
+  - On a second model (GLM-5.3 on ScaDS, one run per arm), the computed ratio is about 1.5 (1.08-1.80 across 47 price endpoints), and GLM's own predictor dropped the credentials function in 22 of 57 tasks, all of which failed.
   - The reasoning mode changes accuracy (24-28 against 45-50 of 57) and the bill (+23-28%), so it is a run setting to fix and record, like the provider.
   - The break-even curve (P5) is still unmeasured.
 - **Not verified by anyone:** the human has spot-checked no V5 row; steward, scout, blind and challenger work is model work checked by model work.

@@ -1,6 +1,7 @@
 # RESULTS-R3-B (2026-11-05/06): R3 Part B, run by the lead on Linux (AUTH-024)
 
 ## Final summary (2026-11-07; details and the history of corrections below)
+- **Second model (added 2026-11-08):** GLM-5.3 on ScaDS (AUTH-026) is reported separately in `exchange/prior-work/v5-probes/results/R3-GLM/RESULTS-R3-GLM.md` on output branch `v5-r3-glm-results`. B1 23, B2 24 of 57; computed bill ratio about 1.5.
 - **Setup.** 57 AppWorld dev tasks per run; `minimax/minimax-m3` on OpenRouter, `gmicloud/fp8` pinned for both arms. B1 = all 469 definitions on every call; B2 = AppWorld's predictor subset (at most 20).
 - **Accuracy (passed of 57).**
 
