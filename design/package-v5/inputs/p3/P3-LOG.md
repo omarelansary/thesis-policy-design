@@ -44,6 +44,7 @@ deterministic, not a number of turns).
 | Research rev. 2 | 80736a8 | Human: not extensive enough (INT-T-034). Six web scouts, 8 claims checked by the lead | 80 searches, 126 fetches | No published deterministic stop for tool-search loops. Enforcement works and text does not (2610.06191, CGDP 2605.07042, CrewAI). A refusal result helps only some models (2610.05348). Excluding the requested action redirects to another (Guardrails Redirect). A "Done" stub favours false claims (2609.14758) | Keep the trigger; change the enforcement; test it on two-need tasks, because a session-wide stop predictably harms the doable need |
 | Smoke 4 | 55dd9a4 | Check the two-need harness on one task per model | 268 / $0.120 | GLM keeps emitting tool calls with no tools offered | The forced reply now ends the session itself ("stop ignored") |
 | 4 | 4a5a650 | Two-need tasks in kinds P, AF, AS; plain twice, note, stopreply, stopsearch (INT-T-035) | 6,282 / $3.510 | Both present: no harm. Forced reply: the doable need was lost in 40-80% of tasks (p ≤ 0.016, all cells), and most models kept calling tools after the stop. Search withdrawn: the doable need was kept, but the loop did not end (guessed names and backstop hits went up). Note: no effect. Substitutes and MiniMax's false claims (6-8 of 40) occur with no rule | No session-wide or search-only stop meets the requirement. The rule must be scoped per need. Next: design it by replay on run 4's logs (INT-T-036) |
+| Replay (a) | (this commit) | Human chose option (a) (INT-T-036): replay candidate per-need rules on run 4's logs; no requests | 0 / $0 | Replay check: 180 of 180 replayed first NULLs match the logged ones. At the first NULL, the doable tool was already shown but not called in 51, 51 and 67 of 80. Ending at the m-th misstep trades the doable need against requests (a count). DRY (search withdrawn; shown tools in the dry app refused; end only when nothing is pending) kept Y at 30, 36 and 33 of 40 (no end rule: 32, 38, 34), cut substitutes from 14, 9, 9 to 5, 2, 4, saved 10-29% of requests; still at the backstop in 15, 2, 9 | DRY is the only candidate that survives the replay. A live run 5 (plain against DRY, about $1.40) is proposed, not started |
 
 **Spend:** P3 total $7.786 of $10 (runs and smoke tests; per-run figures in the result files).
 
@@ -57,7 +58,6 @@ deterministic, not a number of turns).
    them; they need a separate safeguard on state-changing calls, which only the end-to-end study can score.
 
 ## 4. Open
-- **Option (a)** (INT-T-036): replay candidate per-need rules on run 4's logs. Run 5 only after the human approves it with its
-  cost ($2.21 left).
+- **Run 5** (`RESULTS-P3-REPLAY-A.md` section 3): plain against DRY, about $1.40 of the $2.21 left. Waiting for the human.
 - **Records for the operations branch:** P3 AUTH row (INT-T-028 to INT-T-036), WD entries, STATE pointer (`ops/OPEN-TASKS.md`).
 - **Where the stop rule is tested:** P3, then the V5-R arm of the end-to-end study (`STOP-RULE-RESEARCH-20261108.md` section 5).
