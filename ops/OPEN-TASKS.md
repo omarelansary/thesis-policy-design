@@ -13,8 +13,6 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       about $0.40, stop $0.60; 193 requests, $0.445; OpenAI total $0.594); WD-071 (part B results with harness revision 2, the
       proposed D-01 variant, the B2 stall, INT-T-027: D-01 kept, variant decided after part A); STATE.md update with a pointer
       here. Then run the full verifier there.
-- [ ] **D-01 revision decision** (INT-T-027). **Condition met 2026-11-08** (part A done, `design/package-v5/inputs/p5/RESULTS-P5-A.md`: D-01 fits the client route; lead proposes keeping it and adding the hosted variant as a separate mode). Put part A's comparison with D-01 and the
-      proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
 - [ ] **P3 records on the operations branch** (P3 closed 2026-11-08, INT-T-039; record in `design/package-v5/inputs/p3/P3-LOG.md`;
       $9.953 of the $10 stop): enter the P3 AUTH row (INT-T-028..039, including the run 6 ceiling of INT-T-038) and WD entries
       (runs 1-6, V5-R17 with its open items) with the other operations-branch records.

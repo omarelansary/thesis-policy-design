@@ -1,4 +1,6 @@
-"""PROPOSED, not adopted: a vendor-hosted-search variant of D-01 (calc/regime_bill.py), written after P5's OpenAI side check
+"""ADOPTED 2026-11-08 as D-01h, a separate mode of D-01 for vendor-hosted search (INT-T-043, after P5 part A showed that D-01 as
+written fits the client route, design/package-v5/inputs/p5/RESULTS-P5-A.md). Original header follows.
+PROPOSED, not adopted: a vendor-hosted-search variant of D-01 (calc/regime_bill.py), written after P5's OpenAI side check
 (design/package-v5/inputs/p5/RESULTS-P5-B.md, repeat with harness revision 2). D-01 stays as it is until the human decides (AUTH-028
 stop rule: the as-written predictions were contradicted by 2.2 to 7.9 times at 100-300 tools). The human decided on 2026-11-07
 (INT-T-027): D-01 stays the working equation, this stays a proposal, and revision is decided after P5 part A on ScaDS.
