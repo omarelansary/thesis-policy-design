@@ -1,71 +1,140 @@
 ---
 type: summary
 status: unverified (pages read through WebFetch, which returns a small model's summary, not the raw page; nothing stored in
-  evidence/; numbers below are as the summaries gave them and must be checked against the papers before any of them is cited)
+  evidence/; numbers are as the summaries gave them unless marked [checked], which means the lead re-fetched the primary page
+  and found the figure there; none of them may be cited as EXT before the page is stored and extracted)
 ---
-# P3: how should a tool-search loop decide that nothing fits? (research note, 2026-11-08)
+# P3: how should a tool-search loop decide that nothing fits? (research note, 2026-11-08, revision 2)
 
-Covered by INT-T-033 (the human authorized the research; at most 10 web searches and 20 page fetches, the lead's bound). Used:
-**7 searches, 6 fetches** (one PDF did not decode). Stored sources re-read locally: CONVOLVE (`v5-convolve-2606.28733`),
-AgentAbstain (`arxiv-2607.10059`), ToolBeHonest (`arxiv-2406.20015`), BFCL v3 multi-turn (`web-bfcl-v3-multi-turn-blog`),
-Tool Attention (`v5-xp-arxiv-2604.21816`), Anthropic tool search, Pydantic AI tools. No V5 rule changed.
+- **Revision 1** (INT-T-033): the lead alone, 7 web searches and 6 fetches.
+- **Revision 2** (INT-T-034): the human asked for an extensive search.
+  - Six general-purpose web scouts ran in one round. Together they used 80 of 90 searches and 126 of 150 fetches.
+  - The lead spot-checked eight claims against their primary pages (8 of 15 fetches).
+  - The scout reports are in `stop-research-scouts-20261108/` (S1 to S6), copied as received. They are leads, not evidence.
+- Stored sources re-read locally: CONVOLVE, AgentAbstain, ToolBeHonest, BFCL v3, Tool Attention, Anthropic tool search, Pydantic
+  AI.
+- No V5 rule changed.
 
-## 1. What was found
-| Source | What it says (as read) | Bearing on P3 |
-|---|---|---|
-| **"Judged Useless, Queried Anyway"**, arXiv 2610.06191 (new) | Seven agents call a failing source's results useless 97-100% of the time, yet rarely stop on that; "Prompt cues change when they stop but not what they stop on". **A harness rule** (after five consecutive results the agent judged useless, "only the finish action remains") raised success on failing sources for every model; non-inferior where the source works in 18 of 20 tests; k = 5 tuned on development data; a lexical detector in place of the agent's judgment was a control ("the gain comes from acting on an accurate signal"). HotpotQA and FEVER retrieval, not tool search; 7-8B open models plus Claude Haiku 4.5 and Sonnet 5 | The closest evidence for P3's problem: **the stop has to be enforced by the client; a note or a prompt does not do it.** Matches run 3 (the note reached 50 of 60 sessions; only 10 then stopped searching). Its trigger is a count (k = 5) of useless results, not of turns |
-| **CONVOLVE / "Agentic Abstention"**, arXiv 2606.28733 (stored) | "Some agents never abstain when they should, while others do so only after many unnecessary interactions"; stopping rules distilled from past trajectories and put in the context raise Llama-3.3-70B's timely recall from 26.7 to 57.4 (WebShop) | Names our failure ("timely" abstention). Its remedy is in the prompt and learned per deployment, so it mixes with P3's question; possible later cell, not the rule |
-| **AgentAbstain**, arXiv 2607.10059 (stored) | Paired should-act / should-abstain tasks; best model 59.5% paired accuracy; "post-hoc abstention where agents first commit irreversible actions, and then claim refusal"; no search channel | Our D and A cells are already such pairs on the same 20 tasks: **report paired accuracy** (target called in D and a safe, honest reply in A). The post-hoc pattern is our substitute-then-"couldn't" |
-| **Cost-aware stopping for tool acquisition (CAM-DF)**, arXiv 2607.27083 (new) | A learned logistic stop over a score-ranked tool list (stop at the first depth with p >= 0.5); 37% fewer tools exposed at comparable success on tau-bench Retail; needs labelled required-tool sets for training; does not discuss "no tool fits" | A retrieval-depth stop, not a search-loop stop; needs training data. Not for now |
-| Tool Attention, arXiv 2604.21816 (stored) | Similarity threshold calibrated once per deployment on 100-200 held-out (query, tool) pairs, maximising F1 | The `05` "score threshold" route: workable with a dense encoder and calibration data; BM25 scores are not comparable across queries, so not with our ranker |
-| ToolBeHonest, arXiv 2406.20015 (stored) | Unsolvable tasks built by removing a needed tool (Missing Necessary Tools) or giving tools that cannot fully do the job (Limited Functionality Tools); models degrade most on LFT | LFT is our near-miss substitute case. **Removing one needed tool from a real multi-step task** is a ready construction for the end-to-end test |
-| BFCL v3 missing functions (stored) | Withholds functions; a turn is force-terminated after more than 20 steps | A count backstop, like our 12 |
-| OpenAI tool search guide (fetched); Anthropic tool search (stored) | OpenAI says nothing on no-match or limiting repeated searches; Anthropic returns an empty result, not an error | Vendors leave the stop to the application |
-| Rust agent crates (agent-base, phi-agent) | Stop after max consecutive failures of the same tool | A count pattern for hard errors only; nothing on empty results |
-| Searches for partially infeasible multi-step tasks | No benchmark found that scores "finish the feasible parts and report the impossible one" (PlanBench-XL and E-Bench come closest) | Run 4 would measure something the found benchmarks do not |
+## 1. What is known, in eight points [F as reported; I where marked]
+1. **Nothing published tests a deterministic stop for a tool-search loop, per need or otherwise.** No tool-retrieval benchmark
+   found has queries whose tool is absent from the catalogue. The named tool-retrieval systems (MCP-Zero, ScaleMCP, Dynamic
+   ReAct, AnyTool, RAG-MCP, ToolGen, MassTool) leave the stop to the model, to a fixed cap, or to nothing (S1, S2, S6; "not
+   found" in the places searched). **P3's question is open in the literature** [I].
+2. **A stop works when the client enforces it; text does not.**
+   - arXiv 2610.06191: after five useless results, "only the finish action remains". This raised success for every model, and
+     prompts "change when they stop but not what they stop on".
+   - **CGDP, arXiv 2605.07042 [checked]**: a programmatic gate. It fires when the query is similar to recent queries (Jaccard)
+     AND the share of unseen retrieved items is low, for p consecutive rounds. It then "forces the agent to give a final answer".
+     - On one setup it gave +16.2% accuracy and saved 39% of tokens; averaged over three agents it gave +1.1% to +6.9%.
+     - LLM-judged gates did worse: "spirals into infinite loops" (−3.3% accuracy, +159% tokens) or "premature stopping" (−5.0%).
+     - Its threshold values are in an appendix the fetch did not reach.
+   - **CrewAI [checked]**: on the fourth identical call with the same result, a note to "give its final answer"; on the fifth,
+     "CrewAI stops its tool use". Any changed call or result resets the count.
+   - Pydantic AI's loop detector says its nudge can be ignored and should be paired with a hard limit; OpenHands halts on
+     repeated action and observation (S3, S4).
+   - The ladder "note, then hard stop" is the common design. It is measured only in 2610.06191 and CGDP.
+3. **A result that replaces the search results with a refusal helps some models and not others.** "Search Engines Never Say No",
+   arXiv 2610.05348 [checked]:
+   - The refusal raised abstention on unanswerable questions from 23% to 97% (Qwen3-8B/32B) and 28% to 57% (Haiku 4.5). It beat
+     a system-prompt instruction by 51 points on average.
+   - Search-R1 ignored it and fabricated retrievals.
+   - Sonnet 5.5 and Opus 5.5 rose only 2 points, but followed a system-prompt directive (+16).
+   - [I] Our rule2 already had this form: the search result was replaced by the note. In tool search it stopped only 10 of 50
+     sessions, which is weaker than in their QA setting. The effect depends on the model, so models must not be pooled.
+4. **The trigger we have is reasonable; a BM25 score threshold is not.**
+   - "Selection Is Retrieval, Abstention Is Not", arXiv 2609.18672 [checked]: on 70 actions, BM25 score features separate
+     in-catalogue from out-of-catalogue requests at an AUC of at most 0.697, against 0.806 for a frozen encoder.
+   - Counting raw novelty fails because each rewording surfaces some unseen item (S3). Our scope restriction (only tools of the
+     best match's apps count as new) addresses that. In run 3 it fired in 50 of 60 target-absent sessions and 5 of 120
+     target-present ones.
+   - CGDP adds query similarity as a second condition.
+5. **Why substitutes came after the note.** "When Guardrails Redirect", NeurIPS 2026 [checked]: when the requested target is
+   excluded, the model can be redirected "to another executable but unrequested target". Excluding it "never reduces the
+   wrong-target modification rate", while "strict request matching prevents all wrong-target modifications in the execution
+   replay".
+   - [I] Our note tells the model the requested action is unavailable, and the model redirects to a near miss. Run 3's logs
+     agree: 0 substitutes before the first note, all after it.
+   - A stop that leaves state-changing tools callable cannot prevent this. A forced reply can.
+   - Request matching needs the requested action. In P3 that is the gold answer, so it can only be a scoring category there,
+     not a mitigation. In deployment it would need intent extraction, which is not deterministic.
+6. **False claims and our stub "Done".** "Fabrication After Tool Failure", arXiv 2609.14758 [checked]:
+   - Dishonesty was 0.0% when the tool returns status:error and 45.3% when it returns status:ok with a bad value.
+   - One sentence requiring `retrieval_status: OK or FAILED` cut it from 14.10% to 0.87%.
+   - [I] Our stub answers every call with an ok-like "Done", which is their high-dishonesty condition. Requiring the flag is a
+     prompt instruction, but checking it by regex is deterministic.
+   - FTA (arXiv 2609.35732, unchecked) reports false success falling from 22.8% to 0.8% with a structured final report.
+   - Both are prompt-side, so for P3 they would be a separate cell, not the stop rule.
+7. **Evaluation designs to reuse** (S2, S6):
+   - paired should-act / should-abstain tasks (AgentAbstain; our D and A cells already are such pairs);
+   - False Continue Rate and the tokens of continuing against stopping (FeasiGen, arXiv 2605.28532; "up to 73.9%" [checked]);
+   - ToolSandbox's "minefields", near-miss calls defined in advance. Our tasks already name a distractor for each target;
+   - AppWorld's state diff and SABench's separate collateral-damage rate;
+   - MCPHallu's Unreachable Goal tasks, where the average score is 0.458 and 23.2% pass [checked]. Its graded
+     early-declaration score was not checked;
+   - per-need labels instead of a prefix score.
+8. **Per need:** the only per-subquery stops found use a trained verifier (HALT) or a planner (TOOLQP, PLUTo). None is
+   deterministic. Scout 6's suggestion is to infer "threads" from the search stream (query similarity, or the app of the best
+   match) and stop only a dry thread. **No source measures this** [I].
 
-## 2. What run 3's logs add [O] (variant rule2, local logs, counts only)
-- **Target absent:** in 0 of 50 sessions with the note was a state-changing call made before the first note; every substitute
-  action and every call to a guessed name came after it (4, 8 and 8 sessions). The note arrived once in 17 sessions, more often
-  in 33.
-- **Target present (D, W):** the note fired in 5 of 120 sessions; in 3 of them the target had already been shown but was
-  called only after the note.
+## 2. What run 3's logs add [O] (rule2, local logs, counts only)
+- **Target absent:** in 0 of 50 sessions with the note was a state-changing call made before the first note; every substitute and
+  every call to a guessed name came after it. The note arrived once in 17 sessions and more often in 33.
+- **Target present:** the note fired in 5 of 120 sessions. In 3 of them the target had already been shown but was called only
+  after the note.
 
 ## 3. Reading [I]
-1. **The stop must be enforced by the client** (2610.06191; run 3). The human's requirement, dynamic and deterministic, can keep
-   the signal we have (rule2: nothing unseen in the matched apps), which is deterministic and needs no count.
-2. **The trade-off is in what the enforcement leaves callable.**
-   - **Forced reply at the first note:** only answering remains. Run 3's logs say this would have stopped every substitute in
-     cell A. It would also have cut off the 3 of 120 target-present sessions that called a tool already shown after the note.
-   - **Search withdrawn at the first note, shown tools still callable:** keeps those 3. It ends runaway searching, but the
-     substitutes are also shown tools, so it may not prevent them.
+1. **Keep the trigger, change the enforcement.** The novelty signal within the matched apps is deterministic, needs no count, and
+   fired where it should. What failed is the enforcement. A note, even one that replaces the results, leaves the decision to the
+   model (points 2 and 3).
+2. **The enforcement must remove the chance to act on a near miss** (point 5).
+   - **Forced reply at the first note** (CGDP's form, and 2610.06191's) would have stopped every substitute in run 3. Its cost is
+     the 3 of 120 target-present sessions that called a shown target after the note.
+   - **Withdrawing only search_tools** keeps those 3, but leaves the near misses callable.
+3. **Per need, a global stop has a predictable harm.** If the missing need is searched first, a global stop fires before the
+   other need's tool is found. No source offers a tested per-need rule, so run 4 should measure that harm. Its logs (which apps
+   each need's searches hit) are then the development data for a per-thread rule. That is how 2610.06191 and CGDP chose their
+   parameters.
+4. **The lead's withdraw idea was not taken from a source.** It turns out to match published designs (point 2). They differ in
+   leaving only "finish" rather than the tools already shown.
 
-   The client cannot tell a shown target from a shown near miss, so only a run can say which matters more.
-3. **Per need, not per session.** A task with two needs may hit the note on the missing need before the other need's tool has
-   been found. A forced reply then loses the feasible need; withdrawn search may too. This is why the multi-need run comes
-   before any choice.
-4. The lead's earlier idea (withdraw search_tools) has, in the literature, the form "only finish remains after the stop
-   signal". It was not taken from there; the lead found the paper afterwards.
+## 4. Revised proposal for run 4 (for the human; not started)
+- **Tasks:** 20 lead-written tasks over the same catalogue, each with two needs, in three kinds:
+  - both tools present;
+  - one tool absent, its need named first;
+  - one tool absent, its need named second.
 
-## 4. Proposal for run 4 (for the human; not started)
-- **Tasks:** new lead-written tasks over the same catalogue, each with two needs, in three kinds: both tools present; one present
-  and one absent with the absent need named first; the same with it named second. Values in the prompt, stub results as before.
-- **Variants:** plain; rule2 (note only); stop-reply (forced reply at the first note); stop-search (search withdrawn at the first
-  note, shown tools still callable). No count, no prompt instruction; cap 12 as a backstop only.
-- **Measures per need:** feasible need done; absent need: no substitute, no false claim, said so. Also paired accuracy over the
-  three kinds, requests, and backstop hits.
-- **Cost:** about $2 to $3 for three models, inside the $5.84 left; within the $10 stop.
+  Each need has a near-miss tool, a "minefield", fixed before the run. Values are given in the prompt, and results are stubs
+  ("Done"), as before. That is a stated limitation (point 6).
+- **Variants** (no prompt instruction in any; turn cap 12 as a backstop only):
+  1. **plain**, run twice to measure the run-to-run flip rate;
+  2. **note** (rule2 as in run 3);
+  3. **stop-reply:** at the first note the result is a typed `{"status": "no_match"}` and the next request carries no tools, so
+     the model must answer;
+  4. **stop-search:** at the first note the same typed result, then search_tools is withdrawn and call_tool stays for tools
+     already shown.
+- **Scoring per need:**
+  - feasible need: done, cut off by the rule, or not attempted;
+  - absent need: honest decline, substitute (minefield or another state-changing call), false claim, or still searching at the
+    backstop.
+- **Also reported:** paired accuracy over the kinds; requests and tokens after the first note; per model, exact McNemar on
+  discordant tasks. At 20 tasks only large effects show: at least 6 tasks changing one way are needed for p < 0.05.
+- **Cost:** 5 runs of variants × 60 task-kinds × 3 models = 900 sessions, about $2.7 to $3.6, inside the $5.84 left. Without
+  the repeated plain run, about $2.2 to $2.9.
+- **Not in run 4:**
+  - a per-thread rule, to be designed from run 4's logs;
+  - a structured final-status cell, which is prompt-side (point 6);
+  - request-bound execution gates, which need the gold answer in P3 (point 5).
 
 ## 5. Where the stop rule is tested (the human's question) [I]
-- **P3 (the loop item):** `05` already puts the no-match rule in P3 as a recovery option. Run 4 is that test: mechanism and large
-  effects only, about 20 tasks, stub results.
-- **End-to-end study:** the rule becomes part of V5-R's deferral stage, so its effect on success and on the bill (requests per
-  turn) is measured in the V5-R arm. The proposed vehicle is AppWorld's real multi-step tasks with one needed API removed (the
-  ToolBeHonest construction), paired with the unchanged task (the AgentAbstain design). AppWorld's state checks would catch
-  substitute actions, and its real results remove the stub "Done" that makes false claims easy. The task set is the human's
-  choice (`05` section 3).
+- **P3:** run 4 above. `05` already places the no-match rule in P3 as a recovery option.
+- **End-to-end study:** the rule becomes part of V5-R's deferral stage, and its effect on success and requests per turn is
+  measured in the V5-R arm. The vehicle would be AppWorld's real multi-step tasks:
+  - with the needed APIs masked as FeasiGen does (point 7), paired with the unchanged task;
+  - AppWorld's state checks would score substitutes as collateral damage;
+  - its real results remove the stub "Done" (point 6).
+
+  The task set is the human's choice (`05` section 3).
 - **Not P1, P2 or P5.**
-  - P1 runs on deferral and so will use whatever rule P3 leaves, but it does not test it.
-  - P2 has no search.
-  - The requests that no-match searching costs (run 3: 7.3 to 9.5 per session in cell A against 3.6 to 3.9 in D) are an input to
-    the bill. Whether D-01 should carry such a term is a question for the human after part A (INT-T-027), not a P5 change.
+  - P1 uses whatever rule P3 leaves; P2 has no search.
+  - The requests spent on no-match searching (run 3: 7.3 to 9.5 per session in cell A against 3.6 to 3.9 in D) are an input to
+    the bill. Whether D-01 carries such a term is the human's decision after part A (INT-T-027).
