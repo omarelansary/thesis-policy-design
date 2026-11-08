@@ -11,8 +11,9 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
 - [ ] **P5 part A on ScaDS GLM-5.3** (AUTH-028; cap about 140 requests, INT-T-026). Condition: GLM B2 has ended ("wait if GLM is
       still running ... the api might be overloaded"). Command: `python3 design/package-v5/tools/p5_break_even.py --route scads
       --model zai-org/GLM-5.3 --sessions 2 --warm-sessions 1 --max-requests 140 --out design/package-v5/inputs/p5/scads-glm53`,
-      then `tools/p5_analyze.py` on its log; scan outputs for key material before commit. Status 2026-11-07 16:03 UTC: B2 nearly
-      stalled (1 of 36 tasks since 13:55, repeated 900 s timeouts).
+      then `tools/p5_analyze.py` on its log; scan outputs for key material before commit. **Condition met 2026-11-08:** GLM B2
+      finished 36 of 36 at 14:28 UTC (exit 0). The lead's start of part A was refused by the auto-mode permission classifier
+      (no reason given); the human runs the command above or allows it.
 - [ ] **Operations-branch records** (branch `linux-from-v5-audit--portable-guard-and-short-state`). **Drafts ready to apply** (INT-T-040): `ops/drafts/OPS-BRANCH-RECORDS-DRAFT-20261108.md` (AUTH-028 amendment, AUTH-029 P3, AUTH-030, WD-071 to WD-075, STATE section A); ids checked free on that branch at 22e3d7d. Condition: the other agent
       says the shared folder is free. To write: AUTH-028 amendment for INT-T-026 (part A cap about 140; OpenAI repeat accepted at
       about $0.40, stop $0.60; 193 requests, $0.445; OpenAI total $0.594); WD-071 (part B results with harness revision 2, the
@@ -25,6 +26,12 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       (runs 1-6, V5-R17 with its open items) with the other operations-branch records.
 - [ ] **End-to-end study, from P3** (`05` section 3, V5-R17 open items a-c): instruction-only arm; the stop's treatment of the
       tools array (V5-R02); model differences as an input to model choice. Waits for the end-to-end authorization.
+
+- [ ] **P2** (INT-T-040; preparation done, `design/package-v5/inputs/p2/P2-DESIGN.md`, harness `tools/p2_offering.py`, mock-tested):
+      the human decides on the pilot (5 tasks, arm `all`, gpt-5-mini and gpt-5.4-mini, about $0.50, stop $2) and needs to add
+      `OPENAI_API_KEY` if it is no longer in `~/r3-work/.env`; then Main A with a cost from the pilot.
+- [ ] **Group 2** (INT-T-040: authorized after group 1 is complete; group 1 done at 385237a): P3 sources stored as EXT;
+      end-to-end task preparation; P1 preparation. Waits for the human's word.
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
