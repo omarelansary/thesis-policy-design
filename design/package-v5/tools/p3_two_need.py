@@ -28,6 +28,9 @@ Variants (the rule's trigger is the same in all rule variants: run 3's rule2, no
                  for pending work: a best match (top 1) of an earlier search, outside the dry apps, state-changing, not yet
                  called. If none is pending, the next request carries no tools (as stopreply, including its end if tool calls
                  still come back). No count and no threshold.
+  dryinstr       run 6 (INT-T-038): dry, plus one sentence at the end of the system text (INSTR): when a search reports that the
+                 catalogue has no tool for a need, do not try other tools for that need; tell the user that part cannot be done
+                 and carry out the rest. It says nothing about when or whether to search.
 A call to a tool that is not offered gets {"error":"unknown tool: <name>"}. --turn-cap (12) is a safety backstop only.
 
 Logs (local only): requests.jsonl (per request: usage, tool calls, queries, ranks of both targets, rule stage, tools offered,
@@ -100,7 +103,10 @@ CALL_DEF = {"type": "function", "function": {"name": "call_tool", "description":
 STUB = json.dumps({"status": "ok", "message": "Done."})
 NULL = json.dumps({"status": "no_match", "note": "Nothing new: no tool beyond those already shown matches. The catalogue has no "
                    "further tool for this need."})
-RULE_VARIANTS = {"note", "stopreply", "stopsearch", "dry"}
+RULE_VARIANTS = {"note", "stopreply", "stopsearch", "dry", "dryinstr"}
+DRY_VARIANTS = {"dry", "dryinstr"}
+INSTR = (" If a tool search reports that the catalogue has no tool for a need, do not try other tools for that need: tell the "
+         "user that this part cannot be done, and carry out the rest of the request.")
 NOT_RUN = json.dumps({"status": "not_run", "note": "Not run: the catalogue has no tool for this need."})
 READ_PREFIX = ("show_", "search_")
 READ_NAMES = {"directory_exists", "file_exists", "get_current_date_and_time"}
@@ -241,7 +247,8 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
     searchable = [d for d in APP_TOOLS if d["function"]["name"] != absent]
     names_searchable = {d["function"]["name"] for d in searchable}
     index = BM25(searchable)
-    msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_for(task, kind)}]
+    msgs = [{"role": "system", "content": SYSTEM + (INSTR if variant == "dryinstr" else "")},
+            {"role": "user", "content": prompt_for(task, kind)}]
     called, seen, scope = [], set(), set()
     dry, top1, refused = set(), set(), 0  # variant dry (run 5)
     searches, nreq, complete, capped, null_step, mode, stop_ignored = 0, 0, False, False, None, "full", False
@@ -325,19 +332,19 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
                         stage, result, fire = "null", NULL, True
                         if null_step is None:
                             null_step = step
-                        if variant == "dry" and top:
+                        if variant in DRY_VARIANTS and top:
                             dry.add(top[0].split("__")[0])
                 rec["rule_stage"].append(stage)
             elif name == "call_tool" and name in offered:
                 inner = str((args or {}).get("name", "")) if isinstance(args, dict) else ""
                 rec["tool_calls"].append("call_tool:" + inner)
-                if variant == "dry" and mode == "nosearch" and inner in names_searchable and inner.split("__")[0] in dry:
+                if variant in DRY_VARIANTS and mode == "nosearch" and inner in names_searchable and inner.split("__")[0] in dry:
                     called.append((inner + "#refused", step))
                     result, misstep, refused = NOT_RUN, True, refused + 1
                 elif inner in names_searchable or inner in CORE_NAMES:
                     called.append((inner, step))
                     result = STUB
-                    if variant == "dry" and mode == "nosearch" and inner not in seen and inner not in CORE_NAMES:
+                    if variant in DRY_VARIANTS and mode == "nosearch" and inner not in seen and inner not in CORE_NAMES:
                         misstep = True
                 else:
                     called.append((inner + "#unknown", step))
@@ -355,9 +362,9 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
             msgs.append({"role": "tool", "tool_call_id": tc.get("id") or "", "content": result})
         if fire and variant == "stopreply":
             mode = "notools"
-        elif fire and variant in ("stopsearch", "dry") and mode == "full":
+        elif fire and variant in ("stopsearch",) + tuple(DRY_VARIANTS) and mode == "full":
             mode = "nosearch"
-        elif variant == "dry" and mode == "nosearch" and misstep:
+        elif variant in DRY_VARIANTS and mode == "nosearch" and misstep:
             done = {n for n, _ in called}
             pending = [t for t in top1 if t.split("__")[0] not in dry and not read_only(t) and t not in done]
             if not pending:
