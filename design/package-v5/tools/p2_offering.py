@@ -39,6 +39,10 @@ ap.add_argument("--api", choices=["chat_completions", "responses"], default="res
 ap.add_argument("--key-env", default="OPENAI_API_KEY")
 ap.add_argument("--reasoning-effort", default="low", choices=["minimal", "low", "medium", "high"])
 ap.add_argument("--temperature", type=float, default=1.0, help="gpt-5 family accepts only the default 1.0")
+ap.add_argument("--seed", type=int, default=None, help="sent as the request seed when given (P2b on ScaDS: 100, as R3 Part B)")
+ap.add_argument("--no-reasoning-param", action="store_true", help="send no reasoning field (ScaDS: reasoning as served)")
+ap.add_argument("--min-interval", type=float, default=0.0, help="seconds between model calls (ScaDS GLM-5.3: 2 per minute, use 31)")
+ap.add_argument("--retry-429", type=int, default=0, help="retry a rate-limited call this many times after --min-interval + 5 s")
 ap.add_argument("--price", default="", help="input,cached_input,output dollars per million tokens (required for a live run)")
 ap.add_argument("--max-spend", type=float, default=0.0)
 ap.add_argument("--max-calls", type=int, default=3000)
@@ -95,7 +99,7 @@ class Stop(BaseException):
     pass
 
 
-CUR = {"task": None, "subset": [], "spend": 0.0, "calls": 0, "fail_streak": 0}
+CUR = {"task": None, "subset": [], "spend": 0.0, "calls": 0, "fail_streak": 0, "last_call": 0.0}
 TRACE = RUN / "trace" / "calls.jsonl"
 GT = AW / "aw-root/data/tasks"
 
@@ -158,10 +162,28 @@ def _get(*a, **kw):
                                       "tools": [{"type": "function", "name": n} for n in CUR["subset"]]}
         rec = {"task": CUR["task"], "arm": args.arm, "api": args.api, "n_tools": len(ckw.get("tools") or []),
                "n_items": len(ckw.get("messages") or ckw.get("input") or [])}
-        t0 = now()
-        try:
-            r = caller(**ckw)
-        except Exception as e:
+        r, attempt = None, 0
+        while True:
+            if args.min_interval:
+                wait = CUR["last_call"] + args.min_interval - time.time()
+                if wait > 0:
+                    time.sleep(wait)
+            CUR["last_call"] = time.time()
+            t0 = now()
+            try:
+                r = caller(**ckw)
+                break
+            except Exception as e:
+                if getattr(e, "status_code", None) == 429 and attempt < args.retry_429:
+                    attempt += 1
+                    with open(TRACE, "a") as f:
+                        f.write(json.dumps({**rec, "status": "rate_limited_retry", "attempt": attempt}) + "\n")
+                    time.sleep(args.min_interval + 5)
+                    continue
+                err = e
+                break
+        if r is None:
+            e = err
             rec.update(status="error", error=type(e).__name__, http=getattr(e, "status_code", None), latency_s=round(now() - t0, 2))
             with open(TRACE, "a") as f:
                 f.write(json.dumps(rec) + "\n")
@@ -170,7 +192,7 @@ def _get(*a, **kw):
             CUR["fail_streak"] += 1
             if CUR["fail_streak"] >= 2:  # added after the first gpt-5.4-mini pilot: AppWorld's agent absorbs failed calls
                 raise Stop(f"two failed model calls in a row ({type(e).__name__}, HTTP {getattr(e, 'status_code', None)})") from None
-            raise
+            raise e
         CUR["fail_streak"] = 0
         d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
         u = d.get("usage") or {}
@@ -201,7 +223,9 @@ lmm.get_raw_lm_caller = _get
 
 model_config = {"client_name": "openai", "api_type": args.api, "name": args.model, "base_url": args.base,
                 "temperature": args.temperature, "drop_reasoning_content": False,
-                **({"reasoning_effort": args.reasoning_effort} if args.api == "chat_completions" else {"reasoning": {"effort": args.reasoning_effort}}),
+                **({} if args.no_reasoning_param else {"reasoning_effort": args.reasoning_effort} if args.api == "chat_completions"
+                   else {"reasoning": {"effort": args.reasoning_effort}}),
+                **({"seed": args.seed} if args.seed is not None else {}),
                 "cost_per_token": {"input_cache_hit": PRICE[1], "input_cache_miss": PRICE[0], "input_cache_write": 0.0, "output": PRICE[2]},
                 "retry_after_n_seconds": 15, "use_cache": False, "max_retries": 20}
 P = os.environ["APPWORLD_EXPERIMENT_PROMPTS_PATH"]
@@ -227,7 +251,8 @@ if bad:
     sys.exit(f"not eligible dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-meta = dict(tag=args.tag, arm=args.arm, model=args.model, api=args.api, base=args.base, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
+meta = dict(tag=args.tag, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
+            no_reasoning_param=args.no_reasoning_param, min_interval=args.min_interval, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
             price=args.price, max_spend=args.max_spend, apps=APPS, tasks=ids, started=utc(),
             harness_sha256=__import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest())
 (RUN / "run-meta.json").write_text(json.dumps(meta, indent=1))

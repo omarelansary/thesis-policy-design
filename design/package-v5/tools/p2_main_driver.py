@@ -16,9 +16,11 @@ ap.add_argument("--cap", type=float, required=True)
 ap.add_argument("--arms", default="all,enf,instr,drop")
 ap.add_argument("--repeats", type=int, default=2)
 ap.add_argument("--api", default="responses")
+ap.add_argument("--tag-prefix", default="p2-main")
+ap.add_argument("--extra", default="", help="further p2_offering.py arguments, space-separated (P2b: ScaDS base, key, pacing)")
 a = ap.parse_args()
 RUNS = WS / "design/package-v5/inputs/p2/local/runs"
-PROG = WS / f"design/package-v5/inputs/p2/local/main-{a.model}.progress"
+PROG = WS / f"design/package-v5/inputs/p2/local/{a.tag_prefix}-{a.model.split('/')[-1]}.progress"
 spent = 0.0
 for rep in range(1, a.repeats + 1):
     for arm in a.arms.split(","):
@@ -26,9 +28,9 @@ for rep in range(1, a.repeats + 1):
         if left <= 0.01:
             open(PROG, "a").write(f"{time.strftime('%FT%TZ', time.gmtime())} STOP cap ${a.cap} reached (spent ${spent:.4f})\n")
             sys.exit(3)
-        tag = f"p2-main-{a.model}-{arm}-r{rep}"
+        tag = f"{a.tag_prefix}-{a.model.split('/')[-1]}-{arm}-r{rep}"
         rc = subprocess.call([sys.executable, str(HERE / "p2_offering.py"), "--tag", tag, "--arm", arm, "--api", a.api, "--model", a.model,
-                              "--price", a.price, "--max-spend", str(left)])
+                              "--price", a.price, "--max-spend", str(left)] + a.extra.split())
         st = json.load(open(RUNS / tag / "stats.json")) if (RUNS / tag / "stats.json").exists() else {}
         s = float(st.get("spend") or 0.0)
         spent += s
