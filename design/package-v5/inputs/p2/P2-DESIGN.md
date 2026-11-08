@@ -47,7 +47,7 @@ against offering everything. The sources measure removal (E8, E9, E10) or the me
 places searched.
 
 ## 3. Route and models
-- **Route: OpenAI Chat Completions.** It is the only route where the offering mechanism is enforced and keeps the cache (E3, E4).
+- **Route: OpenAI, Responses API** (changed after the pilot: gpt-5.4-mini rejects function tools with reasoning on Chat Completions; Responses is AppWorld's own setting for the gpt-5 family; the harness supports both). It is the only route where the offering mechanism is enforced and keeps the cache (E3, E4).
   The `allowed_tools` shape is the Chat Completions one that R1 tested: `{"type":"allowed_tools","allowed_tools":{"mode":"auto","tools":[{"type":"function","function":{"name":...}}]}}`.
 - **Models: two OpenAI models of different generations**, so a result is a range, not one model's (REQ-U22-14):
   - `gpt-5-mini`: AppWorld ships a config for it, `experiments/configs/simplified_function_calling_agent/openai/gpt-5-mini-2025-08-07-medium-reasoning/`;
@@ -129,8 +129,14 @@ places searched.
 - **The ranges are wide** because steps and the cached share are not yet measured for these models on these tasks. So the lead
   proposes the pilot first.
 
+**Measured in the pilot (2026-11-08, `RESULTS-P2-PILOT.md`):**
+- **Per task:** about 8 calls, about 17,000 prompt tokens per call, cached share 0.78-0.86.
+- **Cost per task:** $0.015-0.018 (gpt-5-mini) and $0.031 (gpt-5.4-mini), both on the Responses API.
+- **Main A:** about $3.2 + $5.5 = **$8.7** (stop $13). **Main B:** about $11.6.
+- The estimate above is kept as written.
+
 ## 8. Staged plan (each stage needs the human's word)
-1. **Pilot** (about $0.50, stop $2):
+1. **Pilot** (about $0.50, stop $2; **done 2026-11-08, $0.316, INT-T-041**):
    - 5 tasks from 5 different scenarios, arm `all`, both models, one run each.
    - It gives the floor and ceiling (`17` CH-0140: if `all` solves nearly every task, a gain cannot show; if it solves almost
      none, a loss cannot show) and the real tokens, steps and cached share.

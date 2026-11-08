@@ -28,8 +28,8 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       tools array (V5-R02); model differences as an input to model choice. Waits for the end-to-end authorization.
 
 - [ ] **P2** (INT-T-040; preparation done, `design/package-v5/inputs/p2/P2-DESIGN.md`, harness `tools/p2_offering.py`, mock-tested):
-      the human decides on the pilot (5 tasks, arm `all`, gpt-5-mini and gpt-5.4-mini, about $0.50, stop $2) and needs to add
-      `OPENAI_API_KEY` if it is no longer in `~/r3-work/.env`; then Main A with a cost from the pilot.
+      pilot done 2026-11-08 (INT-T-041, $0.316, `RESULTS-P2-PILOT.md`); the human decides on Main A (`all`, `enf`, `instr`;
+      30 tasks; 2 repeats; both models on the Responses API; about $8.7, stop $13) or Main B (adds `drop`, about $11.6).
 - [ ] **Group 2** (INT-T-040: authorized after group 1 is complete; group 1 done at 385237a): P3 sources stored as EXT;
       end-to-end task preparation; P1 preparation. Waits for the human's word.
 

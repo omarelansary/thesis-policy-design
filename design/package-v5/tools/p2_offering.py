@@ -34,6 +34,8 @@ ap.add_argument("--tag", required=True, help="run name: experiment name and fold
 ap.add_argument("--arm", choices=["all", "enf", "instr", "drop"], required=True)
 ap.add_argument("--model", required=True, help="OpenAI model id, e.g. gpt-5-mini or gpt-5.4-mini")
 ap.add_argument("--base", default="https://api.openai.com/v1")
+ap.add_argument("--api", choices=["chat_completions", "responses"], default="responses",
+                help="responses is AppWorld's own setting for the gpt-5 family; gpt-5.4-mini refuses function tools with reasoning on chat")
 ap.add_argument("--key-env", default="OPENAI_API_KEY")
 ap.add_argument("--reasoning-effort", default="low", choices=["minimal", "low", "medium", "high"])
 ap.add_argument("--temperature", type=float, default=1.0, help="gpt-5 family accepts only the default 1.0")
@@ -93,7 +95,7 @@ class Stop(BaseException):
     pass
 
 
-CUR = {"task": None, "subset": [], "spend": 0.0, "calls": 0}
+CUR = {"task": None, "subset": [], "spend": 0.0, "calls": 0, "fail_streak": 0}
 TRACE = RUN / "trace" / "calls.jsonl"
 GT = AW / "aw-root/data/tasks"
 
@@ -148,9 +150,14 @@ def _get(*a, **kw):
         if CUR["calls"] >= args.max_calls:
             raise Stop(f"calls reached --max-calls {args.max_calls}")
         if args.arm == "enf" and ckw.get("tools"):
-            ckw["tool_choice"] = {"type": "allowed_tools", "allowed_tools": {"mode": "auto", "tools": [
-                {"type": "function", "function": {"name": n}} for n in CUR["subset"]]}}
-        rec = {"task": CUR["task"], "arm": args.arm, "n_tools": len(ckw.get("tools") or []), "n_messages": len(ckw.get("messages") or [])}
+            if args.api == "chat_completions":  # the shape R1 tested on Chat Completions
+                ckw["tool_choice"] = {"type": "allowed_tools", "allowed_tools": {"mode": "auto", "tools": [
+                    {"type": "function", "function": {"name": n}} for n in CUR["subset"]]}}
+            else:  # the flat Responses shape (R1: also accepted and enforced on OpenAI)
+                ckw["tool_choice"] = {"type": "allowed_tools", "mode": "auto",
+                                      "tools": [{"type": "function", "name": n} for n in CUR["subset"]]}
+        rec = {"task": CUR["task"], "arm": args.arm, "api": args.api, "n_tools": len(ckw.get("tools") or []),
+               "n_items": len(ckw.get("messages") or ckw.get("input") or [])}
         t0 = now()
         try:
             r = caller(**ckw)
@@ -160,17 +167,27 @@ def _get(*a, **kw):
                 f.write(json.dumps(rec) + "\n")
             if getattr(e, "status_code", None) in (401, 402, 403):
                 raise Stop(f"endpoint refused with HTTP {e.status_code}") from None
+            CUR["fail_streak"] += 1
+            if CUR["fail_streak"] >= 2:  # added after the first gpt-5.4-mini pilot: AppWorld's agent absorbs failed calls
+                raise Stop(f"two failed model calls in a row ({type(e).__name__}, HTTP {getattr(e, 'status_code', None)})") from None
             raise
+        CUR["fail_streak"] = 0
         d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
         u = d.get("usage") or {}
-        det = u.get("prompt_tokens_details") or {}
-        cdet = u.get("completion_tokens_details") or {}
-        prompt, cached, completion = u.get("prompt_tokens") or 0, det.get("cached_tokens") or 0, u.get("completion_tokens") or 0
+        if "input_tokens" in u:  # Responses API
+            det, cdet = u.get("input_tokens_details") or {}, u.get("output_tokens_details") or {}
+            prompt, cached, completion = u.get("input_tokens") or 0, det.get("cached_tokens") or 0, u.get("output_tokens") or 0
+        else:
+            det, cdet = u.get("prompt_tokens_details") or {}, u.get("completion_tokens_details") or {}
+            prompt, cached, completion = u.get("prompt_tokens") or 0, det.get("cached_tokens") or 0, u.get("completion_tokens") or 0
         cost = (prompt - cached) * PRICE[0] + cached * PRICE[1] + completion * PRICE[2]
         CUR["spend"] += cost
         CUR["calls"] += 1
-        msg = ((d.get("choices") or [{}])[0].get("message")) or {}
-        names = [((tc.get("function") or {}).get("name") or "") for tc in (msg.get("tool_calls") or [])]
+        if "output" in d:  # Responses API: function calls are output items
+            names = [(o.get("name") or "") for o in (d.get("output") or []) if o.get("type") == "function_call"]
+        else:
+            msg = ((d.get("choices") or [{}])[0].get("message")) or {}
+            names = [((tc.get("function") or {}).get("name") or "") for tc in (msg.get("tool_calls") or [])]
         rec.update(status="ok", model=d.get("model"), system_fingerprint=d.get("system_fingerprint"), prompt=prompt, cached=cached,
                    completion=completion, reasoning=cdet.get("reasoning_tokens"), cost=round(cost, 6), tool_calls=names,
                    outside_subset=sum(1 for n in names if n not in set(CUR["subset"])), latency_s=round(now() - t0, 2))
@@ -182,8 +199,9 @@ def _get(*a, **kw):
 
 lmm.get_raw_lm_caller = _get
 
-model_config = {"client_name": "openai", "api_type": "chat_completions", "name": args.model, "base_url": args.base,
-                "temperature": args.temperature, "reasoning_effort": args.reasoning_effort, "drop_reasoning_content": False,
+model_config = {"client_name": "openai", "api_type": args.api, "name": args.model, "base_url": args.base,
+                "temperature": args.temperature, "drop_reasoning_content": False,
+                **({"reasoning_effort": args.reasoning_effort} if args.api == "chat_completions" else {"reasoning": {"effort": args.reasoning_effort}}),
                 "cost_per_token": {"input_cache_hit": PRICE[1], "input_cache_miss": PRICE[0], "input_cache_write": 0.0, "output": PRICE[2]},
                 "retry_after_n_seconds": 15, "use_cache": False, "max_retries": 20}
 P = os.environ["APPWORLD_EXPERIMENT_PROMPTS_PATH"]
@@ -209,7 +227,7 @@ if bad:
     sys.exit(f"not eligible dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-meta = dict(tag=args.tag, arm=args.arm, model=args.model, base=args.base, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
+meta = dict(tag=args.tag, arm=args.arm, model=args.model, api=args.api, base=args.base, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
             price=args.price, max_spend=args.max_spend, apps=APPS, tasks=ids, started=utc(),
             harness_sha256=__import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest())
 (RUN / "run-meta.json").write_text(json.dumps(meta, indent=1))
