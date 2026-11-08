@@ -13,7 +13,7 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       --model zai-org/GLM-5.3 --sessions 2 --warm-sessions 1 --max-requests 140 --out design/package-v5/inputs/p5/scads-glm53`,
       then `tools/p5_analyze.py` on its log; scan outputs for key material before commit. Status 2026-11-07 16:03 UTC: B2 nearly
       stalled (1 of 36 tasks since 13:55, repeated 900 s timeouts).
-- [ ] **Operations-branch records** (branch `linux-from-v5-audit--portable-guard-and-short-state`). Condition: the other agent
+- [ ] **Operations-branch records** (branch `linux-from-v5-audit--portable-guard-and-short-state`). **Drafts ready to apply** (INT-T-040): `ops/drafts/OPS-BRANCH-RECORDS-DRAFT-20261108.md` (AUTH-028 amendment, AUTH-029 P3, AUTH-030, WD-071 to WD-075, STATE section A); ids checked free on that branch at 22e3d7d. Condition: the other agent
       says the shared folder is free. To write: AUTH-028 amendment for INT-T-026 (part A cap about 140; OpenAI repeat accepted at
       about $0.40, stop $0.60; 193 requests, $0.445; OpenAI total $0.594); WD-071 (part B results with harness revision 2, the
       proposed D-01 variant, the B2 stall, INT-T-027: D-01 kept, variant decided after part A); STATE.md update with a pointer

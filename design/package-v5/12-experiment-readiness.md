@@ -23,3 +23,36 @@ Every harness takes the model as a run-time argument and writes it into each out
 
 ## 4. What I can do now without any authorization
 Write the P3 task set and catalogue specification (desk work); regenerate the frontier page and sort the 24 "before any implementation" ledger rows under V5; keep records current. None needs the key.
+## 6. Update 2026-11-08 (INT-T-040; this branch, `v5-p5-break-even`)
+This section supersedes the rows of section 1 for P5, P3 and P2. Branch `v5-r3-part-b-results` has its own section 5 (update of
+2026-11-07); a merge keeps both sections.
+- **P5** (AUTH-028).
+  - Part B, the OpenAI side check, is done: $0.594 (`inputs/p5/RESULTS-P5-B.md`).
+    - Individually deferred functions still bill 30% of their tokens.
+    - The break-even is between 10 and 30 tools on cold starts.
+    - D-01 as written misses this route by more than the run-to-run spread. The human keeps D-01 until part A (INT-T-027).
+  - Part A (ScaDS GLM-5.3, client deferral, cap about 140 requests, INT-T-026) waits for the GLM B2 run to end.
+- **P3: done and closed** (runs 1-6 on OpenRouter, GMICloud fp8, three models, $9.953; INT-T-028..039; `inputs/p3/P3-LOG.md`).
+  - The models searched for a deferred tool without being told to, so HYP-0019's falsifier is not met on that set.
+  - For a missing tool, V5-R17 adds a deterministic stop plus one sentence in the system text (`04`, provisional).
+  - Its open items go to the end-to-end study (`05` section 3).
+- **P2: preparation authorized (INT-T-040), no run.** The route question of section 1 ("the route left is instruction text
+  without enforcement") is now answered per provider:
+  - **OpenAI:** `allowed_tools` is a real server mechanism.
+    - It keeps the cache: 3,328 of 3,426 prompt tokens cached, as in the plain repeat.
+    - Both models stayed inside the subset in 20 of 20 repeats (`10` section 12, R1 part 1 and R2 A1).
+    - Limit: at most 128 tools per request (`17` section 7, P2 note; R1 part 3). So AppWorld's 457 definitions cannot be declared
+      at once there.
+  - **ScaDS:** the LiteLLM proxy refuses it (HTTP 400 on all ten models, `10` section 12). The instruction-only restriction is
+    followed by most models in the adversarial probe cell (seven of nine in 5 of 5), not by Llama-3.3-70B. Named forcing is
+    ignored by three models (`10` section 12, R2 A1).
+  - **OpenRouter, GMICloud pinned:** accepted and **not enforced** (the excluded tool was called in 9 of 9). Only `auto` works
+    for `tool_choice` (`10` section 12, R3 A3). So this route cannot carry a server-enforced arm, and a run there would look
+    enforced when it is not.
+  - **Consequence for the design [I]:**
+    - P2 can test HYP-0018 in two forms: server-enforced on OpenAI, within 128 declared tools; and instruction-only, which is
+      portable and has no enforcement, on the open-weight routes.
+    - Each form needs an all-offered arm on the same declared prefix and cache diagnostics per request.
+    - The design, the harness and a cost estimate are in `inputs/p2/` (in preparation). No request is sent before a run is
+      authorized with its cost.
+- **P1 and P4:** unchanged from section 1.
