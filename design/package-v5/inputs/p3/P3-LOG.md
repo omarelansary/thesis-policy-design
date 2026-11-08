@@ -33,6 +33,7 @@ deterministic, not a number of turns).
 | INT-T-035 | 11-08 | Agrees to run 4 and its cost; leaves the repeated plain run and where to start to the lead |
 | INT-T-036 | 11-08 | Chooses option (a): design a per-need rule by replay on run 4's logs; document runs, decisions, reasons, results and conclusions |
 | INT-T-037 | 11-08 | Approves run 5: plain against DRY, about $1.40 |
+| INT-T-038 | 11-08 | Chooses option (ii): DRY plus a one-sentence instruction, on MiniMax, DeepSeek and GLM; accepts going over $10 (lead's ceiling $10.60) |
 
 ## 2. Runs
 | Run | Commit | What changed, and why | Requests / spend | Result [O] | Conclusion [I] |
@@ -49,19 +50,23 @@ deterministic, not a number of turns).
 
 | 5 | e906aff, e697e2c | Human approved run 5 (INT-T-037): the only candidate that survived the replay, DRY, tested live against plain | 2,639 / $1.618 | Both present: no harm. Doable need 40→34, 36→34, 33→27 of 40 (more than the replay predicted). Substitutes 12→5, 4→1, 6→3; false claims 5→2, 0→0, 1→0. Backstop barely changed; guessed names rose; requests −8 to −19%. Y was lost mostly at the backstop, while the model guessed the missing tool's name | DRY is the best client-side rule found: deterministic, no count, fewer harmful actions, no harm when the tool exists. But no client-side rule makes these models stop searching for a missing tool. The lever left is the model (an instruction, or model choice). Lead recommends closing P3 |
 | Note on run 5 | d929585 | Human asked whether run 4 should be rerun without the repeated plain run | 0 / $0 | No rerun needed: that run would have been a subset of run 4. Run 4 plain, run 4 plainB and run 5 plain are three copies of the no-rule condition. For all three models DRY lies below the whole no-rule range on the doable need (37-40 / 36-40 / 30-33 against 34 / 34 / 27) and on substitutes (12-16 / 4-5 / 5-8 against 5 / 1 / 3); the backstop count varies too much to read | DRY's gain on substitutes and its small cost in doable needs are both very probably real (`RESULTS-P3-RUN5.md` section 1a) |
-**Spend:** P3 total $9.404 of $10 (runs and smoke tests; per-run figures in the result files). $0.60 left.
+| 6 | 636afdd, (next commit) | Human chose (ii) (INT-T-038): DRY plus one sentence in the system text on what to do when the catalogue has no tool for a need | 894 / $0.549 | Doable need 40 / 39 / 37 of 40 (no rule 37-40 / 36-40 / 30-33; DRY 34 / 34 / 27); backstop 3 / 0 / 1; guessed names 2 / 1 / 0; requests 32-48% below no rule; substitutes 7 / 1 / 2; false claims 3 / 0 / 0; both present 20 / 17 / 19 of 20 | First variant to meet the requirement on two-need tasks. Most of the gain over DRY seems to come from the instruction (the NULL fired less), but an instruction-only arm is missing. Lead recommends closing P3 and carrying DRY plus the instruction into V5-R, with an instruction-only arm in the end-to-end study |
+**Spend:** P3 total $9.953, inside the original $10 stop (runs and smoke tests; per-run figures in the result files).
 
 ## 3. Standing conclusions [I] (revised as runs come in)
 1. Models search for a deferred tool without being told to (runs 1-2). For these models and tasks, deferral needs no
    instruction to search.
 2. When the tool is missing, models do not stop on their own, and a message from the search tool does not stop them (runs 1-4).
 3. A stop the client enforces does work, but over the whole session it costs the needs that could be done (run 4). Scoped to the
-   app where nothing was found (DRY, run 5), it halves substitute actions at a small cost in doable needs. It still does not make
-   models stop searching for a tool that does not exist (runs 2-5).
+   app where nothing was found (DRY, run 5), it halves substitute actions at a small cost in doable needs, but alone it does not
+   make models stop searching for a tool that does not exist (runs 2-5).
+5. DRY plus one sentence telling the model what to do when the catalogue has no tool for a need (run 6) keeps the doable need,
+   ends the loop and cuts requests by a third to a half. It is the provisional answer to the human's requirement; the share of the
+   instruction alone is not yet measured.
 4. Substitute actions and false claims are model behaviour, not caused by the rules (runs 3-4). A search stop cannot prevent
    them; they need a separate safeguard on state-changing calls, which only the end-to-end study can score.
 
 ## 4. Open
-- **Next:** the human decides on `RESULTS-P3-RUN5.md` section 3: (i) close P3 (lead's recommendation), or (ii) a last small instruction run within the $0.60 left.
+- **Next:** the human decides on `RESULTS-P3-RUN6.md` section 3 (lead recommends closing P3).
 - **Records for the operations branch:** P3 AUTH row (INT-T-028 to INT-T-036), WD entries, STATE pointer (`ops/OPEN-TASKS.md`).
 - **Where the stop rule is tested:** P3, then the V5-R arm of the end-to-end study (`STOP-RULE-RESEARCH-20261108.md` section 5).

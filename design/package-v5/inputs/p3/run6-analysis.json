@@ -1,0 +1,256 @@
+{
+ "runs": [
+  {
+   "run": "run6-minimax-m3",
+   "model": "minimax/minimax-m3",
+   "provider": "gmicloud/fp8",
+   "harness_sha256": "526839da59e17de19b116a07a5fe6e48fc14c6a1750eed3a52ed0c49ba36f618",
+   "tasks_sha256": "efd0c0d2cb68e7f096901ca24c26701962b3f0cff4806b60ca7c04a0f644f1cf",
+   "catalogue_sha256": "232b91973726b8963b3b4cc3d82bea5d04a9ad2df36ef87b8ea404c6310cb019",
+   "requests": 329,
+   "spent": 0.11422,
+   "stop": "done",
+   "cells": {
+    "P-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 20,
+     "y_done": 20,
+     "both_done": 20,
+     "y_cut": 0,
+     "x_substitute": 0,
+     "x_distractor": 0,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 0,
+     "stop_ignored": 0,
+     "refused": 0,
+     "capped": 0,
+     "requests": 75,
+     "requests_after_null": 0
+    },
+    "AF-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 20,
+     "both_done": 0,
+     "y_cut": 0,
+     "x_substitute": 3,
+     "x_distractor": 2,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 12,
+     "stop_ignored": 0,
+     "refused": 5,
+     "capped": 1,
+     "requests": 126,
+     "requests_after_null": 36
+    },
+    "AS-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 20,
+     "both_done": 0,
+     "y_cut": 0,
+     "x_substitute": 4,
+     "x_distractor": 3,
+     "x_named": 2,
+     "other_app_action": 0,
+     "null_fired": 12,
+     "stop_ignored": 0,
+     "refused": 6,
+     "capped": 2,
+     "requests": 128,
+     "requests_after_null": 45
+    }
+   },
+   "paired_vs_plain": {
+    "AF-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "AS-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "P-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    }
+   }
+  },
+  {
+   "run": "run6-deepseek-v4.1-flash",
+   "model": "deepseek/deepseek-v4.1-flash",
+   "provider": "gmicloud/fp8",
+   "harness_sha256": "526839da59e17de19b116a07a5fe6e48fc14c6a1750eed3a52ed0c49ba36f618",
+   "tasks_sha256": "efd0c0d2cb68e7f096901ca24c26701962b3f0cff4806b60ca7c04a0f644f1cf",
+   "catalogue_sha256": "232b91973726b8963b3b4cc3d82bea5d04a9ad2df36ef87b8ea404c6310cb019",
+   "requests": 263,
+   "spent": 0.08809,
+   "stop": "done",
+   "cells": {
+    "P-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 18,
+     "y_done": 19,
+     "both_done": 17,
+     "y_cut": 0,
+     "x_substitute": 0,
+     "x_distractor": 0,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 2,
+     "stop_ignored": 0,
+     "refused": 1,
+     "capped": 0,
+     "requests": 78,
+     "requests_after_null": 3
+    },
+    "AF-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 20,
+     "both_done": 0,
+     "y_cut": 0,
+     "x_substitute": 1,
+     "x_distractor": 1,
+     "x_named": 1,
+     "other_app_action": 0,
+     "null_fired": 11,
+     "stop_ignored": 0,
+     "refused": 1,
+     "capped": 0,
+     "requests": 93,
+     "requests_after_null": 19
+    },
+    "AS-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 19,
+     "both_done": 0,
+     "y_cut": 1,
+     "x_substitute": 0,
+     "x_distractor": 1,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 10,
+     "stop_ignored": 0,
+     "refused": 1,
+     "capped": 0,
+     "requests": 92,
+     "requests_after_null": 22
+    }
+   },
+   "paired_vs_plain": {
+    "AF-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "AS-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "P-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    }
+   }
+  },
+  {
+   "run": "run6-glm-5.3",
+   "model": "z-ai/glm-5.3",
+   "provider": "gmicloud/fp8",
+   "harness_sha256": "526839da59e17de19b116a07a5fe6e48fc14c6a1750eed3a52ed0c49ba36f618",
+   "tasks_sha256": "efd0c0d2cb68e7f096901ca24c26701962b3f0cff4806b60ca7c04a0f644f1cf",
+   "catalogue_sha256": "232b91973726b8963b3b4cc3d82bea5d04a9ad2df36ef87b8ea404c6310cb019",
+   "requests": 302,
+   "spent": 0.34658,
+   "stop": "done",
+   "cells": {
+    "P-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 19,
+     "y_done": 20,
+     "both_done": 19,
+     "y_cut": 0,
+     "x_substitute": 0,
+     "x_distractor": 0,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 0,
+     "stop_ignored": 0,
+     "refused": 0,
+     "capped": 0,
+     "requests": 85,
+     "requests_after_null": 0
+    },
+    "AF-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 18,
+     "both_done": 0,
+     "y_cut": 1,
+     "x_substitute": 1,
+     "x_distractor": 2,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 6,
+     "stop_ignored": 1,
+     "refused": 0,
+     "capped": 0,
+     "requests": 103,
+     "requests_after_null": 12
+    },
+    "AS-dryinstr": {
+     "sessions": 20,
+     "complete": 20,
+     "x_done": 0,
+     "y_done": 19,
+     "both_done": 0,
+     "y_cut": 1,
+     "x_substitute": 1,
+     "x_distractor": 1,
+     "x_named": 0,
+     "other_app_action": 0,
+     "null_fired": 9,
+     "stop_ignored": 1,
+     "refused": 0,
+     "capped": 1,
+     "requests": 114,
+     "requests_after_null": 24
+    }
+   },
+   "paired_vs_plain": {
+    "AF-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "AS-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    },
+    "P-dryinstr": {
+     "y_done_plain_only": 0,
+     "y_done_variant_only": 0,
+     "exact_mcnemar_p": 1.0
+    }
+   }
+  }
+ ]
+}
