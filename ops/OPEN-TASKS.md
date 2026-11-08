@@ -8,9 +8,13 @@ Kept on `v5-p5-break-even`, with the records (WD-082 moved them here from the Li
 Windows/Linux switch). `ops/STATE.md` section A points here.
 
 ## 1. Waiting on a condition (the lead does these when the condition is met)
-- [ ] **P2b** (AUTH-031, INT-T-044): `all` against `instr` on ScaDS GLM-5.3, running since 2026-11-08 20:52 UTC (first line of its local `progress.log`; paced at 31 s,
-      many hours). When it ends: `design/package-v5/tools/p2_analyze.py`, a results file, and HYP-0018's result section updated
-      (its status stays `proposed`).
+- [ ] **P2b** (AUTH-031, INT-T-044; full design kept, INT-T-046): `all` against `instr` on ScaDS GLM-5.3, 2 repeats, paced at 31 s.
+      Attempt 1 (tag prefix `p2b`, from 2026-11-08 20:52 UTC) stopped itself at task 6 of 30 of its first run at 23:10 UTC: two
+      calls in a row timed out (each about 900 s: 300 s client timeout and two retries); the successful calls had a median of 11 s,
+      a 90th percentile of 245 s and a maximum of 711 s. ScaDS showed GLM-5.3 up again at 23:12, so attempt 2 (prefix `p2b2`,
+      same settings) started from task 1, so that each run is complete; attempt 1 is kept and not pooled. Its finish line
+      carries AppWorld's frozen clock (2023-05-18), not the real time. When attempt 2 ends: `design/package-v5/tools/p2_analyze.py`,
+      a results file, and HYP-0018's result section updated (its status stays `proposed`).
 - [ ] **End-to-end study, from P3 and the preparation** (`05` section 3; V5-R17 open items a-c; `inputs/e2e/E2E-TASKS-DESIGN.md`):
       instruction-only arm; the stop's treatment of the tools array (V5-R02); model differences as an input to model choice; the
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
