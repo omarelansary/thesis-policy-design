@@ -1,6 +1,6 @@
 # P2 design: offering a subset at a fixed cached prefix (preparation, 2026-11-08)
 
-Status: **preparation only** (INT-T-040). No model request has been sent, and a run needs the human's authorization with its cost.
+Status: **run done 2026-11-08** (pilot `RESULTS-P2-PILOT.md`, main `RESULTS-P2-MAIN.md`, $12.69 in all; INT-T-041, INT-T-042). Written as preparation (INT-T-040). No model request has been sent, and a run needs the human's authorization with its cost.
 Written by the lead; nothing here is validated, approved or final. No V5 rule changed.
 - **Harness:** `design/package-v5/tools/p2_offering.py`. **Analysis:** `design/package-v5/tools/p2_analyze.py`.
 - **Tested** with a dry run and a local mock server (section 9).

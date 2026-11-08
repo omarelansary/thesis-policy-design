@@ -19,9 +19,9 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
 - [ ] **End-to-end study, from P3** (`05` section 3, V5-R17 open items a-c): instruction-only arm; the stop's treatment of the
       tools array (V5-R02); model differences as an input to model choice. Waits for the end-to-end authorization.
 
-- [ ] **P2** (INT-T-040; preparation done, `design/package-v5/inputs/p2/P2-DESIGN.md`, harness `tools/p2_offering.py`, mock-tested):
-      pilot done 2026-11-08 (INT-T-041, $0.316, `RESULTS-P2-PILOT.md`); the human decides on Main A (`all`, `enf`, `instr`;
-      30 tasks; 2 repeats; both models on the Responses API; about $8.7, stop $13) or Main B (adds `drop`, about $11.6).
+- [ ] **P2 decisions** (run done 2026-11-08, `design/package-v5/inputs/p2/RESULTS-P2-MAIN.md`, $12.69): the human decides on
+      section 4 (keep the offering stage; the per-model instruction check P2b, free on ScaDS; a `04` note that declaring only the
+      subset is cheaper for a subset fixed for a whole session; HYP-0018 result recorded with a status the human chooses).
 - [ ] **Group 2** (INT-T-040: authorized after group 1 is complete; group 1 done at 385237a): P3 sources stored as EXT;
       end-to-end task preparation; P1 preparation. Waits for the human's word.
 

@@ -53,6 +53,6 @@ This section supersedes the rows of section 1 for P5, P3 and P2. Branch `v5-r3-p
     - P2 can test HYP-0018 in two forms: server-enforced on OpenAI, within 128 declared tools; and instruction-only, which is
       portable and has no enforcement, on the open-weight routes.
     - Each form needs an all-offered arm on the same declared prefix and cache diagnostics per request.
-    - The design, the harness and a cost estimate are in `inputs/p2/P2-DESIGN.md` (done 2026-11-08: a pilot of about $0.50 is proposed first). No request is sent before a run is
+    - The design, the harness and a cost estimate are in `inputs/p2/P2-DESIGN.md`. **P2 was run on 2026-11-08** (INT-T-041, INT-T-042; `inputs/p2/RESULTS-P2-MAIN.md`, $12.69): no accuracy loss from server-enforced offering beyond run-to-run variation; the cache was kept. No request is sent before a run is
       authorized with its cost.
 - **P1 and P4:** unchanged from section 1.
