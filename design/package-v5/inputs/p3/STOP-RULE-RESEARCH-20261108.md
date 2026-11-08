@@ -1,8 +1,8 @@
 ---
 type: summary
-status: unverified (pages read through WebFetch, which returns a small model's summary, not the raw page; nothing stored in
-  evidence/; numbers are as the summaries gave them unless marked [checked], which means the lead re-fetched the primary page
-  and found the figure there; none of them may be cited as EXT before the page is stored and extracted)
+status: unverified summary (pages first read through WebFetch, which returns a small model's summary; [checked] meant the lead
+  re-fetched the primary page). Section 6: the nine primary pages behind points 2 to 7 are now stored with hashes and every quoted
+  phrase or figure was found in them (2026-11-08); the rest of this note is still a summary, not verified text
 ---
 # P3: how should a tool-search loop decide that nothing fits? (research note, 2026-11-08, revision 2)
 
@@ -138,3 +138,23 @@ status: unverified (pages read through WebFetch, which returns a small model's s
   - P1 uses whatever rule P3 leaves; P2 has no search.
   - The requests spent on no-match searching (run 3: 7.3 to 9.5 per session in cell A against 3.6 to 3.9 in D) are an input to
     the bill. Whether D-01 carries such a term is the human's decision after part A (INT-T-027).
+
+## 6. Sources stored (2026-11-08, AUTH-030 group 2; INT-T-047) [O]
+- The nine primary pages behind points 2 to 7 were stored with `tools/litfetch.py` under AUTH-030 in `evidence/literature-20261019/`
+  (one line each in `MANIFEST.jsonl`: URL, HTTP status, time, SHA-256 of the raw bytes and of the stored text). arXiv pages were
+  fetched as HTML (PyMuPDF is not installed here, and installs are not allowed). 9 fetches, 0 searches.
+- The lead then searched each stored text for the phrase or figure quoted above. **All were found**, with the notes below. These
+  passages may now be cited from the stored files. On this branch the verifier still accepts only EXT records as finding evidence;
+  citing stored literature directly in a finding needs AUTH-022's verifier change, which is on the Linux branch (not merged).
+
+| Stored id | Point | text SHA-256 (first 12) | Lines | What was found |
+|---|---|---|---|---|
+| `p3stop-arxiv-2610.06191` (https://arxiv.org/html/2610.06191v1) | point 2 | 9eb8d6155e71 | 5331 | "only the finish action remains" (line 101), "change when they stop" ... "but not what they stop on" (line 77). Nuance: the trigger is five consecutive results *the agent judged* useless (lines 77, 101, 188), not results that were objectively empty. Was unchecked; now found. |
+| `p3stop-arxiv-2605.07042-cgdp` (https://arxiv.org/html/2605.07042) | point 2 | a1cc12fd28c1 | 3103 | Jaccard (line 397), "forces the agent to give a final answer" (403), +16.2% (653), 39% (64), "spirals into infinite loops" (617), "premature stopping" (60). |
+| `p3stop-arxiv-2610.05348` (https://arxiv.org/html/2610.05348v1) | point 3 | 5c0cd9f6b463 | 2223 | abstract (line 48): 23% to 97% (Qwen3-8B/32B), 28% to 57% (Haiku 4.5), beats a system-prompt instruction by 51 points, Search-R1 fabricates, Sonnet 5.5 and Opus 5.5 +2, directive +16. |
+| `p3stop-arxiv-2609.18672` (https://arxiv.org/html/2609.18672) | point 4 | 1abf823e969f | 1592 | AUC 0.697 (line 70) and 0.806 (71). |
+| `p3stop-arxiv-2609.14758` (https://arxiv.org/html/2609.14758v1) | point 6 | cd064d32b465 | 1149 | 45.3 (line 79), 14.10 (73), 0.87 (87), retrieval_status (86). |
+| `p3stop-arxiv-2605.28532-feasigen` (https://arxiv.org/html/2605.28532) | point 7 | 4fb0038bc254 | 1472 | "false continue rate reaching up to 73.9%" (line 60). |
+| `p3stop-arxiv-2611.07689-mcphallu` (https://arxiv.org/html/2611.07689) | point 7 | 8f94fbc917a4 | 3475 | Unreachable Goal, 0.458 and 23.2% (lines 77-79). The graded early-declaration score is still not checked. |
+| `p3stop-neurips2026-guardrails-redirect` (https://neurips.cc/virtual/2026/168975) | point 5 | f2dc7c0b4cd4 | 81 | listing page only (81 lines; no arXiv version found): the three quoted phrases are on line 67 (the abstract). The paper's body is not stored. |
+| `p3stop-crewai-tools-v1.15.35` (https://docs.crewai.com/v1.15.35/en/concepts/tools) | point 2 | be5e11d7cbea | 519 | "stops its tool use" (line 495); "give its final answer" is present but split over a line break (near line 495). |

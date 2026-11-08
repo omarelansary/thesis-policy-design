@@ -19,8 +19,6 @@ Windows/Linux switch). `ops/STATE.md` section A points here.
 - [ ] **Push** (INT-T-047, WD-082): `v5-p5-break-even` (the research records now live here, with the P5, P3 and P2 work), and
       force-push the Linux branch, reset to 5abc9ac (administrative only; origin has d5ae226). Its rebase onto `v5-audit` 77357c1 is
       still to do (WD-072). The human pushes.
-- [ ] **P3 sources stored as EXT** (group 2, AUTH-030): needs `tools/litfetch.py` on `v5-p5-break-even` to accept AUTH-030 from
-      the operations branch, a tool change for the human to review.
 - [ ] **End-to-end and P1 decisions** (`E2E-TASKS-DESIGN.md` section 5; `P1-PREP.md` section 3): whether the bill and accuracy arms
       keep AppWorld's prompt as shipped; which tasks; the form of "removed"; P1's construction, arms and measures.
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
