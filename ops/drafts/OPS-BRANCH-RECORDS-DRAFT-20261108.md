@@ -5,7 +5,7 @@ are written on `v5-p5-break-even` because the shared folder is not free (`ops/OP
 there from this branch.
 - **Not an authorization, and not a record yet.** The authorizations are the human's words in the intake records cited below.
   Applying this file only copies them into the operations-branch files in that branch's format.
-- **Formats** follow that branch as read on 2026-11-08 (read-only `git show`, head `22e3d7d`):
+- **Formats** follow that branch as read on 2026-11-08 (read-only `git show`, head `22e3d7d`; renumbered 2026-11-08 after the branch moved to `94be01c` with WD-071 and WD-072 by the other agent):
   - `ops/AUTHORIZATIONS.md`: table row, then a "verbatim human text" section with the lead's record;
   - `ops/DESIGN-DECISIONS.md`: `## WD-0NN title (date)` with bullets;
   - `ops/STATE.md`: at most 40 lines and 6 KB.
@@ -13,7 +13,7 @@ there from this branch.
   retyped.
 
 **How to apply (when the shared folder is free):**
-1. Rebase or check that ids AUTH-029, AUTH-030 and WD-071 to WD-075 are still free on the operations branch. If not, renumber
+1. Check that ids AUTH-029 to AUTH-031 and WD-073 to WD-078 are still free on the operations branch. If not, renumber
    here first.
 2. Add the rows and sections of part 1 to `ops/AUTHORIZATIONS.md`, and the entries of part 2 to `ops/DESIGN-DECISIONS.md`.
 3. Replace section A of `ops/STATE.md` with part 3; copy `ops/OPEN-TASKS.md` across.
@@ -101,9 +101,22 @@ Verbatim section "AUTH-030 verbatim human text (message of 2026-11-08)":
 Lead's record (not the human's words): "evice" is read as "evidence" and "eolicilty" as "explicitly". "then i authorize group 2 after
 fully completing group one" is read as a future authorization, so only P2 preparation is covered now.
 
+### 1d. New row AUTH-031: P2 runs on OpenAI (2026-11-08)
+| AUTH-031 | human | P2 runs on OpenAI (Responses API), as designed in `design/package-v5/inputs/p2/P2-DESIGN.md`. **(1) Pilot** (INT-T-041): 5 dev tasks, arm `all`, gpt-5-mini and gpt-5.4-mini, stop $2. Done: $0.316 (`RESULTS-P2-PILOT.md`). **(2) Main A and B** (INT-T-042): arms `all`, `enf`, `instr` and `drop`; 30 eligible dev tasks; 2 repeats; both models; estimate about $11.6, per-model caps $6 and $11. The lead watches and reports both models' costs during the run, so the human can top up. Keys only from the environment; AppWorld text and tool names stay local; counts only are committed. **Also in INT-T-041:** the human allowed the lead to run P5 part A (AUTH-028), which the auto-mode classifier had refused. | 2026-11-08 | Branch `v5-p5-break-even` | INT-T-041, INT-T-042 (verbatim below) |
+
+Verbatim section "AUTH-031 verbatim human text (messages of 2026-11-08)":
+**INT-T-041**:
+> i allow you too run it yes, and you can also run P5 and p2 parallel rgith? then we do group2? or we wait for the outpcomes from p2?
+
+**INT-T-042**:
+> i agree on P2 main A and B but watch both costs as it go so i can topup when needed and for point 2 i chose option a just tell me what to do next
+
+Lead's record (not the human's words): INT-T-041's "run P5 and p2 parallel" is read as approving the P2 pilot as proposed, not the
+main run; the main run is INT-T-042.
+
 ## Part 2. `ops/DESIGN-DECISIONS.md`
 
-## WD-071 P5 part B results; D-01 kept until part A (2026-11-07)
+## WD-073 P5 part B results; D-01 kept until part A (2026-11-07)
 - **OpenAI side check** (AUTH-028; `design/package-v5/inputs/p5/RESULTS-P5-B.md`, repeat with harness revision 2): 193 requests,
   $0.445, accepted at about $0.40 with a stop at $0.60 (INT-T-026). The OpenAI side check cost $0.594 in all.
 - **Bills:**
@@ -117,7 +130,7 @@ fully completing group one" is read as a future authorization, so only P2 prepar
 - **The human (INT-T-027):** keep D-01. The hosted-search variant (`calc/regime_bill_hosted.py`) stays a proposal until part A.
 - **This is not P5's test:** part A, on ScaDS with client deferral, waits for GLM B2 to end (cap about 140 requests, INT-T-026).
 
-## WD-072 P3 runs 1-3: models search uninstructed; tool-side notes do not stop them (2026-11-07 to 2026-11-08)
+## WD-074 P3 runs 1-3: models search uninstructed; tool-side notes do not stop them (2026-11-07 to 2026-11-08)
 - **AUTH-029.** Harness `tools/p3_uninstructed_search.py`; analysis `tools/p3_analyze.py`; results `inputs/p3/RESULTS-P3-RUN1.md`
   to `RUN3.md`.
 - **Run 1** ($1.56, plus a $0.115 smoke test):
@@ -129,7 +142,7 @@ fully completing group one" is read as a future authorization, so only P2 prepar
 - **Run 3** ($0.726): the revised rule (rule2, novelty within the best-match apps, note only) did no harm, but stopped only 10 of
   50 sessions after the note. Run 2's attribution of the false claims to the listing was corrected.
 
-## WD-073 P3 research, two-need run 4 and log replay (2026-11-08)
+## WD-075 P3 research, two-need run 4 and log replay (2026-11-08)
 - **Research** (INT-T-033, INT-T-034; `inputs/p3/STOP-RULE-RESEARCH-20261108.md` revision 2 and six scout reports, unverified
   leads; 8 claims checked against primary pages):
   - no published deterministic stop for tool-search loops;
@@ -144,7 +157,7 @@ fully completing group one" is read as a future authorization, so only P2 prepar
   - At the first NULL the doable tool was already shown but not called in 51, 51 and 67 of 80 sessions.
   - Of the candidates, only DRY (refuse calls into the dry app; end when nothing is pending) survived.
 
-## WD-074 P3 runs 5-6 and closure: V5-R17 provisional (2026-11-08)
+## WD-076 P3 runs 5-6 and closure: V5-R17 provisional (2026-11-08)
 - **Run 5** ($1.618, DRY against plain):
   - Substitutes 12 / 4 / 6 to 5 / 1 / 3 of 40, and false claims 5 / 0 / 1 to 2 / 0 / 0.
   - The doable need fell 40 / 36 / 33 to 34 / 34 / 27, below the range of three no-rule copies.
@@ -160,20 +173,31 @@ fully completing group one" is read as a future authorization, so only P2 prepar
   - `05` gained the end-to-end arm; `06` gained the traceability row.
 - **P3 spend: $9.953.** Record: `inputs/p3/P3-LOG.md`.
 
-## WD-075 Group 1 and P2 preparation started (2026-11-08)
+## WD-077 Group 1 and P2 preparation started (2026-11-08)
 - The human asked for group 1 (these drafts; the update of `12`) and P2 preparation, with web searches as needed and explicit
   citations (INT-T-040).
 - No P2 request is sent. A run needs its own authorization with its cost.
 
-## Part 3. `ops/STATE.md` section A (replacement; keep the file under 40 lines and 6 KB)
+## WD-078 P5 part A started; P2 pilot done; P2 main run started (2026-11-08)
+- **P5 part A** (AUTH-028): started on the human's word (INT-T-041), after GLM B2 ended.
+  - The first attempt stopped after 4 requests: ScaDS's limit is 2 requests per minute on GLM-5.3 (`10` line 40).
+  - It was restarted with a 31 s pause (`inputs/p5/scads-glm53-r2/`).
+- **P2 pilot** (AUTH-031, $0.316):
+  - 3 of 5 tasks solved on every working run; about 8 calls and 17,000 prompt tokens per task; cached 0.78-0.86.
+  - gpt-5.4-mini rejects function tools with reasoning on Chat Completions, so the harness moved to the Responses API and gained
+    a stop after two failed calls.
+- **P2 main** (AUTH-031): 4 arms x 2 repeats x 30 tasks per model, caps $6 and $11, run by `tools/p2_main_driver.py`.
+
+## Part 3. `ops/STATE.md` section A (merge with the branch's current lines, which the other agent updated at `94be01c`: B2 finished, R3 and GLM results merged into `v5-audit` and pushed; keep the file under 40 lines and 6 KB)
 - **V5 audit** (AUTH-020) is a conceptual package. Start at `design/package-v5/00-README.md`. Working draft V5-R = DPR-0007 plus
   V5-R17 (provisional). Nothing is validated, approved or final. The benchmark register is `17`.
 - **Probes R1-R3 done** (results `exchange/prior-work/v5-probes/results/`). (Keep the existing bullet.)
-- **Running:** GLM-5.3 on ScaDS (AUTH-026, free): B2 running, then stop.
+- **GLM-5.3 B2** (AUTH-026): finished 2026-11-08 (WD-071 on that branch).
 - **P5** (AUTH-028, amended INT-T-026/027): part B (OpenAI side check) done, $0.594 (`inputs/p5/RESULTS-P5-B.md`). Part A
   (ScaDS GLM-5.3, cap about 140) waits for B2 to end. D-01 is kept until part A.
 - **P3 closed** (AUTH-029, 2026-11-08): six runs on OpenRouter, $9.953 (`design/package-v5/inputs/p3/P3-LOG.md`). Models search
   uninstructed; V5-R17 adds a stop for a missing tool, provisional.
-- **P2 preparation** (AUTH-030): design, harness and cost estimate; no requests.
+- **P2** (AUTH-030 preparation, AUTH-031 runs): pilot done ($0.316); main run (4 arms x 2 repeats x 30 tasks, both models, caps $6 and $11) running from 2026-11-08 (`design/package-v5/inputs/p2/`).
+- **P5 part A** running on ScaDS with a 31 s pause (rate limit 2 per minute).
 - **The lead's to-do list:** `ops/OPEN-TASKS.md` (not an authorization).
 - (Keep the existing bullets on the questions guide, the supervisor and the thesis question.)
