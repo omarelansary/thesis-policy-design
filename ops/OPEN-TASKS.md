@@ -20,10 +20,10 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       here. Then run the full verifier there.
 - [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
-- [ ] **P3 record and decision** (runs 1 to 4 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
-      `RESULTS-P3-RUN4.md`; $7.786 of $10): enter the P3 AUTH row (INT-T-028..036) and WD with the operations-branch records; option (a)
-      done (INT-T-036, `RESULTS-P3-REPLAY-A.md`): DRY survives the replay; the human decides on run 5 (plain against DRY, about
-      $1.40 of the $2.21 left); keep `design/package-v5/inputs/p3/P3-LOG.md` up to date with every run and decision.
+- [ ] **P3 record and decision** (runs 1 to 5 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
+      `RESULTS-P3-RUN5.md`; $9.404 of $10): enter the P3 AUTH row (INT-T-028..037) and WD with the operations-branch records; option (a)
+      done (INT-T-036, `RESULTS-P3-REPLAY-A.md`): DRY survived the replay and ran as run 5; the human decides on RESULTS-P3-RUN5
+      section 3 (lead recommends closing P3; $0.60 left); keep `design/package-v5/inputs/p3/P3-LOG.md` up to date with every run and decision.
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).
