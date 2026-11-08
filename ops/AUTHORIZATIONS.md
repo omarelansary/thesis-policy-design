@@ -631,6 +631,16 @@ Lead's record (not the human's words): "the testes that costs u wanted to do" is
 
 Lead's record (not the human's words): the message answers the lead's question "Should I add that as AUTH-026 and start?", which followed its proposal (a one-task smoke on GLM-5.3, B1 and B2 on 57 dev tasks, a repeat of both, all on ScaDS, free, on a new output branch from `v5-audit`). The lead reads "So them" as "Do them". If the human meant otherwise, the runs can be stopped; nothing is paid or merged.
 
+Narrowed by the human (message of 2026-11-07, in reply to the lead's options after GLM B1 finished):
+> i choose option 2 Finish GLM B2, then stop
+
+Lead's record: the repeats of B1 and B2 were dropped; the sequence script was stopped at about 09:20 UTC and the B2 process ran on alone (WD-065). B2 was cut by a laptop restart after 21 tasks and resumed for the other 36 under a new tag (2026-11-07 13:55 UTC). The human then said (message of 2026-11-07):
+> okay own this do schdules i wont be here to accept or reminde you by sth
+
+Lead's record: read as "monitor the run without asking, inside AUTH-026"; the lead checked hourly, read-only, changed no run setting, and would only have resumed an interrupted run with the same flags. Not a widening of scope.
+
+**Done 2026-11-08** (B2 finished 14:28 UTC): results in `exchange/prior-work/v5-probes/results/R3-GLM/` on the new output branch `v5-r3-glm-results` cut from `v5-audit` (bded61d), as this entry says; the research records that cite them are on `v5-r3-part-b-results` (6b8a00f, THREAD E-35). Not merged; no paid call.
+
 ## AUTH-027 verbatim human text (message of 2026-11-06)
 > let them work in the background and go run the repeats
 
