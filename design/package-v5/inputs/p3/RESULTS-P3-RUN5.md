@@ -41,6 +41,24 @@ test was run first: DRY only adds rules to run 4's tested stopsearch path, and i
 - In all but one, Y's tool had been the best match of a search but was never called. In the backstop sessions, the model spent
   the remaining requests guessing names for the missing tool.
 
+## 1a. Against three copies of the no-rule condition [O] (added 2026-11-08 at the human's request)
+Run 4's plain, run 4's plainB and run 5's plain share tasks, models, provider and settings. Together they give three copies of
+the no-rule condition. AF + AS, sessions of 40, MiniMax / DeepSeek / GLM:
+
+| | no rule: range of the three copies | DRY (run 5) |
+|---|---|---|
+| doable need Y done | 37-40 / 36-40 / 30-33 | **34 / 34 / 27** |
+| substitute action in X's app | 12-16 / 4-5 / 5-8 | **5 / 1 / 3** |
+| false claim that X was done | 5-8 / 0 / 0-1 | **2 / 0 / 0** |
+| still at the backstop | 13-15 / 2-8 / 15-17 | 11 / 8 / 11 |
+
+**Reading [I].**
+- For all three models, DRY lies below the whole no-rule range on Y done and on substitutes. So both effects are very probably
+  real, although no single cell reaches significance at 20 tasks.
+- The backstop count moves too much between identical runs (DeepSeek 2 to 8) to read DRY's effect on it.
+- The run 4 question (with or without the repeated plain run) needs no rerun: the run without the repeat would have been a subset
+  of this one.
+
 ## 2. Reading [I]
 1. **DRY works on the harms that ran:** substitute actions in the missing need's app fell by half or more (12 to 5, 4 to 1,
    6 to 3), and false claims fell (5 to 2, 1 to 0). This needs no gold answer: the dry app is simply where nothing new was found.
