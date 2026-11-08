@@ -10,7 +10,8 @@ Per (kind, variant), sessions of 20:
   x_named           X absent: X's removed target was called by its exact name (an error came back)
   other_app_action  a state-changing call outside the two needs' apps
   null_fired        the rule's NULL result was returned at least once
-  stop_ignored      stopreply: the model returned tool calls with no tools offered, so the client ended the session
+  refused           dry: at least one call into a dry app was not run
+  stop_ignored      stopreply and dry: the model returned tool calls with no tools offered, so the client ended the session
   capped            the session reached the 12-request backstop
   requests, requests_after_null
 Paired per task against plain (same kind): y_done discordant pairs b (plain done, variant not) and c (plain not, variant done),
@@ -41,7 +42,7 @@ for d in a.runs:
     for s in ss:
         key = f"{s['kind']}-{s['variant']}"
         c = cells.setdefault(key, dict(sessions=0, complete=0, x_done=0, y_done=0, both_done=0, y_cut=0, x_substitute=0,
-                                       x_distractor=0, x_named=0, other_app_action=0, null_fired=0, stop_ignored=0, capped=0, requests=0,
+                                       x_distractor=0, x_named=0, other_app_action=0, null_fired=0, stop_ignored=0, refused=0, capped=0, requests=0,
                                        requests_after_null=0))
         c["sessions"] += 1
         c["requests"] += s["requests"]
@@ -61,6 +62,7 @@ for d in a.runs:
         c["null_fired"] += s["null_step"] is not None
         c["capped"] += s["capped"]
         c["stop_ignored"] += bool(s.get("stop_ignored"))
+        c["refused"] += bool(s.get("refused"))
         if s["null_step"] is not None:
             c["requests_after_null"] += s["requests"] - s["null_step"]
         by[(s["task"], s["kind"], s["variant"])] = s
@@ -89,7 +91,7 @@ for d in a.runs:
 with open(a.out, "w", encoding="utf-8", newline="\n") as f:
     json.dump(out, f, indent=1)
 cols = ["complete", "x_done", "y_done", "both_done", "y_cut", "x_substitute", "x_distractor", "x_named", "other_app_action",
-        "null_fired", "stop_ignored", "capped", "requests", "requests_after_null"]
+        "null_fired", "stop_ignored", "refused", "capped", "requests", "requests_after_null"]
 for r in out["runs"]:
     print(f"{r['model']}: {r['requests']} requests, ${r['spent']}, stop {r['stop']}")
     print("  " + f"{'cell':14}" + "".join(f"{c[:8]:>9}" for c in cols))

@@ -22,6 +22,12 @@ Variants (the rule's trigger is the same in all rule variants: run 3's rule2, no
                  the calls are logged, not executed.
   stopsearch     as note; from the first NULL on, search_tools is withdrawn; call_tool and the core stay, so tools already shown
                  can still be called.
+  dry            run 5 (INT-T-037; RESULTS-P3-REPLAY-A): as stopsearch, and the best-match app of a NULL search is 'dry'. After the
+                 first NULL a call into a dry app is not run ({"status":"not_run",...}). A 'misstep' is such a refused call, a
+                 call of an unknown name or of a tool never shown, or an attempt to search. After a misstep the client checks
+                 for pending work: a best match (top 1) of an earlier search, outside the dry apps, state-changing, not yet
+                 called. If none is pending, the next request carries no tools (as stopreply, including its end if tool calls
+                 still come back). No count and no threshold.
 A call to a tool that is not offered gets {"error":"unknown tool: <name>"}. --turn-cap (12) is a safety backstop only.
 
 Logs (local only): requests.jsonl (per request: usage, tool calls, queries, ranks of both targets, rule stage, tools offered,
@@ -94,7 +100,8 @@ CALL_DEF = {"type": "function", "function": {"name": "call_tool", "description":
 STUB = json.dumps({"status": "ok", "message": "Done."})
 NULL = json.dumps({"status": "no_match", "note": "Nothing new: no tool beyond those already shown matches. The catalogue has no "
                    "further tool for this need."})
-RULE_VARIANTS = {"note", "stopreply", "stopsearch"}
+RULE_VARIANTS = {"note", "stopreply", "stopsearch", "dry"}
+NOT_RUN = json.dumps({"status": "not_run", "note": "Not run: the catalogue has no tool for this need."})
 READ_PREFIX = ("show_", "search_")
 READ_NAMES = {"directory_exists", "file_exists", "get_current_date_and_time"}
 
@@ -236,6 +243,7 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
     index = BM25(searchable)
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_for(task, kind)}]
     called, seen, scope = [], set(), set()
+    dry, top1, refused = set(), set(), 0  # variant dry (run 5)
     searches, nreq, complete, capped, null_step, mode, stop_ignored = 0, 0, False, False, None, "full", False
     for step in range(1, a.turn_cap + 1):
         if n_req >= a.max_requests:
@@ -287,7 +295,7 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
         if msg.get("reasoning_details"):
             amsg["reasoning_details"] = msg["reasoning_details"]
         msgs.append(amsg)
-        fire = False
+        fire, misstep = False, False
         for tc in tcs:
             fn = tc.get("function") or {}
             name = fn.get("name") or ""
@@ -308,6 +316,8 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
                 rec["rank_y"].append(hits.index(ny["target"]) + 1 if ny["target"] in hits else None)
                 result = json.dumps([defs[n]["function"] for n in top]) if top else json.dumps({"result": "no matching tools"})
                 stage = None
+                if top:
+                    top1.add(top[0])
                 if variant in RULE_VARIANTS:
                     if top:
                         scope.add(top[0].split("__")[0])
@@ -315,16 +325,24 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
                         stage, result, fire = "null", NULL, True
                         if null_step is None:
                             null_step = step
+                        if variant == "dry" and top:
+                            dry.add(top[0].split("__")[0])
                 rec["rule_stage"].append(stage)
             elif name == "call_tool" and name in offered:
                 inner = str((args or {}).get("name", "")) if isinstance(args, dict) else ""
                 rec["tool_calls"].append("call_tool:" + inner)
-                if inner in names_searchable or inner in CORE_NAMES:
+                if variant == "dry" and mode == "nosearch" and inner in names_searchable and inner.split("__")[0] in dry:
+                    called.append((inner + "#refused", step))
+                    result, misstep, refused = NOT_RUN, True, refused + 1
+                elif inner in names_searchable or inner in CORE_NAMES:
                     called.append((inner, step))
                     result = STUB
+                    if variant == "dry" and mode == "nosearch" and inner not in seen and inner not in CORE_NAMES:
+                        misstep = True
                 else:
                     called.append((inner + "#unknown", step))
                     result = json.dumps({"error": f"unknown tool: {inner}"})
+                    misstep = True
             else:
                 rec["tool_calls"].append(name)
                 if name in offered and name in CORE_NAMES:
@@ -333,11 +351,17 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
                 else:
                     called.append((name + "#unknown", step))
                     result = json.dumps({"error": f"unknown tool: {name}"})
+                    misstep = True
             msgs.append({"role": "tool", "tool_call_id": tc.get("id") or "", "content": result})
         if fire and variant == "stopreply":
             mode = "notools"
-        elif fire and variant == "stopsearch":
+        elif fire and variant in ("stopsearch", "dry") and mode == "full":
             mode = "nosearch"
+        elif variant == "dry" and mode == "nosearch" and misstep:
+            done = {n for n, _ in called}
+            pending = [t for t in top1 if t.split("__")[0] not in dry and not read_only(t) and t not in done]
+            if not pending:
+                mode = "notools"  # nothing left that was found and not used: the next request asks for the reply
         rec["tools_offered_next"] = mode
         req_log.write(json.dumps(rec) + "\n"); req_log.flush()
     else:
@@ -356,7 +380,7 @@ for si, (task, kind, variant) in enumerate(SESSIONS, 1):
     cat_all = [n for n, _ in called if n in defs and not n.startswith("supervisor__")]
     apps_xy = {nx["target"].split("__")[0], ny["target"].split("__")[0]}
     srec = dict(session=si, task=task["id"], kind=kind, variant=variant, complete=complete, capped=capped, requests=nreq,
-                searches=searches, null_step=null_step, final_mode=mode, stop_ignored=stop_ignored,
+                searches=searches, null_step=null_step, final_mode=mode, stop_ignored=stop_ignored, refused=refused, dry_apps=len(dry),
                 need_x=need_rec(nx, absent is not None), need_y=need_rec(ny, False),
                 state_changing_other_apps=sum(1 for n in cat_all if n.split("__")[0] not in apps_xy and not read_only(n)),
                 unknown_calls=sum(1 for n, _ in called if n.endswith("#unknown")))
