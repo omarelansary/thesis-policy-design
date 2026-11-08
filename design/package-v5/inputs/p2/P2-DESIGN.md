@@ -74,7 +74,7 @@ places searched.
   - 128 tools lies in R-mid on this route (D-01's break-even range, `04` section 1).
   - Size, as served through AppWorld's task API: 76,763 characters, about 19,200 tokens at 4 characters per token. R1 part 3's
     measured 80 to 145 billed tokens per AppWorld definition gives about 10,300 to 18,500 billed tokens.
-- **Subset:** each task's ground-truth required APIs plus `supervisor__complete_task`: 6 to 10 tools (median 7).
+- **Subset:** each task's ground-truth required APIs plus the supervisor app's complete-task API: 6 to 10 tools (median 7).
   - It is an **oracle** subset, so P2 tests the mechanism at its best case, not a predictor (V5-R11's oracle ablation).
   - Realistic subsets, such as memory seeds that miss or over-include, belong to P1 and the end-to-end study.
 
