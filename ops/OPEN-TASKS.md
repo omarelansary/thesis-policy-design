@@ -20,12 +20,10 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
       here. Then run the full verifier there.
 - [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
-- [ ] **P3 record and decision** (runs 1 to 3 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
-      `RESULTS-P3-RUN3.md`; $4.156 of $10): enter the P3 AUTH row (INT-T-028..032) and WD with the operations-branch records; the
-      order is agreed (INT-T-033): research done (`design/package-v5/inputs/p3/STOP-RULE-RESEARCH-20261108.md` revision 2,
-      INT-T-034: six scouts, 80 searches, 126 fetches, eight claims checked); next, the human approves run 4 as proposed there
-      (section 4: two-need tasks in three kinds; plain twice, note, stop-reply, stop-search; about $2.7 to $3.6), then the lead
-      writes the tasks and runs it.
+- [ ] **P3 record and decision** (runs 1 to 4 done 2026-11-07/08, `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to
+      `RESULTS-P3-RUN4.md`; $7.786 of $10): enter the P3 AUTH row (INT-T-028..035) and WD with the operations-branch records; the
+      human decides on RESULTS-P3-RUN4 section 5 (lead recommends (a): replay candidate per-need rules on run 4's logs at no
+      cost, then at most one run 5 within the $2.21 left).
 
 ## 2. Waiting on the human (or Windows)
 - [ ] Workbook entries listed in `design/ledger/notes/ANSWERS-20261107.md` (no openpyxl here; the human or a Windows session).

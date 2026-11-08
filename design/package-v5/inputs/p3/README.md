@@ -1,6 +1,6 @@
 # P3: uninstructed search for a deferred tool (preparation, 2026-11-07)
 
-Status: **run 3 done 2026-11-08** (`RESULTS-P3-RUN3.md`: the revised rule `rule2` removed run 2's harm but is a weak stop,
+Status: **run 4 done 2026-11-08** (`RESULTS-P3-RUN4.md`: two-need tasks; a session-wide forced reply loses the doable need, withdrawing only search does not end the loop; a per-need rule is proposed, to be designed from run 4's logs; P3 total $7.786 of $10). Earlier: **run 3 done 2026-11-08** (`RESULTS-P3-RUN3.md`: the revised rule `rule2` removed run 2's harm but is a weak stop,
 because models keep searching after the note; a hard client-side stop is proposed; P3 total $4.156 of $10). Earlier: **run 2 done 2026-11-07** (`RESULTS-P3-RUN2.md`: repeat holds; the no-match rule as designed is not recommended, a revision is proposed; P3 total $3.430 of $10). Earlier: **run 1 done 2026-11-07** (three models, 1,762 requests including smoke tests, $1.675 of the $10 stop; reading in `RESULTS-P3-RUN1.md`). Harness tested against a local mock server first. Covered by the human's
 INT-T-028 and INT-T-029 (P3 on OpenRouter, about 20 tasks built over AppWorld's real definitions, stop at $10 in total, models
 proposed by the lead and confirmed by the human before any run); the P3 AUTH row is still to be entered in
@@ -52,3 +52,9 @@ tool is deterministic and the same for every model.
 - **Cells:** D, A, W as `plain` and `rule2` (no expose-all cell); same 20 tasks, three models, provider; turn cap 12 as a
   backstop only. Final replies are kept locally to 400 characters for classification.
 - Not in run 3: tasks that need several tools (recommended for a later run, the human's decision).
+
+## Run 4 (INT-T-033..035, 2026-11-08)
+- Harness `tools/p3_two_need.py` (the run 1-3 harness is unchanged), analysis `tools/p3_analyze_two_need.py`.
+- **Tasks:** 20 two-need tasks built locally from the run 1-3 tasks (`local/tasks2.json`), in kinds P, AF and AS.
+- **Variants:** plain, plainB, note, stopreply, stopsearch.
+- Design reasons are in `STOP-RULE-RESEARCH-20261108.md` (revision 2, with the six scout reports in `stop-research-scouts-20261108/`).
