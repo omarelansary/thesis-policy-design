@@ -107,6 +107,12 @@ for x in ratios:
     d = eager_d.get(x["n"])
     s = next(v for v in sessions if v["arm"] == x["arm"] and v["n"] == x["n"] and v["session"] == x["session"])
     e = next(v for v in sessions if v["arm"] == ref and v["n"] == x["n"] and v["session"] == x["session"])
+    if (x["arm"], x["n"]) not in cal and x["arm"] == "deferral":
+        # ScaDS client deferral: the prefix (core + search_tools + call_tool) does not depend on n, so the harness calibrates it
+        # once (n = 10). Reuse that calibration for every n (fix of 2026-11-08, part A; part B's arms are calibrated per n).
+        same = sorted(k for k in cal if k[0] == "deferral")
+        if same:
+            cal[(x["arm"], x["n"])] = cal[same[0]]
     if not d or (x["arm"], x["n"]) not in cal or (ref, x["n"]) not in cal:
         continue
     D = max(s["searches"], 1)

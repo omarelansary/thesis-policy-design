@@ -8,18 +8,12 @@ Written on branch `v5-p5-break-even` (42d9ff2). When the operations branch is ne
 `ops/STATE.md` and bring the file across.
 
 ## 1. Waiting on a condition (the lead does these when the condition is met)
-- [ ] **P5 part A on ScaDS GLM-5.3** (AUTH-028; cap about 140 requests, INT-T-026). Condition: GLM B2 has ended ("wait if GLM is
-      still running ... the api might be overloaded"). Command: `python3 design/package-v5/tools/p5_break_even.py --route scads
-      --model zai-org/GLM-5.3 --sessions 2 --warm-sessions 1 --max-requests 140 --out design/package-v5/inputs/p5/scads-glm53`,
-      then `tools/p5_analyze.py` on its log; scan outputs for key material before commit. **Condition met 2026-11-08:** GLM B2
-      finished 36 of 36 at 14:28 UTC (exit 0). The lead's start of part A was refused by the auto-mode permission classifier
-      (no reason given); the human runs the command above or allows it.
 - [ ] **Operations-branch records** (branch `linux-from-v5-audit--portable-guard-and-short-state`). **Drafts ready to apply** (INT-T-040): `ops/drafts/OPS-BRANCH-RECORDS-DRAFT-20261108.md` (AUTH-028 amendment, AUTH-029 P3, AUTH-030, WD-071 to WD-075, STATE section A); ids checked free on that branch at 22e3d7d. Condition: the other agent
       says the shared folder is free. To write: AUTH-028 amendment for INT-T-026 (part A cap about 140; OpenAI repeat accepted at
       about $0.40, stop $0.60; 193 requests, $0.445; OpenAI total $0.594); WD-071 (part B results with harness revision 2, the
       proposed D-01 variant, the B2 stall, INT-T-027: D-01 kept, variant decided after part A); STATE.md update with a pointer
       here. Then run the full verifier there.
-- [ ] **D-01 revision decision** (INT-T-027). Condition: part A results are in. Put part A's comparison with D-01 and the
+- [ ] **D-01 revision decision** (INT-T-027). **Condition met 2026-11-08** (part A done, `design/package-v5/inputs/p5/RESULTS-P5-A.md`: D-01 fits the client route; lead proposes keeping it and adding the hosted variant as a separate mode). Put part A's comparison with D-01 and the
       proposed variant (`design/package-v5/calc/regime_bill_hosted.py`) to the human; the human decides.
 - [ ] **P3 records on the operations branch** (P3 closed 2026-11-08, INT-T-039; record in `design/package-v5/inputs/p3/P3-LOG.md`;
       $9.953 of the $10 stop): enter the P3 AUTH row (INT-T-028..039, including the run 6 ceiling of INT-T-038) and WD entries

@@ -1,0 +1,43 @@
+{
+ "script_sha256": "87905175dfb55a6675623cbdd3fa7c44e53b50bf3456583c20b4054836045409",
+ "args": {
+  "route": "scads",
+  "model": "zai-org/GLM-5.3",
+  "sizes": "10,30,100,300",
+  "arms": null,
+  "sessions": 2,
+  "warm_sessions": 1,
+  "no_calibration": false,
+  "turn_cap": 6,
+  "max_requests": 140,
+  "max_spend": 0.0,
+  "price": "",
+  "reasoning_effort": "low",
+  "max_output": 2048,
+  "timeout": 300.0,
+  "pause": 0.0,
+  "seed": 5,
+  "def_chars": 1000,
+  "out": "design/package-v5/inputs/p5/scads-glm53",
+  "dry_run": false,
+  "analyze": null
+ },
+ "started": "2026-11-08T16:58:41Z",
+ "base_host": "llm.scads.ai",
+ "sizes": [
+  10,
+  30,
+  100,
+  300
+ ],
+ "arms": [
+  "expose_all",
+  "deferral"
+ ],
+ "catalogue_sha256": "c7623caf8d49cc9dea064a7529e23bf4cbf912e5ec75506d88f750b48d9704dc",
+ "target": "orders_get_shipping_status",
+ "finished": "2026-11-08T16:58:44Z",
+ "requests": 4,
+ "spend": 0.0,
+ "stopped": "two failed requests in a row"
+}
