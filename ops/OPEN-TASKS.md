@@ -4,8 +4,8 @@ Started 2026-11-07 by the lead, after the human asked to save the waiting work "
 `ops/STATE.md`. **When an item is finished, delete its line in the same commit as the work**, and say which commit did it in the
 commit message. Nothing here authorizes anything: each item names the AUTH or decision that covers it, or says it waits for one.
 
-Kept on `v5-p5-break-even`; copied to the operations branch `linux-from-v5-audit--portable-guard-and-short-state` on 2026-11-08
-(WD-081), whose `ops/STATE.md` section A points here. Keep the two copies in step by hand.
+Kept on `v5-p5-break-even`, with the records (WD-082 moved them here from the Linux branch, which now holds only the
+Windows/Linux switch). `ops/STATE.md` section A points here.
 
 ## 1. Waiting on a condition (the lead does these when the condition is met)
 - [ ] **P2b** (AUTH-031, INT-T-044): `all` against `instr` on ScaDS GLM-5.3, running since 2026-11-08 20:52 UTC (first line of its local `progress.log`; paced at 31 s,
@@ -16,9 +16,9 @@ Kept on `v5-p5-break-even`; copied to the operations branch `linux-from-v5-audit
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
 
 ## 2. Waiting on the human (or Windows)
-- [ ] **Push the operations branch** (records applied 2026-11-08, INT-T-045: AUTH-028 amendment, AUTH-029 to AUTH-031, WD-073 to
-      WD-081, STATE, this file; reviewed in two rounds). The human pushes; that branch's rebase onto `v5-audit` 77357c1 is still
-      to do (WD-072).
+- [ ] **Push** (INT-T-047, WD-082): `v5-p5-break-even` (the research records now live here, with the P5, P3 and P2 work), and
+      force-push the Linux branch, reset to 5abc9ac (administrative only; origin has d5ae226). Its rebase onto `v5-audit` 77357c1 is
+      still to do (WD-072). The human pushes.
 - [ ] **P3 sources stored as EXT** (group 2, AUTH-030): needs `tools/litfetch.py` on `v5-p5-break-even` to accept AUTH-030 from
       the operations branch, a tool change for the human to review.
 - [ ] **End-to-end and P1 decisions** (`E2E-TASKS-DESIGN.md` section 5; `P1-PREP.md` section 3): whether the bill and accuracy arms

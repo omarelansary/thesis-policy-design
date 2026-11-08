@@ -27,10 +27,10 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 - Research outputs go on a branch cut from `v5-audit` and reach it by merge, only when the human says so (WD-061).
 
 ## D. Machines and branches (operations only; not research)
-- **This branch, `linux-from-v5-audit--portable-guard-and-short-state`, carries only the Windows/Linux switch:** the cross-platform guard and tests, the verifier fix, the SSH remote on Linux, the Linux-run AUTH rows and this file. No research content. It is rebased onto `v5-audit` after each merge; the human force-pushes it. The rebase onto 77357c1 is not done yet (WD-072).
-- **Not yet tested on Windows.** Before merging it into `v5-audit`, run on Windows: `python tools/verify_workspace.py`, `python ops/tests/guard_cases.py`, `python ops/tests/finding_citation_cases.py` (WD-059).
+- **Branch `linux-from-v5-audit--portable-guard-and-short-state` carries only the Windows/Linux switch** (AUTH-021 to AUTH-023: cross-platform guard and tests, verifier fix, SSH remote). Reset to 5abc9ac on 2026-11-08 (INT-T-047, WD-082): its research records (AUTH-024 to AUTH-031, WD-062 to WD-081, STATE) now live on `v5-p5-break-even`; old tip kept as `backup/linux-records-before-split-20261108`. The human force-pushes it (origin had d5ae226) and rebases it onto `v5-audit` after merges (not yet onto 77357c1).
+- **The switch is not yet tested on Windows.** Before merging the Linux branch into `v5-audit`, run on Windows: `python tools/verify_workspace.py`, `python ops/tests/guard_cases.py`, `python ops/tests/finding_citation_cases.py` (WD-059).
 - **Linux notes:** `python` must exist (symlink to `python3`); 224 WARN lines are expected: origin extracts cannot be re-verified there; AppWorld and the run scripts live in `~/r3-work` (outside the repository); the API keys are in `~/r3-work/.env`, which the human empties when done.
 - **Open for the human:** whether Bash `git commit` should ask first again.
 
 ## Next action for any session
-Read this file, run `python tools/verify_workspace.py --quick` (expect `fail=0` on this branch), check `ops/AUTHORIZATIONS.md`, and work only inside an AUTH.
+Read this file, run `python tools/verify_workspace.py --quick` (on `v5-p5-break-even` expect the 3 literature-summary FAILs that the Linux branch's verifier fix removes), check `ops/AUTHORIZATIONS.md`, and work only inside an AUTH.
