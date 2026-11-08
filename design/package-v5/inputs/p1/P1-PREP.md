@@ -65,3 +65,16 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
   recorded history.
 - The run needs the deferral harness of P3 joined to AppWorld's agent (as the end-to-end preparation also needs). It is not
   written.
+
+## 5. Decision on the order (the human, 2026-11-08, INT-T-045)
+- **The human's question:** why a synthetic set would be needed.
+- **The lead's answer [I]:**
+  - AppWorld's natural users give only about 16 returning sessions with any seed overlap above 0.25, and 36 of 64 with none
+    (section 2). The band where M2 should pay may be too thin to show an effect.
+  - A synthetic set would add users at controlled recurrence. It was `05`'s original plan, because `17` found no benchmark with
+    natural recurrence.
+- **Decision:** start with AppWorld's natural users only. Add a synthetic set later, and only if the high-recurrence band proves
+  too thin to read.
+- **Change record:** `05` P1's wording ("multi-session users built by a declared construction") is not changed yet. AppWorld's
+  natural users are a construction too: the session order by date is chosen. The synthetic part becomes optional, conditional on
+  that result.

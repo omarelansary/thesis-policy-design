@@ -51,14 +51,35 @@ find a way, you can call it with status="fail" to exit with failure".
 
 This replaces P3's keyword-and-reader classification with recorded calls. It answers the "one reader" limit of P3 runs 2 to 6.
 
-## 4. Decisions for the human (not made)
-1. **AppWorld's prompt says "The task is doable".** In a removed-API variant that is false, and it pushes the model toward
-   substitutes. The options:
-   - (a) keep the prompt as AppWorld ships it (comparable with published AppWorld numbers);
-   - (b) delete only "The task is doable, but" in both halves of every pair (the same prompt for both, so the pair stays
-     matched).
+## 4. Change record: AppWorld's "The task is doable" line (decided 2026-11-08, INT-T-045)
+- **Who added it, and where [O]:** AppWorld, in the "Key Instructions" of its current agent prompts. The function-calling agent's
+  `instructions.txt` line 41 reads: "The task is doable, but if you cannot find a way, you can call it with status="fail" to exit
+  with failure". The same line is in the full-code and ReAct agents' prompts. The older prompt (`_legacy_instructions.txt`) has no
+  "Key Instructions" section and no such line.
+- **Why it was there [I]:** every AppWorld task is checked solvable by AppWorld's authors ("We use end-to-end testing to ensure that
+  the generated tasks are solvable", `STOP-RULE-RESEARCH` scout S2, C9). On their benchmark the sentence is true. It tells the
+  agent not to give up, while still leaving an exit (`status="fail"`).
+- **What it does:**
+  - **[I] On an unchanged task:** it likely raises persistence, and so success; the size is not measured.
+  - **[I] On a variant with a needed API removed:** it states something false. That pushes the model toward a near-miss
+    substitute or a false claim, the two failures P3 and the research found (`STOP-RULE-RESEARCH` point 5: "excluding the requested
+    action redirects to another").
+  - **[O] All P2 runs used it** (AppWorld's prompt unchanged).
+- **Decision (the human, INT-T-045):** remove only the words "The task is doable, but", in both halves of every pair, so the pair
+  stays matched. What remains: "if you cannot find a way, you can call it with status="fail" to exit with failure". The exit is
+  kept.
+- **How its effect will be recorded** (so the change can be read later):
+  - Run the unchanged dev tasks once without the words, with the same harness, models and settings as P2's `all` arm.
+  - P2's `all` runs (with the words, 2 repeats per model) are the comparison. The difference, against P2's run-to-run spread
+    (6 and 8 of 30), is the effect of the words on solvable tasks.
+  - In the pairs, the effect on removed-API variants is read from the declines, substitutes and false claims (section 3).
+  - Cost: one `all`-arm run per model on 30 tasks, about $0.50 (gpt-5-mini) and $1.00 (gpt-5.4-mini) at P2's measured figures.
+    It runs with the end-to-end study, which needs its own authorization.
 
-   The lead recommends (b) for the V5-R17 test, and (a) for the bill and accuracy arms of the end-to-end study.
+## 5. Decisions for the human (not made)
+1. *(Decided 2026-11-08, INT-T-045: the words are removed in both halves; section 4.)* Whether the bill and accuracy arms of the
+   end-to-end study, which have no removed API, keep AppWorld's prompt unchanged for comparability with published AppWorld
+   numbers. The lead recommends keeping it there.
 2. **Which tasks:**
    - the validated dev tasks only (clean, small);
    - or also train tasks validated by further runs (more tasks, costs runs).
@@ -66,7 +87,7 @@ This replaces P3's keyword-and-reader classification with recorded calls. It ans
    catalogue, as in P3) defines "removed". V5-R17's stop concerns search, so deferral removal fits it. Both need the same task
    pairs.
 
-## 5. Next steps (desk work, no cost)
-- When P2's main run ends, rerun the builder with `--traces` on its run folders, and report validated counts.
+## 6. Next steps (desk work, no cost)
+- Done 2026-11-08: the builder rerun with P2's 16 run folders validated **16 dev tasks in 6 scenarios** (`e2e-variants-summary.json`).
 - Write the end-to-end harness's variant mode: remove the API from the searchable catalogue and apply V5-R17. It follows the
   P2 harness (AppWorld's own agent) and needs the search layer of P3's harness. It is not written yet.
