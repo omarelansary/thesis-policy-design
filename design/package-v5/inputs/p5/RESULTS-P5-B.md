@@ -43,7 +43,7 @@ The harness was revised for part A (revision 2: a fresh marker per cold session,
 - **Most of that gap is the billed share v.** At 300 tools the cold ratio is 0.06 with v = 0, 0.09 with v = 0.036 (namespaces) and 0.35 with v = 0.30 (functions). The non-tool part X does not move n*, because it adds to both arms; it only pulls the ratio towards 1.
 - **The variant fits the side check's cold cells within 0.01 to 0.10, except functions at 10 tools (1.03 against 1.19).** This is a fit to the same data, not a test.
 
-**Decision (the human, 2026-11-07, INT-T-027): D-01 stays the working equation; the variant stays a proposal; whether to revise D-01 is decided after P5 part A on ScaDS, which tests D-01's own client mode.** Nothing is adopted.
+**Decision (the lead's recommendation, which the human answered with "I agree" in INT-T-027; read by the lead as agreement; INT-T-043 later settled it): D-01 stays the working equation; the variant stays a proposal; whether to revise D-01 is decided after P5 part A on ScaDS, which tests D-01's own client mode.** Nothing is adopted.
 
 **Still the side check, not P5's test:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
 

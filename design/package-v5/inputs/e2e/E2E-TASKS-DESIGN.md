@@ -1,6 +1,6 @@
 # End-to-end preparation: AppWorld task pairs with one needed API removed (2026-11-08)
 
-Status: **preparation only, desk work** (group 2, INT-T-040; the human said group 2 does not need to wait for P2, INT-T-041/042).
+Status: **preparation only, desk work** (group 2, INT-T-040; started by the lead after group 1 was complete. INT-T-041 asked whether to wait for P2 and recorded no answer; starting was the lead's reading).
 No model request. Nothing here is validated, approved or final. No V5 rule changed.
 - **Builder:** `design/package-v5/tools/e2e_absent_variants.py`.
 - **Local output** (API names; git-excluded): `inputs/e2e/local/`.
@@ -77,7 +77,7 @@ This replaces P3's keyword-and-reader classification with recorded calls. It ans
     It runs with the end-to-end study, which needs its own authorization.
 
 ## 5. Decisions for the human (not made)
-1. *(Decided 2026-11-08, INT-T-045: the words are removed in both halves; section 4.)* Whether the bill and accuracy arms of the
+1. *(Not decided. INT-T-045 removed the words in both halves of every pair, section 4.)* Whether the bill and accuracy arms of the
    end-to-end study, which have no removed API, keep AppWorld's prompt unchanged for comparability with published AppWorld
    numbers. The lead recommends keeping it there.
 2. **Which tasks:**
