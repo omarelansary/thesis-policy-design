@@ -43,6 +43,8 @@ ap.add_argument("--seed", type=int, default=None, help="sent as the request seed
 ap.add_argument("--no-reasoning-param", action="store_true", help="send no reasoning field (ScaDS: reasoning as served)")
 ap.add_argument("--min-interval", type=float, default=0.0, help="seconds between model calls (ScaDS GLM-5.3: 2 per minute, use 31)")
 ap.add_argument("--retry-429", type=int, default=0, help="retry a rate-limited call this many times after --min-interval + 5 s")
+ap.add_argument("--provider", default="", help="OpenRouter only: pin this provider, fallbacks off, and bill by OpenRouter's "
+                "reported cost (P2b on OpenRouter: GMICloud, INT-T-050)")
 ap.add_argument("--timeout", type=float, default=300.0,
                 help="client timeout per attempt, seconds (P2 main: 300; P2b on ScaDS: 1200, INT-T-049)")
 ap.add_argument("--price", default="", help="input,cached_input,output dollars per million tokens (required for a live run)")
@@ -162,6 +164,9 @@ def _get(*a, **kw):
             else:  # the flat Responses shape (R1: also accepted and enforced on OpenAI)
                 ckw["tool_choice"] = {"type": "allowed_tools", "mode": "auto",
                                       "tools": [{"type": "function", "name": n} for n in CUR["subset"]]}
+        if args.provider:  # the same pin as P3 (p3_two_need.py): one provider, no fallbacks, usage with cost
+            ckw["extra_body"] = {**(ckw.get("extra_body") or {}),
+                                 "provider": {"order": [args.provider], "allow_fallbacks": False}, "usage": {"include": True}}
         rec = {"task": CUR["task"], "arm": args.arm, "api": args.api, "n_tools": len(ckw.get("tools") or []),
                "n_items": len(ckw.get("messages") or ckw.get("input") or [])}
         r, attempt = None, 0
@@ -205,7 +210,10 @@ def _get(*a, **kw):
             det, cdet = u.get("prompt_tokens_details") or {}, u.get("completion_tokens_details") or {}
             prompt, cached, completion = u.get("prompt_tokens") or 0, det.get("cached_tokens") or 0, u.get("completion_tokens") or 0
         cost = (prompt - cached) * PRICE[0] + cached * PRICE[1] + completion * PRICE[2]
-        CUR["spend"] += cost
+        or_cost = u.get("cost") if args.provider else None  # OpenRouter's billed cost, used for the spend stop when present
+        if args.provider and d.get("provider") and d.get("provider") != args.provider:
+            raise Stop(f"served by {d.get('provider')}, not the pinned {args.provider}")
+        CUR["spend"] += or_cost if or_cost is not None else cost
         CUR["calls"] += 1
         if "output" in d:  # Responses API: function calls are output items
             names = [(o.get("name") or "") for o in (d.get("output") or []) if o.get("type") == "function_call"]
@@ -213,7 +221,7 @@ def _get(*a, **kw):
             msg = ((d.get("choices") or [{}])[0].get("message")) or {}
             names = [((tc.get("function") or {}).get("name") or "") for tc in (msg.get("tool_calls") or [])]
         rec.update(status="ok", model=d.get("model"), system_fingerprint=d.get("system_fingerprint"), prompt=prompt, cached=cached,
-                   completion=completion, reasoning=cdet.get("reasoning_tokens"), cost=round(cost, 6), tool_calls=names,
+                   completion=completion, reasoning=cdet.get("reasoning_tokens"), cost=round(cost, 6), or_cost=or_cost, provider=d.get("provider"), tool_calls=names,
                    outside_subset=sum(1 for n in names if n not in set(CUR["subset"])), latency_s=round(now() - t0, 2))
         with open(TRACE, "a") as f:
             f.write(json.dumps(rec) + "\n")
@@ -253,7 +261,7 @@ if bad:
     sys.exit(f"not eligible dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-meta = dict(tag=args.tag, timeout=args.timeout, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
+meta = dict(tag=args.tag, timeout=args.timeout, provider=args.provider, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
             no_reasoning_param=args.no_reasoning_param, min_interval=args.min_interval, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
             price=args.price, max_spend=args.max_spend, apps=APPS, tasks=ids, started=utc(),
             harness_sha256=__import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest())
