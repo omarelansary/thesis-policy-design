@@ -14,7 +14,9 @@ Windows/Linux switch). `ops/STATE.md` section A points here.
       a 90th percentile of 245 s and a maximum of 711 s. ScaDS showed GLM-5.3 up again at 23:12, so attempt 2 (prefix `p2b2`,
       same settings) started from task 1, so that each run is complete; attempt 1 is kept and not pooled. Attempt 2 stopped the
       same way at task 7 at 2026-11-09 03:00 UTC (60 calls in about 3.8 h). **Not restarted: waits for the human** (a longer client
-      timeout is a harness change to show first; or another time of day; or a smaller design).
+      timeout is a harness change to show first; or another time of day; or a smaller design). INT-T-048: effort stays as
+      served and both repeats stay. INT-T-049: ScaDS, with `--timeout 1200` (default 300 kept); attempt 3 (prefix `p2b3`)
+      started 2026-11-09 about 09:05 UTC from task 1. Attempts 1 and 2 kept, not pooled.
       Serving facts (stored 2026-11-09, `evidence/literature-20261019/p2b-scads-glm53-model-page-20261109.txt`): ScaDS runs
       `gpustack/GLM-5.3-W4A8` (4-bit weights, 8-bit activations) on 8 H100 over two nodes as an HPC Slurm job (offline between
       jobs); thinking defaults to max effort, which P2b uses (no reasoning field sent). OpenRouter's GMICloud serves fp8. Its finish line

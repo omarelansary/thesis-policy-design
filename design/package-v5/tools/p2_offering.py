@@ -43,6 +43,8 @@ ap.add_argument("--seed", type=int, default=None, help="sent as the request seed
 ap.add_argument("--no-reasoning-param", action="store_true", help="send no reasoning field (ScaDS: reasoning as served)")
 ap.add_argument("--min-interval", type=float, default=0.0, help="seconds between model calls (ScaDS GLM-5.3: 2 per minute, use 31)")
 ap.add_argument("--retry-429", type=int, default=0, help="retry a rate-limited call this many times after --min-interval + 5 s")
+ap.add_argument("--timeout", type=float, default=300.0,
+                help="client timeout per attempt, seconds (P2 main: 300; P2b on ScaDS: 1200, INT-T-049)")
 ap.add_argument("--price", default="", help="input,cached_input,output dollars per million tokens (required for a live run)")
 ap.add_argument("--max-spend", type=float, default=0.0)
 ap.add_argument("--max-calls", type=int, default=3000)
@@ -141,7 +143,7 @@ class P2Agent(SimplifiedFunctionCallingAgent):  # type: ignore[misc]
 
 
 _OpenAI = lmm.OpenAI
-lmm.OpenAI = lambda **kw: _OpenAI(timeout=300.0, **kw)
+lmm.OpenAI = lambda **kw: _OpenAI(timeout=args.timeout, **kw)
 _orig_get = lmm.get_raw_lm_caller
 
 
@@ -251,7 +253,7 @@ if bad:
     sys.exit(f"not eligible dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-meta = dict(tag=args.tag, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
+meta = dict(tag=args.tag, timeout=args.timeout, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
             no_reasoning_param=args.no_reasoning_param, min_interval=args.min_interval, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
             price=args.price, max_spend=args.max_spend, apps=APPS, tasks=ids, started=utc(),
             harness_sha256=__import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest())
