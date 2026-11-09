@@ -8,6 +8,10 @@ Kept on `v5-p5-break-even`, with the records (WD-082 moved them here from the Li
 Windows/Linux switch). `ops/STATE.md` section A points here.
 
 ## 1. Waiting on a condition (the lead does these when the condition is met)
+- [ ] **P1 and P4 under AUTH-033 (the lead, human away; checkpoint 2026-11-10).** Done: step A (`inputs/p1/P1-PREP.md`
+      section 7, commit 377928d). **Resume at step B** from `P1-PREP.md` section 8: write `tools/p1_memory.py`, smoke 3
+      sessions, then 64 returning sessions x (none, pop6, oracle) x 2 repeats on GLM-5.3 via OpenRouter GMICloud, at most $12;
+      then P4 (at most $8), then results, HYP-0017/HYP-0021 result sections, STATE.
 - [ ] **End-to-end study, from P3 and the preparation** (`05` section 3; V5-R17 open items a-c; `inputs/e2e/E2E-TASKS-DESIGN.md`):
       instruction-only arm; the stop's treatment of the tools array (V5-R02); model differences as an input to model choice; the
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
