@@ -78,3 +78,33 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
 - **Change record:** `05` P1's wording ("multi-session users built by a declared construction") is not changed yet. AppWorld's
   natural users are a construction too: the session order by date is chosen. The synthetic part becomes optional, conditional on
   that result.
+
+## 6. Desk check of HYP-0017's falsifier on these users (2026-11-10; no model request) [O], then [I]
+- **Script:** `design/package-v5/tools/p1_recurrence.py` (rebuilt; the script behind section 2 was not kept). It reproduces
+  section 2's non-core column exactly: recall 0.19 (quartiles 0 / 0 / 0.33, zero in 36, all in 3), precision 0.14 (0 / 0 / 0.25,
+  zero in 36), median seed set 6. It does **not** reproduce the "all APIs" column (it gives recall 0.55, precision 0.44, against
+  0.49 and 0.38); that column's definition was not recorded. The non-core column is the one M2 depends on.
+- **The falsifier** (HYP-0017): the seed precision h stays below the break-even h* of `calc/memory_seed.py` (revision 4) for the
+  observed session length T, matches per search K and discovery mode. Here, client-side search, seeds = every non-core API needed
+  in the user's earlier sessions, h from AppWorld's required APIs (gold), T on a grid around P2's median of 8 requests.
+
+| K | r (cache read) | T = 3 | T = 8 | T = 10 | T = 30 |
+|---|---|---|---|---|---|
+| 1 | 0.1 | h* 0.21: 17/64 | 0.27: 15/64 | 0.29: 14/64 | 0.50: 7/64 |
+| 1 | 0.025 | 0.26: 15/64 | 0.28: 15/64 | 0.29: 14/64 | 0.37: 9/64 |
+| 3 | 0.1 | 0.15: 22/64 | 0.18: 20/64 | 0.20: 20/64 | 0.30: 14/64 |
+| 3 | 0.025 | 0.17: 21/64 | 0.18: 20/64 | 0.19: 20/64 | 0.23: 16/64 |
+
+  (Each cell: h* and the returning sessions whose h reaches it. r = 0.05 lies between the two rows; the script prints it.)
+- **Reading [I].** On AppWorld's natural users, seeding everything a user needed before pays in at most about a third of returning
+  sessions (7 to 22 of 64), and the mean precision (0.14) is below every h* in the grid (lowest 0.15). By gold, the falsifier is
+  met on average for this seed rule on these users. This does not yet falsify HYP-0017:
+  - h counts tools the task **needs**; the falsifier counts tools **called**, which a run would measure (models also call
+    seeded tools they do not need: the over-calling `05` P1 asks about);
+  - it tests one seed rule (everything used before); a narrower rule (for example, tools used in two or more earlier sessions)
+    would have a different h, and is untested;
+  - W, the cost of writing the memory, is not included (it would lower the saving further); T and K are assumed, not measured
+    on these tasks;
+  - the users are a construction (section 4).
+- **What it changes for P1 (for the human):** a model run on these users would most likely show M2 not paying, which is a result
+  (a negative result is still a thesis). Where M2 could pay, the high-recurrence returns, there are only 14 to 22 sessions.
