@@ -1,0 +1,43 @@
+
+
+        GLM-5.3 - TUD:AI
+
+          Skip to content
+
+GLM-5.3
+
+Name in the API
+zai-org/GLM-5.3
+Base model
+zai-org/GLM-5.3
+Weights we run
+gpustack/GLM-5.3-W4A8 (W4A8 quantization: 4-bit weights, 8-bit activations)
+Type
+Chat
+Input → output
+text → text
+Context length
+524,288 tokens
+Availability
+HPC
+Hardware
+8 × NVIDIA H100 (94 GB) on two nodes of the Capella HPC cluster
+Thinking
+Default: on, with the highest effort (max).
+reasoning_effort: every value is accepted, but the model only knows low and high.
+All other values (minimal, medium, xhigh, max) mean max.
+low and high both think clearly less than the default.
+Numeric effort: no.
+Turn off: not possible. With reasoning_effort: "none", chat_template_kwargs: {"enable_thinking": false}
+or chat_template_kwargs: {"thinking": false} the model still thinks, and the reasoning ends up in the answer
+(content) instead of the separate reasoning field (vLLM issue #54744).
+Tool calling
+Yes
+Example
+Chat request. Set model to the name above.
+
+Notes
+
+For short answers, use reasoning_effort: "low" rather than turning thinking off,
+  because turning it off mixes the reasoning into the answer.
+
