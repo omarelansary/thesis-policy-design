@@ -103,3 +103,7 @@ scenarios** now have a removed API that every successful run called (FeasiGen's 
 - Two OpenAI models; two repeats at temperature 1.0; 30 tasks in 10 scenarios.
 - The interval is a scenario bootstrap with 10 clusters, which is rough.
 - Costs use the prices read on 2026-11-08 (`P2-DESIGN.md` E2).
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Lines 58 to 61: "no accuracy loss beyond run-to-run variation" and "improved by about 12 points" are stronger than the evidence. The intervals (bootstrap over 10 scenarios, called rough at line 104) allow losses up to 17 points (gpt-5.4-mini, enforced) and 28 points (gpt-5-mini, instruction); no per-repeat McNemar test is below 0.05; gpt-5-mini's +0.117 has the opposite sign on gpt-5.4-mini and six contrasts were made without correction. Supported wording: no detectable difference, small effects not excluded.

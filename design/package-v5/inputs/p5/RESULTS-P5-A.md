@@ -69,3 +69,8 @@ deferral prefix is about 1,480 tokens at every size; it does not depend on n.
 - The first request of the run was refused, so it is not in the calibration; the analysis uses the n = 10 deferral calibration
   for every size, because the deferral prefix does not depend on n. That was a fix in `p5_analyze.py` (2026-11-08); part B's arms
   are calibrated per n and unaffected.
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 46: the largest relative difference at 30 to 300 tools is 17.7% (0.153 against 0.130 at 100 tools), not 16%.
+- Line 51: warm minus cold reaches 0.354 at 10 tools (1.381 against 1.027), so the range is 0.02 to 0.35.

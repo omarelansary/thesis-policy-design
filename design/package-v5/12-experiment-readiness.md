@@ -56,3 +56,8 @@ This section supersedes the rows of section 1 for P5, P3 and P2. Branch `v5-r3-p
     - The design, the harness and a cost estimate are in `inputs/p2/P2-DESIGN.md`. **P2 was run on 2026-11-08** (INT-T-041, INT-T-042; `inputs/p2/RESULTS-P2-MAIN.md`, $12.69): no accuracy loss from server-enforced offering beyond run-to-run variation; the cache was kept. No request is sent before a run is
       authorized with its cost.
 - **P1 and P4:** unchanged from section 1.
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 10: P3 "Not yet" is superseded: P3 ran on 2026-11-07/08 and was closed (line 35; `inputs/p3/P3-LOG.md`).
+- Line 42: 3,328 of 3,426 holds for gpt-4.1-mini; gpt-5-mini cached 3,328 of 3,510.

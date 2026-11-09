@@ -40,3 +40,10 @@ blind-output-A `f730ca31efc7054e4fcdcdbd44956fb5db5b61ac471237666768290ad7fad679
 
 ## Change log
 - 2026-10-22: first drafts; steward corrections applied to `03`; independent review and revision 2 of the calculations, `01`-`06`, DPR-0007; targeted searches; this README rewritten.
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 3: "nothing was run except the lead's two arithmetic scripts" describes 2026-10-22. Since then the P0 probes, R1 to R3 and P2, P3 and P5 were run (`12-experiment-readiness.md`, `ops/STATE.md`), and `calc/` holds six scripts.
+- Line 7: "between about 10 and 230 tools": the printed tables of `calc/regime_bill.stdout.txt` reach 9 to 196; 232 occurs only in a grid cell that is not printed (definitions of 100 tokens, 30 requests, cache read 0.025, 10 searches, uncached core). P5 part A measured the break-even between 10 and 30 tools on ScaDS (`inputs/p5/RESULTS-P5-A.md`).
+- Line 11: P0, P5 and P3 have been measured (P3 closed 2026-11-08); P1 is prepared, not run.
+- Line 12: "the break-evens barely depend on them" holds for sessions of about 10 requests (n* moves at most 1.2×); in sessions of 3 requests n* moves 1.5 to 2× over the price ranges (`11-price-ranges.md:48,51`).

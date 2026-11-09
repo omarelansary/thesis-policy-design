@@ -59,3 +59,7 @@ about 2% of input) to 30 times (MiniMax) higher for expose-all. One user turn, s
 - "Uninstructed" means no instruction in the system text; search_tools still describes itself in one line, as vendors' search
   tools do. The ranker is the harness's BM25; the models' queries found the target every time, so ranker misses were not tested.
 - The cap of 6 requests shapes the absent-cell counts; a longer cap would show how long models keep searching.
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 44: "searched in every session" holds for the deferred cell D. In the distractor cell W, MiniMax-M3 searched in 19 of 20 sessions in both variants (`run1-analysis.json`; `RESULTS-P3-RUN2.md:85`).

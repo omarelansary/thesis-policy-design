@@ -47,3 +47,7 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | D-04 | `calc/price_sensitivity.py`, `calc/price_sensitivity.stdout.txt`; `11` |
 | D-05 | `calc/retention_and_write.py`, `calc/retention_and_write.stdout.txt`; `10` sections 9 and 11; `inputs/p0-api-lifetime.jsonl`, `inputs/p0-api-minmax-lifetime.jsonl`, `inputs/p0-api-glm-lifetime.jsonl`; L/v5-ls-f03-claude-build-with-claude-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt; L/v5-ls-f12-google-docs-pricing.txt:288-305 (SUM-0057); REQ-U28-01 |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 10: uninstructed use was measured by P3 (see `03-reuse-map.md` corrections); HYP-0019 remains `proposed`.
