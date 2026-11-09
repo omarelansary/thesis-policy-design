@@ -21,7 +21,7 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 - The human's `.workspace/` stays untracked and is never pushed.
 
 ## C. Operating rules
-- Authorizations: AUTH-020 (V5 audit), AUTH-021 to AUTH-023 (machine portability, see D), AUTH-024 to AUTH-027 (R3 probes; done), AUTH-028 (P5; done), AUTH-029 (P3; closed), AUTH-030 (group 1 and 2, P2 preparation) and AUTH-031 (P2 runs, P2b).
+- Authorizations: AUTH-020 (V5 audit), AUTH-021 to AUTH-023 (machine portability, see D), AUTH-024 to AUTH-027 (R3 probes; done), AUTH-028 (P5; done), AUTH-029 (P3; closed), AUTH-030 (group 1 and 2, P2 preparation), AUTH-031 (P2 runs, P2b) and AUTH-033 (P1 and P4 by the lead while the human is away; the lead's limits). AUTH-032 is the deck session's (`v5-slides`).
 - Run allow-listed commands alone, never chained (WD-042, WD-043). The guard allows only `git push [-u] origin v5-audit` and the same for the Linux branch; the human pushes anything else.
 - Agents: evidence-steward, design-proposer, design-challenger; protocol `ops/PROTOCOL.md`.
 - Research outputs go on a branch cut from `v5-audit` and reach it by merge, only when the human says so (WD-061).
