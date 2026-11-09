@@ -39,9 +39,15 @@ Status: provisional, lead, 2026-10-22. Machine check: `python design/package-v5/
 | V5-R13 | `15` PL-2, 4.3; L/v5-ls-b06-chatgpt-customization-memories.txt; L/v5-ls-a10-geminicli-cli-auto-memory.txt; L/v5-ls-c04-mem0-blog-mem0-the-token-efficient-memory-algorithm.txt; L/v5-ls-g01-arxiv-pdf-2605.24941.txt (SUM-0058, SUM-0059, SUM-0061); REQ-O21-03; REQ-U28-01 |
 | V5-R14 | `15` PL-3, 4.5; L/v5-ls-g07-github-github-copilot-building-an-agentic-memory-system-for.txt; L/v5-ls-g08-github-agents-copilot-memory.txt:149-155; L/v5-ls-e02-arxiv-pdf-2602.11988.txt (SUM-0060, SUM-0063); REQ-U28-01 |
 | V5-R15 | `15` PL-8, 4.5; L/v5-ls-g08-github-agents-copilot-memory.txt; L/v5-ls-f25-claude-en-memory.txt (SUM-0056, SUM-0060); REQ-U28-01 |
+| V5-R17 | `inputs/p3/RESULTS-P3-RUN1.md` to `RESULTS-P3-RUN6.md`, `inputs/p3/P3-LOG.md`, `inputs/p3/STOP-RULE-RESEARCH-20261108.md` (leads, unverified); INT-T-031, INT-T-039 |
 | V5-R16 | `15` PL-6, 4.6; L/v5-ls-f03-claude-build-with-claude-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt; L/v5-ls-f12-google-docs-pricing.txt (SUM-0057); REQ-U28-01 |
-| D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt` |
+| D-01 | `calc/regime_bill.py`, `calc/regime_bill.stdout.txt`; checked on V5's route in `inputs/p5/RESULTS-P5-A.md` |
+| D-01h | `calc/regime_bill_hosted.py`; `inputs/p5/RESULTS-P5-B.md`; INT-T-043 |
 | D-03 | `calc/compact_tiers.py`, `calc/compact_tiers.stdout.txt` |
 | D-04 | `calc/price_sensitivity.py`, `calc/price_sensitivity.stdout.txt`; `11` |
 | D-05 | `calc/retention_and_write.py`, `calc/retention_and_write.stdout.txt`; `10` sections 9 and 11; `inputs/p0-api-lifetime.jsonl`, `inputs/p0-api-minmax-lifetime.jsonl`, `inputs/p0-api-glm-lifetime.jsonl`; L/v5-ls-f03-claude-build-with-claude-prompt-caching.txt; L/v5-ls-f05-openai-guides-prompt-caching.txt; L/v5-ls-f12-google-docs-pricing.txt:288-305 (SUM-0057); REQ-U28-01 |
 | D-02 | `calc/memory_seed.py`, `calc/memory_seed.stdout.txt` |
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-103)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 10: uninstructed use was measured by P3 (see `03-reuse-map.md` corrections); HYP-0019 remains `proposed`.

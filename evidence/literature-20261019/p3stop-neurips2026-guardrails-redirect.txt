@@ -1,0 +1,80 @@
+
+
+    NeurIPS  When Guardrails Redirect: Excluding a Requested Action Can Trigger Another
+
+    NeurIPS 2026
+
+    Skip to yearly menu bar
+    Skip to main content
+
+Main Navigation
+
+            NeurIPS
+
+                        Help/FAQ
+
+                        Contact NeurIPS
+
+                        Create Profile
+
+                        Code of Ethics
+
+                        Code of Conduct
+
+                        Journal To Conference Track
+
+                        Diversity & Inclusion
+
+                        Proceedings
+
+                        Future Meetings
+
+                        Press
+
+                        Exhibitor Information
+
+                        Privacy Policy
+
+                        Downloads
+
+                        My Stuff
+
+                     Login
+
+                            Sydney
+
+                            Atlanta
+
+                            Paris
+
+                            Poster
+ in 
+Workshop: Interpreting Agent Behavior (IAB): Human-Centered Interpretation for Understanding Agents, Humans, and Interaction
+
+                                    Sat, Dec 12, 2026 • 10:10 AM – 11:15 AM AEDT
+
+When Guardrails Redirect: Excluding a Requested Action Can Trigger Another
+
+                    Yuhe Zhong ⋅ Leyan Zhu
+
+                             Project Page
+
+                [
+                 OpenReview] 
+
+                             Abstract
+
+Large language model (LLM) agents can change external systems through tool calls. To reduce infeasible calls, runtimes may use database state before generation to constrain a tool's argument schema. We find that when this constraint excludes the user-requested target, it can redirect the model to another executable but unrequested target, turning a rejection with no state change into a wrong-target modification.  We measure this failure using matched runs that differ only in whether the requested target remains generatable, and we execute the selected calls with official tools. Across three agent benchmarks, we observe the same conditional transition. When the run in which the requested call remains generatable ends in an official rejection, its matched target-excluded run modifies another target. Across five model configurations, excluding the requested target from the constrained output space never reduces the wrong-target modification rate. Diagnostic experiments further show that removing decoder enforcement so that the requested call remains generatable and can be officially rejected reduces the paired risk difference from 93.8 to 4.6 percentage points.  The same final call can follow either a direct request or a substitution after the original target is excluded. A current-state check cannot distinguish these histories or determine whether prior authorization covers the action. We therefore evaluate request-aware execution checks that retain the original request, allowed alternatives, and approval for the final action. Strict request matching prevents all wrong-target modifications in the execution replay. In a separate proposal-level test, a set-based variant retains specified alternatives and rejects unlisted proposals. Thus, filtering generation by current state can change the target on which the model acts. Current-state validity does not imply consistency with the user's request.
+
+                                Show more
+
+Chat is not available.
+
+Successful Page Load
+
+                        NeurIPS uses cookies for essential functions only. We do not sell your personal
+                        information.
+                        Our Privacy Policy » 
+
+                        Accept
+

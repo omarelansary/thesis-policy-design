@@ -30,3 +30,42 @@ Write the P3 task set and catalogue specification (desk work); regenerate the fr
 - **Run settings any authorization must fix and record:** the provider (pinned, no fallback), the reasoning mode (hosts differ in the default; with it off, MiniMax-M3 passed 24 to 28 of 57, with it on 45 to 50), the AppWorld `raise_on_failure` setting for reference-solution checks, a new experiment name per run (AppWorld issue #203), a client timeout, and a stop when the key or endpoint refuses calls.
 - **Repeats.** Identical runs differed in 5 (ScaDS) and 9 to 12 (OpenRouter) of 57 tasks. A comparison of arms needs at least two runs per arm, or more tasks, before "nearly the same" accuracy can be read (`17` section 9, item 3).
 - **Model availability.** ScaDS stopped serving MiniMax-M3 between 2026-11-02 and 11-06. Served models can disappear without notice, so each harness should record the served model id per call.
+
+## 6. Update 2026-11-08 (INT-T-040; this branch, `v5-p5-break-even`)
+This section supersedes the rows of section 1 for P5, P3 and P2. Branch `v5-r3-part-b-results` has its own section 5 (update of
+2026-11-07); a merge keeps both sections.
+- **P5** (AUTH-028).
+  - Part B, the OpenAI side check, is done: $0.594 (`inputs/p5/RESULTS-P5-B.md`).
+    - Individually deferred functions still bill 30% of their tokens.
+    - The break-even is between 10 and 30 tools on cold starts.
+    - D-01 as written misses this route by more than the run-to-run spread. The human keeps D-01 until part A (INT-T-027).
+  - Part A (ScaDS GLM-5.3, client deferral, cap about 140 requests, INT-T-026) waits for the GLM B2 run to end.
+- **P3: done and closed** (runs 1-6 on OpenRouter, GMICloud fp8, three models, $9.953; INT-T-028..039; `inputs/p3/P3-LOG.md`).
+  - The models searched for a deferred tool without being told to, so HYP-0019's falsifier is not met on that set.
+  - For a missing tool, V5-R17 adds a deterministic stop plus one sentence in the system text (`04`, provisional).
+  - Its open items go to the end-to-end study (`05` section 3).
+- **P2: preparation authorized (INT-T-040), no run.** The route question of section 1 ("the route left is instruction text
+  without enforcement") is now answered per provider:
+  - **OpenAI:** `allowed_tools` is a real server mechanism.
+    - It keeps the cache: 3,328 of 3,426 prompt tokens cached, as in the plain repeat.
+    - Both models stayed inside the subset in 20 of 20 repeats (`10` section 12, R1 part 1 and R2 A1).
+    - Limit: at most 128 tools per request (`17` section 7, P2 note; R1 part 3). So AppWorld's 457 definitions cannot be declared
+      at once there.
+  - **ScaDS:** the LiteLLM proxy refuses it (HTTP 400 on all ten models, `10` section 12). The instruction-only restriction is
+    followed by most models in the adversarial probe cell (seven of nine in 5 of 5), not by Llama-3.3-70B. Named forcing is
+    ignored by three models (`10` section 12, R2 A1).
+  - **OpenRouter, GMICloud pinned:** accepted and **not enforced** (the excluded tool was called in 9 of 9). Only `auto` works
+    for `tool_choice` (`10` section 12, R3 A3). So this route cannot carry a server-enforced arm, and a run there would look
+    enforced when it is not.
+  - **Consequence for the design [I]:**
+    - P2 can test HYP-0018 in two forms: server-enforced on OpenAI, within 128 declared tools; and instruction-only, which is
+      portable and has no enforcement, on the open-weight routes.
+    - Each form needs an all-offered arm on the same declared prefix and cache diagnostics per request.
+    - The design, the harness and a cost estimate are in `inputs/p2/P2-DESIGN.md`. **P2 was run on 2026-11-08** (INT-T-041, INT-T-042; `inputs/p2/RESULTS-P2-MAIN.md`, $12.69): no accuracy loss from server-enforced offering beyond run-to-run variation; the cache was kept. No request is sent before a run is
+      authorized with its cost.
+- **P1 and P4:** unchanged from section 1.
+
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-103)
+Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
+- Line 10: P3 "Not yet" is superseded: P3 ran on 2026-11-07/08 and was closed (line 35; `inputs/p3/P3-LOG.md`).
+- Line 42: 3,328 of 3,426 holds for gpt-4.1-mini; gpt-5-mini cached 3,328 of 3,510.

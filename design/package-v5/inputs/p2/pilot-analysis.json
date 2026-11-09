@@ -1,0 +1,123 @@
+{
+ "runs": [
+  {
+   "run": "p2-pilot-gpt5mini-all",
+   "model": "gpt-5-mini",
+   "arm": "all",
+   "reasoning_effort": "low",
+   "harness_sha256": "77aa0accca5914625288859b8571dacdd97c330b8941c21d561c6248f3c51209",
+   "tasks": 5,
+   "exceptions": 0,
+   "success": 3,
+   "tests_passed": 16,
+   "tests_total": 18,
+   "steps": 45,
+   "calls": 40,
+   "calls_failed": 0,
+   "prompt": 673724,
+   "cached": 579584,
+   "completion": 18252,
+   "reasoning": 10048,
+   "cost": 0.0745,
+   "outside_subset": 0,
+   "served": [
+    "gpt-5-mini-2025-08-07"
+   ],
+   "per_task_success": {
+    "50e1ac9_1": true,
+    "fac291d_1": false,
+    "4ec8de5_1": false,
+    "b119b1f_1": true,
+    "d4e9306_1": true
+   },
+   "stopped": null,
+   "cached_share": 0.86
+  },
+  {
+   "run": "p2-pilot-gpt5mini-all-resp",
+   "model": "gpt-5-mini",
+   "arm": "all",
+   "reasoning_effort": "low",
+   "harness_sha256": "90afe9e67f2affe14bab3a20e456f83ffeca2d3d71b98c4a452420a036f489f5",
+   "tasks": 5,
+   "exceptions": 0,
+   "success": 3,
+   "tests_passed": 15,
+   "tests_total": 18,
+   "steps": 52,
+   "calls": 47,
+   "calls_failed": 0,
+   "prompt": 806359,
+   "cached": 625792,
+   "completion": 13317,
+   "reasoning": 5632,
+   "cost": 0.0874,
+   "outside_subset": 0,
+   "served": [
+    "gpt-5-mini-2025-08-07"
+   ],
+   "per_task_success": {
+    "50e1ac9_1": true,
+    "fac291d_1": true,
+    "4ec8de5_1": false,
+    "b119b1f_1": true,
+    "d4e9306_1": false
+   },
+   "stopped": null,
+   "cached_share": 0.776
+  },
+  {
+   "run": "p2-pilot-gpt54mini-all-resp",
+   "model": "gpt-5.4-mini",
+   "arm": "all",
+   "reasoning_effort": "low",
+   "harness_sha256": "90afe9e67f2affe14bab3a20e456f83ffeca2d3d71b98c4a452420a036f489f5",
+   "tasks": 5,
+   "exceptions": 0,
+   "success": 3,
+   "tests_passed": 16,
+   "tests_total": 18,
+   "steps": 39,
+   "calls": 34,
+   "calls_failed": 0,
+   "prompt": 575610,
+   "cached": 484608,
+   "completion": 10926,
+   "reasoning": 4785,
+   "cost": 0.1538,
+   "outside_subset": 2,
+   "served": [
+    "gpt-5.4-mini-2026-03-17"
+   ],
+   "per_task_success": {
+    "50e1ac9_1": true,
+    "fac291d_1": false,
+    "4ec8de5_1": false,
+    "b119b1f_1": true,
+    "d4e9306_1": true
+   },
+   "stopped": null,
+   "cached_share": 0.842
+  }
+ ],
+ "paired_against_all": [
+  {
+   "model": "gpt-5-mini",
+   "arm": "p2-pilot-gpt5mini-all",
+   "against": "p2-pilot-gpt5mini-all-resp",
+   "tasks": 5,
+   "all_only": 1,
+   "arm_only": 1,
+   "exact_mcnemar_p": 1.0
+  },
+  {
+   "model": "gpt-5-mini",
+   "arm": "p2-pilot-gpt5mini-all-resp",
+   "against": "p2-pilot-gpt5mini-all",
+   "tasks": 5,
+   "all_only": 1,
+   "arm_only": 1,
+   "exact_mcnemar_p": 1.0
+  }
+ ]
+}

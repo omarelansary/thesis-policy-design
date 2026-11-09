@@ -1,0 +1,2222 @@
+
+
+Search Engines Never Say No: How Frozen Agents React When the Retrieval Tool Refuses
+
+Skip to main content
+
+      Report GitHub Issue
+      ×
+
+      Title:
+
+Content selection saved. Describe the issue below:
+
+      Description:
+
+    Why HTML?
+
+      Report Issue
+
+      Back to Abstract
+
+      Download PDF
+
+      Contents
+
+      Reading mode
+
+      Colour theme
+
+    License: CC BY 4.0
+
+arXiv:2610.05348v1 [cs.IR] 04 Oct 2026
+
+Search Engines Never Say No: 
+
+How Frozen Agents React When the Retrieval Tool Refuses
+
+Ramraj Chandradevan
+
+Sayontan Ghosh
+
+Vinoth Selvendran
+
+Email: {first.last,first.last,vinoth459005}@gmail.com
+
+Abstract
+
+A search tool never says no: it returns its top-kk passages even when the index holds no answer, so the agent sees irrelevant text instead of a miss signal. We ask what frozen search agents do when the tool refuses instead. On an index-hole testbed (257 NQ and 300 HotpotQA questions run with and without their gold passages in a 21M-passage BM25 index), seven agents receive one of five refusal wordings. An un-announced one-sentence refusal raises abstention on unanswerable questions from 23% to 97% on average for Qwen3-8B/32B and from 28% to 57% for Claude Haiku 4.5, cutting wrong answers almost one-for-one and beating a system-prompt instruction by 51 points on average. Search-R1 ignores the refusal and fabricates retrievals; Claude Sonnet 5.5 and Opus 5.5 answer from memory (abstention +2+2 points) and obey a system-prompt directive instead (+16+16). We also found that wording matters: an explanation beats a bare token; a directive inside the observation is decisive for Haiku; a soft warning is useless. Realistic triggers, from a lightweight score-based predictor to an LLM grounding judge, fall well short of the oracle, and all land on a benefit-versus-signal-quality curve that prices any trigger by its recall at a fixed false-refusal budget: for compliant agents the bottleneck is the detector inside the tool, not the agent, and the curve tells future detector work what each point of recall is worth.
+
+1 Introduction
+
+A search agent is a language model that answers a question by calling a retrieval tool, reading what it returns and searching again if needed (Yao et al., 2023; Jin et al., 2025; Li et al., 2025). Today’s retrieval tools have a blind spot: they return their top-kk passages even when the index contains nothing that answers the query, so a miss looks exactly like a hit (Hua and Xiao, 2026; Li et al., 2026).
+
+Fixing this blind spot is hard on either side of the tool call. On the agent side, training a model to abstain on irrelevant, missing or misleading evidence works (Zhang et al., 2026; Feng et al., 2026), but it needs access to the weights. Generally, strongest agents are closed models served through an API, and the open models that can be trained are smaller and less capable. Therefore, for most deployments only prompt engineering is left. On the tool side, a production search stack chains a first-stage retriever and one or more rerankers, each tuned for ranking quality rather than for detecting its own misses; teaching it to report a miss means re-optimizing every stage together. Due to the aforementioned challenges, in practice both components are frozen. What a system builder does control is the contract between them: what the tool returns. We propose to put the control there, as a gate at the tool’s outlet that makes one binary decision per call (pass the passages through, or refuse) and leaves both the retrieval stack and the agent untouched.
+
+A question is unanswerable, an index hole, when no passage that could answer it is in the index. We change the tool contract so that the tool can refuse: instead of passages it returns a NULL observation, a short message saying that nothing reliable was found. We then ask what frozen agents (models used exactly as released, with no training) do with it: do they abstain (answer ‘unknown’, ‘I don’t know’ or similar), search again, or ignore the refusal and answer anyway?
+
+Such a gate depends on two links. The first, retrieval→\totrigger, is how reliably a detector recognises a miss from what the retrieval stack returns. It depends on the retriever, the rankers and the detector, and can be summarised by the trigger’s recall at a fixed false-refusal budget. The second, trigger→\toagent, is what the agent does once the tool refuses. The second link comes first: a perfect detector is worthless if the agent ignores the refusal, and how off-the-shelf agents respond to one has not been measured. We therefore study the trigger→\toagent link and leave detector design to future work. We control the refusal directly with an oracle and with noisy oracles of known recall, measure how each agent’s behaviour changes as recall varies, and place realistic triggers on the resulting curve only to show where today’s detectors land.
+
+Unlike score-based abstention in single-shot retrieval-augmented generation (RAG) or training the agent to abstain (Section 2), a tool-side refusal is a one-line contract change that applies even to closed models. Our key contributions are as follows:
+
+• 
+
+Introduced a search tool that can say no: a tool-side, training-free change to the tool contract that lets the tool refuse (return a NULL observation) when the index cannot answer; it needs no access to the agent and therefore works with frozen and closed models.
+
+• 
+
+Conducted the first comprehensive behavioral study of off-the-shelf agents facing a tool refusal, on an index-hole testbed that runs each question with and without its gold passages, so that unanswerability is known by construction rather than annotated (seven frozen agents, two datasets), which reveals: behavior: Qwen3-8B/32B and Haiku 4.5 obey the refusal and abstain (+243+243% relative on average), Search-R1 fabricates retrievals, Sonnet 5.5 and Opus 5.5 answer from memory; wording: directive >> explanation >> bare token ≈\approx empty list, and a soft warning is useless; safety and cost: hallucinated answers of the compliant agents fall by 84% at unchanged answerable accuracy and search calls.
+
+• 
+
+Presented a benefit-versus-signal-quality curve that prices any refusal trigger by its recall at a fixed false-refusal budget. Realistic triggers, from a lightweight score-based predictor to an LLM grounding annotator, all land on the curve, confirming that for compliant agents the bottleneck is the detector in the tool, not the agent, and giving future detector work a target to read off. Code, data splits, traces and the tool harness will be released upon acceptance.
+
+2 Related Work
+
+Silent tool failure.
+
+Tool failures are usually silent (Gopalan et al., 2026; Li et al., 2026), and agents treat an empty payload as data (Singh, 2026). Sethi et al. (2026) show that an explicit error flag removes fabrication for API tools; a search tool cannot know that it failed, so the refusal must be predicted. Xu and Wu (2026) show that the wording of tool error messages governs recovery; we show that refusal wording governs abstention. Luo et al. (2026) and Xie et al. (2026) find that frozen agents rarely stop when answers run out; we ask whether they stop when told.
+
+Sufficiency signals.
+
+Query performance prediction (QPP) from score distributions (Cronen-Townsend et al., 2002; Zhou and Croft, 2007; Shtok et al., 2012) has been re-purposed for RAG abstention (Holdcroft et al., 2026; Veselý et al., 2026; Bacellar, 2026), cross-encoders as sufficiency gates (Mondal et al., 2026), and QPP correlates with agent answer quality (Tian et al., 2025; Tian et al., 2026); in none of these does the agent see the signal. Agent-side training (Zhang et al., 2026; Feng et al., 2026) and judges that stop an agent when evidence is sufficient (Roh and Han, 2026b; Roh and Han, 2026a; Luo, 2026) are complementary: our signal fires when evidence is absent. Knowledge-gap canaries (Do Rosario et al., 2026) and GRAB-RAG (Setiawan, 2026) delete answers from single-shot RAG contexts; our holes sit inside an index that a multi-turn agent searches, and their tool always returns kk passages after a deletion, so a shorter result list cannot betray the hole.
+
+3 Experimental Setup
+
+Testbed.
+
+The corpus is wiki-18, 21M Wikipedia passages (Karpukhin et al., 2020), indexed with BM25 (Robertson and Zaragoza, 2009; Lin et al., 2021). Questions from KILT-NQ dev (Kwiatkowski et al., 2019; Petroni et al., 2021) and HotpotQA bridge dev (Yang et al., 2018) are kept only if their gold passages are retrievable in the intact index and no other top-50 passage contains the answer once the gold articles are removed (Appendix A): 257 NQ questions (all used) and 783 HotpotQA, of which 300 are sampled (due to costly API calls) and used for every agent. Each question is run in two roles: ans, with the intact index, and hole, where a per-call filter deletes every passage of the question’s gold articles (about 30) and, as a safety net, any passage containing an answer string. We confirmed that the passages for every hole episode returned to the agent contained no gold answer, so a correct hole answer can only come from memory.
+
+Tool contract and wordings.
+
+search(query) returns the top-5 passages (top-3 for Search-R1, its native setting); the tool description never mentions refusal, so a refusal is un-announced. When a signal fires, the tool returns one of five observations instead: N-bare, the token NULL_RESULT; N-empty, an empty result list; N-explain, the token plus “No reliable results were found for this query. The index may not contain the information needed.”; N-directive, N-explain plus a sentence suggesting a different query or answering ‘unknown’; N-soft, the normal top-kk passages preceded by a low-confidence warning. Baselines: V, the vanilla tool, and V+P, V plus a system-prompt directive to answer ‘unknown’ without supporting evidence. Agents may call the tool at most eight times in a single episode.
+
+Signals.
+
+oracle fires on every hole query (question-level ground truth). oracle-q fires only on the hole queries whose top-kk the deletion actually changed (76–92%); it is the ceiling for any trigger that sees one query at a time. qpp is the realistic trigger: a logistic regression on 14 statistics of the BM25 score list of the returned candidates estimates from the list alone whether the search succeeded; its threshold is calibrated on held-out agent queries so that at most 5% of answerable calibration episodes receive a false refusal, and it adds negligible latency. Section 4.4 studies additional three triggers with details in the Appendix.
+
+Agents (all frozen).
+
+Qwen3-8B and Qwen3-32B (Yang et al., 2025) via vLLM tool calling (thinking off, greedy); Claude Haiku 4.5, Sonnet 5.5 and Opus 5.5 via API (the 5.5 models run with provider-default sampling; Limitations), with the previous-generation Sonnet 4.6 in the appendix; Search-R1 (Jin et al., 2025), a Qwen2.5-7B model post-trained to search with an exact-match reward, with its native prompt.
+
+NQ (nn=257)
+HotpotQA (nn=300)
+
+Agent
+Condition
+Abst.
+Wrong
+Mem.
+Calls
+EMans{}_{\textsc{ans}}
+Abst.
+Wrong
+Mem.
+Calls
+EMans{}_{\textsc{ans}}
+
+Qwen3-8B
+V
+15.2
+79.0
+4.3
+1.18
+31.5
+12.3
+84.3
+3.3
+1.38
+28.0
+
+V+P
+19.5
+75.5
+3.9
+1.26
+32.7
+†17.7
+81.0
+1.3
+1.53
+29.0
+
+N-explain/oracle
+‡90.7
+‡7.4
+1.9
+1.15
+=V
+‡97.3
+‡2.3
+0.3
+4.12
+=V
+
+N-directive/oracle
+‡94.9
+‡3.1
+1.9
+1.00
+=V
+‡98.7
+‡1.3
+0.0
+1.69
+=V
+
+N-explain/qpp
+‡25.7
+‡69.6
+3.5
+1.16
+31.1
+‡25.7
+‡71.3
+2.7
+1.80
+28.3
+
+Qwen3-32B
+V
+21.4
+69.6
+5.8
+1.00
+35.8
+41.3
+55.0
+3.3
+1.10
+32.0
+
+V+P
+‡33.5
+‡59.9
+5.4
+1.00
+36.2
+‡51.0
+‡45.7
+2.7
+1.07
+30.0
+
+N-explain/oracle
+‡99.6
+‡0.4
+0.0
+1.00
+=V
+‡100.0
+‡0.0
+0.0
+1.07
+=V
+
+N-directive/oracle
+‡100.0
+‡0.0
+0.0
+1.00
+=V
+‡100.0
+‡0.0
+0.0
+1.03
+=V
+
+N-explain/qpp
+‡31.1
+‡61.1
+5.1
+1.00
+35.0
+‡56.3
+‡41.0
+2.3
+1.07
+‡28.3
+
+Haiku 4.5
+V
+15.6
+50.6
+14.8
+4.07
+43.6
+40.7
+48.7
+9.3
+6.41
+54.0
+
+V+P
+‡24.9
+48.6
+9.7
+4.23
+44.4
+47.3
+45.3
+6.3
+6.42
+54.0
+
+N-explain/oracle
+‡34.2
+‡37.4
+17.1
+4.07
+=V
+‡80.3
+‡15.3
+4.0
+6.41
+=V
+
+N-directive/oracle
+‡69.6
+‡16.7
+9.3
+4.07
+=V
+‡91.7
+‡7.0
+1.3
+6.23
+=V
+
+N-explain/qpp
+18.7
+49.0
+14.0
+4.11
+43.6
+42.0
+48.0
+8.3
+6.35
+55.0
+
+Sonnet 5.5
+V
+0.8
+35.0
+35.0
+2.21
+46.7
+2.3
+47.7
+28.3
+4.13
+57.0
+
+V+P
+‡11.3
+30.0
+31.1
+2.98
+47.9
+‡16.7
+†40.3
+25.7
+4.98
+58.3
+
+N-explain/oracle
+1.6
+35.4
+36.6
+4.34
+=V
+4.0
+45.0
+29.7
+5.07
+=V
+
+N-directive/oracle
+‡6.2
+31.9
+35.4
+4.34
+=V
+4.7
+48.3
+28.7
+5.17
+=V
+
+N-explain/qpp
+1.6
+35.0
+35.0
+2.34
+46.3
+2.7
+49.3
+28.3
+4.23
+57.3
+
+Opus 5.5
+V
+0.4
+52.9
+41.6
+2.30
+54.1
+2.0
+49.7
+41.3
+3.29
+58.3
+
+V+P
+‡21.4
+50.6
+22.2
+3.96
+54.9
+‡20.0
+44.0
+29.0
+5.16
+†61.7
+
+N-explain/oracle
+†2.7
+†46.3
+46.3
+2.29
+=V
+‡4.7
+47.0
+43.3
+3.13
+=V
+
+N-directive/oracle
+‡5.4
+‡44.0
+46.3
+2.82
+=V
+‡7.3
+46.3
+41.7
+3.44
+=V
+
+N-explain/qpp
+0.0
+51.8
+43.2
+2.33
+55.3
+2.7
+49.7
+41.3
+3.37
+59.3
+
+Search-R1a
+V
+0.0
+94.2
+5.1
+2.86
+38.5
+0.0
+97.0
+3.0
+3.52
+40.3
+
+N-explain/oracle
+0.8
+92.6
+5.8
+4.60
+=V
+0.7
+95.0
+4.3
+5.18
+=V
+
+N-directive/oracle
+‡5.1
+‡87.2
+7.4
+4.22
+=V
+‡4.0
+‡91.3
+4.7
+4.53
+=V
+
+N-explain/qpp
+0.0
+93.8
+5.4
+3.19
+39.3
+0.0
+97.3
+2.7
+3.97
+39.0
+
+Table 1: Main results include hole (unanswerable): abstention (Abst.), wrong-or-hedged rate (%), correct-from-memory rate (Mem.; no shown passage contained the answer) in %, mean calls; ans: cover-EM (%).
+Superscripts mark a significant difference from the vanilla tool V: † p<0.05p<0.05, ‡ p<0.01p<0.01 (test in §3). =V: oracle never fires on ans. aBM25 index, no system prompt (hence no V+P).
+
+Outcomes and statistics.
+
+An episode ends correct (cover-EM: the final answer contains a gold answer string), wrong (a confident non-matching answer), abstain (‘unknown’ or an equivalent from a frozen lexicon) or no-answer. On hole we report abstention (desired), the wrong rate (hallucination) and mean calls; on ans, cover-EM. Significance (†/‡ in the tables) comes from a question-level paired bootstrap of each condition against V (10k resamples, two-sided pp-values, Holm-adjusted within each agent ×\times dataset family). Averages in the text are unweighted means over the named agents and both datasets.
+
+4 Results
+
+4.1 Do agents obey a refusal? Tool-side versus prompt-side
+
+Table 1 shows that under the vanilla tool every agent hallucinates on a large share of the unanswerable questions; 65% of these answers copy a span from a shown, irrelevant passage. The N-explain/oracle refusal changes this for three agents: averaged over Qwen3-8B, Qwen3-32B and Haiku 4.5, hole abstention significantly rises from 24.4% to 83.7%, a relative improvement of 243%, and the wrong rate falls from 64.5% to 10.5% (−84-84% relative), almost one-for-one across both datasets. Three agents do not comply. Search-R1, whose post-trained exact-match reward never paid for ‘unknown’, abstains in under 1% of episodes and keeps 94% wrong answers. Sonnet 5.5 and Opus 5.5 move from 1.4% to 3.2% abstention (+1.9+1.9 points; significant only for Opus).
+Tool-side versus prompt-side: For the compliant agents the prompt directive alone (V+P) raises abstention from 24.4% to 32.3% (+32+32% relative); the tool refusal raises it to 83.7%, beating the prompt by 51.4 points. For Sonnet 5.5 and Opus 5.5 the order reverses: the prompt lifts them to 17.3%, whereas the refusal to only 3.2%.
+
+Figure 1: Pricing a trigger (Qwen3-8B, N-explain): hole abstention (blue) and wrong rate (orange) against realised refusal recall (share of hole episodes with ≥\geq1 refusal). Lines connect V, two noisy oracles (oracle-q at 50% and 75% recall), oracle-q and oracle; markers are triggers.
+
+4.2 Does wording matter?
+
+Agent
+Data
+V
+bare
+empty
+explain
+direct.
+soft
+
+Qwen3-8B
+NQ
+15.2
+‡83.3
+‡85.6
+‡90.7
+‡94.9
+†20.6
+
+HP
+12.3
+‡96.0
+‡96.7
+‡97.3
+‡98.7
+16.0
+
+Haiku 4.5
+NQ
+15.6
+‡25.3
+‡25.3
+‡34.2
+‡69.6
+17.5
+
+HP
+40.7
+‡74.0
+‡71.7
+‡80.3
+‡91.7
+41.3
+
+Table 2: hole abstention (%) under oracle by wording (HP = HotpotQA): directive >> explain >> bare ≈\approx empty; soft stays near V. †/‡: as in Table 1.
+
+The wording of one-line tool-side refusal makes substantial differences in HOLE abstention rates. Table 2 confirms the following findings: (i) The explanation beats the bare token: 83.7% versus 79.5% abstention averaged over the two compliant agents (Haiku and Qwen3-8B). (ii) A bare token and an empty list are indistinguishable (79.5% vs. 79.4%). (iii) The directive is the strongest lever (92.5%); for Haiku it is decisive (80.7%, +23+23 points over the explanation). (iv) The soft warning is nearly useless (29.2%, +4.8+4.8 points over V): the agent anchors on visible passages.
+
+4.3 What non-compliant agents do?
+
+Search-R1 never abstains (<<1%, Table 1); a refusal only makes it search more before answering (2.9 →\to 4.6 and 3.5 →\to 5.2 calls), and in 72% of these wrong episodes its reasoning reports a finding it never saw (“I found out that …” after four consecutive refusals; Appendix B). Sonnet 5.5 and Opus 5.5 answer from memory: the Mem. column of Table 1 shows they are right without any supporting passage in 39% of unanswerable questions under the refusal (37% under V), Sonnet 5.5 after more reformulation (2.2 →\to 4.3 calls on NQ), and Opus 5.5 without (2.3 →\to 2.3). Opus 5.5, the strongest model here (highest ans EM), is no more compliant than Sonnet 5.5 under any tool refusal (within 3 pts).
+
+4.4 How far can a realistic trigger get today?
+
+Realistic triggers fall well short of the oracle; what they deliver is the recall they achieve within a false-refusal budget. Figure 1 plots, for Qwen3-8B, abstention and wrong-answer rates on unanswerable questions against the share of those questions with at least one refusal; the lines connect V, two noisy oracles, oracle-q and oracle. Because a compliant agent reacts only to whether the tool refused, the curve prices any trigger: a detector on the line delivers exactly what its recall predicts, so its benefit can be read off before deployment. We placed four triggers on it (refer Appendix C), from lightweight to LLM-based. (1) The lightweight BM25 qpp refuses in 16%/37% of unanswerable questions (NQ/HotpotQA) and raises abstention by 69%/109% relative to V. (2) A zero-shot cross-encoder (Chen et al., 2024b) at the same 5% budget refuses in 26%/39% and raises it by 92%/160% (det-bge). (3) Relaxing its budget to 10% roughly doubles recall (46%/61%) and raises abstention by 197%/266% (det-bge-hi). (4) A strict LLM grounding judge Chandradevan (2024) used as a hard filter (detf-llmjudge: drop rejected passages, refuse if none is left) refuses in 61%/71% and raises it by 253%/363%, closest to oracle-q (+412+412%/+483+483%) but unbudgeted (at the cost of refusing 28%/36% of answerable questions). Every marker lies on or near the line: for a compliant agent the detector, not the agent, is the bottleneck, and the curve states in advance what any future detector is worth.
+
+5 Conclusion
+
+A retrieval tool that can say no is a cheap, training-free safety mechanism for the agents that obey it: for Qwen3-8B/32B and Haiku 4.5 an explanatory refusal raises abstention on unanswerable questions by 243% and cuts hallucinated answers by 84%, at unchanged answerable accuracy and search calls. It is of little use for the post-trained Search-R1 and for Claude Sonnet 5.5 and Opus 5.5, which answer from memory instead. Three recommendations follow: make a failed search visible; explain it, and put the directive where the agent reads it (the observation for Qwen and Haiku, the system prompt for the 5.5 models); and pick the false-refusal budget knowingly, since realistic triggers deliver only the recall that budget buys. The benefit-versus-signal-quality curve makes that trade explicit: every trigger we tried lands on it, so for compliant agents the open problem is the detector inside the tool, and the curve tells future detector work what each point of recall is worth.
+
+Limitations
+
+Scope of the testbed. Our index holes delete the gold Wikipedia articles of one corpus and two QA datasets; the strict eligibility filter leaves 257 NQ questions, and unanswerability in the wild (stale facts, false premises, private data) may look different to both the trigger and the agent.
+
+Automatic scoring. Outcomes are scored by string matching against gold aliases and a frozen abstention lexicon; an LLM-judge audit shows the abstention label is reliable but the correct/wrong split is conservative, so absolute hallucination rates are upper bounds while every between-condition difference is unaffected.
+
+Agents and triggers are snapshots. We study seven frozen agents with fixed prompts and default decoding, and every realistic trigger was calibrated once on one agent’s queries; different prompts, per-agent calibration, or future models could shift the absolute numbers, although the benefit-versus-signal-quality curve lets a reader price any new trigger.
+
+Ethical considerations
+
+The intervention reduces confident wrong answers on questions the index cannot support, which is the intended safety benefit. But it also introduces false refusals on answerable questions (1–23% of episodes here for the 5%- and 10%-budget triggers and 16–58% for the hard-rule LLM as a judge, depending on agent). For compliant agents each false refusal costs the answer. Deployments should calibrate the trigger per agent and monitor false-refusal rates. All data are public English Wikipedia QA benchmarks (NQ, HotpotQA, KILT, wiki-18) used under their licences; no human subjects were involved in our study; commercial model outputs were used only for evaluation. Language-model coding assistants were used in the implementation, as disclosed in the checklist.
+
+References
+
+Bacellar (2026)
+
+Andre Bacellar. 2026.
+
+Predictable failure in multi-hop retrieval: Score-distributional confidence scoring and abstention.
+
+arXiv preprint arXiv:2609.22056.
+
+Chandradevan (2024)
+
+Ramraj Chandradevan. 2024.
+
+Training Search and Ranking Models with Minimal Supervision.
+
+Phd thesis, Emory University, Atlanta, GA.
+
+Chen et al. (2024a)
+
+Jianlv Chen, Shitao Xiao, Peitian Zhang, Kun Luo, Defu Lian, and Zheng Liu. 2024a.
+
+Bge m3-embedding: Multi-lingual, multi-functionality, multi-granularity text embeddings through self-knowledge distillation.
+
+arXiv preprint arXiv:2402.03216.
+
+Chen et al. (2024b)
+
+Jianlv Chen, Shitao Xiao, Peitian Zhang, Kun Luo, Defu Lian, and Zheng Liu. 2024b.
+
+M3-embedding: Multi-linguality, multi-functionality, multi-granularity text embeddings through self-knowledge distillation.
+
+arXiv preprint arXiv:2402.03216.
+
+Model: https://huggingface.co/BAAI/bge-reranker-v2-m3.
+
+Cronen-Townsend et al. (2002)
+
+Steve Cronen-Townsend, Yun Zhou, and W. Bruce Croft. 2002.
+
+Predicting query performance.
+
+In Proceedings of the 25th Annual International ACM SIGIR Conference on Research and Development in Information Retrieval, pages 299–306, Tampere, Finland. ACM.
+
+Do Rosario et al. (2026)
+
+Alden Do Rosario, Hussein Younes, and Felipe Pires. 2026.
+
+Why RAGs hallucinate: Penalty-aware evaluation of retrieval-augmented generation systems with knowledge-gap canaries.
+
+arXiv preprint arXiv:2608.26385.
+
+Feng et al. (2026)
+
+Tao Feng, Xinke Jiang, and Chao Wu. 2026.
+
+KbSD: Knowledge boundary aware self-distillation for behavioral calibration in agentic search.
+
+arXiv preprint arXiv:2606.29863.
+
+Gopalan et al. (2026)
+
+Shreya Gopalan, Devansh Singh, and Sundaraparipurnan Narayanan. 2026.
+
+Silent failures in agent-tool interaction: An audit of ToolUniverse.
+
+arXiv preprint arXiv:2609.26836.
+
+Holdcroft et al. (2026)
+
+Jamie Holdcroft, Abdelrahman Abdallah, and Adam Jatowt. 2026.
+
+The magnitude mirage: Rethinking confidence for reasoning-intensive retrieval.
+
+arXiv preprint arXiv:2609.15578.
+
+Accepted at EMNLP 2026 (per arXiv comments).
+
+Hua and Xiao (2026)
+
+Peichun Hua and Yunming Xiao. 2026.
+
+Semantics delivery network: Rethinking web retrieval infrastructure for LLM agents.
+
+arXiv preprint arXiv:2609.22486.
+
+Jin et al. (2025)
+
+Bowen Jin, Hansi Zeng, Zhenrui Yue, Jinsung Yoon, Sercan Arik, Dong Wang, Hamed Zamani, and Jiawei Han. 2025.
+
+Search-R1: Training LLMs to reason and leverage search engines with reinforcement learning.
+
+arXiv preprint arXiv:2503.09516.
+
+Karpukhin et al. (2020)
+
+Vladimir Karpukhin, Barlas Oguz, Sewon Min, Patrick Lewis, Ledell Wu, Sergey Edunov, Danqi Chen, and Wen-tau Yih. 2020.
+
+Dense passage retrieval for open-domain question answering.
+
+In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP), pages 6769–6781. Association for Computational Linguistics.
+
+Kwiatkowski et al. (2019)
+
+Tom Kwiatkowski, Jennimaria Palomaki, Olivia Redfield, Michael Collins, Ankur Parikh, Chris Alberti, Danielle Epstein, Illia Polosukhin, Jacob Devlin, Kenton Lee, Kristina Toutanova, Llion Jones, Matthew Kelcey, Ming-Wei Chang, Andrew M. Dai, Jakob Uszkoreit, Quoc Le, and Slav Petrov. 2019.
+
+Natural questions: A benchmark for question answering research.
+
+Transactions of the Association for Computational Linguistics, 7:452–466.
+
+Li et al. (2025)
+
+Xiaoxi Li, Guanting Dong, Jiajie Jin, Yuyao Zhang, Yujia Zhou, Yutao Zhu, Peitian Zhang, and Zhicheng Dou. 2025.
+
+Search-o1: Agentic search-enhanced large reasoning models.
+
+arXiv preprint arXiv:2501.05366.
+
+Li et al. (2026)
+
+Zongrong Li, Shengkun Ye, Feiyou Guo, and Zuoyou Dang. 2026.
+
+SilentProbe: Measuring silent failure in production APIs used as agent tools.
+
+arXiv preprint arXiv:2609.00035.
+
+Lin et al. (2021)
+
+Jimmy Lin, Xueguang Ma, Sheng-Chieh Lin, Jheng-Hong Yang, Ronak Pradeep, and Rodrigo Nogueira. 2021.
+
+Pyserini: An easy-to-use python toolkit to support replicable IR research with sparse and dense representations.
+
+arXiv preprint arXiv:2102.10073.
+
+Luo et al. (2026)
+
+Han Luo, Bingbing Wen, and Lucy Lu Wang. 2026.
+
+Agentic abstention: Do agents know when to stop instead of act?
+
+arXiv preprint arXiv:2606.28733.
+
+Luo (2026)
+
+Weimeng Luo. 2026.
+
+When should multi-round RAG stop? structured stopping judgments and retrieval reduction in Search-R1.
+
+arXiv preprint arXiv:2608.13237.
+
+Mondal et al. (2026)
+
+Joyanta Jyoti Mondal, Md. Shifatul Ahsan Apurba, Mridul Banik, Md Masud Al Mahmud, and Ibne Farabi Shihab. 2026.
+
+Before answering: Evidence sufficiency under size-matched memory construction.
+
+arXiv preprint arXiv:2609.32269.
+
+Petroni et al. (2021)
+
+Fabio Petroni, Aleksandra Piktus, Angela Fan, Patrick Lewis, Majid Yazdani, Nicola De Cao, James Thorne, Yacine Jernite, Vladimir Karpukhin, Jean Maillard, Vassilis Plachouras, Tim Rocktäschel, and Sebastian Riedel. 2021.
+
+KILT: a benchmark for knowledge intensive language tasks.
+
+In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pages 2523–2544. Association for Computational Linguistics.
+
+Robertson and Zaragoza (2009)
+
+Stephen Robertson and Hugo Zaragoza. 2009.
+
+The probabilistic relevance framework: BM25 and beyond.
+
+Foundations and Trends in Information Retrieval, 4(1–2):1–174.
+
+Roh and Han (2026a)
+
+Daeyoung Roh and Donghee Han. 2026a.
+
+CoVeR: Coverage-based routing of verifier calls in agentic retrieval.
+
+arXiv preprint arXiv:2609.26086.
+
+Roh and Han (2026b)
+
+Daeyoung Roh and Donghee Han. 2026b.
+
+HALT: Verification-aware stopping for retrieval-augmented search agents.
+
+arXiv preprint arXiv:2608.02009.
+
+Accepted to Findings of EMNLP 2026 (per arXiv comments).
+
+Sethi et al. (2026)
+
+Arham Sethi, Arsen Kenzhebayev, Saanvi Paturi, Vatsal Raina, Vyas Raina, and Ivaxi Sheth. 2026.
+
+Fabrication after tool failure: Tool-augmented agents assert values their tools did not return.
+
+arXiv preprint arXiv:2609.14758.
+
+Setiawan (2026)
+
+Yohanes Andre Setiawan. 2026.
+
+Prompt-based abstention fails under misleading context: A controlled study of small frozen RAG models.
+
+arXiv preprint arXiv:2608.22228.
+
+Shtok et al. (2012)
+
+Anna Shtok, Oren Kurland, David Carmel, Fiana Raiber, and Gad Markovits. 2012.
+
+Predicting query performance by query-drift estimation.
+
+ACM Transactions on Information Systems, 30(2):11:1–11:35.
+
+Singh (2026)
+
+Aarushi Singh. 2026.
+
+Guardrails as scapegoats: Auditing unfaithful safety refusals in tool-augmented LLM agents.
+
+arXiv preprint arXiv:2607.19449.
+
+Tian et al. (2025)
+
+Fangzheng Tian, Jinyuan Fang, Debasis Ganguly, Zaiqiao Meng, and Craig Macdonald. 2025.
+
+Am I on the right track? what can predicted query performance tell us about the search behaviour of agentic RAG.
+
+arXiv preprint arXiv:2507.10411.
+
+Tian et al. (2026)
+
+Fangzheng Tian, Debasis Ganguly, and Craig Macdonald. 2026.
+
+Predicting partial answer quality and utility in agentic retrieval-augmented generation.
+
+arXiv preprint arXiv:2609.16453.
+
+To appear at CIKM 2026 (per arXiv comments).
+
+Veselý et al. (2026)
+
+Matyáš Veselý, Michal Průšek, and Jiří Franc. 2026.
+
+Your retriever already knows: Distribution-shape QPP for RAG retrieval sufficiency.
+
+In Text, Speech, and Dialogue (TSD 2026), volume 16940 of LNCS, pages 592–604. Springer.
+
+ArXiv:2609.11646.
+
+Wang et al. (2022)
+
+Liang Wang, Nan Yang, Xiaolong Huang, Binxing Jiao, Linjun Yang, Daxin Jiang, Rangan Majumder, and Furu Wei. 2022.
+
+Text embeddings by weakly-supervised contrastive pre-training.
+
+arXiv preprint arXiv:2212.03533.
+
+Xie et al. (2026)
+
+Jianan Xie, Xin Sun, Zhongqi Chen, Xing Zheng, Qiang Liu, and Bowen Song. 2026.
+
+HopRefusalBench: Diagnosing refusal failures in search-augmented agents for multi-hop reasoning.
+
+arXiv preprint arXiv:2608.01358.
+
+Xu and Wu (2026)
+
+Xiaonan Xu and Wenjing Wu. 2026.
+
+MCP error messages written for developers hurt the most capable agents most.
+
+arXiv preprint arXiv:2609.35381.
+
+Yang et al. (2025)
+
+An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, et al. 2025.
+
+Qwen3 technical report.
+
+arXiv preprint arXiv:2505.09388.
+
+60 listed authors (Qwen Team, Alibaba).
+
+Yang et al. (2018)
+
+Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio, William Cohen, Ruslan Salakhutdinov, and Christopher D. Manning. 2018.
+
+HotpotQA: A dataset for diverse, explainable multi-hop question answering.
+
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 2369–2380, Brussels, Belgium. Association for Computational Linguistics.
+
+Yao et al. (2023)
+
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. 2023.
+
+ReAct: Synergizing reasoning and acting in language models.
+
+In International Conference on Learning Representations (ICLR).
+
+ArXiv:2210.03629.
+
+Zhang et al. (2026)
+
+Fengji Zhang, Tianyu Fan, Yuxiang Zheng, Xinyao Niu, Chengen Huang, Jacky Keung, and Bei Chen. 2026.
+
+To answer or to abstain: Mitigating search-agent hallucinations via abstention-aware reinforcement learning.
+
+arXiv preprint arXiv:2607.10738.
+
+Zhou and Croft (2007)
+
+Yun Zhou and W. Bruce Croft. 2007.
+
+Query performance prediction in web search environments.
+
+In Proceedings of the 30th Annual International ACM SIGIR Conference on Research and Development in Information Retrieval, pages 543–550, Amsterdam, The Netherlands. ACM.
+
+Notation. O = oracle, OQ = oracle-q, QPP = the BM25-score predictor of the main text, DQPP = its dense e5 variant; n=257n=257 (NQ) and 300300 (HotpotQA) per cell; “wrong” includes hedged answers (about 1% of hole wrong answers).
+
+Appendix A Testbed and tool strings
+
+Eligibility funnel.
+
+A question enters the testbed only if its unanswerable version is unanswerable by construction. Starting from the KILT-NQ and HotpotQA (bridge) development sets, we first drop questions whose answer would make the hole leaky or the metric unreliable: yes/no, purely numeric, year, very short (under four characters) or stop-word answers, and answers longer than six tokens. We then require every gold Wikipedia title to resolve to a passage in the wiki-18 corpus, and at least one gold passage to contain an accepted answer string, so that deleting the gold articles really removes the answer. Because the tool also removes any surviving passage that contains an answer string, we keep only answers that occur in at most 2,000 corpus passages; otherwise the deletion would gut the corpus rather than carve a hole. The question must be answerable in the intact index (an answer-bearing gold passage in the BM25 top-20 for the question itself), and, after the gold articles are removed, none of the next 50 best passages may still contain the answer; otherwise the answer is redundantly present and the hole is vacuous. Table 3 gives the surviving counts after each step. All 257 surviving NQ questions are used; of the 783 HotpotQA survivors we sampled 300. Calibration pools for the trigger apply the same rules to the training splits (300 questions per dataset) and are disjoint from the evaluation questions.
+
+Step
+NQ
+HotpotQA
+
+Development questions (bridge only for HotpotQA)
+2,837
+5,918
+
+Answer type and length filter
+2,402
+5,166
+
+All gold titles resolve to a corpus passage
+2,063
+4,211
+
+A gold passage contains an answer string
+1,989
+4,035
+
+Answer string in ≤\leq2,000 corpus passages
+1,281
+2,935
+
+Answer-bearing gold passage in BM25 top-20
+748
+1,634
+
+No answer in the top-50 after gold deletion
+257
+783
+
+Used (per agent)
+257
+300
+
+Table 3: Eligibility funnel: questions surviving each rule, applied in order.
+
+Alias safety net.
+
+Every hole query additionally removes surviving passages that contain a gold alias as a whole-word, case-folded phrase. The net fires on 27% of hole calls overall, more often for Claude (27–36% of calls) than for Qwen (18–24%) or Search-R1 (19–22%), because Claude often searches for the answer it already suspects; the effective hole for Claude is therefore the title hole plus on average 17–31 alias-bearing passages per question, still negligible relative to the corpus. A full scan of all 266,969 passages shown in 127,791 hole calls of all seven agents found 0 passages with a gold alias, gold title or gold docid, and every NULL observation was byte-identical to its format string. On ans the filter is inactive by construction.
+
+Observation strings.
+
+The tool returns a JSON string in the vanilla conditions; the refusal strings below are the experimental manipulation and were byte-identical across agents. For Search-R1, whose native protocol wraps observations in <information> …</information>, the same strings are placed inside that block and N-empty is the empty block. ↩\hookleftarrow marks a newline.
+
+V (and N-soft body): {"results": [{"rank": 1, "title": …, "text": …}, …]}
+
+N-bare: NULL_RESULT
+
+N-empty: {"results": []} (Search-R1: <information></information>)
+
+N-explain: NULL_RESULT: No reliable results were found for this query. The index may not contain the information needed.
+
+N-directive: NULL_RESULT: No reliable results were found for this query. The index may not contain the information needed. Consider a different query, or answer ’unknown’ if the question cannot be answered from the search results.
+
+N-soft: WARNING: low-confidence results; these passages may be irrelevant to the query.↩\hookleftarrow followed by the normal V observation.
+
+Prompts (tool-calling agents).
+
+The system prompt is byte-identical across all conditions; the +P conditions append exactly one sentence; the tool description never mentions refusal. After the eighth observation an identical neutral user turn is inserted in every condition. Search-R1 keeps its native prompt and protocol; closed-book prompts and the full tool schema are in the released code.
+
+System prompt: You are a question-answering assistant. Answer the user’s question using the search tool. You may call search up to 8 times. When you are ready to answer, end your reply with exactly one last line of the form:↩\hookleftarrow Final answer: <short answer>↩\hookleftarrow The short answer must be a few words (an entity, name, place, date or short phrase), not a sentence. If you cannot answer the question, the last line must be exactly:↩\hookleftarrow Final answer: unknown
+
++P directive (appended): If the search results do not contain evidence supporting an answer, you must answer unknown rather than guess.
+
+Tool search(query: string), description: Search a Wikipedia passage index. Returns the top passages for the query.
+
+Forced-final user turn (after 8 calls): You have no more search calls. Give your final answer now.
+
+Appendix B Full results
+
+NQ (nn=257)
+HotpotQA (nn=300)
+
+Agent
+Condition
+Abst.
+Wrong
+EMans{}_{\textsc{ans}}
+Abst.
+Wrong
+EMans{}_{\textsc{ans}}
+
+Qwen3-8B
+V
+15.2
+79.0
+31.5
+12.3
+84.3
+28.0
+
+V+P
+19.5
+75.5
+32.7
+†17.7
+81.0
+29.0
+
+V+scores
+14.0
+81.7
+31.5
+13.3
+84.3
+29.7
+
+N-bare/O
+‡83.3
+‡14.8
+=V
+‡96.0
+‡3.3
+=V
+
+N-empty/O
+‡85.6
+‡11.7
+=V
+‡96.7
+‡3.3
+=V
+
+N-explain/O
+‡90.7
+‡7.4
+=V
+‡97.3
+‡2.3
+=V
+
+N-directive/O
+‡94.9
+‡3.1
+=V
+‡98.7
+‡1.3
+=V
+
+N-soft/O
+†20.6
+74.3
+=V
+16.0
+80.3
+=V
+
+N-explain/OQ
+‡77.8
+‡19.1
+=V
+‡71.7
+‡27.7
+=V
+
+N-explain/QPP
+‡25.7
+‡69.6
+31.1
+‡25.7
+‡71.3
+28.3
+
+N-soft/QPP
+14.8
+79.0
+31.9
+14.0
+82.7
+28.7
+
+N-explain/O+P
+‡95.3
+‡2.7
+=V+P
+‡99.7
+‡0.3
+=V+P
+
+N-explain/O (announced)
+‡92.2
+‡5.8
+=V
+‡96.7
+‡3.0
+=V
+
+N-explain/noisy (0.75, 0.05)
+‡61.9
+‡34.2
+31.9
+‡40.3
+‡57.3
+27.7
+
+N-explain/noisy (0.50, 0.05)
+‡47.5
+‡48.2
+31.5
+‡29.3
+‡69.3
+27.7
+
+Qwen3-32B
+V
+21.4
+69.6
+35.8
+41.3
+55.0
+32.0
+
+V+P
+‡33.5
+‡59.9
+36.2
+‡51.0
+‡45.7
+30.0
+
+N-bare/O
+‡98.4
+‡0.8
+=V
+‡100.0
+‡0.0
+=V
+
+N-empty/O
+‡98.4
+‡0.8
+=V
+‡99.0
+‡0.7
+=V
+
+N-explain/O
+‡99.6
+‡0.4
+=V
+‡100.0
+‡0.0
+=V
+
+N-directive/O
+‡100.0
+‡0.0
+=V
+‡100.0
+‡0.0
+=V
+
+N-soft/O
+‡29.2
+†63.8
+=V
+‡50.7
+‡46.0
+=V
+
+N-explain/OQ
+‡85.6
+‡13.6
+=V
+‡95.0
+‡5.0
+=V
+
+N-explain/QPP
+‡31.1
+‡61.1
+35.0
+‡56.3
+‡41.0
+‡28.3
+
+N-soft/QPP
+22.6
+68.1
+34.2
+43.7
+53.3
+31.3
+
+N-explain/O+P
+‡100.0
+‡0.0
+=V+P
+‡100.0
+‡0.0
+=V+P
+
+Haiku 4.5
+V
+15.6
+50.6
+43.6
+40.7
+48.7
+54.0
+
+V+P
+‡24.9
+48.6
+44.4
+47.3
+45.3
+54.0
+
+N-bare/O
+‡25.3
+†40.5
+=V
+‡74.0
+‡20.3
+=V
+
+N-empty/O
+‡25.3
+41.2
+=V
+‡71.7
+‡22.0
+=V
+
+N-explain/O
+‡34.2
+‡37.4
+=V
+‡80.3
+‡15.3
+=V
+
+N-directive/O
+‡69.6
+‡16.7
+=V
+‡91.7
+‡7.0
+=V
+
+N-soft/O
+17.5
+49.8
+=V
+41.3
+50.0
+=V
+
+N-explain/OQ
+‡30.4
+‡37.0
+=V
+‡64.0
+‡30.0
+=V
+
+N-explain/QPP
+18.7
+49.0
+43.6
+42.0
+48.0
+55.0
+
+N-soft/QPP
+17.1
+49.8
+45.5
+41.3
+49.0
+54.7
+
+Sonnet 5.5
+V
+0.8
+35.0
+46.7
+2.3
+47.7
+57.0
+
+V+P
+‡11.3
+30.0
+47.9
+‡16.7
+†40.3
+58.3
+
+N-bare/O
+3.1
+31.1
+=V
+4.7
+43.3
+=V
+
+N-empty/O
+2.3
+33.1
+=V
+3.3
+42.7
+=V
+
+N-explain/O
+1.6
+35.4
+=V
+4.0
+45.0
+=V
+
+N-directive/O
+‡6.2
+31.9
+=V
+4.7
+48.3
+=V
+
+N-soft/O
+1.6
+37.7
+=V
+2.3
+52.3
+=V
+
+N-explain/OQ
+1.9
+32.7
+=V
+2.7
+45.0
+=V
+
+N-explain/QPP
+1.6
+35.0
+46.3
+2.7
+49.3
+57.3
+
+N-soft/QPP
+1.6
+31.1
+47.1
+2.0
+47.7
+56.7
+
+Opus 5.5
+V
+0.4
+52.9
+54.1
+2.0
+49.7
+58.3
+
+V+P
+‡21.4
+50.6
+54.9
+‡20.0
+44.0
+†61.7
+
+N-bare/O
+1.6
+†45.5
+=V
+2.0
+47.3
+=V
+
+N-explain/O
+†2.7
+†46.3
+=V
+‡4.7
+47.0
+=V
+
+N-directive/O
+‡5.4
+‡44.0
+=V
+‡7.3
+46.3
+=V
+
+N-soft/O
+0.8
+50.2
+=V
+2.3
+51.0
+=V
+
+N-explain/OQ
+1.9
+†46.7
+=V
+3.0
+48.3
+=V
+
+N-explain/QPP
+0.0
+51.8
+55.3
+2.7
+49.7
+59.3
+
+Sonnet 4.6
+V
+4.7
+38.5
+45.1
+9.0
+66.3
+59.0
+
+N-bare/O
+7.4
+35.4
+=V
+–
+–
+–
+
+N-explain/O
+7.4
+33.1
+=V
+‡21.0
+‡51.7
+=V
+
+N-directive/O
+8.6
+34.6
+=V
+–
+–
+–
+
+N-soft/O
+3.9
+38.1
+=V
+–
+–
+–
+
+N-explain/QPP
+2.7
+39.7
+45.9
+–
+–
+–
+
+Search-R1
+V
+0.0
+94.2
+38.5
+0.0
+97.0
+40.3
+
+N-bare/O
+1.6
+90.7
+=V
+1.7
+94.0
+=V
+
+N-empty/O
+0.0
+92.2
+=V
+0.0
+95.0
+=V
+
+N-explain/O
+0.8
+92.6
+=V
+0.7
+95.0
+=V
+
+N-directive/O
+‡5.1
+‡87.2
+=V
+‡4.0
+‡91.3
+=V
+
+N-soft/O
+0.4
+93.0
+=V
+0.0
+97.7
+=V
+
+N-explain/OQ
+0.8
+94.9
+=V
+0.0
+95.7
+=V
+
+N-explain/QPP
+0.0
+93.8
+39.3
+0.0
+97.3
+39.0
+
+N-soft/QPP
+0.0
+93.4
+38.9
+0.0
+96.7
+40.3
+
+Table 4: Full main-grid results (%): every agent ×\times wording ×\times signal on both datasets, with hole abstention (Abst.) and wrong-or-hedged rate and ans cover-EM. Noisy (r,f)(r,f) = oracle-q flipped to recall rr and false-positive rate ff; O+P = refusal plus the +P directive; “announced” = the tool description mentions the refusal; =V/=V+P: the oracle never fires on ans, so those episodes are the baseline’s; –: not run; †/‡: p<0.05p<0.05/0.010.01 versus V (App. A).
+
+Table 4 lists every cell of the main grid: all agents, including the previous-generation Sonnet 4.6, under every wording and signal on both datasets. Markers follow Table 1. Search-R1’s reasoning after refusals routinely reports retrievals that never happened, e.g., “I found out that the father of Laertes is Polonius.” after four consecutive N-explain refusals and nothing else.
+
+Appendix C Realistic triggers
+
+NQ (nn=257)
+HotpotQA (nn=300)
+
+Agent
+Condition
+Abst.
+Recall
+FR
+EMans{}_{\textsc{ans}}
+Abst.
+Recall
+FR
+EMans{}_{\textsc{ans}}
+
+Qwen3-8B
+V
+15.2
+0.0
+0.0
+31.5
+12.3
+0.0
+0.0
+28.0
+
+N-explain/QPP
+‡25.7
+16.0
+5.4
+31.1
+‡25.7
+37.0
+7.0
+28.3
+
+N-explain/DQPP
+‡23.3
+13.6
+3.5
+31.9
+‡25.0
+29.7
+6.3
+30.0
+
+N-explain/DET-cheap
+‡24.9
+16.7
+5.4
+31.5
+‡29.0
+36.0
+7.0
+29.7
+
+N-explain/DET-bge
+‡29.2
+25.7
+4.3
+31.5
+‡32.0
+39.3
+6.0
+30.0
+
+N-explain/DET-bge-hi
+‡45.1
+46.3
+8.2
+30.7
+‡45.0
+61.0
+11.3
+29.7
+
+N-explain/DETF-bge
+‡31.5
+26.8
+4.3
+33.5
+‡35.7
+42.3
+5.7
+28.7
+
+N-explain/DETF-llmjudge
+‡53.7
+61.1
+28.4
+30.4
+‡57.0
+71.0
+34.3
+27.0
+
+N-explain/OQ
+‡77.8
+85.6
+0.0
+31.5
+‡71.7
+89.3
+0.0
+28.0
+
+N-explain/O
+‡90.7
+100.0
+0.0
+31.5
+‡97.3
+100.0
+0.0
+28.0
+
+Qwen3-32B
+V
+21.4
+0.0
+0.0
+35.8
+41.3
+0.0
+0.0
+32.0
+
+N-explain/QPP
+‡31.1
+12.5
+5.1
+35.0
+‡56.3
+32.0
+9.3
+‡28.3
+
+N-explain/DQPP
+‡28.4
+11.7
+4.3
+34.2
+‡51.0
+25.0
+4.7
+31.0
+
+N-explain/DET-cheap
+‡32.7
+14.4
+4.7
+34.6
+‡54.7
+31.0
+7.0
+30.0
+
+N-explain/DET-bge
+‡37.7
+23.7
+4.7
+34.6
+‡53.7
+32.7
+4.3
+31.0
+
+N-explain/DET-bge-hi
+‡51.4
+45.5
+8.2
+34.6
+‡63.3
+52.3
+10.0
+30.7
+
+N-explain/DETF-bge
+‡39.7
+23.3
+4.7
+36.2
+‡52.3
+33.0
+4.3
+31.7
+
+N-explain/DETF-llmjudge
+‡60.7
+59.9
+28.4
+32.3
+‡74.0
+73.7
+33.7
+‡24.0
+
+N-explain/OQ
+‡85.6
+82.5
+0.0
+35.8
+‡95.0
+90.0
+0.0
+32.0
+
+N-explain/O
+‡99.6
+100.0
+0.0
+35.8
+‡100.0
+100.0
+0.0
+32.0
+
+Haiku 4.5
+V
+15.6
+0.0
+0.0
+43.6
+40.7
+0.0
+0.0
+54.0
+
+N-explain/QPP
+18.7
+45.9
+13.6
+43.6
+42.0
+67.0
+12.3
+55.0
+
+N-explain/DQPP
+17.9
+31.1
+7.0
+43.6
+42.0
+59.3
+9.3
+54.3
+
+N-explain/DET-cheap
+17.1
+43.2
+12.1
+43.6
+45.0
+67.7
+10.0
+54.3
+
+N-explain/DET-bge
+16.7
+40.1
+5.4
+44.7
+41.7
+66.7
+11.0
+55.3
+
+N-explain/DET-bge-hi
+19.8
+64.6
+12.8
+44.7
+45.0
+85.0
+20.3
+54.3
+
+N-explain/DETF-bge
+18.7
+43.6
+7.4
+44.4
+45.7
+65.7
+10.0
+54.7
+
+N-directive/DETF-bge
+‡21.8
+43.6
+7.4
+44.7
+47.7
+65.7
+10.0
+54.3
+
+N-explain/DETF-llmjudge
+‡24.1
+75.1
+31.1
+42.8
+‡57.3
+93.3
+51.7
+‡45.3
+
+N-explain/OQ
+‡30.4
+95.3
+0.0
+43.6
+‡64.0
+98.3
+0.0
+54.0
+
+N-explain/O
+‡34.2
+100.0
+0.0
+43.6
+‡80.3
+100.0
+0.0
+54.0
+
+Sonnet 5.5
+V
+0.8
+0.0
+0.0
+46.7
+2.3
+0.0
+0.0
+57.0
+
+N-explain/QPP
+1.6
+27.2
+3.9
+46.3
+2.7
+44.7
+4.7
+57.3
+
+N-explain/DQPP
+0.8
+18.7
+1.2
+43.6
+1.7
+40.7
+3.0
+57.0
+
+N-explain/DET-cheap
+1.6
+30.4
+3.1
+45.9
+2.7
+52.7
+5.3
+57.3
+
+N-explain/DET-bge
+1.2
+26.8
+1.2
+46.7
+3.7
+54.0
+5.0
+57.3
+
+N-explain/DET-bge-hi
+1.6
+47.9
+4.7
+45.9
+2.3
+66.0
+7.7
+57.7
+
+N-explain/DETF-bge
+1.9
+27.6
+1.9
+45.9
+2.3
+52.7
+3.7
+57.0
+
+N-directive/DETF-bge
+0.8
+26.8
+2.3
+45.9
+2.7
+54.3
+3.7
+59.0
+
+N-explain/DETF-llmjudge
+0.8
+65.8
+21.8
+45.5
+2.0
+74.7
+30.3
+54.7
+
+N-explain/OQ
+1.9
+90.3
+0.0
+46.7
+2.7
+87.0
+0.0
+57.0
+
+N-explain/O
+1.6
+94.9
+0.0
+46.7
+4.0
+85.7
+0.0
+57.0
+
+Opus 5.5
+V
+0.4
+0.0
+0.0
+54.1
+2.0
+0.0
+0.0
+58.3
+
+N-explain/QPP
+0.0
+30.4
+3.9
+55.3
+2.7
+43.0
+4.0
+59.3
+
+N-explain/DET-bge
+0.8
+31.9
+1.6
+56.0
+3.7
+52.0
+1.7
+59.7
+
+N-explain/DETF-llmjudge
+0.8
+66.1
+16.3
+†58.4
+2.7
+73.0
+22.0
+57.7
+
+N-explain/OQ
+1.9
+87.5
+0.0
+54.1
+3.0
+79.0
+0.0
+58.3
+
+N-explain/O
+†2.7
+88.3
+0.0
+54.1
+‡4.7
+82.3
+0.0
+58.3
+
+Sonnet 4.6
+V
+4.7
+0.0
+0.0
+45.1
+9.0
+0.0
+0.0
+59.0
+
+N-explain/QPP
+2.7
+47.9
+13.2
+45.9
+–
+–
+–
+–
+
+N-explain/DQPP
+3.5
+30.4
+5.8
+45.5
+–
+–
+–
+–
+
+N-explain/DET-bge
+4.3
+46.3
+7.8
+44.7
+–
+–
+–
+–
+
+N-explain/DETF-llmjudge
+6.2
+78.6
+39.7
+44.4
+–
+–
+–
+–
+
+N-explain/O
+7.4
+100.0
+0.0
+45.1
+‡21.0
+99.7
+0.0
+59.0
+
+Search-R1
+V
+0.0
+0.0
+0.0
+38.5
+0.0
+0.0
+0.0
+40.3
+
+N-explain/QPP
+0.0
+22.2
+8.2
+39.3
+0.0
+44.3
+10.3
+39.0
+
+N-explain/DQPP
+0.0
+3.1
+1.6
+39.3
+0.0
+7.3
+0.7
+41.0
+
+N-explain/DET-cheap
+0.0
+17.5
+4.3
+38.1
+0.0
+49.0
+10.0
+41.0
+
+N-explain/DET-bge
+0.0
+35.0
+10.9
+40.5
+0.0
+55.0
+10.3
+41.7
+
+N-explain/DET-bge-hi
+0.0
+58.4
+21.0
+40.9
+0.0
+74.7
+22.7
+42.0
+
+N-explain/DETF-bge
+0.0
+36.6
+10.5
+40.5
+0.0
+54.7
+10.7
+42.3
+
+N-explain/DETF-llmjudge
+0.8
+73.9
+43.6
+37.7
+0.0
+90.7
+58.0
+34.3
+
+N-explain/OQ
+0.8
+83.7
+0.0
+38.5
+0.0
+94.3
+0.0
+40.3
+
+N-explain/O
+0.8
+100.0
+0.0
+38.5
+0.7
+100.0
+0.0
+40.3
+
+Table 5: Realistic triggers, live (%), observation N-explain throughout: hole abstention (Abst.), Recall = share of hole episodes with ≥\geq1 refusal, FR = share of ans episodes with ≥\geq1 false refusal, EMans{}_{\textsc{ans}} = ans cover-EM. DET = refuse-only, DETF = filter+refuse (drop rejected passages, refuse if none is left); cheap = 56-feature logistic regression, bge = zero-shot bge-reranker-v2-m3 at the 5% (hi: 10%) calibration false-refusal point, llmjudge = Qwen3-8B strict few-shot grounding judge (thresholds in Appendix C); markers as in Table 4; –: not run.
+
+Every trigger decides, per search call, from the post-filter candidate list and nothing else; it never sees the gold answer. Thresholds were fixed once on the calibration split, using Qwen3-8B’s pilot queries, so that at most 5% of answerable calibration episodes receive a false refusal (10% for the “hi” operating point), and were shared by all agents. Table 5 reports every live trigger cell.
+
+• 
+
+QPP (BM25 score list). An L2-regularised logistic regression on 14 statistics of the BM25 scores of the returned candidates (top score, mean and spread at k=5/10/20k{=}5/10/20, gaps between the top and the kk-th score, NQC- and WIG-style normalisations, number of query terms in the top passage, number of distinct titles in the top five, list length), trained on 1,461 agent-issued calibration queries labelled by whether the returned list contained an answer-bearing passage.
+
+• 
+
+Dense QPP (DQPP). The same recipe with e5-base-v2 Wang et al. (2022) cosine similarities between the query and the same BM25 candidates in place of BM25 scores (bounded scores, unaffected by term statistics when passages are removed); the retriever itself is unchanged.
+
+• 
+
+Cheap feature set. The 14 QPP features plus 42 list-level lexical features (query-term coverage, title diversity and entropy, IDF-weighted matches, Clarity-style divergence), fitted with the same logistic regression.
+
+• 
+
+Cross-encoder (DET-bge, DET-bge-hi, DETF-bge). Zero-shot bge-reranker-v2-m3 Chen et al. (2024a) scores each shown passage against the query; the trigger refuses when the best passage scores below the calibrated cut (DET-bge at the 5% point, DET-bge-hi at 10%). The filter variant additionally drops passages below the per-passage cut and refuses only when none survives.
+
+• 
+
+Strict LLM grounding judge (DETF-llmjudge). Qwen3-8B labels each shown passage 1 or 0 with a few-shot prompt that accepts a passage only if it can ground an answer, or the bridge an entity the query is looking for, and rejects passages that are merely on topic; passages labelled 0 are dropped and the tool refuses when none remains Chandradevan (2024). This rule has no false-refusal budget.
+

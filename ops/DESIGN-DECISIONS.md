@@ -369,3 +369,311 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - Follow-up finished (2026-11-06, AUTH-025, THREAD E-28): with reasoning on (`gmicloud/fp8`), B1 passed 50 of 57 and B2 46 of 57 (no reasoning: 28 and 28; ScaDS Part 4 50, repeat 53) [O]. B1 against B2: 4.44 times the prompt tokens and 2.58 times the cost (no reasoning: 3.86 and 2.48) [O]. The 10 flips between the arms are of the order of run-to-run variation, so accuracy does not separate them [I]. Reasoning off was the main cause of the earlier gap; fp8 is not shown to matter [I]. AUTH-025 spend $4.80. Not merged into `v5-audit` (waiting on the human). No V5 rule changed.
 - Repeat (2026-11-06, AUTH-027, THREAD E-29): the reasoning-on B1 and B2 repeated: B1 45, B2 46 of 57 (first runs 50 and 46) [O]. Same-arm differences (9, 12 tasks) match between-arm differences (10, 11) [O], so no accuracy difference between all tools and the predictor is visible in four runs [I]. B1 over B2 cost 2.58 and 2.19 times, prompt tokens 4.44 and 4.02 times [O]. Spend $4.43. Not merged. No V5 rule changed.
 - Second model (2026-11-08, AUTH-026, THREAD E-35, `R3-GLM/RESULTS-R3-GLM.md` on `v5-r3-glm-results`): GLM-5.3 on ScaDS, one run per arm. B1 23, B2 24 of 57 [O]. B1 over B2: prompt 2.17 times, computed bill 1.51 times at `gmicloud/fp8` prices (1.08-1.80 over 47 endpoints) [O]. GLM's predictor dropped the credentials function in 22 tasks, all failed; with it offered B2 passed 24 of 35 against B1's 13 [O]. The bill ratio depends on the model, and a model-run selection step can drop a needed function, hidden in the accuracy total [I]. Free. Not merged. No V5 rule changed.
+
+## WD-059 Guard made cross-platform; STATE.md shortened (AUTH-021, 2026-11-05)
+- Context: the human asked for an audit of branch `v5-audit` (a copy of the Windows workspace now on Linux) and then chose options A and C of the lead's report. The audit's other findings are NOT acted on here: the three verifier FAILs (SUM-0045 to SUM-0047 cite stored literature through `evidence_lines`, not EXT ids), the push-guard bypass through `bash -c`, `sh -c` or `env`, and the drift between `CLAUDE.md` and the AUTH-020 permission changes are open for the human.
+- A: `tools/guard.py` (pinned) derives the parent-directory rule from the workspace path on POSIX, treats `/tmp/claude-<uid>/` as the scratchpad, applies the MSYS `/c/` rewrite only on Windows, and passes `maxsplit` by keyword (Python 3.14 deprecation). The Windows branch is unchanged. `ops/tests/guard_cases.py` is OS-aware (73 cases, 0 failures on Linux, Python 3.14, `-W error`; baseline before the change: 2 failures, both the sibling-directory cases). `config/PINNED.json` re-pinned. Windows untested.
+- C: `ops/STATE.md` (18.5 KB, imported every session) was moved verbatim to `ops/STATE-ARCHIVE.md` and replaced by a short current-state file; nothing was deleted.
+- Outside the repository, at the human's request: symlink `~/.local/bin/python` to `/usr/bin/python3` so the hook command resolves.
+- Branch (human's instruction, 2026-11-05): all of this is on `linux-from-v5-audit--portable-guard-and-short-state`, branched from `v5-audit` at 549fd4a; `v5-audit` is unchanged. The human cannot test Windows, so the Windows run of `tools/verify_workspace.py` and `ops/tests/guard_cases.py` is outstanding and the branch is not to be merged into `v5-audit` before it passes.
+
+## WD-060 Findings may cite hash-verified stored literature; push guard hardened; CLAUDE.md brought in line (AUTH-022, 2026-11-05)
+- Context: the human answered the lead's list of open items (AUTH-022). Same branch as WD-059, Windows untested.
+- Item 3, verifier: `tools/verify_workspace.py` accepts a finding if it cites an EXT record, or at least one stored literature file named in `evidence_lines` that is listed in `evidence/literature-20261019/MANIFEST.jsonl`, exists, and matches `text_sha256`. A cited literature file that fails any of those is a FAIL even when an EXT is also cited. Line ranges are not checked. Effect: SUM-0045, SUM-0046 and SUM-0047 (FND-0043..0045) now pass with 19, 28 and 14 verified files; the verifier reports 0 FAIL on this branch. This widens the rule 'a finding must cite EXT ids' only as stated in the record-class table of `CLAUDE.md`. Test: `ops/tests/finding_citation_cases.py` (13 cases; 5 of them fail against the previous verifier). The stored manifest itself was checked in the audit: 625 texts, 0 hash mismatches.
+- Item 5, push guard: the old check looked for `git` only at the start of a command or after `; & | (`, so `bash -c "git push --force origin main"`, `sh -c`, `env git push`, `command`, `sudo`, `xargs`, a `git push` on a second line, and heredocs fed to a shell passed; it also refused `git commit -m "fix push guard"` and `git log --grep push`. It now works on tokens (`runs_git_push` in `tools/guard.py`). 34 new cases in `ops/tests/guard_cases.py`, 21 of which the old guard failed. Allowed pushes: `git push [-u] origin v5-audit` and the same for the branch `linux-from-v5-audit--portable-guard-and-short-state`. `.claude/settings.json` was not changed, so its deny rules (command-prefix) are as before and the new branch's push still triggers the permission prompt.
+- Item 4, `CLAUDE.md`: the 'no pushes' and 'commits need the approval prompt' sentences now state the AUTH-012, AUTH-020 and AUTH-022 exceptions and that `git commit` through Bash no longer asks (PowerShell still does). No permission was changed. **Open for the human:** whether Bash `git commit` should ask again, and whether PowerShell and Bash should behave the same.
+- Item 2, push of the branch: see the commit log and `ops/STATE.md`.
+
+## WD-061 Branch workflow for the Windows/Linux switch (human instruction, 2026-11-05)
+- The human's words (message of 2026-11-05): when an output is to be merged into v5, "we should open a branch from v5 put the output commit and push and merge to v5 then we rebase to our branch so it is always a branch from the newest v5 and its only for linux vs windows switch nothing more no core ideas should be there but we still checkout to it here bec we here are on linux".
+- Recorded in `ops/STATE.md`. Not an authorization for any new permission. Two points are open for the human: allowing pushes of the per-output branches (the guard names only `v5-audit` and the Linux branch), and how to update a Linux branch that is already pushed (a rebase needs a force push, which the guard refuses; merging `v5-audit` into it avoids that).
+- Lead's observation, for the human to weigh: of what is on the Linux branch now, only the POSIX parts of `tools/guard.py` and the OS-aware paths in `ops/tests/guard_cases.py` are specific to Linux. The verifier rule for stored literature, the push-guard hardening, the `CLAUDE.md` sync and the shortened `STATE.md` are OS-independent safeguards or notes, not research content, and could travel to `v5-audit` by the output-branch route after the Windows run. Once everything has been merged, the Linux branch would hold no commits of its own and serves only as the place to work on Linux.
+
+## WD-062 R3 Part A merged; Linux branch rebased; R3 Part B authorized (AUTH-024) with a cost estimate to approve (2026-11-05)
+- Branches: `v5-r3-part-a-check` (9e4d7f6) was merged into `v5-audit` as a fast-forward and `v5-audit` pushed (AUTH-020). This branch was rebased onto it (conflicts only in `ops/STATE.md`, where the short version was kept and updated, and `ops/DESIGN-DECISIONS.md`, where both sides were kept; checked: verifier fail=0, guard cases and citation cases 0 failures). The pushed copy of this branch is stale until the human force-pushes. Not yet run on Windows (unchanged).
+- Part B: AUTH-024 lets the lead run it here (the describing agent is unavailable; the human holds the OpenRouter key). Output goes to a new branch cut from `v5-audit` (results in `exchange/prior-work/v5-probes/results/R3-B/`), merged locally, then `git push origin v5-audit`.
+- Cost estimate for the human to approve [I] (from the 10-task pilot bill in `results/R3/r3-a4-pilot-bill-2026-11-02.json`, scaled by 5.7 to 57 tasks and priced at GMICloud fp8: $0.24 in, $0.96 out, $0.048 cache read per million tokens): B1 all tools about $4.7 (pilot cache share 93%), B2 control about $1.0, B3 about $1.0, total about $6.7; with a 1.5 margin about $10. If the GMICloud cache does not work at all, B1 alone would cost about $17 and the total about $20; the pilot's cache share, and A3's cache reads on GMICloud, make that unlikely. Uncertainty: the pilot is 10 tasks, per-task cost spans $0.02 to $0.24 because step-capped tasks dominate, so a factor of two either way is plausible. The run order is B1, B2, B3; the lead stops a run at 1.5 times its approved estimate.
+
+## WD-063 R3 Part B run, diagnosed, not merged (2026-11-06)
+- Run: B1, B2 and B3 ran 2026-11-05 20:38 to 23:30 UTC on OpenRouter with `gmicloud/fp8` pinned, for $4.26 against the approved $6.7 (AUTH-024). The output branch `v5-r3-part-b-results` (e988bcb, then 36ffac5) is cut from `v5-audit` 9e4d7f6; it is local, not pushed and not merged.
+- The human (2026-11-06): "donot merge diagnose first and reuse the winodws outputs as refrence fro the windows run bec at the moment there is no way to run windows and test it so you need to investgate deeply". The diagnosis used only files already in the repository from the Windows side, plus local logs. It made no model call; its one network access was a public, keyless read of OpenRouter's model listing.
+- Findings, recorded in RESULTS-R3-B *Diagnosis* and THREAD E-26:
+  - The lead's own environment check was wrong (`raise_on_failure` left at its default); the corrected check passes 57 of 57.
+  - The runner and the predictor are not shown to cause the gap.
+  - OpenRouter/GMICloud returned no reasoning on any of 1,637 replies, while ScaDS reasons. That is the most likely cause of the accuracy gap and is untested.
+- Next, for the human:
+  - Whether to test with reasoning switched on: a new probe, which the lead will cost before running.
+  - Whether to merge the output branch once satisfied.
+  - The describing agent can count reasoning in the Windows logs at no cost (E-26).
+
+## WD-064 R3 Part B follow-up with reasoning on finished; not merged (2026-11-06)
+- AUTH-025 stages 1-3 done.
+  - Stage 3: B1 50 of 57, B2 46 of 57 with reasoning on (`gmicloud/fp8`). The cost ratio is 2.58 and the prompt ratio 4.44. Spend $4.80, inside the accepted range.
+  - B1 ran in two parts, because the OpenRouter key's own $10 limit stopped part 1 at task 13. The human raised the limit ("i added credit you can continue"), and the 45 remaining tasks ran under a new tag.
+  - The runner now stops on HTTP 401/402/403 and after two failing tasks in a row.
+- A second copy of this session (the same conversation resumed in another process) committed the interim state at about 10:13 UTC: AUTH-025 row 7118b64, STATE 3618459 and output branch e014634 (THREAD E-27). The final results build on that state (ae766cf, THREAD E-28); nothing was overwritten.
+- Open:
+  - The key showed about $4.5 more spending than the lead's runs. THREAD E-28 asks the describing agent whether a Windows-side run used the key.
+  - Merging the output branch into `v5-audit` waits on the human.
+
+## WD-065 GLM-5.3 runs started; MiniMax-M3 repeat done; not merged (2026-11-06)
+- **AUTH-026** (the human: "So them", read as "Do them"): GLM-5.3 on ScaDS, free, reasoning on by default.
+  - The first smoke was stopped by the lead's own time limit. The second finished, but GLM called `complete_task` at once and failed.
+  - Then B1, B2, B1 repeat and B2 repeat, detached (`nohup`). ScaDS needs a median of 67 s per B1 call at about 88,000 prompt tokens, so the sequence takes days.
+- **AUTH-027** (the human: "let them work in the background and go run the repeats"): the MiniMax-M3 reasoning-on B1 and B2 repeated on OpenRouter, $4.43.
+  - Result: B1 45, B2 46; no accuracy difference is visible.
+  - The cost ratio held: 2.19 in the repeat, 2.58 in the first runs.
+  - Recorded on `v5-r3-part-b-results` (THREAD E-29).
+- **ScaDS status check** (the human asked, 2026-11-06): `MiniMaxAI/MiniMax-M3` is no longer served (403, not listed). `MiniMax-M3.1-Flash` is up, with tools, but returned no reasoning even when asked; the Windows probes of 11-01/02 agree. This check is not yet in the results file.
+- 2026-11-07, AUTH-026 narrowed by the human ("i choose option 2 Finish GLM B2, then stop"): GLM-5.3 B1 finished (23 of 57; 2 of 741 calls timed out, then retried). B2 continues to the end. The repeats of both are dropped: the lead stopped the sequence script at about 09:20 UTC, and the B2 process runs on alone. Reason: ScaDS is overloaded (B2 median 61 s per call, 13 of 112 calls timed out at 15 min), and GLM is weak and erratic here (3 of 11 B2 tasks completed at the first step), so repeats add little.
+
+## WD-066 STATE.md rewritten and split; docs refresh kept apart from machine notes (2026-11-07)
+- The human: "do docs refresh, but seprate windowstolinux stuff from real work stuff donot contaminate the ledger work with stupid stuff as operating system change".
+- The research-doc refresh (`17`, `12`, `00-README`, `08` section 5, RESULTS-R3-B summary, the questions guide `design/ledger/notes/QUESTIONS-FOR-YOU-20261107.md`) is on the output branch `v5-r3-part-b-results` (36373a9) and mentions no operating system, machine or branch.
+- `STATE.md` is rewritten under 6 KB and 40 lines, with research status (A-C) and machines and branches (D) in separate sections. The previous text is archived verbatim in `STATE-ARCHIVE.md`.
+- Corrected: the old STATE line "Waiting on the human: Q-U28..Q-U32 and the ledger proposals in 08 (workbook not edited)" was wrong. Q-U28 to Q-U33 are answered, and the `08` proposals were applied on 2026-10-22 after Q-U31 (95 Change log rows).
+
+## WD-067 The human's answers of 2026-11-07 recorded; P5 authorized (AUTH-028); Executor description requested (2026-11-07)
+- A new lead session took over the previous session's task at the human's request (INT-T-023 line 6). The research records are on the output branch `v5-r3-part-b-results` (commit 5099066): intake INT-T-023, register REQ-U1107-01..09, `design/ledger/notes/ANSWERS-20261107.md`, and `exchange/prior-work/REQUEST-X1-executor.md` (THREAD E-30).
+- `17` section 9 is postponed by the human. `08` section 5 was rechecked against the result files and left unchanged. Five rows hold. EC5's "dominate" and N-26's "55 of 57" are narrower than written (21-59%; 46-55 of 57 over four runs). C-D09 and Q-U14 need the P5 update.
+- P5 is authorized (AUTH-028), P5 only. Route and models are not yet chosen, so no call has been made.
+- The ledger workbook was not edited. There is no `openpyxl` on Linux and installs are not authorized. The answers and the proposed status changes are listed per question in `ANSWERS-20261107.md`, to be applied on Windows or by the human.
+- `requirements/THESIS_QUESTION.md` is unchanged. The human says the professor and Joaa set the question; whether REQ-O14F-01's sentence is the wording to enter is asked of the human.
+- `design/tool-exposure-policy-proposal.md` is archived in place (banner; the author is the human). It was not moved, because records cite its path.
+
+## WD-068 Follow-up answers: P5 route, research question entered as pointers (2026-11-07)
+- INT-T-024 (on `v5-r3-part-b-results`, d7595b7, REQ-U1107-10..13). The P5 route is added to AUTH-028: ScaDS GLM-5.3 after GLM B2 ends; the OpenAI billing check only after an accepted estimate.
+- `requirements/THESIS_QUESTION.md` now holds the supervisor's 14 October wording verbatim (INT-T-003 L150, L159) and pointers to the 21 October scope (REQ-O21-01, -07, -08) and to how the work reads it (REQ-J22-02, REQ-U21-07). The lead wrote no new formulation. The 21 October document the human linked is INT-T-002 and was not downloaded again.
+- Q-U16 is declined. Q-U17: keep; the human's thesis workspace with `thesis-private` is the source for request X1.
+
+## WD-069 Executor investigation closed for now (2026-11-07)
+- X1 was answered by the describing agent (PWD-019, THREAD E-31/E-32) and checked by the lead (E-33). The tested Executor was upstream `main` at `98d606b`, configured but not patched.
+- The human then asked what V5 needs from the open-source project. The lead's answer: its reusable parts, already taken from its documentation (`03` section 4a, 2026-10-22), and, only for a baseline run, what to run (PWD-017, PWD-019).
+- The human closed the investigation for now (INT-T-025, REQ-U1107-14). It reopens if a baseline run is decided, if Joaa answers Q-J33, or if a V5 part comes to depend on Executor behaviour not yet described. Records on `v5-r3-part-b-results`.
+
+## WD-070 P5 harness written; run plan and cost estimate (2026-11-07)
+- The human said "yes you can start it ... i also agree on paying but tell me how much would it cost". The harness `design/package-v5/tools/p5_break_even.py` is on the new output branch `v5-p5-break-even`, cut from `v5-audit` (96f1db0). It was tested only against a local mock server; no real request has been sent.
+- **Part A, ScaDS GLM-5.3:** 94 requests, free. It runs after the GLM B2 run ends, which is expected the night of 7 to 8 November or the morning of 8 November.
+- **Part B, OpenAI `gpt-5.4-mini`:** 73 requests. Estimate about $0.80, stop at $1.20, from the stored price page of 2026-10-19, which must be read again on the day of the run. The human agreed to pay in principle; the run still waits for the human to accept this figure and to add an `OPENAI_API_KEY` to `~/r3-work/.env`.
+- The harness's search plus `call_tool` mechanism is not P2's choice. The stub definitions keep the bulk in the parameter schema, because OpenAI's deferral keeps names and descriptions visible.
+
+## WD-071 GLM-5.3 B2 finished; results recorded on two branches; not merged (2026-11-08)
+- B2 part 2 (`glm-b2-control-rest`, 36 tasks) ran 2026-11-07 13:55 to 2026-11-08 14:28 UTC, with no exception. One task (`37a8675_2`) took 14.6 hours: 46 of its requests timed out on long reasoning replies. The human asked whether to stop it (2026-11-08); the lead advised letting it finish, since it was free and stopping would leave B2 with about half the tasks.
+- The human said "okay own this do schdules i wont be here to accept or reminde you by sth". The lead ran an hourly read-only check (session cron, `glm_watch.py`), changed no setting and deleted the check when the run ended. Recorded under AUTH-026.
+- Part 1's 21 tasks had never been evaluated (the restart killed the run); they were evaluated locally with AppWorld's evaluator (11 passed).
+- Result: B1 23, B2 24 of 57. B1/B2 prompt 2.17 times; computed bill about 1.5 times. GLM's predictor dropped `supervisor.show_account_passwords` in 22 B2 tasks, all failed; this explains WD-065's "completed at the first step".
+- Where it is: `R3-GLM/` on the new output branch `v5-r3-glm-results`, cut from `v5-audit` as AUTH-026 says (bded61d). The records that cite it (`17` s5, `12` s5, `00-README`, RESULTS-R3-B pointer, the research decisions log, THREAD E-35) are on `v5-r3-part-b-results` (6b8a00f), because those files' current versions live there. Both were committed from separate git worktrees, so the shared folder stayed on the other session's branch. Nothing is merged or pushed.
+- Next: P5's ScaDS part can start (AUTH-028). Whether to propose a ledger change for the predictor finding (`08` s5) is left to the human.
+
+## WD-072 R3 Part B and GLM-5.3 results merged into `v5-audit` (2026-11-08)
+- The human (2026-11-08), in reply to the lead's "merge both research branches into `v5-audit` only when you say so": "yes i accept mergeing!"
+- `v5-audit` was fast-forwarded from 9e4d7f6 to `v5-r3-part-b-results` (6b8a00f; R3 Part B with AUTH-024, -025 and -027, the docs refresh, the answers of 2026-11-07, X1 and the Executor closure, and the GLM records). `v5-r3-glm-results` was then merged with a merge commit (77357c1). There were no conflicts. Done in a separate git worktree, so the shared folder stayed on `v5-p5-break-even`.
+- The quick check on `v5-audit` gives the same 4 failures as before the merge (3 literature summaries without EXT evidence, and the remote without an AUTH row); this branch fixes them.
+- Not merged: `v5-p5-break-even` (the other session's P5 and P3 work, 34 commits), not named by the human, and this operations branch, which waits for its Windows test (WD-059).
+- Pushed 2026-11-08 on the human's word ("yes push, the other agent is working on the other part"): `origin/v5-audit` 9e4d7f6..77357c1. By section D, this branch is rebased onto `v5-audit` after a merge, and the human force-pushes it. That rebase is not done yet, because both branches edit `ops/DESIGN-DECISIONS.md` and the other session also commits here.
+
+## WD-073 P5 part B (OpenAI side check) results; D-01 kept until part A (2026-11-07)
+- **Numbering:** WD-073 to WD-081 were drafted on `v5-p5-break-even` and numbered after WD-072 when applied on 2026-11-08 (WD-078, last bullet). Their dates are those of the events. Paths below are on `v5-p5-break-even` unless said otherwise.
+- **What ran** (AUTH-028, INT-T-026): OpenAI `gpt-5.4-mini` hosted tool search.
+  - **Before:** harness revision 1 ($0.149). Its sessions started warm from the calibration requests, and it had one session per cell.
+  - **Change:** revision 2 forces cold starts (a fresh marker in tool 0) and runs 2 cold and 1 warm session per cell.
+  - **Why:** to control the cache state and give a spread.
+  - 193 requests, $0.445; the side check cost $0.594 in all (`design/package-v5/inputs/p5/RESULTS-P5-B.md`).
+  - It is not P5's test. The human, 2026-11-07, as quoted in `RESULTS-P5-B.md` (no intake record holds it): "this test does not count as P5 test yet".
+- **Result:**
+  - Individually deferred functions still bill 30% of their tokens; namespaces bill 3.6%.
+  - Deferral against eager, cold, at 10/30/100/300 tools: 1.19/0.70/0.44/0.35 (functions) and 1.12/0.67/0.29/0.11 (namespaces). Break-even between 10 and 30.
+  - D-01 as written missed this route by 2.2 to 7.9 times at 100-300 tools, more than the run-to-run spread, so AUTH-028's stop rule applied. D-01's formula with the measured parameters reproduces the cells within 0.01 to 0.07 at 30-300 tools, and is 0.14 to 0.15 too low at 10.
+- **Limits:** one model, one stub catalogue, one task, low reasoning effort, hosted search only.
+- **Change proposed by the lead, not made:** a hosted-search variant (`design/package-v5/calc/regime_bill_hosted.py`). **Before:** `04` had D-01 only. The lead's reading of INT-T-027 (the human asked about the equation, then wrote "I agree"): D-01 stays, and the variant stays a proposal until part A.
+
+## WD-074 P3 runs 1-3: models search uninstructed; tool-side notes do not stop them (2026-11-07 to 2026-11-08)
+- **Setup** (AUTH-029; INT-T-028 to INT-T-030):
+  - OpenRouter, provider GMICloud fp8 pinned without fallback; MiniMax-M3, DeepSeek-V4.1-Flash and GLM-5.3.
+  - Tasks built by the lead over AppWorld's 463 real tool definitions, with stub results; temperature 0, seed 7; a $10 stop for all of P3.
+  - Harness `design/package-v5/tools/p3_uninstructed_search.py`, analysis `design/package-v5/tools/p3_analyze.py`.
+  - Results `design/package-v5/inputs/p3/RESULTS-P3-RUN1.md` to `RUN3.md`.
+  - Smoke 1: 78 requests, $0.115 (87002c6).
+- **Run 1** ($1.56):
+  - With the target deferred and no instruction to search, all three models searched in every session and called the target in 19-20 of 20, as with all tools exposed. HYP-0019's falsifier is not met on this set.
+  - With the target absent, 12-17 of 20 sessions were still searching at the 6-request cap.
+- **Run 2** ($1.755; INT-T-031):
+  - **Who and why:** the lead added a no-match rule with an app listing, after run 1's runaway searching and the human's request for a stop that is not a number of turns.
+  - **What it did:** it cut runaway searching, but doubled or tripled substitute actions.
+  - **Why dropped:** the listing put near-miss tools in front of the model.
+  - The per-request rule-stage logging was fixed after the run (781d987).
+- **Run 3** ($0.726; INT-T-032):
+  - **Who and why:** the lead's revised rule2, to remove run 2's side effect while keeping a stop. **Before:** the run 2 rule with the listing.
+  - **The rule:** no listing; novelty only within the best-match apps; otherwise only a note.
+  - **What it did:** no harm, but only 10 of 50 sessions stopped after the note.
+  - **Why not kept as the stop:** a note is not a stop.
+  - Run 2's attribution of the false claims to the listing was corrected: they also occur with no rule.
+
+## WD-075 P3 stop-rule research, two-need run 4 and log replay (2026-11-08)
+- **Research, revision 1** (INT-T-033; the lead alone, 7 searches, 6 fetches):
+  - It found arXiv 2610.06191: only "finish" remains after five judged-useless results.
+  - Run 3's logs showed every target-absent substitute came after the first note, while 3 of 120 target-present sessions called an already-shown target after it.
+  - The lead's own idea, withdrawing search_tools when the note comes, was judged weak for multi-need tasks.
+  - The human accepted the lead's order research → per-need rule → two-need run (INT-T-033: "i accept the order").
+- **Research, revision 2** (INT-T-034; six web scouts within the lead's bounds of 90 searches and 150 fetches: 80 searches, 126 fetches; 8 claims checked against primary pages; `design/package-v5/inputs/p3/STOP-RULE-RESEARCH-20261108.md`):
+  - No published deterministic stop for tool-search loops was found.
+  - Client-enforced stops work where text does not (arXiv 2610.06191; CGDP, 2605.07042).
+  - Excluding the requested action redirects models to another ("When Guardrails Redirect").
+  - A "Done" stub matches the high-dishonesty condition (2609.14758).
+- **Run 4** ($3.630 with smoke, INT-T-035; two-need tasks; plain twice, note, stopreply, stopsearch):
+  - Smoke 4 ($0.120): GLM kept emitting tool calls after all tools were removed. **Before:** the session went on to the cap. **Change (the lead):** the forced reply now ends the session itself. **Effect:** such sessions are ended and recorded as "stop ignored" (21, 29 and 31 of 40 in run 4's forced-reply sessions with a missing tool, `RESULTS-P3-RUN4.md`).
+  - A session-wide forced reply lost the doable need in 40-80% of tasks (p <= 0.016 in all six cells).
+  - Withdrawing only search kept the doable need, but did not end the loop.
+  - The note alone had no effect.
+  - Substitutes, and MiniMax's false claims (6-8 of 40), occur with no rule.
+- **Replay** ($0, INT-T-036; `design/package-v5/inputs/p3/RESULTS-P3-REPLAY-A.md`):
+  - The replayed first no-match matched the logged one in 180 of 180 sessions.
+  - At the first no-match, the doable tool was already shown but not called in 51, 51 and 67 of 80 sessions.
+  - **Who and why, DRY:** the lead's rule (refuse calls into an app where nothing new was found; end only when nothing is pending), designed from run 4's logs. A session-wide stop loses tools already found.
+  - **Replay figures:** DRY kept the doable need in 30/36/33 of 40 (the logged search-withdrawn sessions, no end rule: 32/38/34); substitutes 14/9/9 → 5/2/4 (same baseline); it ended 8 to 20 of 40 sessions early and saved 10 to 29% of their requests (82, 96 and 37 in all); still at the backstop 15/2/9.
+- **Documentation:** the human asked that runs, decisions, reasons, results and conclusions be documented: `design/package-v5/inputs/p3/P3-LOG.md`.
+
+## WD-076 P3 runs 5-6 and closure: V5-R17 provisional (2026-11-08)
+- **Run 5** ($1.618, INT-T-037; DRY against plain):
+  - Substitutes 12/4/6 → 5/1/3 of 40; false claims 5/0/1 → 2/0/0.
+  - The doable need fell 40/36/33 → 34/34/27, more than the replay predicted, and below the range of three no-rule copies (run 4 plain, run 4 plainB, run 5 plain).
+  - The loss came mostly while models guessed the missing tool's name until the backstop.
+  - The human asked whether run 4 should be rerun without its repeated plain run (recorded in `RESULTS-P3-RUN5.md` section 1a and `P3-LOG.md`; no intake record holds the question); no rerun was needed (d929585).
+- **Run 6** ($0.549, INT-T-038; the human accepted going over $10; the ceiling of $10.60 is the lead's, and was not needed):
+  - **Change (the lead's option (ii), chosen by the human in INT-T-038):** one sentence added to the system text on what to do when the catalogue has no tool for a need. **Before:** DRY alone.
+  - **Why:** run 5's loss happened while models guessed names.
+  - **What it did:** doable need 40/39/37 of 40; backstop 3/0/1; guessed names 2/1/0; requests 32-48% below no rule; substitutes 7/1/2; false claims 3/0/0; with both tools present, both needs done 20/17/19 of 20 against 18-20/18/20 with no rule (one run per cell).
+- **Change (INT-T-039): V5-R17 added to `04`** (the lead's rule, OURS, provisional): the stop plus the sentence.
+  - **Before:** `04` had no rule for a missing tool.
+  - **Why:** models search uninstructed but keep searching for a missing tool (WD-074), and the human asked for a dynamic, deterministic stop.
+  - **Open items, recorded in V5-R17:**
+    - an instruction-only arm, for the end-to-end study;
+    - withdrawing search_tools changes the tools array, against V5-R02;
+    - MiniMax's residual substitutes and false claims (model choice).
+  - `05` gained the end-to-end arm and `06` the traceability row. P3 total: $9.953.
+
+## WD-077 Group 1 and P2 preparation (2026-11-08)
+- **The request:** the human (INT-T-040) asked for group 1, then P2 preparation, with web searches as needed and explicit citations.
+- **Group 1, done at 385237a:**
+  - ready-to-apply drafts of these records (`ops/drafts/OPS-BRANCH-RECORDS-DRAFT-20261108.md`);
+  - `design/package-v5/12-experiment-readiness.md` section 6: P2's route per provider. OpenAI enforces `allowed_tools`, keeps the cache, and allows at most 128 tools; ScaDS refuses it; GMICloud accepts it without enforcing it.
+- **P2 preparation (02c3d78):**
+  - `design/package-v5/inputs/p2/P2-DESIGN.md`, with its evidence table and search log;
+  - harness `design/package-v5/tools/p2_offering.py` (the lead; there was no P2 harness before), reusing AppWorld's own function-calling agent with two hooks (the declared list and the offer);
+  - a dry run and a mock test.
+
+## WD-078 P5 part A started; P2 pilot; P2 main run started (2026-11-08)
+- **P5 part A** (INT-T-041):
+  - The first attempt stopped after 4 requests: ScaDS allows 2 requests per minute on GLM-5.3 (`design/package-v5/10-p0-university-api-reading.md` line 40).
+  - **Change (the lead):** rerun with a 31 s pause (`design/package-v5/inputs/p5/scads-glm53-r2/`). **Before:** no pause.
+- **P2 pilot** (AUTH-031, $0.316):
+  - 3 of 5 tasks on every working run; about 8 calls per task and about 17,000 prompt tokens per call; cached share 0.78-0.86.
+  - **Change (the lead): Chat Completions → Responses API** for both models. **Why:** gpt-5.4-mini rejects function tools with reasoning on Chat Completions. **What it did:** the main run had 0 failed calls (WD-080). The rejected pilot run on Chat Completions is kept as a record and is not in the pilot's figures.
+  - **Change (the lead): a stop after two failed model calls in a row.** **Before:** no such stop. **Why:** AppWorld's agent had absorbed the rejected calls silently. **Effect:** none was needed in the main run (0 failed calls).
+- **P2 main run** (INT-T-042): 4 arms × 2 repeats × 30 tasks per model, with per-model caps of $6 and $11, run by `design/package-v5/tools/p2_main_driver.py` (repeat 1 of all arms, then repeat 2).
+- **Records:**
+  - When the human chose option (a), this branch had moved to 94be01c with the other agent's WD-071 and WD-072.
+  - So the drafts were renumbered (WD-073 to WD-081) and not applied until the human said "its free" (INT-T-045).
+
+## WD-079 P5 part A results; D-01 kept, D-01h added (2026-11-08)
+- **Result** (`design/package-v5/inputs/p5/RESULTS-P5-A.md`; ScaDS GLM-5.3, client deferral, 138 requests, free):
+  - Deferral / expose-all, cold: 1.03-1.06 (10 tools), 0.44-0.46 (30), 0.14-0.15 (100), 0.048-0.049 (300). Break-even between 10 and 30, close to 10.
+  - D-01 as written is within 0.01-0.03 at 30-300 tools and overstates at 10 (1.29).
+  - Warm starts shrink deferral's advantage.
+- **Analysis fix (the lead):**
+  - **Before:** `design/package-v5/tools/p5_analyze.py` compared D-01 only at 10 tools, because the deferral prefix, which does not depend on n, was calibrated once.
+  - **Change:** it reuses that calibration for every n.
+  - **Effect:** the comparison at 30-300 tools on this route is new; no earlier statement rested on it.
+- **Change (INT-T-043, deciding INT-T-027):**
+  - **D-01 kept** as the working equation for the client route.
+  - **D-01h added** (`design/package-v5/calc/regime_bill_hosted.py`) as a separate mode for vendor-hosted search.
+  - **Before:** `04`'s D-01 entry named only `design/package-v5/calc/regime_bill.py`, and V5-R03 chose by D-01 alone.
+  - **Why (the lead's reason; the human gave none):** D-01 fits our route (part A) and missed the vendor route (part B). The name D-01h and the words "separate mode" are the lead's.
+  - **Limits:** one model, one route, stub tools of about 230 tokens, one three-turn task, 2 cold and 1 warm session per cell; no accuracy. D-01 with an uncached core does not fit (2 to 2.7 times too high).
+  - Applied to `04` (the D-01 entry and V5-R03) and `06`; the variant's numbers are unchanged.
+
+## WD-080 P2 main run results and decisions; P2b started (2026-11-08)
+- **Result** (`design/package-v5/inputs/p2/RESULTS-P2-MAIN.md`; 16 runs, 480 task-runs, 0 failed calls, $12.377; P2 total $12.693):
+  - **Setup:** AppWorld dev, 30 Spotify tasks; 128 tools declared; oracle subsets of 6-10.
+  - **Server-enforced offering (`allowed_tools`)** kept the cache and was enforced: 0 calls outside the subset in 120 task-runs.
+  - **Accuracy against offering all, per task:** gpt-5-mini +0.117 (95% scenario-bootstrap interval +0.033 to +0.217); gpt-5.4-mini −0.050 (−0.167 to +0.050). Run-to-run flips: 6 and 8 of 30. HYP-0018's falsifier is not met.
+  - **The instruction form** broke the subset and doubled the calls on gpt-5-mini (5 and 14 calls outside), and was followed on gpt-5.4-mini.
+  - **Declaring only the subset** cost 10-20% less, at the same accuracy within the intervals.
+  - **Cost and sessions:** `enf` against `all`: calls x1.08 (gpt-5-mini) and x1.32 (gpt-5.4-mini), cost x1.02 and x1.15; restricting to the oracle subset made gpt-5.4-mini work around it (in `all` it had used 18 and 26 calls outside the oracle list). `instr` on gpt-5-mini: calls x2.03, cost x1.37.
+- **Decisions (INT-T-044):** V5 keeps the offering stage.
+  - **Change: a note in `04` after V5-R17** (the human: "add note"; the wording is the lead's). **Before:** `04` had no statement on which offering form to use. **Why:** P2's cost and instruction results.
+  - **Change: HYP-0018 gains P2's result** (before: no result section). **Its status stays `proposed`** (the human: "donot close it we moght need more eviddenve").
+  - **Not shown by P2** (HYP-0018 "Not shown"): realistic subsets that miss needed tools; catalogue sizes other than 128; other benchmarks; Anthropic's mechanism; accuracy differences of a few points.
+  - `05` P2 row status; the `12` section 6 pointer was updated after the run (a8278c7).
+- **P2b started** on ScaDS GLM-5.3 (`all` against `instr`, 2 repeats). Harness options added by the lead (before: none for ScaDS):
+  - **pacing, 31 s:** ScaDS's limit of 2 requests per minute;
+  - **429 retry:** so a refused request does not count as a failure;
+  - **seed 100 and temperature 0:** as in R3 Part B on ScaDS, so the runs are comparable;
+  - **no reasoning field:** reasoning as served.
+- **Change (the lead): large local logs gzipped.** **Before:** AppWorld's plain-text console logs exceeded the verifier's 5 MB check. **What it did:** lossless; the files stay local and git-excluded, and the check passes.
+
+## WD-081 Group 2 preparation; records applied; end-to-end prompt change; P1 order (2026-11-08)
+- **Group 2:** started by the lead after group 1 was complete. This is the lead's reading of INT-T-040; INT-T-041 asked whether to wait and recorded no answer (AUTH-030, lead's record).
+- **End-to-end pairs** (`design/package-v5/inputs/e2e/E2E-TASKS-DESIGN.md`):
+  - AppWorld tasks with one state-changing needed API removed. 108 of 147 train and dev tasks have a candidate.
+  - With P2's successful traces (FeasiGen's rule), 16 dev tasks in 6 scenarios are validated.
+  - A deterministic scorer from the complete-task status and the recorded calls: honest decline, false claim, substitute.
+  - An AppWorld API identifier in two design notes was replaced by a description (838ec25).
+- **Change record: AppWorld's "The task is doable" line (INT-T-045).**
+  - **Who added it, where:** AppWorld, in the "Key Instructions" of its current agent prompts (function-calling agent `instructions.txt` line 41; also the full-code and ReAct prompts). The legacy prompt has no such line. All P2 runs used it.
+  - **What it does [I]:**
+    - On AppWorld's own tasks, which are all checked solvable, it is true and discourages giving up.
+    - On a removed-API variant it is false, and pushes the model toward a substitute or a false claim.
+    - Its size on solvable tasks is not measured [U].
+  - **Change (INT-T-045: "remove the task is doable"):** the lead reads this as removing only the words "The task is doable, but", in both halves of every pair, and keeping the exit to status "fail"; the human did not specify the scope.
+  - **How its effect is recorded:**
+    - Run the unchanged dev tasks once without the words, against P2's `all` runs with them. That is one run per model, about $0.50 and $1.00, and needs the end-to-end authorization.
+    - Yardstick: P2's run-to-run flips (6 and 8 of 30).
+    - On variants: the declines, substitutes and false claims.
+- **P1** (`design/package-v5/inputs/p1/P1-PREP.md`):
+  - AppWorld's own users give 34 returning users and 64 returns. Outside the core, seed recall averages 0.19 and precision 0.14 (zero in 36 of 64).
+  - **Before:** `05` P1 planned a declared construction of users, in effect a synthetic set.
+  - **Order (INT-T-045:** the human asked "can we start by appworld first then try adding synthetic?"; the lead reads this as approval of the order): start with AppWorld's natural users. The condition "add a synthetic set only if the high-recurrence band proves too thin" is the lead's. `05` P1's wording is not changed yet.
+- **Still open, not decided:**
+  - whether the end-to-end bill and accuracy arms, which have no removed API, keep AppWorld's prompt as shipped (the lead recommends keeping it);
+  - which tasks (validated dev only, or more);
+  - the form of "removed" (declared set or searchable catalogue);
+  - P1's construction, arms and measures (proposed in `P1-PREP.md` section 3).
+  - Neither the end-to-end variant mode nor the P1 harness is written.
+- **Records applied (INT-T-045):**
+  - The AUTH-028 amendment, AUTH-029 to AUTH-031, and WD-073 to WD-081.
+  - **STATE rewritten (the lead).** **Why:** sections A and C were out of date after P5, P3 and P2. **What it did:** section A now points to WD-073 to WD-081 and to `ops/OPEN-TASKS.md`; section D states that the rebase onto 77357c1 is not done. The previous STATE is archived verbatim.
+  - `ops/OPEN-TASKS.md` added (the lead's to-do list, started 2026-11-07 after the human asked to keep waiting work in a long-term place; copied here so this branch's STATE can point to it).
+  - The human's words were copied from the intake records by `ops/drafts/apply_ops_records.py`.
+  - Reviewed before commit by Sonnet 5.5 subagents at high effort in two rounds (INT-T-045): round 1 by three reviewers (completeness; facts and numbers; format, rules and change records), round 2 by two (resumed after a usage limit through messaging thread T-20261108-01). Their findings and the lead's fixes are listed in the message of the commit that adds this entry.
+- **Not done: the P3 sources stored as EXT.** `tools/litfetch.py` on `v5-p5-break-even` checks that branch's AUTH table, which ends at AUTH-020. Letting it read this branch's AUTH-030 is a tool change for the human to review.
+
+## WD-082 Research records moved from the Linux branch to `v5-p5-break-even` (2026-11-08)
+- **The human (INT-T-047):** the records commit and all related commits go onto `v5-p5-break-even`; the Linux branch keeps only the administrative commits of the Windows/Linux switch, "which stuff that doenot matter in our thesis at all to any reader".
+- **Before:** the lead worked on Linux, so the research AUTH rows and decision entries were written on `linux-from-v5-audit--portable-guard-and-short-state` from d5ae226 (AUTH-024) onward, beside the switch's own commits (8cbedee AUTH-021, c426947 AUTH-022, 968c016 WD-061, 5abc9ac AUTH-023).
+- **Change (the lead, `ops/drafts/move_records_to_v5p5.py`):** the 19 commits d5ae226..d2f65f5 were replayed onto `v5-p5-break-even` with their messages, authors and dates. Each touched only `ops/AUTHORIZATIONS.md`, `ops/DESIGN-DECISIONS.md`, `ops/STATE.md`, `ops/STATE-ARCHIVE.md` and `ops/OPEN-TASKS.md`, and each file was set to that commit's exact version. The five files on `v5-p5-break-even` are byte-identical to the Linux branch's at d2f65f5. Old -> new: d5ae226 -> 6dac715; 0c39e2a -> a12ac95; 7118b64 -> 784fd40; 3618459 -> 0f8bc9c; 7dc5e4b -> e68ce2a; 0a1c8fb -> 745e022; b9e0cea -> 4f2701c; e342b38 -> ffb5e66; 2c6d6b7 -> e0f14e8; 1a6032d -> 6d5d67c; 0d1636c -> f9d61c2; a5b6e30 -> 966b8df; 6946afc -> a528580; 4d312b3 -> 44568a4; 22e3d7d -> d73e55e; e633b89 -> 954abeb; 67100dc -> 9286f7b; 94be01c -> 42015fd; d2f65f5 -> f78492a.
+- **Then:** the Linux branch was reset to 5abc9ac (its last administrative commit); its old tip is kept as `backup/linux-records-before-split-20261108`. The human force-pushes it (origin had d5ae226, the first research commit).
+- **What it did:** the Linux branch holds only the switch. The record files on `v5-p5-break-even` also carry AUTH-021 to AUTH-023 and WD-059 to WD-061, which describe the switch; the switch's code (guard, tests, verifier fix, CLAUDE.md, PINNED) stays on the Linux branch. The verifier here shows 3 FAILs (literature summaries; fixed by that verifier change), down from 4: the remote is now covered by the AUTH-023 row. STATE section D rewritten to say this.
+
+## WD-083 P3 sources stored; `litfetch` not changed (2026-11-08)
+- **The human (INT-T-047):** "yes change litfetch, show me the diff", after the lead proposed that `tools/litfetch.py` also accept an AUTH id from the Linux branch's table, so the P3 sources could be stored under AUTH-030.
+- **Change not made (the lead):** after WD-082, AUTH-030 is in this branch's own `ops/AUTHORIZATIONS.md`, so `litfetch` accepts it as it is. **Why not:** the change had no purpose left, and `litfetch.py` is a pinned file (`config/PINNED.json`). No diff exists to review.
+- **Change made (the lead, AUTH-030 group 2):** the nine primary pages behind points 2 to 7 of `design/package-v5/inputs/p3/STOP-RULE-RESEARCH-20261108.md` were stored in `evidence/literature-20261019/` (ids `p3stop-*`, 9 fetches, HTTP 200, arXiv as HTML because PyMuPDF is not installed). **Before:** the note rested on WebFetch summaries and spot-checks. **What it did:** every quoted phrase and figure was found in the stored texts (the note's section 6, with lines and hashes). One nuance was added (arXiv 2610.06191's trigger is results *the agent judged* useless), and two limits stay (MCPHallu's early-declaration score is unchecked; only the NeurIPS listing of "When Guardrails Redirect" is stored).
+- **Wording corrected:** the lead had called this "stored as EXT". Stored literature does not become EXT records here; under AUTH-022 (Linux branch, not merged) a finding cites the stored file and the verifier checks its hash. On this branch, findings still need EXT records.
+
+## WD-084 P2b done on OpenRouter (2026-11-09)
+- **The human:** keep the full design (INT-T-046); effort as served and both repeats (INT-T-048); ScaDS with a longer timeout (INT-T-049); then OpenRouter GMICloud fp8, diff first, no cap, cost watched (INT-T-050, INT-T-051).
+- **Changes (the lead, approved as diffs):** `p2_offering.py --timeout` (c657ac3) and `--provider` (ad0383d). **Before:** a fixed 300 s timeout and no provider pin. **Why:** ScaDS stalls; then ScaDS's own 900 s cut (HTTP 408) made the timeout useless, so the route moved.
+- **Result (`design/package-v5/inputs/p2/RESULTS-P2B.md`):** $5.781, 855 calls, 0 failed; `instr` against `all` +0.067 (−0.033 to +0.217), 0 calls outside the subset in 60 task-runs, calls x0.93, cost x0.80, noise 1 of 30. HYP-0018 gains it, status stays `proposed` (INT-T-044).
+- **Not the university route:** GMICloud fp8 at effort "as served" (behaves like high) against ScaDS's W4A8 at max. The three ScaDS attempts are kept, not pooled, not scored.
+- **Added:** `tools/p2_paired.py` (reproduces main-paired-summary.json exactly), `tools/p2b_effort_probe.py`.
+- **Proposed, not made:** `04`'s P2 note still ends "P2b checks it on the university API"; the lead's proposed replacement is in the commit message of this entry, for the human.
+
+- **WD-084 addendum (INT-T-052):** the proposed replacement of `04`'s P2 note was applied as written. **Before:** "P2b checks it on the university API." **Why:** P2b ran on OpenRouter and has a result.
+
+## WD-085 `v5-p5-break-even` merged into `v5-audit` (2026-11-09, INT-T-053)
+- **The human:** "merge to v5 audit and lets continue working"; the slides are updated with all results at the end; do not disturb the other agent.
+- **How (the lead):** in a separate worktree (`.worktrees/audit`), so the main checkout (`v5-p5-break-even`) and the other agent's worktree (`.claude/worktrees/v5-slides`) did not change. **Why a worktree:** a checkout of `v5-audit` in the main folder would have changed files under any process reading them there.
+- **Conflicts (3), each "both sides appended at the end":** `00-README.md` (v5-audit's dated line, then the corrections of 2026-11-09), `12-experiment-readiness.md` (section 5 of v5-audit, then section 6, as section 6 itself says), `ops/DESIGN-DECISIONS.md` (v5-audit's R3 continuation bullets, then WD-059 to WD-084). Kept both, in that order, as raw bytes; no text reworded; 0 lines lost against either parent.
+- **Checks:** verifier fail=3 (the known literature summaries); guard tests 2 failures (Windows path forms; guard and tests identical to `v5-audit`'s, fixed by the Linux branch).
+- **Not pushed** (the human did not say push). `v5-slides` not touched; it does not yet have P2b or the later fixes.

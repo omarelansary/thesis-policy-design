@@ -1,0 +1,323 @@
+{
+ "run": "run1-deepseek-v4.1-flash",
+ "model": "deepseek/deepseek-v4.1-flash",
+ "provider": "gmicloud/fp8",
+ "harness_sha256": "5088fafddd821770b0e4401d7007a9fb6627cd5b2483b1732fbf2ef1e8e9f029",
+ "tasks_sha256": "b902d5766e8a2f44a9b99a5ac5e6e3d21f789db0e899936db4714d7004a9d7ba",
+ "catalogue_sha256": "232b91973726b8963b3b4cc3d82bea5d04a9ad2df36ef87b8ea404c6310cb019",
+ "catalogue_tools": 463,
+ "k": 3,
+ "temperature": 0.0,
+ "served": [
+  "GMICloud|deepseek/deepseek-v4.1-flash"
+ ],
+ "requests": 575,
+ "requests_ok": 575,
+ "cost": 0.18158,
+ "prompt_tokens": 4792308,
+ "cached_tokens": 4157056,
+ "completion_tokens": 72596,
+ "cells": {
+  "E-plain": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "correct call, zero searches": 16,
+    "correct after a wrong call": 4
+   },
+   "searched": 0,
+   "target_called": 20,
+   "target_in_search_results": 0,
+   "target_called_unseen": 0,
+   "distractor_called": 3,
+   "other_catalogue_called": 5,
+   "requests": 53,
+   "failed_tasks": []
+  },
+  "D-plain": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "search then correct call": 15,
+    "answer without a tool, searched": 1,
+    "correct after a wrong call": 4
+   },
+   "searched": 20,
+   "target_called": 19,
+   "target_in_search_results": 20,
+   "target_called_unseen": 0,
+   "distractor_called": 0,
+   "other_catalogue_called": 4,
+   "requests": 74,
+   "failed_tasks": []
+  },
+  "D-index": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "search then correct call": 15,
+    "correct after a wrong call": 5
+   },
+   "searched": 20,
+   "target_called": 20,
+   "target_in_search_results": 20,
+   "target_called_unseen": 0,
+   "distractor_called": 2,
+   "other_catalogue_called": 6,
+   "requests": 76,
+   "failed_tasks": []
+  },
+  "A-plain": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "wrong-tool call": 7,
+    "searched, no call": 3,
+    "called the absent tool by name": 3,
+    "turn cap reached, searched": 7
+   },
+   "searched": 20,
+   "target_called": 3,
+   "target_in_search_results": 0,
+   "target_called_unseen": 3,
+   "distractor_called": 4,
+   "other_catalogue_called": 7,
+   "requests": 111,
+   "failed_tasks": []
+  },
+  "A-index": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "wrong-tool call": 7,
+    "searched, no call": 2,
+    "called the absent tool by name": 3,
+    "turn cap reached, searched": 8
+   },
+   "searched": 20,
+   "target_called": 4,
+   "target_in_search_results": 0,
+   "target_called_unseen": 4,
+   "distractor_called": 0,
+   "other_catalogue_called": 7,
+   "requests": 117,
+   "failed_tasks": []
+  },
+  "W-plain": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "search then correct call": 16,
+    "correct after a wrong call": 3,
+    "wrong-tool call": 1
+   },
+   "searched": 20,
+   "target_called": 19,
+   "target_in_search_results": 20,
+   "target_called_unseen": 1,
+   "distractor_called": 2,
+   "other_catalogue_called": 4,
+   "requests": 72,
+   "failed_tasks": []
+  },
+  "W-index": {
+   "sessions": 20,
+   "complete": 20,
+   "outcome": {
+    "search then correct call": 17,
+    "wrong-tool call": 1,
+    "correct after a wrong call": 2
+   },
+   "searched": 20,
+   "target_called": 19,
+   "target_in_search_results": 20,
+   "target_called_unseen": 1,
+   "distractor_called": 4,
+   "other_catalogue_called": 4,
+   "requests": 72,
+   "failed_tasks": []
+  }
+ },
+ "per_task": {
+  "t01": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "wrong-tool call",
+   "A-index": "wrong-tool call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t02": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "searched, no call",
+   "A-index": "searched, no call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t03": {
+   "E-plain": "correct after a wrong call",
+   "D-plain": "answer without a tool, searched",
+   "D-index": "correct after a wrong call",
+   "A-plain": "wrong-tool call",
+   "A-index": "called the absent tool by name",
+   "W-plain": "correct after a wrong call",
+   "W-index": "wrong-tool call"
+  },
+  "t04": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "correct after a wrong call",
+   "D-index": "search then correct call",
+   "A-plain": "called the absent tool by name",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t05": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t06": {
+   "E-plain": "correct after a wrong call",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "wrong-tool call",
+   "A-index": "wrong-tool call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t07": {
+   "E-plain": "correct after a wrong call",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "wrong-tool call",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "correct after a wrong call"
+  },
+  "t08": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "searched, no call",
+   "A-index": "searched, no call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t09": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "wrong-tool call",
+   "A-index": "wrong-tool call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t10": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t11": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "called the absent tool by name",
+   "A-index": "called the absent tool by name",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t12": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t13": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t14": {
+   "E-plain": "correct after a wrong call",
+   "D-plain": "correct after a wrong call",
+   "D-index": "correct after a wrong call",
+   "A-plain": "wrong-tool call",
+   "A-index": "wrong-tool call",
+   "W-plain": "wrong-tool call",
+   "W-index": "correct after a wrong call"
+  },
+  "t15": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "correct after a wrong call",
+   "D-index": "search then correct call",
+   "A-plain": "called the absent tool by name",
+   "A-index": "wrong-tool call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t16": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "correct after a wrong call",
+   "W-index": "search then correct call"
+  },
+  "t17": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "correct after a wrong call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "called the absent tool by name",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t18": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "correct after a wrong call",
+   "A-plain": "wrong-tool call",
+   "A-index": "wrong-tool call",
+   "W-plain": "correct after a wrong call",
+   "W-index": "search then correct call"
+  },
+  "t19": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "correct after a wrong call",
+   "D-index": "correct after a wrong call",
+   "A-plain": "searched, no call",
+   "A-index": "turn cap reached, searched",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  },
+  "t20": {
+   "E-plain": "correct call, zero searches",
+   "D-plain": "search then correct call",
+   "D-index": "search then correct call",
+   "A-plain": "turn cap reached, searched",
+   "A-index": "wrong-tool call",
+   "W-plain": "search then correct call",
+   "W-index": "search then correct call"
+  }
+ }
+}
