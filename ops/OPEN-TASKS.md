@@ -19,7 +19,9 @@ Windows/Linux switch). `ops/STATE.md` section A points here.
       started 2026-11-09 about 09:05 UTC from task 1. Attempts 1 and 2 kept, not pooled.
       Attempt 3 stopped at task 5 at 13:30 UTC (two tasks in a row ended with HTTP 408 from ScaDS: each try cut at about 900 s by
       the server, so the 1200 s client timeout does not help; median call 26 s by day). Three attempts: 190 calls, 10 failed.
-      **Not restarted: waits for the human** (OpenRouter fp8 at about $18, or ScaDS at a quieter time, or parked).
+      INT-T-050/051: moved to OpenRouter, GMICloud fp8 pinned (`--provider`, diff approved), no spending cap (the human; key
+      limit raised to $60, $31.99 left at the start), effort as served (on GMICloud it behaves like "high"; ScaDS's default is
+      "max": a route difference to report), timeout 600 s. Started 2026-11-09 14:10 UTC, prefix `p2b-or`. ScaDS attempts kept, not pooled.
       Serving facts (stored 2026-11-09, `evidence/literature-20261019/p2b-scads-glm53-model-page-20261109.txt`): ScaDS runs
       `gpustack/GLM-5.3-W4A8` (4-bit weights, 8-bit activations) on 8 H100 over two nodes as an HPC Slurm job (offline between
       jobs); thinking defaults to max effort, which P2b uses (no reasoning field sent). OpenRouter's GMICloud serves fp8. Its finish line
