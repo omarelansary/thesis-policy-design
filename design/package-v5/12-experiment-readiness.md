@@ -57,7 +57,7 @@ This section supersedes the rows of section 1 for P5, P3 and P2. Branch `v5-r3-p
       authorized with its cost.
 - **P1 and P4:** unchanged from section 1.
 
-## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-103)
 Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
 - Line 10: P3 "Not yet" is superseded: P3 ran on 2026-11-07/08 and was closed (line 35; `inputs/p3/P3-LOG.md`).
 - Line 42: 3,328 of 3,426 holds for gpt-4.1-mini; gpt-5-mini cached 3,328 of 3,510.

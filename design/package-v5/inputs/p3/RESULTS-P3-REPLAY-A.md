@@ -72,6 +72,6 @@ Logged stopsearch sessions, kinds with a missing tool, 40 per model.
 - **Cost:** two of run 4's five variants, so about $1.40 (run 4: $3.51 for five). That is within the $2.21 left.
 - **Not run before the human's approval** (INT-T-036).
 
-## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-103)
 Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
 - Line 61: "10 to 29% of their requests" reproduces with the requests of all 40 sessions as denominator (82, 96, 37 saved of 382, 332, 379), not only of the 8 to 20 sessions ended early.

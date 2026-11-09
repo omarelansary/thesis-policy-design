@@ -91,6 +91,6 @@ the no-rule condition. AF + AS, sessions of 40, MiniMax / DeepSeek / GLM:
 - DeepSeek has 119 of 120 sessions.
 - The replay-based estimate of Y's loss proved optimistic, because what models do after a refusal was not in the logs.
 
-## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-053)
+## Corrections of 2026-11-09 (lead, AUTH-032 as amended by INT-T-103)
 Found while building the results deck (`design/package-v5/deck/CLAIM-LEDGER.md`). The text above is left as it was; each point names the line it corrects.
 - Line 37: the table gives 25 sessions without Y under DRY (6 + 6 + 13); 24 counts complete sessions only (DeepSeek's AS cell has 19 complete sessions, `run5-analysis.json`).
