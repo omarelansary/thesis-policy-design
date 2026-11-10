@@ -1,6 +1,6 @@
 ---
 type: summary
-status: draft v3 = the analyser's text corrected after verification round 1 (28 problems) and round 2 (23 problems) by four independent verifiers; every correction was checked by the lead against the files; round 3 pending (AUTH-034, INT-T-055)
+status: draft v4 = the analyser's text corrected after verification rounds 1 (28 problems), 2 (23) and 3 (10) by six independent verifiers; every correction was checked by the lead against the files; round 4 pending (AUTH-034, INT-T-055)
 ---
 # Analysis of experiments P3, P2 (with P2b), P1 and P4 of the V5 tool-access policy
 
@@ -42,7 +42,7 @@ Labels:
   - Long tasks, where clearing is meant to pay, were not tested.
 - **Overall picture:**
   - What the four tests support is at the level of mechanism: the cache survives enforced offering, and models search uninstructed.
-  - None of the four demonstrates a bill saving from a V5 add-on against run-to-run variation. Point estimates down exist: removal of unoffered definitions (P2 `drop`, x0.80 and x0.90, one stream, sharing not priced), P2b `instr` (x0.80 or x0.85, no interval for the cost) and P3's requests (-32 to -48%, which is requests, not bill, on stub tasks). Enforced offering (x1.02, x1.15) and masking (x2.06) point up, and the sign of P1's bill effect is unresolved. Role memory saves searches. (The large saving of deferral over showing everything is another result: P3 run 1 side observation and P5, see C1 and D.)
+  - None of the four demonstrates a bill saving from a V5 add-on against run-to-run variation. Point estimates down exist: removal of unoffered definitions (P2 `drop`, x0.80 and x0.90, one stream, sharing not priced), P2 `instr` on gpt-5.4-mini (x0.87; on gpt-5-mini it was x1.37), P2b `instr` (x0.80 or x0.85, no interval for the cost) and P3's requests (-32 to -48%, which is requests, not bill, on stub tasks). Enforced offering (x1.02, x1.15) and masking (x2.06) point up, and the sign of P1's bill effect is unresolved. Role memory saves searches. (The large saving of deferral over showing everything is another result: P3 run 1 side observation and P5, see C1 and D.)
   - Every test is one benchmark (AppWorld), short tasks and one to three models. Three of the four (P3, P1, P4) ran only on OpenRouter, not on the university API.
 
 ---
@@ -90,7 +90,7 @@ Labels:
   - W: a similar wrong tool visible.
 - Runs 1 to 3 used single-need tasks. Runs 4 to 6 used 20 two-need tasks in three kinds: both tools present (P), or one tool missing and named first (AF) or second (AS).
 - "Substitute" means a state-changing call of another tool in the missing tool's app. "False claim" means saying the missing action was done.
-- Total spend $9.953. The per-run sums match the log [D: 1.675 + 1.755 + 0.726 + 3.630 + 1.618 + 0.549].
+- Total spend $9.953. The per-run sums match the log [D: 1.675 + 1.755 + 0.726 + 3.630 + 1.618 + 0.549; the run 1 and run 4 figures include their smoke tests].
 
 **Result 1: uninstructed search** [O, `p3/RESULTS-P3-RUN1.md`, recomputed from `run1-analysis.json`]. Sessions out of 20, MiniMax / DeepSeek / GLM; the `plain` prompt variant (an `index` variant made no difference that 20 tasks can show, same file, Reading 2):
 
@@ -110,7 +110,7 @@ Labels:
 **Result 2: the missing tool.**
 - [O] Run 2's rule listed the matched app's tools once. Substitutes doubled or tripled, for example MiniMax 5 to 10.
 - [O] Run 3's note-only rule `rule2` did little. The note reached 50 of 60 sessions and only 10 then ended. Requests fell 8 to 12%.
-- [O] Run 4 (kinds P/AF/AS, 40 sessions per model): a session-wide forced reply lost the doable need. Y done was 14/19/9 of 40, against 37 to 40 / 36 to 40 / 30 to 33 with no rule. Withdrawing only search kept Y but made guessed-name calls rise (3 to 12, 12 to 19, 13 to 15).
+- [O] Run 4 (kinds P/AF/AS; 300 sessions per model over 5 variants; the AF+AS cells have 40 sessions per variant): a session-wide forced reply lost the doable need. Y done was 14/19/9 of 40, against 37 to 40 / 36 to 40 / 30 to 33 in the three no-rule copies of runs 4 and 5. Withdrawing only search kept Y but made guessed-name calls rise (3 to 12, 12 to 19, 13 to 15).
 - [O] The log replay (`p3/RESULTS-P3-REPLAY-A.md`, no model call): at the first no-match, the doable tool was already shown but not yet called in 51, 51 and 67 of 80 sessions. [I, the replay file's reading] Models search for both needs before acting, which is why any stop that ends the session at that point loses the doable need.
 
 **Result 3: runs 4 to 6, AF+AS, 40 sessions per model** (recomputed from `run4/5/6-analysis.json` and the adjudicated-replies files):
@@ -148,7 +148,7 @@ Labels:
 - [U] The effect on real AppWorld tasks with real results.
 - [U] Whether DRY plus the sentence works if `search_tools` stays and answers `no_match` instead of being withdrawn (`04` V5-R17 open item b). A note alone (search left in place) was weak in run 3 (the note reached 50 of 60 sessions and 10 of those then ended; requests fell 8 to 12%) and showed no measurable effect in run 4.
 - [U] Other models. MiniMax kept 7 substitutes and 3 false claims of 40 even with the rule, so this is model-dependent.
-- [I] V5-R17 withdraws `search_tools`. V5-R02 forbids changing the tools array within a session; `04` V5-R17 item (b) says that on routes with an offering mechanism (Anthropic tool removal, OpenAI `allowed_tools`) the withdrawal needs no array change, and on routes without one it does. This is open item (b).
+- [I] V5-R17 withdraws `search_tools`. V5-R02 forbids changing the tools array within a session; `04` V5-R17 item (b) says that on routes with an offering mechanism (Anthropic tool removal, OpenAI `allowed_tools`) the withdrawal needs no array change, and on routes without one it does. This is open item (b). In run 3, a probe that changed the tools array near the end of a session showed a clean cache on GLM-5.3 only; the other two models were unexplained (`p3/RESULTS-P3-RUN3.md` section 4).
 
 ---
 
@@ -220,7 +220,7 @@ Labels:
   - A "pop6" role memory (the six non-core APIs other users need most, outside the current scenario) has precision 0.24 and net +956 fresh-token equivalents at K=3, T=8. Against a session of about 50,000 [O, approximate] that is about 2% [D: 956/50,000].
   - At K=1 the net is -256. At T=30 it is negative.
 - **Live run:** `none` against `pop6`, GLM-5.3, client-side BM25 search returning the top 3, 2 repeats. The oracle arm was dropped by the lead before any run, because the projection exceeded the lead's $12 limit. The run spent $11.394.
-- Runs hit their cost caps. The common session set became 33 sessions of 16 users.
+- Three of the four runs stopped at their cost caps (none r1, pop6 r1, pop6 r2); none r2 ran all 35 sessions. The common session set became 33 sessions of 16 users.
 
 **Results** [O, recomputed from `p1-analysis.json`; I reproduced the paired values]:
 
@@ -245,17 +245,17 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
 
 - [D] Dropping the single no-memory session `76f2c72_3` (49 calls, $0.584, failed in none r1; 8 calls and $0.025 in the three other runs) gives -$0.0029 per session, -4.6% (32 sessions). I recomputed this.
 - [O] The +16% comes from adding `7d7fbf6_1`: with pop6 it took 49 calls ($0.618) and then 22 calls ($0.923, cut by the cap); without memory it took 10 and 7 calls ($0.027, $0.019). It was expensive with pop6 in both repeats, so a seed effect is suggested by this session, not shown. The -16% estimate, by contrast, rests on a no-memory runaway in one repeat only.
-- [O] Seeds make requests larger. Mean prompt rises 12 to 30% across unequal session sets [D: 16,209/14,489; 18,114/13,936], and about 16% on the matched 35-session sets (16,209 against 13,936; the mean prompt figures come from the local logs, not from `p1-analysis.json`).
+- [D, local call traces; not in `p1-analysis.json`] Mean prompt per call is higher for pop6 only when the sessions cut by caps and the runaways are counted (whole-run means: +12% and +30%, 16,209/14,489 and 18,114/13,936). On the 33 sessions completed in all four runs it was 12,985 and 14,305 for pop6 against 15,430 and 14,164 for none, so larger requests are not shown. (`RESULTS-P1.md` carried a "+16% on matched sets" figure; it was not a matched comparison and is corrected there.)
 - [O] By recurrence band (main set: zero 17 sessions, low 7, high 9): billed -$0.020, +$0.035, -$0.031 per session; success differences 0, +0.07, 0; no intervals. Run-to-run flips (sessions whose success differs between repeats): none 6, pop6 3.
 
 **Strength of evidence.**
 - [O] One model, one provider, 33 sessions of 16 users (half the planned 64). The user-level interval is rough.
-- [I] The average session length was about 11 to 12 requests [D, completed sessions only: 534/44 = 12.1, 405/35 = 11.6, 400/35 = 11.4, 358/33 = 10.8]. At K=3, client search and T 11 to 12, the break-even h* is 0.19 to 0.21 at the project's cache-read ratios (r = 0.1, 0.05, 0.025) and up to 0.22 at GLM-5.3's list ratio 0.186 [D, via `memory_seed.py`'s `hstar`, recomputed by the lead]. The measured 0.27 is above that, so by D-02 role memory should pay a little (pop6's net per session at T = 11 to 12 is +580 to +670 fresh-token equivalents at the three ratios, about 1% of a session of roughly 50,000, recomputed by the lead with `tools/p1_seed_rules.py`'s functions). At T = 30 (K=3) h* is 0.30 at r = 0.1 (0.23 to 0.26 at lower r), above the measured 0.27, so the sign depends on session length (`P1-PREP.md` section 6; some sessions ran 49 calls).
+- [I] The average session length was about 11 to 12 requests [D, completed sessions only: 534/44 = 12.1, 405/35 = 11.6, 400/35 = 11.4, 358/33 = 10.8]. At K=3, client search and T 11 to 12, the break-even h* is 0.19 to 0.21 at the project's cache-read ratios (r = 0.1, 0.05, 0.025) and up to 0.22 at GLM-5.3's list ratio 0.186 [D, via `memory_seed.py`'s `hstar`, recomputed by the lead]. The measured 0.27 is above that, so by D-02 role memory should pay a little (pop6's net per session at T = 11 to 12 is +580 to +670 fresh-token equivalents at the three ratios, about 1% of a session of roughly 50,000, recomputed by the lead with `tools/p1_seed_rules.py`'s functions). At T = 30 (K=3) h* is 0.30 at r = 0.1 and 0.33 at r = 0.186, above the measured 0.27, but 0.26 and 0.23 at r = 0.05 and 0.025, below it, so the sign depends on session length and on r (`P1-PREP.md` section 6; some sessions ran 49 calls).
 - [I] The expected saving (about 1% at T = 11 to 12, about 2% at T = 8) is far smaller than the interval half-width. The paired bill interval is about ±$0.024 on a mean of $0.071 per session, about ±34% [D]. P1 could not have detected a 2% effect either way.
 - [O] **Selection effects.** The session set depends on pop6's own spending. The lead's cap rule fixed the set after pop6 r1's cost was seen (`P1-PREP.md` section 9, corrected after review). Sessions that cost pop6 more were cut. [I] That may bias the main set in pop6's favour. The sensitivity view is the file's attempt to show the other side.
 - [O] **pop6 looks ahead.** It counts later-dated sessions of other users (`RESULTS-P1.md` Limits). It is not memory a deployed system would have at that date. [I] It also does not depend on the user, so it is closer to a larger core chosen by usage (S1) than to personal memory (`P1-PREP.md` section 7's reading).
 - [O] The memory is built from gold, not from what the model did earlier.
-- [O] **Route.** Discovered tools were appended to the tools array (docstring of `tools/p1_memory.py`, point 2), which V5-R02 allows ("appended discoveries", `04` line 87). Seeds were declared at session start. Cached share was 0.63 to 0.74 against about 0.9 in P2. [I] On this route, appended discoveries ended the cached prefix, so V5-R02's "appended discoveries" is not cache-safe here (`P1-PREP.md` section 9 calls this V5-R02's question). The effect falls on both arms; its effect on the trade between seeds and searches is [U].
+- [O] **Route.** Discovered tools were appended to the tools array (docstring of `tools/p1_memory.py`, point 2), which V5-R02 allows ("appended discoveries", `04` line 87). Seeds were declared at session start. Cached share was 0.63 to 0.74 (P1's no-memory runs 0.64 to 0.69) against about 0.9 in P2 and 0.82 to 0.94 in P2b and P4's keep arm (same model and route, no discoveries). [I] On this route, appended discoveries ended the cached prefix, so V5-R02's "appended discoveries" is not cache-safe here (`P1-PREP.md` section 9 calls this V5-R02's question). The effect falls on both arms; its effect on the trade between seeds and searches is [U].
 - [O] No stop rule (V5-R17) was used in P1, although the AUTH-033 text mentions it. The harness note says every task is doable.
 
 **What P1 does not show.**
@@ -325,7 +325,7 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
 **What conflicts or depends on the model.**
 - P2: the instruction form was followed by two models and broken by one; `enf` was +11.7 points (interval excludes 0) on one OpenAI model and -5.0 (includes 0) on the other.
 - P3: MiniMax made far more false claims than DeepSeek and GLM (5-8 against 0 and 0-1 with no rule; 3 against 0 and 0 with DRY plus the sentence), and more substitutes without a rule (12-16 against 4-5 and 5-8) and with DRY plus the sentence (7 against 1 and 2).
-- P1 and P2b: P2b (30 Spotify tasks) succeeded 55 of 60; P1's no-memory runs succeeded 39 of 44 and 34 of 35 on other tasks. The difference is a few 49-call sessions, not a success gap; no contradiction is shown.
+- P1 and P2b: P2b (30 Spotify tasks, all 128 tools declared) succeeded 55 of 60; P1's no-memory runs (other tasks, client search) succeeded 39 of 44 and 34 of 35. P1 sessions are longer (median 11 calls against 7 in P2b's `all` runs) and run on other tasks; success rates are similar (92%, 89%, 97%); no contradiction is shown.
 - P4 step A against step B: the replay and the live result disagree by an order of magnitude on how much clearing costs. Changed behaviour (calls x1.72 where clearing fired) is the suggested reason; it is not decomposed, and the two measurements differ in tasks and day.
 - P1 and P3 against V5-R02: P1's appended discoveries are allowed by V5-R02 and were followed by a lower cached share on this route ([I] mechanism, not tested by an arm); P3's V5-R17 withdrawal of search needs no array change on routes with an offering mechanism and does on routes without one.
 
@@ -378,12 +378,12 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
 | 17 | Bill -16% / -4.6% / +16%, all uncertain | O/D | `p1-analysis.json` | Recomputed |
 | 18 | P1 could not detect a 2% effect | I | CI half-width about ±34% | My reading |
 | 19 | P1 session set depends on pop6's spending | O | `P1-PREP.md` s9 | Stated in file |
-| 20 | P1 appended discoveries (allowed by V5-R02) and the cached share fell to 0.63-0.74 | O | `tools/p1_memory.py` docstring; `04` line 87 | Corrected after verification |
+| 20 | P1 appended discoveries (allowed by V5-R02) and its cached share was lower (0.63-0.74) than same-model runs without discoveries (0.82-0.94) | O | `tools/p1_memory.py` docstring; `04` line 87 | Corrected after verification |
 | 21 | Per-user rules lose on gold, except "used in 2+ earlier sessions" (seeds 0.3 tools on average; +88 at T=8) | O | `p1_seed_rules.py` (reproduced) | Not tested live |
 | 22 | Clearing: billed x2.06, calls x1.37 | O | `p4-analysis.json` | Recomputed |
 | 23 | Where fired x2.66; never fired x1.00 | D | Same | Recomputed |
 | 24 | Re-fetch after clearing is the mechanism | I | `RESULTS-P4.md` | Suggested only |
-| 25 | Falsifier of HYP-0021 neither met nor refuted | O | `HYP-0021.md` | After correction |
+| 25 | Falsifier of HYP-0021 neither met nor refuted | I (the file's statement; it rests on the falsifier's stated domain) | `HYP-0021.md` | After correction |
 | 26 | Replay (+1 to 7.5%) vs live (x2.06) differ | O/D | `P4-REPLAY-A.md` | Reported |
 | 27 | Masking not supported on short tasks; domain (long runs) not tested | I | C4 | Single model/setting |
 | 28 | Role memory is closer to S1 (core by usage) than to M2 | I | `P1-PREP.md` s7 | The file's reading |
@@ -392,7 +392,7 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
 
 ## F. Things I could not verify, or that look inconsistent between files
 
-1. **`ops/STATE.md` said P2 had "no accuracy loss beyond run-to-run variation".** The corrections in `04` and in `p2/RESULTS-P2-MAIN.md` say that is too strong ("no detectable difference, small effects not excluded"). Confirmed by the lead; STATE.md is corrected in the same commit as this analysis.
+1. **`ops/STATE.md` said P2 had "no accuracy loss beyond run-to-run variation".** The corrections in `04` and in `p2/RESULTS-P2-MAIN.md` say that is too strong ("no detectable difference, small effects not excluded"). Confirmed by the lead; STATE.md was corrected in commit 4119fbc.
 2. **WD-086's original P1 and P4 bullets are superseded by its addendum but remain.** They say:
    - "HYP-0021 falsifier met on this setting";
    - "accuracy unchanged";
@@ -417,7 +417,7 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
    - It names V5-R17's stop; P1 ran without a stop.
    - It says P4 would use "the longest available tasks, if feasible"; the 20 tasks were short.
    - The files record these as the lead's decisions.
-10. **P1 session length.** The session length T that D-02 assumes was never measured as a target. I derived about 11 to 12 requests per session [D] from the run table. No file states the h* at T = 11 to 12; `P1-PREP.md` section 6 gives h* at T = 10 (0.19 to 0.20).
+10. **P1 session length.** `P1-PREP.md` sections 6-7 treat T and K as assumed, not measured on these tasks. The analyser derived about 11 to 12 requests per session [D] from the run table. No file states the h* at T = 11 to 12; `P1-PREP.md` section 6 gives h* at T = 10 (0.19 to 0.20).
 11. **P3 literature.** I spot-checked five of the nine stored `p3stop-*` sources for their quoted phrases and found them. I did not check the other four. The note itself (`STOP-RULE-RESEARCH-20261108.md`) remains a summary. The Guardrails Redirect source is only a listing page abstract.
 12. **P5 and P0.** Used as context and taken from the files. I did not recompute them.
 13. **Whether the model sees the unoffered definitions under `allowed_tools`.** [I] the vendor text implies they stay visible; no P2 arm checks it.
@@ -439,7 +439,7 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
    - The result also depends on whether V5's M2 means role memory (a core chosen from usage, close to S1) or per-user memory (which the desk check says loses).
    - Options: accept; run per-user live; add synthetic users at controlled recurrence.
 3. **Which discovery form should the end-to-end study use: appending discovered tools to the tools array, or placing them in the message history?**
-   - P1 appended to the array and cached share fell to 0.63 to 0.74.
+   - P1 appended to the array and its cached share was 0.63 to 0.74 (about 0.9 in P2; 0.82 to 0.94 in P2b, same route, no discoveries).
    - V5-R02 allows appended discoveries but forbids other changes to the array; appending was followed by a lower cached share on this route ([I] mechanism, not tested by an arm).
    - V5-R17's search withdrawal needs no array change on routes with an offering mechanism and does on routes without one; the files say the end-to-end study decides (`04` V5-R17 open item b).
 4. **Do thesis claims need to hold on the university API?** Only the human knows the thesis constraint.

@@ -32,7 +32,7 @@
 | pop6 r1 | 35 | 32 | $3.008 | 424 | 106 | 16,209 | 0.634 | 57 / 210 (0.271) | 7 |
 | pop6 r2 | 33 | 30 | $2.935 | 380 | 91 | 18,114 | 0.738 | 53 / 198 (0.268) | 7 |
 
-Billed, calls, mean prompt and cached share include the session each capped run stopped in (from the local call traces; the
+Billed, calls, mean prompt and cached share are whole-run values: they include the session each capped run stopped in (from the local call traces; the
 calls of completed sessions only, as in `p1-analysis.json`, are 534, 405, 400 and 358). Searches and seeds are completed
 sessions only. Mean prompt and cached share are not in `p1-analysis.json`.
 
@@ -61,8 +61,11 @@ sessions only. Mean prompt and cached share are not in `p1-analysis.json`.
   seeds the model called (0.27) is close to the desk's 0.24 from gold. Over-calling is small (7 seeds called but not needed per
   run).
 - **On the bill, P1 shows no effect that can be relied on:** the estimate is −16%, −5% or +16% depending on one or two
-  expensive sessions in either arm, and every interval includes zero. The seeds make requests larger (mean prompt +12% to +30%
-  across unequal session sets, about +16% on matched 35-session sets; not decomposed against the saved searches).
+  expensive sessions in either arm, and every interval includes zero. The table's mean prompt is higher with pop6
+  (+12% and +30%), but those whole-run means include the sessions cut by caps and the runaways; on the 33 sessions completed in
+  all four runs the mean prompt per call was 12,985 and 14,305 with pop6 against 15,430 and 14,164 without memory, so larger
+  requests are **not shown** (corrected 2026-11-10 after a verifier; an earlier version of this file said "+16% on matched
+  35-session sets", which was not a matched comparison).
 - **Success:** no difference detected (within about ±0.1 per session on 33 sessions); the sign flips between the two views.
 - **Per-user memory** (HYP-0017's main form) was not run live; on gold it loses except the 2+-sessions rule, which seeds almost
   nothing. For role memory the measured h (0.27) is above the break-even at three matches per search in 8-request sessions (h*
