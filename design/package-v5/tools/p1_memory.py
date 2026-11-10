@@ -349,10 +349,13 @@ with AppWorld.initializer(update_defaults=True, experiment_name=exp, **agent.app
             code = 4
             break
 done = [t for t in ids if stats["tasks"].get(t, {}).get("exception") is None]
-try:
-    ev = evaluate_tasks(task_ids=done, experiment_name=exp, suppress_errors=True, include_details=True, save_reports=True)
-except Exception as e:
-    ev = {"evaluation_error": f"{type(e).__name__}: {e}"}
+ev = {"individual": {}, "per_task_errors": {}}  # one task at a time: a stop mid-task breaks AppWorld's batch scoring (P1 none r1)
+for t_ in done:
+    try:
+        ev["individual"][t_] = evaluate_tasks(task_ids=[t_], experiment_name=exp, suppress_errors=True, include_details=True,
+                                              save_reports=True)["individual"][t_]
+    except Exception as e:
+        ev["per_task_errors"][t_] = f"{type(e).__name__}: {e}"
 (RUN / "evaluation.json").write_text(json.dumps(ev, indent=1, default=str))
 stats["finished"] = utc()
 stats["spend"] = round(CUR["spend"], 6)

@@ -43,10 +43,11 @@ for k, (u, sc) in enumerate(users.items()):
 
 def load(arm, rep):
     d = os.path.join(a.runs, f"{a.prefix}-{arm}-r{rep}")
-    if not (os.path.exists(os.path.join(d, "stats.json")) and os.path.exists(os.path.join(d, "evaluation.json"))):
+    evf = next((os.path.join(d, f) for f in ("evaluation-per-task.json", "evaluation.json") if os.path.exists(os.path.join(d, f))), None)
+    if not (os.path.exists(os.path.join(d, "stats.json")) and evf):
         return None  # missing or still running
     st = json.load(open(os.path.join(d, "stats.json")))
-    ev = json.load(open(os.path.join(d, "evaluation.json"))).get("individual", {})
+    ev = json.load(open(evf)).get("individual", {})  # per-task scoring preferred (tools/aw_eval_per_task.py)
     tasks = st.get("tasks", {})
     per = {t: {"success": int(bool(ev.get(t, {}).get("success"))), "spend": r.get("spend", 0.0), "calls": r.get("calls", 0),
                "searches": r.get("searches", 0), "seeds": r.get("seeds", 0), "seeds_called": r.get("seeds_called", 0),
