@@ -1,0 +1,30 @@
+id	query_or_url	tool	purpose	result
+q01	platform.claude.com prompt-caching	WebFetch	Anthropic caching rules	read (first 100k of 164k chars)
+q02	developers.openai.com prompt-caching	WebFetch	OpenAI caching rules	read
+q03	openrouter.ai docs prompt-caching	WebFetch	OpenRouter caching, sticky routing	read
+q04	Anthropic tool-search-tool doc	WebFetch	defer_loading mechanics, billing	read fully
+q05	Anthropic tool-use-with-prompt-caching	WebFetch	cache invalidation by tool changes	read fully
+q06	Anthropic pricing page (x2)	WebFetch	price table; output too large and saved, second attempt same; only partial rows seen	partial
+q07	Anthropic Managed Agents overview	WebFetch	stateful agent billing	read; no billing info on page
+q08	aistudio.google.com/docs/caching	WebFetch	Gemini caching	read; no prices on page
+q09	DeepSeek kv_cache + pricing	WebFetch	DeepSeek caching	cache page read; pricing page not read (url returned stub)
+q10	docs.z.ai cache	WebFetch	GLM caching	read
+q11	OpenRouter provider-selection	WebFetch	routing/load-balancing	read
+q12	OpenRouter /api/v1/models/z-ai/glm-5.3/endpoints and minimax-m3 endpoints	WebFetch	price spread across endpoints	read (JSON summarised by tool)
+q13	docs.x.ai models; platform.kimi.ai pricing; alibabacloud context-cache	WebFetch	xAI, Kimi, Qwen caching/prices	read (Kimi table not loaded)
+q14	WebSearch Claude Code prompt caching engineering	WebSearch	practitioner	snippets
+q15	Manus context engineering blog	WebFetch	KV-cache, tool masking	read
+q16	claude.dev Lessons from building Claude Code	WebFetch	cache-hit alerts, tool change breaks	read
+q17	dev.to April 23 postmortem commentary	WebFetch	cache-bug postmortem (secondary)	read
+q18	anthropic.com/engineering/advanced-tool-use	WebFetch	tool search accuracy/tokens	read
+q19	WebSearch cost breakdown cache reads dominate	WebSearch	community measurements	snippets
+q20	WebSearch Codex CLI cache hit rate	WebSearch	community/Codex	snippets
+q21	codex.danielvaughan.com two posts	WebFetch	secondary summaries of arXiv	read
+q22	arxiv 2607.12161, 2608.00101, 2601.06007	WebFetch	abstracts	abstract-only
+q23	OpenAI tool search guide; OpenAI pricing page	WebFetch	tool_search, prices, batch/flex	read
+q24	WebSearch OpenRouter caching not working	WebSearch	negative results	snippets
+q25	WebSearch vLLM prefix caching agents	WebSearch	self-hosted hit rates	snippets
+q26	OpenRouter sticky routing blog	WebFetch	vendor claims	read
+q27	WebSearch tool search increased cost	WebSearch	critiques	snippets
+q28	Anthropic context-editing; OpenAI function-calling allowed_tools	WebFetch	cache interaction	read
+q29	WebSearch MiniMax M3 pricing; coding plans; Gemini pricing	WebSearch	pricing/flat plans	snippets only (secondary)

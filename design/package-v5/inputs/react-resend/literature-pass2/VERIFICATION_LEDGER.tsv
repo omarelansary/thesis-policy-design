@@ -1,0 +1,19 @@
+id	claim (as stated by a lane)	lane	my check (primary source opened 2026-11-09)	outcome	note
+V01	Anthropic mid-conversation tool_addition/tool_removal keep tools array and cache; beta	L3	platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages	CONFIRMED	beta headers; Claude models only; final section (combining with caching) unread
+V02	Single-run pass@1 swings 2.2-6.0 pts; SD>1.5 at temp 0	L2	arxiv.org/abs/2602.07150	CONFIRMED, relabelled	arXiv preprint (not ICLR); SWE-Bench-Verified, 3 models, 2 scaffolds, 60k trajectories
+V03	Quesma: cache reads 94-98% of input tokens, 26-30% of bill; claimed 89% token saving vs +5..+17% cost	L2	quesma.com blog	CONFIRMED	vendor-neutral blog, Terminal-Bench 2.1, 1,740 attempts, 5 runs/task/arm
+V04	Vanta: cost/run -48%, completion +5% rel., cache-hit fell	L3	vanta.com post	CONFIRMED with caveats	sample, period, controls, model not stated
+V05	Copilot traces: KV hit 90% within turn, 55% across turn boundaries; 13M sessions	L6	arxiv.org/abs/2608.00101	CONFIRMED (abstract)	server-side KV hit rate, not billing
+V06	Trajectory deletion: 26/42 cheaper under flat pricing, 0/42 cache-aware	L5	arxiv.org/abs/2610.35496	CONFIRMED (abstract)	SWE-bench Verified; preprint 26 Oct 2026
+V07	Exgentic AppWorld table (Opus4.5 smolagent .70, ReAct .61, short .64; Gemini3 .13; GPT5.2 0.00/.22)	L7,L4	arxiv.org/html/2602.22953v2 Table 2	CONFIRMED	cost is per-config avg over all 6 benchmarks, not AppWorld-only; caching not described; n=100
+V08	AWO meta-tools on AppWorld: calls -7.6..-11.9%, cost -4..-15%	L4	arxiv.org/html/2601.22037v2	CONFIRMED, lane rule wrong	GPT5.1 calls -11.9% cost -15.0%; Claude4.5 -7.6% / -4.2%; "calls fall faster than cost" holds for Claude only
+V09	ToolChoiceConfusion: state-aware filter 0.99 success	L3	arxiv.org/html/2606.06284v1 Table 4	NOT CONFIRMED	state-aware baseline 0.65 / 4,354 tok; all tools 0.83 / 24,569; keyword top-5 0.61 / 4,407; 0.99 belongs to authors' CMTF (unverified by me); mock tools
+V10	TraceLab: 95.7% prefix input tokens; cost prefix 59.5/append 29.2/output 11.2	L1	arxiv.org/html/2606.30560	CONFIRMED	~84 steps/session; tool-definition share not reported; "prefix" = position-based, includes history
+V11	TheMCPCompany gpt-5-mini oracle 38.86%/$0.17, retrieval 22.86%/$0.26, browser 24.57%/$0.41	L7	arxiv.org/html/2510.19286v1 Table 1	CONFIRMED	cost = tokens x list price, no caching; repeats not found
+V12	TokenPilot: cost -56..-87%, batch B=3 best	L5	arxiv.org/abs/2606.17016	PARTLY	cost -56/-61/-87% confirmed; benchmarks PinchBench/Claw-Eval; B value and cache-write pricing not stated in abstract
+V13	Physical Cost of Context: Mask-5 uncached prefill +608%, solved 26 vs 29, pays only if hit rate <0.55	L5	arxiv.org/abs/2610.34763	PARTLY	+608.5% and prompt -33.3% confirmed; 26/29 and 0.55 not in abstract; tokens/GPU not dollars; workshop paper
+V14	"Cache hit rate fell >5% at 5 parallel runs" cited to 2609.26891	L4	arxiv.org/abs/2609.26891	NOT SUPPORTED	that paper is "Harness as a Language" (JAZ); claim unattributable; do not use
+V15	AppWorld retrieval completeness: complete sets 21/21 vs incomplete 2/39	CRITIC	arxiv.org/abs/2610.41905	CONFIRMED (abstract)	single author; 345 queries; downstream n=60; trained retriever .33; preprint 30 Oct 2026
+V16	LongFuncEval: accuracy -7..-85% as tool catalogue grows	CRITIC	arxiv.org/abs/2505.10570	CONFIRMED (abstract)	models unnamed; preprint
+V17	ReCache composition-invariant KV blocks for tool schemas, 3.655x TTFT	CRITIC	arxiv.org/abs/2608.19662	CONFIRMED (abstract)	needs attention-level control; no billing; not available on hosted APIs
+V18	Claude Code resends full conversation each request; PTC resume sends full history and same tools array	first pass	code.claude.com costs; PTC docs (saved text)	CONFIRMED	billing of resume undocumented (searched full saved text)

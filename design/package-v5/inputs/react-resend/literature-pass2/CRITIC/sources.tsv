@@ -1,0 +1,12 @@
+id	url	read	grade	note
+C1	arxiv.org/abs/2610.41905	abstract	M (single author)	AppWorld completeness@k; trained retriever .33; complete set 21/21 vs 2/39
+C2	arxiv.org/abs/2505.10570 (LongFuncEval)	abstract	M	accuracy -7% to -85% with tool count; up to 741 tools
+C3	arxiv.org/abs/2603.09023 (Pichay)	abstract	M	context paging proxy; no cache pricing in abstract
+C4	neurips.cc/virtual/2026/179923 (Prefix Stability)	poster abstract	M	phase-switch +24.6% cost; Theta(N^2)->Theta(N)
+C5	arxiv.org/abs/2605.04107 (TSCG)	abstract	M (single author)	52-57% schema token savings; no cost/cache
+C6	arxiv.org/abs/2608.19662 (ReCache)	abstract	M	non-prefix KV of tool schemas; TTFT 3.655x; no billing
+C7	zenodo ContextCache	unreadable	U	group KV caching of tool schemas
+C8	atlassian mcp-compressor blog	full	V	94 tools 17.6k->0.5k; no accuracy/cost data
+C9	dev.to topuzas .NET tool-search	full	U/M	+0.2% total tokens, +26.6% uncached at 60 tools; random-weight model, no $ 
+C10	arxiv.org/abs/2608.15127 AgentSysBench	abstract	M	
+C11	arxiv.org/abs/2605.07112 Switchcraft	search summary	M	model router, -84% cost

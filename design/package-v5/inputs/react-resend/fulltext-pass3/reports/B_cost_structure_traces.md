@@ -1,0 +1,118 @@
+# Group B full-text verification: cost-structure sources (2026-11-09)
+
+Sources: paper.txt of the five papers (line numbers = paper.txt), WebFetch of the three web pages, two WebSearches. Text treated as untrusted data.
+
+## 1. 2607.12161 Weinberger and Hozez (PointFive), v5, 12 Aug 2026
+
+**Design.** Claude Code 2.1.201 only; arms = baseline, RTK v0.44.1, RTK-ML (the authors' own build), Headroom v0.27.0 (API-boundary proxy). 103 tasks, 7 repos, Haiku 4.5 / Sonnet 5 / Opus 4.8, effort levels vary by model; block design, 4 arms from identical copies in random order. 2,908 executed, 2,848 analysed (712 per arm) (l.456-470, 590-600). Mean trajectory only 4.46 turns, baseline success 96% (Table 8). The authors built RTK-ML, so the headline arm is their own product; pre-specified, not pre-registered.
+
+**Definitions.** Cost model Eq.1 (l.144-155): uncached x1, cache-write x1.25 (5-min tier), cache-read x0.1, output at list price. "Harness base (system prompt + tool defs)" appears only as a single row in Table 1 (l.225-236). Tool definitions are NOT separated from the system prompt anywhere; the paper says so: "Exact attribution would require per-request source labeling (system prompt, tool schemas, user prompt, ...) ... that instrumentation does not exist in the retained campaign" (l.1525-1527). "Prefix" is position/cache based: the framework prefix is measured only as what the baseline's first API call reads from cache: 16.5k/23.2k/14.4k tokens (Haiku/Sonnet/Opus) = a "measured lower bound of 76%/83%/85% of all cache-read volume" (l.1514-1518).
+
+**Metrics.** Headline cost is provider-billed `total_cost_usd` (l.540-548, "actual_billed"), cross-checked against usage x list prices. The bill-share decomposition (Table 7, l.640-647) is reconstructed from usage fields with a residual: cache write 44.3 [43.2,45.3], cache read 35.4 [34.5,36.3], output 10.4, uncached 1.3, unattributed 8.7 [7.2,10.1]. Median per-run residual about 0-1%, but dollar-weighted 8.7% (Haiku residual rises with effort 11.0% to 18.3%, apparently thinking charges; Headroom 14.5%) (l.618-636).
+
+**Statistics.** Task-clustered bootstrap (10,000 resamples); ICC 0.37-0.55, Kish effective n "roughly 38-45 tasks per arm despite 712 runs per arm" (l.604-608); family cells exploratory.
+
+**Headline results.** Table 8 (l.689-697): RTK -2.7 [-5.6,-0.1]; RTK-ML +6.8 [+2.8,+11.3]; Headroom +48.4 [+42.3,+55.0]. RTK-ML cut estimated tool-output tokens 5.62M to 3.46M (-38.4%), measured with RTK's own tiktoken o200k tokenizer, "estimates, not provider token counts" (l.727-733). r = 0.154 [-0.051,+0.356] and Spearman 0.013 are over 100 Haiku tasks for the RTK-ML arm only; 87 of 100 tasks saw under 0.1% reduction; the reduction is endogenous (l.733-760). Tool outputs = 3.3% of cost; accessible surface 6.0%.
+
+**Limitations (authors).** One harness and provider, July-2026 prices; 8.7% residual; thinking invisible; Headroom black box; "cross-arm cache carryover cannot be excluded" (l.1553-1555); thin Opus cells. **Mine:** (i) The 74.7% figure is from a different, partly inferred corpus (below). (iii) Single-prompt benchmark runs; in 41 interactive sessions the paper reports that "the framework base falls to about 8% of input tokens and the user-accessible surface grows to roughly 30% of modeled cost" (l.1603-1616). (iv) RTK-ML bundles nine gated mechanisms (query propagation, ranking, embedding sidecar, hints); the cost rise cannot be pinned on the fewer tool tokens.
+
+### Assessment statements, 2607.12161
+- **"38.4% fewer tool-output tokens gave paired billed cost +6.8% (CI +2.8 to +11.3)": ACCURATE as numbers, OVERSTATED as causal wording.** Tokens are estimated by a third-party tokenizer, only for the RTK-ML arm, and "gave" implies a dose-response the paper denies (reduction is "not an externally assigned treatment dose", l.766-770). Heterogeneity: Haiku max effort -21.2 [-40.6,-4.8] (n=20), Haiku high -1.6 (Table 13); holdout-only +9.1 [+2.4,+16.9].
+- **"r=0.15": ACCURATE but incomplete.** Haiku only, n=100 tasks, CI crosses zero, 0.24 without top-5 tasks, "does not establish that compression cannot affect cost" (l.738-760).
+- **"2,848 provider-billed runs, 103 tasks": ACCURATE** (billed `total_cost_usd`).
+- **Bill shares 44.3/35.4/10.4/1.3/8.7: ACCURATE** (Table 7). Caveat: they are reconstructed from usage x list price with a residual; the 44% cache-write share needs the Anthropic 1.25x write premium, absent or smaller on most open-weight routes.
+- **"harness base = 71.6% of context, 92.0% of cache reads and 74.7% of cost over 11,773 requests": numbers ACCURATE, provenance MISLEADING.** They come from Table 1: "1,212 end-to-end child sessions, 11,773 API requests, reconstructed from stored transcripts under a calibrated tokenizer; usage fields exact, component attribution measured, hidden-thinking and cache attribution inferred" (l.225-227). It is a separate "benchmark corpus", not the 2,848 runs. Tool definitions are lumped with the system prompt (no split). The 22% "hidden thinking + unattributed residual" row is inferred, so the 74.7% share partly rests on subtraction. Mean 9.7 requests per session in that corpus (close to the thesis's 10-13). Not attributable to tool definitions alone.
+- **Effective n 38-45 (ICC 0.37-0.55): ACCURATE** (l.604-608). The headline CIs already use a task bootstrap.
+- **"a second proxy raised the bill 48%": ACCURATE for Claude Code (+48.4%), OVERSTATED if read as a general proxy effect.** Headroom is a black box with caching enabled; mechanism unknown (l.1545-1553). In the paper's Codex replication Headroom's reconstructed cost was 12.49% LOWER (l.1139-1143), and long-session Opus +60.9%.
+- **5-minute carryover confound: YES, unresolved.** 100% of 2,136 consecutive within-block pairs fall inside the 5-min TTL; median gap 10.8 s; no TTL-separated re-analysis possible (l.564-585). The three checks (balanced positions, order-difference CIs cross zero, no write deflation) bound but do not exclude it. Consequence for composition: the first call of a run already reads the framework prefix from another run's cache (l.1514-1518), so the benchmark's write/read split understates what a cold production session pays (prefix written at 1.25x, once per cache lifetime).
+
+**Generalisation.** Direction supports the thesis (re-read prefix dominates a short loop; tool-output trimming is second order), but magnitude does not transfer: Claude Code's prefix is about 14-23k tokens, not 469 schemas, and Anthropic prices (read 0.1, write 1.25) differ from open-weight routes (read about 0.2, usually no write premium).
+
+## 2. 2604.22750 Bai et al.
+
+**Design.** OpenHands, SWE-bench Verified, 500 tasks x 4 runs x 8 models (Sonnet 3.7/4/4.5, GPT-5, GPT-5.2, Qwen3-Coder-480B, Kimi-K2, Gemini 3 Pro) (l.147-160). Token metrics averaged over the four runs. Cost computed from usage x list prices (Appendix B, l.1085-1113); Sonnet-4.5 uses 5-min write rate. Mixed-effects regressions for accuracy vs cost quartile. Case study (Section 5) is Sonnet 4.5 only, with phase shares of rounds (Table 1) and one trajectory (astropy-7336).
+
+**Results.** Fig 1: agentic coding input/output ratio 153.85, mean $1.857 per task vs $0.016-0.023 for chat/reasoning (l.46-56). Section 5.2: "cache reads dominate both raw token volume and dollar cost. In every phase ..." and "output tokens are individually priced roughly 80x higher than cache reads" (l.620-628). This is shown in Fig 8 only, with no numeric dollar shares in the text. No system-prompt / tool-definition discussion (grep: none).
+
+**Limits.** Authors: model slice only (l.853-862). Mine: one harness; one model for the breakdown; no CIs; GPT-5 cached price stated as $0.125 vs $1.25 (0.1x) but the formula uses 0.2 r_in (l.1103-1110), an internal inconsistency; tasks are longer than the thesis's 10-13 requests.
+
+### Assessment statements
+- **"input tokens dominate cost even with caching": ACCURATE as the authors' claim, narrowly evidenced** (stated generally in intro l.96-98; shown only for Sonnet 4.5 in Fig 8 and in Fig 1 averages).
+- **"cache reads dominate raw volume and dollar cost in every phase of a Sonnet 4.5 case study although output ~80x pricier": ACCURATE** (l.620-628), though shares are graphical only.
+- **"8 models, OpenHands, SWE-bench Verified": ACCURATE.**
+- **"same-task runs differ up to 30x in tokens (abstract) but about 2x on average (body)": ACCURATE, and the discrepancy is real and unresolved in the text.** "30x" occurs only in the abstract (l.31) and intro (l.102); the body never reports it. Body: "the most expensive runs double the token and monetary cost of the least expensive" (l.259-260), from Fig 2b = per-model max/min ratio "averaged across the 500 instances" (l.237); the y-axis there tops out at about 6 (tokens) and 5 (USD) (l.196, 214). So 30x is presumably the single most extreme instance (max across instances of max/min over 4 runs) while 2x is the mean across instances; the text does not say, and the 30x figure cannot be verified from the paper. Cite about 2x (mean max/min over 4 runs); do not cite 30x without the released data.
+
+**Generalisation.** Supports "re-read context is a large share" for a longer coding agent on Anthropic pricing; silent on tool definitions; the within-task spread (about 2x) argues for many runs per arm.
+
+## 3. 2606.30560 TraceLab (UW SyFI)
+
+**Design.** Own day-to-day use: 4,265 sessions (Claude Code 2,676, Codex 1,589), 357,161 LLM steps, 432,510 tool calls, 43 distinct users, Sep 2025-Jun 2026 (Table 1, l.198-215). Abstract: "our own day-to-day use"; body: "43 developers". Steps per session = 357,161/4,265 = 84 (derived; the paper gives 8.8 LLM calls per request, l.52-55).
+
+**Definitions.** From usage fields (l.152-165): prefix P = `cache_read_input_tokens` (Claude) / `cached_input_tokens` (Codex), i.e. accumulated cached history, including any cached system prompt and tool schemas; append A = `input_tokens + cache_creation_input_tokens`, so Claude "append" cost includes cache WRITES. Position-based, not "system prompt + tool defs". Cost is computed at list prices (Table 6, 5-min write), "estimated API list-price equivalent" about $40.4K, not billed. Table 5: session mean $9.70, median $0.61, p99 $178; prefix 59.5%, append 29.2%, output 11.2% (l.294-320). Table 11 (l.803-811): hit rate 95.7%; user-initiated 84.4%; tool-result 97.5%; misses start beyond 5 min gaps, "after 1 hour almost all steps miss".
+
+**Limits (mine).** One lab, research work; no CIs; token-weighted means dominated by long sessions (mean/median 16x); list prices; Codex has no write price. Tool definitions: no discussion (the only "schema" is the log schema, l.151).
+
+**Assessment statements.** 4,265 sessions / 43 users: ACCURATE. 95.7% of input tokens cache-read: ACCURATE (52.56B/54.90B). 59.5/29.2/11.2: ACCURATE, but "append" includes Claude cache writes. 97.5/84.4: ACCURATE. About 84 steps: ACCURATE (derived). 5-min/1-hour: ACCURATE. "Tool-definition share not reported": ACCURATE (NOT-FOUND-IN-TEXT). Caveat: 84-step autonomous sessions have a higher reuse fraction than 10-13-request tasks by construction.
+
+## 4. 2608.00101 Liu et al. (Azure/UIUC), Copilot traces
+
+**Design.** Client-side sampled traces, one week of June 2026: 13.5M sessions, 3.2M users, 761M LLM calls, 775M tool invocations, 95T tokens (l.17-19, 56-62). Per session about 40-43 LLM calls on average (median 15 in the comparison table); per turn 6.6 (Table 3). Median call: 68K prompt, 63K cached, about 247 output (l.575-590, 650-652).
+
+**'KV cache hit rate'** = cached prompt tokens / prompt tokens per call as observed client-side ("No server-side view. The traces we present are client-side", l.1455); it is a cache outcome, not a bill; the paper has no price or billing analysis. Fig 14 (l.684-700): intra-turn 87-91%, first call after a same-model turn boundary 55% (from 81%), after model switch 8%. Fig 13b: call #1 about 45%, #2 86%, #3+ 92-94%; Fig 13a is bimodal (about 10% of calls below 20%). Compaction in 7.8% of sessions.
+
+**Prompt composition (cuts against the 74.7% framing).** "Conversation history ... 48% of all input tokens on average. Function-call messages ... 28% ... the system prompt contributes only 14%" (l.589-598). Where tool definitions sit is not stated. Tool-definition share: NOT-FOUND-IN-TEXT.
+
+**Statements.** 761M/13M/3.2M: ACCURATE (sampled). 90% within turn, 55% across boundaries: ACCURATE as averages, with the bimodality caveat. Invalidated by model switch/compaction: ACCURATE. It is not a billed share. Generalisation: weak for bills; useful for cache fragility and multi-model routing risk.
+
+## 5. 2601.06007 Lumer et al. (PwC), "Don't Break the Cache"
+
+**Design.** Deep Agents (LangChain) on DeepResearch Bench (100 tasks), web-search tool, 10,000-token system prompt, 4 models; 40 sessions per model per condition (l.196-204, 255-257: "n = 40 per condition for all models"), "over 500" sessions in the abstract (4x4x40 = 640, so the count is loose). Cost = reported token counts x list prices incl. cache writes (l.231-236). Four conditions made by UUID insertion: No Cache (UUID prepended to system prompt; deliberately defeats caching), Full Context, System-Prompt-Only (UUID after the system prompt), Exclude-Tool-Results (UUIDs after system prompt and each tool result). Independent t-tests, no multiplicity correction; >24 h wait between conditions (good control).
+**Results.** Table 2 (l.318-345): GPT-5.2 79.3/81.4/79.6; Sonnet 4.5 77.8/78.5/78.1; Gemini 38.3/41.4/27.8; GPT-4o 47.8/45.9/46.8 (cost reduction vs no-cache for Full/SysPrompt/ExclTool). Table 1 "best mode" picks are not the max-cost modes (GPT-5.2 best 81.4, GPT-4o best 47.8), apparently selected on cost plus TTFT. Ablation (Sec 6): prompt size 500-50,000 tokens (savings 10-45% rising to 54-89%) and tool-CALL count 3-50 per session (savings flat, e.g. GPT-5.2 77-81%).
+### Assessment statements
+- **"caching cut API cost 41-80% (GPT-5.2 79.6, Sonnet 78.5, Gemini 41.4, GPT-4o 45.9)": ACCURATE as the paper's Table 1, but the baseline is an artificially cache-defeated run, and across all modes the range is 27.8-81.4%.** Savings are mostly from a static 10k system prompt re-sent each call ("system prompt ... drives the majority of cost savings", l.~290-300). It is an upper bound on what caching adds, not a bill share.
+- **"it asserts that changing the tool set invalidates the prefix but contains no experiment that changes it": ACCURATE.** The assertion is Sec 5.1 (l.368-380): "When tool definitions are included in the prompt, any change to the available tool set invalidates the cached prefix", supported only by citations to the authors' earlier work, no measurement. Search for tool-set/definition/schema variation finds none. But the second half must be phrased carefully: the paper DOES contain measurements involving tool results (the Exclude-Tool-Results condition, Table 2) and varying the number of tool calls per session (Fig 4), and the abstract says "avoiding dynamic traditional function calling" improves consistency, which has no experiment behind it. So: "no experiment on tool-list/definition changes" is right; "no measurement involving tool results" would be wrong.
+
+## 6. Quesma blog (Does RTK make AI coding cheaper?)
+
+Terminal-Bench 2.1; Claude Code + "Fable 5.0" and OpenCode + DeepSeek V4 Pro via OpenRouter; 5 runs/task/arm; 4 security tasks dropped after refusals, leaving 85/89 tasks, 1,740 attempts total; "over $1,500 spent" (fetch). **Cost source: the post does not state whether dollars are billed or computed** (two targeted fetches, no 'billed', 'price', 'computed', 'cache write'); only "cache reads cost 1/10 of regular input for Fable and 1/30 for DeepSeek". Numbers: chart "Cache reads with RTK": share of input tokens 94% / 98%, share of total bill 30% / 26%; output (incl. reasoning) 56% of cost with RTK and 57% without (DeepSeek); `rtk gain` counter 349.2M tokens "saved" (89%) over 445 DeepSeek attempts, but total bill +5%, mean per-task +17%. Fable bill -5% with a mean per-task +1%, and nearly all savings from one task (winning-avg-corewars). 95% CIs drawn but not given numerically; no named test. **All assessment statements ACCURATE**, with two additions: the 94/98 and 30/26 figures are for the RTK arm only, and the post does not say how cost is obtained. Strength: independent but a blog, one benchmark, one model per harness. Thesis value: the DeepSeek route via OpenRouter, at a 1/30 read ratio, is output-dominated (56%) with reads only 26%, i.e. the share depends on the price ratio and on output.
+
+## 7. llm-d blog (GLM-5.2 on llm-d)
+
+Authors Red Hat/IBM (llm-d maintainers): vendor-authored. Data: SemiAnalysis's Weka corpus, 219 production Claude Code sessions, 78,099 requests, token counts and KV-block hashes. Each request is matched to its best earlier turn; "96% reuse at least 90% of their input as a verbatim prefix", median 99.6%. **Scope: main-agent turns (about 37.7K requests); more than half of all requests are sub-agent requests, for which no reuse figure is given.** Gaps: median 2 s, p90 24 s, p99 11.4 min. Tool definitions and system prompt: not discussed. No bills (only GPU rental). Check: "96% of requests" OVERSTATED (main-agent subset); 99.6% and 2 s ACCURATE. It measures potential overlap (upper bound on hits, ignores TTL/eviction), not realised hit rate. Strength low-medium.
+
+## 8. OpenRouter newsletter ("cache is crucial")
+
+Cached share of agentic tokens "closer to 60%" (Jan) to "just under 90%" (Sep); median provider cache rate 44% to 85%; providers above 90%: 2 of 35 to 11 of 54; cache rate = cached prompt tokens / total prompt tokens; "agentic" = API keys classified monthly by signals, validation not given; resellers excluded; the cost example (87% cached: about $0.51 vs $2.08 per M tokens) omits cache-write premiums. Check: ACCURATE, but the 90% (share of all agentic tokens) and 85% (median across providers) have different bases, and the provider population and model cohort changed (35 to 54 providers; Q3 launches 88.2% vs 54.8%), so the trend mixes behaviour, composition and providers enabling automatic caching. Tokens, not dollars; tool schemas not separated. Supports a high cached fraction on third-party routes.
+
+## 9. Cross-question
+
+**(a) Re-read share of the bill.** Defensible: re-read context is the largest input-side bill item for multi-step coding agents at Anthropic/OpenAI prices (cache reads 35% and reads+writes about 80% of billed cost in Weinberger's 4.5-turn runs; cache reads 59.5% plus append/writes 29.2% at list price in TraceLab; reads dominant in each phase in Bai, figure only); cached token share 90-96% (TraceLab, Copilot intra-turn, OpenRouter). Not established: a single number. Observed range of read share 26% (DeepSeek via OpenRouter at ratio 1/30, Quesma) to 59.5%; it depends on write premium, price ratio, output length and turn count.
+
+**(b) Tool DEFINITIONS.** Not established by any source. Weinberger: merged, inferred "system prompt + tool defs" 74.7% (separate corpus) plus measured first-call prefix 14-23k tokens; Copilot: system prompt 14% of input; others silent; Lumer asserts invalidation without measurement. The thesis's 469-definition case needs its own measurement (66% of bill as reads of the first-request prefix).
+
+**(c) Variation.** Session length: read share rises with turns (cache reads grow 5.7x from short to 7+-turn runs, tool volume 1.7x, Weinberger l.1527-1530; interactive sessions: framework base about 8% of input); TraceLab's means are driven by long sessions. Price ratio: only Quesma speaks (output 56% at 1/30); no paper varies it. Provider: Lumer 28-81% across providers/modes; OpenRouter spread across providers; Copilot model switches 8% hit rate. Not established: causal effect of tool-set size on the bill; open-weight vLLM per-request billing breakdown; behaviour for 10-13-request tasks; whether changing the tool list breaks caches at any provider.
+
+## 10. What changes a recommendation
+
+1. Do not cite 74.7% as a measured tool-definition share: it is an inferred, merged row in a separate 1,212-session corpus.
+2. Do not cite Headroom +48% as proof that proxies defeat caching (Codex replication -12.5%; mechanism unknown).
+3. Cite Lumer only for boundary placement and the dominance of the static prompt; its 41-80% is against a cache-defeated baseline, not a bill share.
+4. Report Bai's 30x as unresolved; use about 2x.
+5. On the thesis route (ratio about 0.2, little or no write premium) Weinberger's 44% write share and TraceLab's 29% "append" do not carry over.
+6. The carryover confound makes reported read/write splits lower bounds on cold-start cost.
+
+## Table
+
+| Paper | Strength | One-sentence demonstration | Assessment accuracy | Consequence |
+|---|---|---|---|---|
+| 2607.12161 | Strongest: billed, paired, 2,848 runs, but own product, 5-min carryover, 4.5 turns | Fewer tool tokens did not reduce the billed cost; reads+writes about 80% of the bill; Claude Code first call reads 14-23k prefix tokens | Numbers accurate; "harness base 74.7%" from a different, inferred corpus with tool defs merged; Headroom +48% not general | Cite for cost structure, not for tool-definition share |
+| 2604.22750 | Medium: 8 models, computed costs, breakdown for one model, figure-only | Input/cache reads dominate cost in all phases for Sonnet 4.5; same-task spread about 2x | Accurate; 30x unsupported in the body | Use 2x; no tool-definition evidence |
+| 2606.30560 | Medium-high for hit rates (real traces, 4,265 sessions); list-price computed cost; one lab | Prefix (cache-read) tokens are 95.7% of input and 59.5% of list-price cost; misses follow gaps over 5 min | Accurate; "append" includes cache writes; tool definitions not discussed | Good for long-session regime, not for 10-13-step tasks |
+| 2608.00101 | Medium: huge scale, client-side hit rates, no bills | Hit rate about 90% intra-turn, 55% across turns, 8% after model switch; system prompt 14% of input | Accurate (serving hit rate, not billed) | Use for cache fragility and routing risk |
+| 2601.06007 | Low-medium: n=40 per cell, cache-defeated baseline, 10k prompt | Caching saved 41-80% against a no-cache baseline, mostly from the static system prompt | Accurate; second half correct but tool-result conditions exist | Tool-set invalidation remains an untested assertion |
+| Quesma blog | Low-medium: independent, 1,740 attempts, cost source unstated | RTK's 89% "tokens saved" coincided with +5-17% cost; reads 26-30% of bill, output 56% on DeepSeek | Accurate | Shows output dominance at low cache ratios |
+| llm-d blog | Low: vendor, secondary data, main-agent only | Main-agent Claude Code requests reuse a median 99.6% of input as verbatim prefix | 96% claim overstated (main-agent subset) | Potential reuse only |
+| OpenRouter newsletter | Medium-low: large real traffic, self-classified, tokens not dollars | Cached share of agentic prompt tokens rose from about 60% to just under 90% in 2026 | Accurate; different bases for 90% and 85% | Supports high cache share on third-party routes |
+
+## Could not verify
+Authors' code/data repos (Weinberger reproducibility package, Bai project site, TraceLab GitHub) were not fetched (budget; WebFetch limit); thus the 30x origin, the identity of the Table 1 corpus, and Bai's per-phase dollar shares remain unconfirmed. Plot-only numbers (Bai Fig 8, Copilot Fig 11) could not be read from extracted text. The Quesma, llm-d and OpenRouter pages were read through WebFetch summaries, not raw HTML; "cost source not stated" is a not-found in that text only. Weinberger Table 13 line numbers are approximate.
