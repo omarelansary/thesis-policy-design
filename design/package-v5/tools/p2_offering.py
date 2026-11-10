@@ -45,6 +45,9 @@ ap.add_argument("--min-interval", type=float, default=0.0, help="seconds between
 ap.add_argument("--retry-429", type=int, default=0, help="retry a rate-limited call this many times after --min-interval + 5 s")
 ap.add_argument("--provider", default="", help="OpenRouter only: pin this provider, fallbacks off, and bill by OpenRouter's "
                 "reported cost (P2b on OpenRouter: GMICloud, INT-T-050)")
+ap.add_argument("--mask", default="", help="P4 (AUTH-033): TRIGGER,KEEP,LEAST, Anthropic's clear_tool_uses applied client-side: when "
+                "a request's input exceeds TRIGGER tokens, replace the oldest tool results by a placeholder, keeping the last KEEP, if at "
+                "least LEAST tokens go; cleared results stay cleared (chat_completions only; off by default)")
 ap.add_argument("--timeout", type=float, default=300.0,
                 help="client timeout per attempt, seconds (P2 main: 300; P2b on ScaDS: 1200, INT-T-049)")
 ap.add_argument("--price", default="", help="input,cached_input,output dollars per million tokens (required for a live run)")
@@ -144,6 +147,40 @@ class P2Agent(SimplifiedFunctionCallingAgent):  # type: ignore[misc]
         return [], Usage(), Status(failed=False)
 
 
+MASK = [int(x) for x in args.mask.split(",")] if args.mask else None
+if MASK:
+    import tiktoken  # noqa: E402
+    _enc = tiktoken.get_encoding("o200k_base")
+    _tok = lambda x: len(_enc.encode(x if isinstance(x, str) else json.dumps(x)))
+    PLACEHOLDER = "[tool result cleared]"
+
+
+def mask_clearing(msgs):
+    """Client-side clear_tool_uses (stored source v5-anthropic-context-editing-20261022.md lines 38-40, 1724-1732)."""
+    if CUR.get("mask_task") != CUR["task"]:
+        CUR.update(mask_task=CUR["task"], cleared=set(), cleared_tokens=0, last_prompt=0, last_n=None)
+    trig, keep, least = MASK
+    for i, m in enumerate(msgs):  # cleared results stay cleared, whether or not the agent's own list kept the edit
+        if m.get("role") == "tool" and m.get("tool_call_id") in CUR["cleared"] and m.get("content") != PLACEHOLDER:
+            msgs[i] = {**m, "content": PLACEHOLDER}
+    size = lambda m: _tok(m.get("content") or "") + sum(_tok(((tc.get("function") or {}).get("arguments")) or "") + 8
+                                                        for tc in (m.get("tool_calls") or [])) + 4  # text, call arguments, framing
+    est = CUR["last_prompt"] + (sum(size(m) for m in msgs[CUR["last_n"]:]) if CUR["last_n"] is not None else 0)
+    now_cleared = 0
+    if CUR["last_n"] is not None and est > trig:
+        tools_i = [i for i, m in enumerate(msgs) if m.get("role") == "tool"]
+        cand = [i for i in (tools_i[:-keep] if keep else tools_i) if msgs[i].get("tool_call_id") not in CUR["cleared"]]
+        x = sum(_tok(msgs[i].get("content") or "") - _tok(PLACEHOLDER) for i in cand)
+        if cand and x >= max(least, 1):
+            for i in cand:
+                CUR["cleared"].add(msgs[i].get("tool_call_id"))
+                msgs[i] = {**msgs[i], "content": PLACEHOLDER}
+            CUR["cleared_tokens"] += x
+            now_cleared = x
+    CUR["last_n"] = len(msgs)
+    return {"mask_est_input": est, "mask_cleared_now": now_cleared, "mask_cleared_total": CUR["cleared_tokens"]}
+
+
 _OpenAI = lmm.OpenAI
 lmm.OpenAI = lambda **kw: _OpenAI(timeout=args.timeout, **kw)
 _orig_get = lmm.get_raw_lm_caller
@@ -169,6 +206,8 @@ def _get(*a, **kw):
                                  "provider": {"order": [args.provider], "allow_fallbacks": False}, "usage": {"include": True}}
         rec = {"task": CUR["task"], "arm": args.arm, "api": args.api, "n_tools": len(ckw.get("tools") or []),
                "n_items": len(ckw.get("messages") or ckw.get("input") or [])}
+        if MASK and ckw.get("messages"):
+            rec.update(mask_clearing(ckw["messages"]))
         r, attempt = None, 0
         while True:
             if args.min_interval:
@@ -202,6 +241,8 @@ def _get(*a, **kw):
             raise e
         CUR["fail_streak"] = 0
         d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
+        if MASK:
+            CUR["last_prompt"] = ((d.get("usage") or {}).get("prompt_tokens") or 0)
         u = d.get("usage") or {}
         if "input_tokens" in u:  # Responses API
             det, cdet = u.get("input_tokens_details") or {}, u.get("output_tokens_details") or {}
@@ -261,7 +302,7 @@ if bad:
     sys.exit(f"not eligible dev task ids: {bad}; nothing was run")
 if args.limit:
     ids = ids[: args.limit]
-meta = dict(tag=args.tag, timeout=args.timeout, provider=args.provider, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
+meta = dict(tag=args.tag, timeout=args.timeout, provider=args.provider, mask=args.mask, arm=args.arm, model=args.model, api=args.api, base=args.base, seed=args.seed,
             no_reasoning_param=args.no_reasoning_param, min_interval=args.min_interval, reasoning_effort=args.reasoning_effort, temperature=args.temperature,
             price=args.price, max_spend=args.max_spend, apps=APPS, tasks=ids, started=utc(),
             harness_sha256=__import__("hashlib").sha256(open(__file__, "rb").read()).hexdigest())
