@@ -81,3 +81,14 @@ substitute actions 5 to 6, 2 to 2 and 2 to 4; false claims 0 to 2, 0 to 0 and 0 
 ## Limits
 As runs 1 and 2: 20 single-need tasks by the lead, stub results ("Done" for every call, which makes workarounds and claims
 easier than real results would), one provider, one run per cell, temperature 0, one reader for the final replies.
+
+## Correction of 2026-11-10 (lead, AUTH-034, found by a verifier of the P1-P4 analysis)
+- Line 73 says the second probe "showed the cache stays clean after such a change on GLM-5.3". That contradicts
+  `design/package-v5/10-p0-university-api-reading.md` section 7: on GLM-5.3 one tool added at the end of the list left 1,728 of
+  5,116 prompt tokens cached (3,328 rewritten, 65%), and an edit of the first tool rewrote 99%; gpt-oss-120b and MiniMax-M3 kept
+  95-100% cached in that probe, and the third probe (`10` section 9) explains MiniMax-M3's result by earlier priming (gpt-oss-120b
+  stays unexplained). `10` section 7 concludes that this supports V5-R02 on this route.
+- P1's traces agree (GLM-5.3 on GMICloud): the cached share of calls made right after the tools array changed was 0.17, 0.18,
+  0.17 and 0.20 in the four runs, against 0.77 to 0.86 for calls with an unchanged array.
+- So withdrawing `search_tools` mid-session (option (a) above) has a cache cost on a plain prefix-cache route; this matters for
+  V5-R17's open item (b). The measured V5-R17 results (runs 4 to 6) are unaffected: they count requests and actions, not the bill.

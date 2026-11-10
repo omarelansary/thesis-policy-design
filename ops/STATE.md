@@ -2,13 +2,14 @@
 
 Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an authorization; read `ops/AUTHORIZATIONS.md`.
 
-## A. Research work (V5; `v5-audit`; `v5-p5-break-even` merged into it 2026-11-09, WD-085)
+## A. Research work (V5; `v5-audit`; `v5-p5-break-even` merged into it 2026-11-09 and 2026-11-10, WD-085, WD-088)
 - **V5 audit** (AUTH-020): conceptual package; start at `design/package-v5/00-README.md`. Working draft V5-R = DPR-0007, plus V5-R17 (provisional). Nothing is validated, approved or final. Benchmark register `17`.
 - **Probes R1-R3 and GLM-5.3 on ScaDS done** (AUTH-024 to AUTH-027; results `exchange/prior-work/v5-probes/results/` and `R3-GLM/`): merged into `v5-audit` and pushed (77357c1; WD-071, WD-072).
 - **P5 done** (AUTH-028): part B, OpenAI side check, $0.594 (WD-073); part A, ScaDS GLM-5.3, free: break-even between 10 and 30 tools; D-01 fits the client route; D-01 kept, D-01h added for vendor-hosted search (WD-079).
 - **P3 closed** (AUTH-029): six runs, $9.953; models search uninstructed; V5-R17 adds a stop for a missing tool, provisional (WD-074 to WD-076; `design/package-v5/inputs/p3/P3-LOG.md`).
-- **P2 done** (AUTH-030, AUTH-031): OpenAI, $12.69; server-enforced offering at a fixed prefix kept the cache, with no accuracy loss beyond run-to-run variation (oracle subsets, 128 tools). P2b ($5.78, OpenRouter GMICloud; ScaDS could not finish it): GLM-5.3 followed the instruction-only subset fully; HYP-0018 kept open (WD-077 to WD-080, WD-084).
-- **End-to-end and P1 prepared** (AUTH-030, WD-081): 16 validated task pairs; AppWorld's natural returning users first. The end-to-end study waits for its own authorization. P4's condition not met in P2's logs (`inputs/p4/P4-CONDITION-CHECK.md`; the human decides). Slides (`v5-slides`, other session) are updated with all results at the end (INT-T-053).
+- **P2 done** (AUTH-030, AUTH-031): OpenAI, $12.69; server-enforced offering at a fixed prefix kept the cache; no accuracy difference detected, small effects not excluded (oracle subsets, 128 tools; `inputs/p2/RESULTS-P2-MAIN.md` corrections). P2b ($5.78, OpenRouter GMICloud; ScaDS could not finish it): GLM-5.3 followed the instruction-only subset fully; HYP-0018 kept open (WD-077 to WD-080, WD-084).
+- **P1 and P4 done by the lead while the human was away** (AUTH-033, WD-086): P1 ($11.39): role memory saves about one search per session; no bill effect shown (−16%, −5% or +16% depending on single sessions); per-user memory loses on gold except one rule that seeds almost nothing. P4 ($5.39, short tasks): clearing old tool results doubled the bill where it fired; accuracy difference not detected. Results `inputs/p1/RESULTS-P1.md`, `inputs/p4/RESULTS-P4.md`; HYP-0017 and HYP-0021 stay `proposed`. **Analysis of P1 to P4 together** (AUTH-034, WD-087): artifact https://claude.ai/artifact/DmcYSDBuCxEgyq52wBkjDR, source `inputs/analysis/ANALYSIS-P1-P4.html`; its questions for the human are the next decisions (`ops/OPEN-TASKS.md`).
+- **End-to-end prepared** (AUTH-030, WD-081): 16 validated task pairs. It waits for its own authorization. Slides (`v5-slides`, other session) are updated with all results at the end (INT-T-053).
 - **Answers of 2026-11-07** (INT-T-023, INT-T-024; `design/ledger/notes/ANSWERS-20261107.md` on `v5-r3-part-b-results`): `17` section 9 postponed; research question entered as pointers (`requirements/THESIS_QUESTION.md`; that file and the answers file are on `v5-audit`); Executor closed for now (WD-069). Still open: the workbook (no `openpyxl` on Linux); Q-U15, Q-U25, Q-U27; the supervisor's verdict on V5 (Q-J31, Q-J32; Q-J33 only for an Executor baseline).
 - **The lead's to-do list:** `ops/OPEN-TASKS.md` (not an authorization).
 
@@ -21,7 +22,7 @@ Earlier versions, verbatim and dated: `ops/STATE-ARCHIVE.md`. Nothing here is an
 - The human's `.workspace/` stays untracked and is never pushed.
 
 ## C. Operating rules
-- Authorizations: AUTH-020 (V5 audit), AUTH-021 to AUTH-023 (machine portability, see D), AUTH-024 to AUTH-027 (R3 probes; done), AUTH-028 (P5; done), AUTH-029 (P3; closed), AUTH-030 (group 1 and 2, P2 preparation) and AUTH-031 (P2 runs, P2b).
+- Authorizations: AUTH-020 (V5 audit), AUTH-021 to AUTH-023 (machine portability, see D), AUTH-024 to AUTH-027 (R3 probes; done), AUTH-028 (P5; done), AUTH-029 (P3; closed), AUTH-030 (group 1 and 2, P2 preparation), AUTH-031 (P2 runs, P2b) and AUTH-033 (P1 and P4 by the lead, human away; the lead's limits) and AUTH-034 (analysis of P1 to P4). AUTH-032 is the deck session's (`v5-slides`).
 - Run allow-listed commands alone, never chained (WD-042, WD-043). The guard allows only `git push [-u] origin v5-audit` and the same for the Linux branch; the human pushes anything else.
 - Agents: evidence-steward, design-proposer, design-challenger; protocol `ops/PROTOCOL.md`.
 - Research outputs go on a branch cut from `v5-audit` and reach it by merge, only when the human says so (WD-061).

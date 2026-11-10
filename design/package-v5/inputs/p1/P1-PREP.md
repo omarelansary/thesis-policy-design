@@ -78,3 +78,93 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
 - **Change record:** `05` P1's wording ("multi-session users built by a declared construction") is not changed yet. AppWorld's
   natural users are a construction too: the session order by date is chosen. The synthetic part becomes optional, conditional on
   that result.
+
+## 6. Desk check of HYP-0017's falsifier on these users (2026-11-10; no model request) [O], then [I]
+- **Script:** `design/package-v5/tools/p1_recurrence.py` (rebuilt; the script behind section 2 was not kept). It reproduces
+  section 2's non-core column exactly: recall 0.19 (quartiles 0 / 0 / 0.33, zero in 36, all in 3), precision 0.14 (0 / 0 / 0.25,
+  zero in 36), median seed set 6. It does **not** reproduce the "all APIs" column (it gives recall 0.55, precision 0.44, against
+  0.49 and 0.38); that column's definition was not recorded. The non-core column is the one M2 depends on.
+- **The falsifier** (HYP-0017): the seed precision h stays below the break-even h* of `calc/memory_seed.py` (revision 4) for the
+  observed session length T, matches per search K and discovery mode. Here, client-side search, seeds = every non-core API needed
+  in the user's earlier sessions, h from AppWorld's required APIs (gold), T on a grid around P2's median of 8 requests.
+
+| K | r (cache read) | T = 3 | T = 8 | T = 10 | T = 30 |
+|---|---|---|---|---|---|
+| 1 | 0.1 | h* 0.21: 17/64 | 0.27: 15/64 | 0.29: 14/64 | 0.50: 7/64 |
+| 1 | 0.025 | 0.26: 15/64 | 0.28: 15/64 | 0.29: 14/64 | 0.37: 9/64 |
+| 3 | 0.1 | 0.15: 22/64 | 0.18: 20/64 | 0.20: 20/64 | 0.30: 14/64 |
+| 3 | 0.025 | 0.17: 21/64 | 0.18: 20/64 | 0.19: 20/64 | 0.23: 16/64 |
+
+  (Each cell: h* and the returning sessions whose h reaches it. r = 0.05 lies between the two rows; the script prints it.)
+- **Reading [I].** On AppWorld's natural users, seeding everything a user needed before pays in at most about a third of returning
+  sessions (7 to 22 of 64), and the mean precision (0.14) is below every h* in the grid (lowest 0.15). By gold, the falsifier is
+  met on average for this seed rule on these users. This does not yet falsify HYP-0017:
+  - h counts tools the task **needs**; the falsifier counts tools **called**, which a run would measure (models also call
+    seeded tools they do not need: the over-calling `05` P1 asks about);
+  - it tests one seed rule (everything used before); a narrower rule (for example, tools used in two or more earlier sessions)
+    would have a different h, and is untested;
+  - W, the cost of writing the memory, is not included (it would lower the saving further); T and K are assumed, not measured
+    on these tasks;
+  - the users are a construction (section 4).
+- **What it changes for P1 (for the human):** a model run on these users would most likely show M2 not paying, which is a result
+  (a negative result is still a thesis). Where M2 could pay, the high-recurrence returns, there are only 14 to 22 sessions.
+
+## 7. Step A: seed rules compared on gold (AUTH-033, 2026-11-10; no model request) [O], then [I]
+- **Script:** `design/package-v5/tools/p1_seed_rules.py`. Seeds come from history only. Net = needed seeds x saving - unneeded
+  seeds x cost (`calc/memory_seed.py` revision 4, client-side search), in fresh-input-token equivalents per returning session;
+  per needed seed 2,155 saved and per unneeded seed 488 spent at K = 3, T = 8, r = 0.1. A whole session of P2's size bills
+  roughly 50,000 (approximate).
+
+| Rule | Sessions with seeds | Mean seeds | Mean h | Mean recall | Net, K=3 T=8 | Net, K=1 T=8 | Net, K=3 T=30 | Sessions h >= h* (K=3 T=8) |
+|---|---|---|---|---|---|---|---|---|
+| all used before (M2 as written) | 64/64 | 6.1 | 0.14 | 0.19 | -963 | -1,594 | -3,700 | 20/64 |
+| used in 2+ earlier sessions | 15/64 | 0.3 | 0.30 | 0.02 | +88 | +10 | -15 | 5/64 |
+| most recent session only | 64/64 | 3.8 | 0.14 | 0.13 | -507 | -919 | -2,157 | 21/64 |
+| apps used in 2+ earlier sessions | 20/64 | 7.3 | 0.06 | 0.12 | -2,187 | -2,612 | -5,766 | 0/64 |
+| **pop6: six APIs most needed by other users (outside the current scenario)** | 64/64 | 6.0 | **0.24** | **0.38** | **+956** | -256 | -1,132 | **36/64** |
+
+- **Reading [I].** Per-user memory loses on the bill in every setting: the user's own history predicts too little. A role memory
+  (the tools other users need most; HYP-0017 says "this user or role") gains about 2% of a short session with three matches per
+  search, and loses with one match or in long sessions. pop6 does not depend on the user, so it is closer to a larger core
+  chosen from usage (S1; Copilot's core, EXT-0228) than to personal memory. Excluding the current scenario's sibling tasks did not
+  change pop6's result.
+- **Chosen for step B:** pop6 (the only rule with a positive net), against no memory and oracle seeds (the session's own gold).
+
+## 8. Step B plan (AUTH-033; harness not yet written; checkpoint of 2026-11-10)
+- **Harness** `design/package-v5/tools/p1_memory.py`, a copy of `p2_offering.py`'s structure (AppWorld's
+  `simplified_function_calling` agent and prompts as shipped, its evaluator, a new root and experiment per run, the same
+  OpenRouter hook: provider pin, billed cost, two-failure stop, 402 stop).
+- **Declared at start:** core = all supervisor APIs and every app's login API; one search tool `tools__search` (the name needs
+  exactly one `__`, or AppWorld's agent skips it); then the arm's seeds (none, pop6, or oracle).
+- **Search:** the harness rewrites each `tools__search` call's code into a `print` of the top 3 BM25 matches over all non-core
+  APIs (P3's ranker), and appends their definitions to the declared tools from the next request (V5's discovery).
+- **No stop rule:** every P1 task is doable; V5-R17 acts only after a no-match signal, and its forced reply would end an AppWorld
+  session without `complete_task`. Held equal across arms (a deviation from section 3, recorded here).
+- **Memory from gold:** pop6 needs no per-user memory; oracle uses the session's gold. First sessions are not run.
+- **Runs:** the 64 returning sessions x 3 arms x 2 repeats on `z-ai/glm-5.3` (OpenRouter, GMICloud). A smoke of 3 sessions
+  first gives the cost per session. If the projection exceeds AUTH-033's $12, the oracle arm (an upper bound, not needed for the
+  falsifier) is dropped before any repeat is cut (INT-T-048).
+- **Measures:** success, billed cost and DPR-0006 components, calls, searches, seeds called (measured h) and seeds called but not
+  needed (over-calling).
+
+## 9. Rule fixed during step B, before any arm comparison (2026-11-10 00:55 UTC)
+- **Observed in the first run (none, repeat 1), 16 sessions:** mean $0.078 per session, twice the smoke's $0.037, because one
+  session ran to AppWorld's 50-step cap (49 calls, $0.58); the others average about $0.044. Cached share 0.68 (P2: about 0.9):
+  each discovery appends to the tools array, which the chat template places before the messages, so the cached prefix ends there
+  (V5-R02's question; [O] here, the mechanism [I]).
+- **Rule (the lead; AUTH-033's $12 for P1 and $3 per run are kept, not raised):** if the first run stops at its $3 cap, the
+  other three runs (pop6 r1, none r2, pop6 r2) use exactly the sessions the first run completed, so all arms and repeats share
+  one session set and no repeat is cut. The sessions are AppWorld's returning sessions in their fixed order, so the set is a
+  prefix of that order, not a choice by outcome.
+- **Applied (03:20 UTC):** none r1 completed 44 sessions ($3.002), pop6 r1 completed the first 35 of them ($3.008; one session ran
+  to the step cap). The repeat-2 runs use exactly those 35 sessions, the set every run can share, with $2.93 each (P1 total:
+  smoke $0.110 + $3.002 + $3.008 + $0.021, an aborted start of none r2 on 44 sessions stopped by the lead after 6 calls, kept as
+  `p1-aborted-none-r2-44ids`, + 2 x $2.93 <= $12). On these 35 sessions repeat 1 cost $2.457 (none) and $2.549 (pop6).
+- **Correction (2026-11-10, after one review round):** this section's heading says "before any arm comparison". The rule for the
+  44 sessions was fixed before; the reduction to 35 and then 33 followed pop6's own caps, applied after pop6 r1's cost was seen,
+  and the costs of both arms on the 35 sessions are listed in the bullet above. So the final set depends on pop6's spending
+  (`RESULTS-P1.md` states this).
+
+## 10. Correction of 2026-11-10 (lead, AUTH-034, from an independent audit; checked by the lead against AppWorld's data)
+- "Sessions in date order" (sections 3 and 5, and the harness docstring) is mostly task-id order. 132 of AppWorld's 147 train and dev tasks carry the same timestamp (2023-05-18T12:00:00; 14 distinct values). The construction sorts by (timestamp, task id), so ties fall back to task id. Of the 33 sessions analysed, 8 are strictly later than the same user's previous one; for the other 25 the order is task-id order.
+- So "returning", "later" and "look-ahead" in P1 mean later in that order. The sessions are not a recorded history, and the gaps between them (relevant to the cache lifetime, REQ-U21-10) are not real. The 33 sessions fall in 26 distinct scenarios.

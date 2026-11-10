@@ -15,7 +15,7 @@
   scored (each stop left an unfinished task, which AppWorld's evaluator rejects).
 - Run instead on OpenRouter, `z-ai/glm-5.3` pinned to GMICloud fp8 with fallbacks off (INT-T-050, INT-T-051; `--provider`,
   commit ad0383d). Every one of the 855 calls was served by GMICloud.
-- **Effort as served** (INT-T-048: not lowered). On GMICloud "as served" behaves like effort high (reasoning tokens for one short
+- **No effort setting sent** (INT-T-048: effort not lowered, so GMICloud's default was used; across the 855 requests it served a mean of 481 reasoning tokens, median 38). In a probe, GMICloud's default behaves like effort high (reasoning tokens for one short
   question: none sent 236 and 421, high 224 and 172, low 50 and 73; `tools/p2b_effort_probe.py`). ScaDS's default is max. So
   this is not the university route: 8-bit against 4-bit weights, and a lower default effort.
 
