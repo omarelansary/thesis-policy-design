@@ -8,10 +8,12 @@ Kept on `v5-p5-break-even`, with the records (WD-082 moved them here from the Li
 Windows/Linux switch). `ops/STATE.md` section A points here.
 
 ## 1. Waiting on a condition (the lead does these when the condition is met)
-- [ ] **P1 and P4 under AUTH-033 (the lead, human away; checkpoint 2026-11-10).** Done: step A (`inputs/p1/P1-PREP.md`
-      section 7, commit 377928d). **Resume at step B** from `P1-PREP.md` section 8: write `tools/p1_memory.py`, smoke 3
-      sessions, then 64 returning sessions x (none, pop6, oracle) x 2 repeats on GLM-5.3 via OpenRouter GMICloud, at most $12;
-      then P4 (at most $8), then results, HYP-0017/HYP-0021 result sections, STATE.
+- [ ] **P1 and P4 under AUTH-033 (the lead, human away).** Done: P1 step A (`inputs/p1/P1-PREP.md` section 7), P4 step A
+      (`inputs/p4/P4-REPLAY-A.md`). **Running since 2026-11-10 00:22 / 00:40 UTC:** P1 step B (`tools/p1_memory.py`; runs
+      `p1-main-glm-5.3-{none,pop6}-r{1,2}` in `inputs/p1/local/runs/`, $3 cap each; oracle arm dropped for cost) and P4 step B
+      (`p2_offering.py --mask 30000,3,5000`; runs `p4-mask-glm-5.3-r{1,2}` in `inputs/p2/local/runs/`, $2.50 cap each; P2b's
+      `all` runs are the keep arm). When they end: analyse (`p2_analyze.py`, `p2_paired.py`, per-session P1 counts), results
+      files, HYP-0017/HYP-0021 result sections (status unchanged), WD entry, STATE.
 - [ ] **End-to-end study, from P3 and the preparation** (`05` section 3; V5-R17 open items a-c; `inputs/e2e/E2E-TASKS-DESIGN.md`):
       instruction-only arm; the stop's treatment of the tools array (V5-R02); model differences as an input to model choice; the
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
