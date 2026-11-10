@@ -31,7 +31,7 @@
 
 ## Step B rule, fixed during the run (2026-11-10 01:25 UTC; after seeing the first 7 tasks' costs, before any accuracy)
 - **Observed [O]:** mask repeat 1, first 7 tasks: billed $1.003 against $0.422 for the same tasks in P2b's keep-everything run 1,
-  and about twice the calls (for example 20 against 8, 19 against 7): after a clear the model calls tools again.
+  and about twice the calls (for example 20 against 8, 19 against 7). [I] After a clear the model seems to call tools again; this is not decomposed (`RESULTS-P4.md`).
 - **Rule (the lead; AUTH-033's $8 for P4 is kept):** if mask repeat 1 stops at its $2.50 cap, repeat 2 runs exactly the tasks
   repeat 1 completed, with a cap of $3.60 (smoke $0.40 + $2.50 + $3.60 = $6.50, within $8), and the keep arm is P2b's two `all`
   runs on the same tasks. The tasks are P2b's in their fixed order, so the set is a prefix of that order.
