@@ -49,11 +49,18 @@ def load(arm, rep):
     st = json.load(open(os.path.join(d, "stats.json")))
     ev = json.load(open(evf)).get("individual", {})  # per-task scoring preferred (tools/aw_eval_per_task.py)
     tasks = st.get("tasks", {})
+    trace_spend = {}
+    for l in open(os.path.join(d, "trace", "calls.jsonl")):
+        r = json.loads(l)
+        if r.get("status") == "ok":
+            trace_spend[r["task"]] = trace_spend.get(r["task"], 0.0) + (r.get("or_cost") or 0.0)
+    inter = {t: {"success": 0, "spend": trace_spend.get(t, 0.0), "calls": sum(1 for _ in ()), "searches": 0, "seeds": 0,
+                 "seeds_called": 0, "over": 0, "exception": "Stop"} for t, r in tasks.items() if r.get("exception") == "Stop"}
     per = {t: {"success": int(bool(ev.get(t, {}).get("success"))), "spend": r.get("spend", 0.0), "calls": r.get("calls", 0),
                "searches": r.get("searches", 0), "seeds": r.get("seeds", 0), "seeds_called": r.get("seeds_called", 0),
                "over": r.get("seeds_called_not_needed", 0), "exception": r.get("exception")} for t, r in tasks.items()
            if r.get("exception") != "Stop"}  # a session interrupted by the run's stop is not a session result
-    return {"per": per, "spend": st.get("spend"), "stopped": st.get("stopped")}
+    return {"per": per, "inter": inter, "spend": st.get("spend"), "stopped": st.get("stopped")}
 
 
 runs = {(arm, rep): load(arm, rep) for arm in ("none", "pop6") for rep in (1, 2)}
@@ -69,32 +76,42 @@ for (arm, rep), r in runs.items():
                                     "seeds": seeds, "seeds_called": sum(x["seeds_called"] for x in p),
                                     "measured_h": round(sum(x["seeds_called"] for x in p) / seeds, 3) if seeds else None,
                                     "seeds_called_not_needed": sum(x["over"] for x in p), "stopped": r["stopped"]}
-reps = [rep for rep in (1, 2) if runs[("none", rep)] and runs[("pop6", rep)]]
-if reps:
-    common = sorted(set.intersection(*[set(runs[(arm, rep)]["per"]) for arm in ("none", "pop6") for rep in reps]))
-    diff = {k: {t: statistics.mean(runs[("pop6", rep)]["per"][t][k] - runs[("none", rep)]["per"][t][k] for rep in reps) for t in common}
-            for k in ("success", "spend", "calls", "searches")}
-    us = sorted({OWNER[t] for t in common})
+def paired(view):
+    res = {}
+    reps = [rep for rep in (1, 2) if runs[("none", rep)] and runs[("pop6", rep)]]
+    if reps:
+        common = sorted(set.intersection(*[set(view[(arm, rep)]) for arm in ("none", "pop6") for rep in reps]))
+        diff = {k: {t: statistics.mean(view[("pop6", rep)][t][k] - view[("none", rep)][t][k] for rep in reps) for t in common}
+                for k in ("success", "spend", "calls", "searches")}
+        us = sorted({OWNER[t] for t in common})
 
-    def boot(vals):
-        rng = random.Random(0); bs = []
-        for _ in range(4000):
-            pick = [rng.choice(us) for _ in us]
-            v = [vals[t] for u in pick for t in common if OWNER[t] == u]
-            bs.append(sum(v) / len(v))
-        bs.sort()
-        return [round(bs[99], 4), round(bs[3899], 4)]
+        def boot(vals):
+            rng = random.Random(0); bs = []
+            for _ in range(4000):
+                pick = [rng.choice(us) for _ in us]
+                v = [vals[t] for u in pick for t in common if OWNER[t] == u]
+                bs.append(sum(v) / len(v))
+            bs.sort()
+            return [round(bs[99], 4), round(bs[3899], 4)]
 
-    for k in ("success", "spend", "calls", "searches"):
-        out["paired"][k] = {"mean_diff_per_session": round(statistics.mean(diff[k].values()), 4), "ci95_user_cluster": boot(diff[k])}
-    base_spend = statistics.mean(statistics.mean(runs[("none", rep)]["per"][t]["spend"] for rep in reps) for t in common)
-    out["paired"]["spend"]["none_mean_per_session"] = round(base_spend, 4)
-    out["paired"]["spend"]["relative"] = round(out["paired"]["spend"]["mean_diff_per_session"] / base_spend, 3)
-    out["paired"]["by_band"] = {b: {"sessions": sum(BAND[t] == b for t in common),
-                                    "success_diff": round(statistics.mean([diff["success"][t] for t in common if BAND[t] == b] or [0]), 3),
-                                    "spend_diff": round(statistics.mean([diff["spend"][t] for t in common if BAND[t] == b] or [0]), 4)}
-                                for b in ("zero", "low", "high")}
-    out["paired"]["sessions"], out["paired"]["users"], out["paired"]["repeats"] = len(common), len(us), reps
+        for k in ("success", "spend", "calls", "searches"):
+            res[k] = {"mean_diff_per_session": round(statistics.mean(diff[k].values()), 4), "ci95_user_cluster": boot(diff[k])}
+        base_spend = statistics.mean(statistics.mean(view[("none", rep)][t]["spend"] for rep in reps) for t in common)
+        res["spend"]["none_mean_per_session"] = round(base_spend, 4)
+        res["spend"]["relative"] = round(res["spend"]["mean_diff_per_session"] / base_spend, 3)
+        res["by_band"] = {b: {"sessions": sum(BAND[t] == b for t in common),
+                                        "success_diff": round(statistics.mean([diff["success"][t] for t in common if BAND[t] == b] or [0]), 3),
+                                        "spend_diff": round(statistics.mean([diff["spend"][t] for t in common if BAND[t] == b] or [0]), 4)}
+                                    for b in ("zero", "low", "high")}
+        res["sessions"], res["users"], res["repeats"] = len(common), len(us), reps
+    return res
+
+
+MAIN = {k: r["per"] for k, r in runs.items() if r}
+SENS = {k: {**r["per"], **r["inter"]} for k, r in runs.items() if r}
+out["paired"] = paired(MAIN)  # sessions completed in every run
+out["paired_incl_interrupted"] = paired(SENS)  # sensitivity: a session cut by a run's stop counts as a failure with its spend so far
+
 if runs[("none", 1)] and runs[("none", 2)]:
     c = set(runs[("none", 1)]["per"]) & set(runs[("none", 2)]["per"])
     out["none_flips_r1_vs_r2"] = sum(runs[("none", 1)]["per"][t]["success"] != runs[("none", 2)]["per"][t]["success"] for t in c)
