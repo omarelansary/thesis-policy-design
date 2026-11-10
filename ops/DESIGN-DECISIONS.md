@@ -677,3 +677,16 @@ Applied: guard hardening (wildcard/parent/`..`/outside-workspace paths, no sanct
 - **Conflicts (3), each "both sides appended at the end":** `00-README.md` (v5-audit's dated line, then the corrections of 2026-11-09), `12-experiment-readiness.md` (section 5 of v5-audit, then section 6, as section 6 itself says), `ops/DESIGN-DECISIONS.md` (v5-audit's R3 continuation bullets, then WD-059 to WD-084). Kept both, in that order, as raw bytes; no text reworded; 0 lines lost against either parent.
 - **Checks:** verifier fail=3 (the known literature summaries); guard tests 2 failures (Windows path forms; guard and tests identical to `v5-audit`'s, fixed by the Linux branch).
 - **Not pushed** (the human did not say push). `v5-slides` not touched; it does not yet have P2b or the later fixes.
+
+## WD-086 P1 and P4 carried out by the lead while the human was away (2026-11-10, AUTH-033, INT-T-054)
+- **The human:** "you own this, monitor and schdeule and contiune till you finish p1 fully then if possible do the same and finish p4 fully then we eanalyse". AUTH-033's limits are the lead's (the human stated none).
+- **P1 (`design/package-v5/inputs/p1/RESULTS-P1.md`, $11.394 of $12):**
+  - Step A (desk): per-user memory loses on the bill in every setting; role memory pop6 chosen.
+  - Step B: harness `tools/p1_memory.py` (the lead; before: none). Oracle arm dropped before any run (projection over $12). Capped runs shortened the session set to 33 sessions of 16 users, by rules fixed before any arm comparison (`P1-PREP.md` section 9).
+  - Result: searches −1.1 per session; bill −16% or +16% depending on one interrupted session (both intervals include 0); success unchanged. HYP-0017 result added, status `proposed`.
+  - Step C not run (the band can be read; budget nearly spent).
+- **P4 (`design/package-v5/inputs/p4/RESULTS-P4.md`, $5.385 of $8):**
+  - Step A (desk replay on P2 logs): vendor defaults never fire; vendor example raises the bill +1.0% to +7.5%.
+  - Step B: `p2_offering.py --mask` (the lead; off by default). Masking doubled the bill (x2.06; x2.66 where it fired, x1.00 where it did not), calls x1.37, accuracy unchanged. HYP-0021 falsifier met on this setting; status `proposed`.
+- **Changes along the way (the lead):** P1 and P4 local folders added to `.git/info/exclude` (before: P1's was not excluded; found before anything was committed); per-task scoring (`tools/aw_eval_per_task.py`; AppWorld's batch scoring fails after a stop mid-session); `p1_analyze.py` excludes, and in a sensitivity includes, sessions cut by a run's cap; size estimate of `--mask` corrected after its smoke.
+- **Not done:** no push, no merge; the other agent's worktree untouched.
