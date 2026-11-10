@@ -13,8 +13,9 @@ Windows/Linux switch). `ops/STATE.md` section A points here.
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
 
 ## 2. Waiting on the human (or Windows)
-- [ ] **Analyse P1 and P4 with the human** (INT-T-054 "then we eanalyse"): `inputs/p1/RESULTS-P1.md`, `inputs/p4/RESULTS-P4.md`;
-      review AUTH-033's limits (the lead's); decide whether per-user memory or the oracle arm should still run.
+- [ ] **Answer the analysis questions** (AUTH-034; artifact https://claude.ai/artifact/DmcYSDBuCxEgyq52wBkjDR, section "Questions for you"):
+      P4 on long tasks or parked; P1 choices (per-user memory live, synthetic users); discovery form for the end-to-end study;
+      university API or OpenRouter; models; HYP-0019; review of the lead's AUTH-033 limits.
 - [ ] **Push** (INT-T-047, WD-082): `v5-p5-break-even` (the research records now live here, with the P5, P3 and P2 work), and
       force-push the Linux branch, reset to 5abc9ac (administrative only; origin has d5ae226). Its rebase onto `v5-audit` 77357c1 is
       still to do (WD-072). The human pushes.
