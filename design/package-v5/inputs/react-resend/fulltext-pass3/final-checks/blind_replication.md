@@ -1,0 +1,12 @@
+# Replication report (own code: rep.py in this dir; r2.json = stored R2 file)
+Totals reproduce: MM all 3.041, MM sub 1.386, GLM all 10.583, GLM sub 7.022 USD (57 tasks per arm; GLM sub = 21 from glm-b2-control + 36 from -rest, one overlap resolved to -rest).
+1. Step-capped (>=48 agent requests): MM all 0 / 0% / 0%; MM sub 2 / 18.3% / 23.7%; GLM all 3 / 25.4% / 26.1%; GLM sub 7 / 74.7% / 88.1%. CONFIRMED. Max requests per task is 49 (never 50), counts identical for any threshold 45..48.
+2. Ratio of arm per-task mean bills (=ratio of totals when no task removed): MM 2.19 -> 2.59 (57 vs 55 tasks); GLM 1.51 -> 4.11 (54 vs 50 tasks). CONFIRMED. DIFFERS if read as the mean of per-task ratios (paired): MM 3.36 (3.47 with tasks capped in either arm dropped), GLM 10.34 (11.63). The claim's wording "per-task mean bill ratio" must mean ratio of means.
+3. Cold-start (first agent request cached tokens billed at fresh price), as % of arm bill: MM all +22.7, MM sub +0.13, GLM all +21.2, GLM sub +0.23. CONFIRMED.
+4. Anatomy (capped removed, subset arms; prefix = prompt of first agent request, cached fills prefix first): MM sub prefix 17.4 / history 39.5 / output 38.5 / predictor 4.5 %; GLM sub 15.2 / 22.2 / 49.7 / 12.9 %. CONFIRMED (~18/40/39/5; ~15/22/50/13).
+5. R2 file: DeepSeek complete 25/30 passed vs incomplete 23/27, turns 8.9 vs 9.48 (9.5), prompt 133,598 vs 128,828 (claim 128,827). MiniMax incomplete mean prompt 503,542 (claim 503,541) vs complete 105,092 (claim 105,091); step_capped task_ids = 0d8a4ee_2, 383cbac_1, 383cbac_3, all incomplete-set; excluding them incomplete n=16, turns 8.44 (8.4), prompt 85,660. CONFIRMED (off by 1 token = truncation vs rounding).
+## Definitional notes
+- The task statement says predictor requests have NO 'tools' key; in fact the key exists with value null (None). Testing key presence classifies predictor calls as agent calls: this makes cold-start for subset arms +5.7% / +3.2% and predictor share 0 -- wrong. Must test `tools is not None`. (All-tools arms have no null-tools requests.)
+- Cold-start is relative to the arm bill incl. predictor; it is an upper-bound style counterfactual only for first agent request (predictor cache assumed unchanged).
+- Prefix = first agent request's whole prompt (incl. system, task text), not only static part; history = rest. Cache attribution (prefix first) is an assumption.
+- "Step-capped" at >=48 requests: no task actually reached 50 logged agent requests.
