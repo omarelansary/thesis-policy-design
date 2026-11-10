@@ -51,7 +51,8 @@ def load(arm, rep):
     tasks = st.get("tasks", {})
     per = {t: {"success": int(bool(ev.get(t, {}).get("success"))), "spend": r.get("spend", 0.0), "calls": r.get("calls", 0),
                "searches": r.get("searches", 0), "seeds": r.get("seeds", 0), "seeds_called": r.get("seeds_called", 0),
-               "over": r.get("seeds_called_not_needed", 0), "exception": r.get("exception")} for t, r in tasks.items()}
+               "over": r.get("seeds_called_not_needed", 0), "exception": r.get("exception")} for t, r in tasks.items()
+           if r.get("exception") != "Stop"}  # a session interrupted by the run's stop is not a session result
     return {"per": per, "spend": st.get("spend"), "stopped": st.get("stopped")}
 
 
