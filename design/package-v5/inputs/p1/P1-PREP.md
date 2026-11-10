@@ -160,3 +160,7 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
   to the step cap). The repeat-2 runs use exactly those 35 sessions, the set every run can share, with $2.93 each (P1 total:
   smoke $0.110 + $3.002 + $3.008 + $0.021, an aborted start of none r2 on 44 sessions stopped by the lead after 6 calls, kept as
   `p1-aborted-none-r2-44ids`, + 2 x $2.93 <= $12). On these 35 sessions repeat 1 cost $2.457 (none) and $2.549 (pop6).
+- **Correction (2026-11-10, after one review round):** this section's heading says "before any arm comparison". The rule for the
+  44 sessions was fixed before; the reduction to 35 and then 33 followed pop6's own caps, applied after pop6 r1's cost was seen,
+  and the costs of both arms on the 35 sessions are listed in the bullet above. So the final set depends on pop6's spending
+  (`RESULTS-P1.md` states this).
