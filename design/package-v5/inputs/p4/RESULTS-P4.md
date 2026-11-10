@@ -54,3 +54,6 @@
 - AppWorld's tasks are short. Long tasks, where clearing is meant to pay, were not run (`05` P4 named MCPMark).
 - The keep arm ran a day earlier, with the earlier harness version; the never-cleared tasks show no drift, but the comparison
   is not simultaneous and that check is weak (see above).
+
+## Estimators (added 2026-11-10, AUTH-034; recomputed by the lead from `p4-analysis.json`)
+- Ratio of total spend ×2.06; mean of the per-task ratios ×2.12; median per-task ratio ×1.52; without the five tasks with the largest excess (they carry 73% of it) ×1.39. "Doubled" is the total-spend reading; a few tasks carry it.

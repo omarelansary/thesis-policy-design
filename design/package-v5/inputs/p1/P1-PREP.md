@@ -164,3 +164,7 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
   44 sessions was fixed before; the reduction to 35 and then 33 followed pop6's own caps, applied after pop6 r1's cost was seen,
   and the costs of both arms on the 35 sessions are listed in the bullet above. So the final set depends on pop6's spending
   (`RESULTS-P1.md` states this).
+
+## 10. Correction of 2026-11-10 (lead, AUTH-034, from an independent audit; checked by the lead against AppWorld's data)
+- "Sessions in date order" (sections 3 and 5, and the harness docstring) is mostly task-id order. 132 of AppWorld's 147 train and dev tasks carry the same timestamp (2023-05-18T12:00:00; 14 distinct values). The construction sorts by (timestamp, task id), so ties fall back to task id. Of the 33 sessions analysed, 8 are strictly later than the same user's previous one; for the other 25 the order is task-id order.
+- So "returning", "later" and "look-ahead" in P1 mean later in that order. The sessions are not a recorded history, and the gaps between them (relevant to the cache lifetime, REQ-U21-10) are not real. The 33 sessions fall in 26 distinct scenarios.

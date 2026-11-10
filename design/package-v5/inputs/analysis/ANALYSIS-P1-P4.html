@@ -86,7 +86,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <header>
   <h1>P1 to P4 analysis</h1>
   <p class="lede">What the four experiments on the V5 tool-access policy show, how strong each result is, and what is still open. Your questions are at the end.</p>
-  <p class="meta">Written 2026-11-10 for you to read. Source text: <code>design/package-v5/inputs/analysis/ANALYSIS-P1-P4-draft.md</code>, commit <code>65c0535</code> (version 5). Nothing here is a decision; the policy, thresholds and margins stay yours.</p>
+  <p class="meta">Written 2026-11-10 for you to read. Source text: <code>design/package-v5/inputs/analysis/ANALYSIS-P1-P4-draft.md</code>, version 6 (corrected after a second audit on 2026-11-10; see the git log of this file). Nothing here is a decision; the policy, thresholds and margins stay yours.</p>
   <ul class="toc">
     <li><a href="#summary">Summary</a></li><li><a href="#read">How to read</a></li><li><a href="#p3">P3</a></li><li><a href="#p2">P2 and P2b</a></li>
     <li><a href="#p1">P1</a></li><li><a href="#p4">P4</a></li><li><a href="#across">Across the four</a></li><li><a href="#doubts">Doubts and corrections</a></li><li><a href="#claims">Claims table</a></li><li><a href="#questions">Questions for you</a></li>
@@ -96,6 +96,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <div class="panel check">
   <h3>How this analysis was checked</h3>
   <p>An independent analyser agent wrote it from the committed files only. Eight other agents then checked it against the files in four rounds. They found 28, 23, 10 and 12 problems. I checked each one against the files myself before applying it. Most were claims that went further than the evidence; a few were wrong numbers or wrong attributions.</p>
+  <p><b>A second, independent audit</b> (another session) then proposed ten wording changes. I checked each against the files: seven applied as proposed, three narrowed because the proposal went further than the data. I also tested the audit's other findings against the raw data. Five were true and were errors in this analysis: P1's "date order" is mostly task-id order; gpt-5-mini did not break the instruction's subset (it changed how it batches calls); I had divided GLM's out-of-subset tool calls by requests; P4's ×2.06 is one of several estimators; and the fixed-prefix arms in P2 start tasks warm while <code>drop</code> does not. All are corrected below and in the repository.</p>
   <p><b>The corrections of the last round were not checked a fifth time</b>, because I capped the process at four rounds. Treat the wording of those fixes with a little more care than the rest.</p>
   <p>Four committed files were corrected on the way: <code>ops/STATE.md</code> (a P2 sentence that overstated accuracy), <code>P4-REPLAY-A.md</code> (a suggestion labelled as observed), <code>RESULTS-P1.md</code> (a prompt-size comparison that was not matched) and <code>RESULTS-P3-RUN3.md</code> (a wrong statement about the cache). Section "Doubts and corrections" lists them.</p>
   <p class="note">Markers used below: <span class="t o">O</span> observed in a file, <span class="t">D</span> derived by arithmetic from numbers in a file, <span class="t i">I</span> interpretation, <span class="t u">U</span> unknown or not shown.</p>
@@ -105,18 +106,18 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <div class="cards">
   <div class="card"><span class="tag">P3</span><h3>Do models search for a hidden tool, and what stops a search for a missing one?</h3>
     <p>Three open-weight models searched without being told to, in 20 of 20 sessions each, and called the target in 19 to 20.</p>
-    <p>For a missing tool, no rule stopped the searching without also losing the other, doable task. The best combination (the stop rule plus one sentence in the instructions, now V5-R17) kept the doable task at 40, 39 and 37 of 40, and cut requests by 32 to 48%.</p>
+    <p>For a missing tool, no single rule from runs 2 to 5 stopped the searching without losing the other, doable task. Only the stop rule plus one sentence in the instructions (now V5-R17) did, and it was developed on the same 20 two-need tasks. It kept the doable task at 40, 39 and 37 of 40 and cut requests by 32 to 48%, partly by removing sessions that ran to the 12-request backstop.</p>
     <p class="strength">Small samples (20 tasks); tasks written by the lead; tools return a stub "Done"; the rule was built on the same 20 tasks it was tested on.</p></div>
   <div class="card"><span class="tag">P2 and P2b</span><h3>Does offering only a subset of the declared tools keep accuracy?</h3>
     <p>With the server enforcing the subset (OpenAI), the cache was kept and no call went outside it (0 of 120 task-runs). No accuracy difference was detectable, but the two models moved in opposite directions (+11.7 and −5.0 points).</p>
-    <p>An instruction alone worked for two of three models. Declaring only the subset was 20% and 10% cheaper on one stream.</p>
+    <p>An instruction alone kept all three models inside the named subset, but it doubled gpt-5-mini's requests through batching. Declaring only the subset was 20% and 10% cheaper on one stream (32% and 25% if every task started with a cold cache).</p>
     <p class="strength">Oracle subsets, 128 tools, 30 tasks from one app family; intervals allow losses up to 17 points. The university route itself was not tested.</p></div>
   <div class="card"><span class="tag">P1</span><h3>Does seeding tools from memory help returning users?</h3>
     <p>A role memory (the 6 tools other users need most) saved about 1.1 searches per session. The bill effect is −16%, −5% or +16% depending on one or two sessions, and every interval includes zero.</p>
     <p>Per-user memory was not run live; on the data it loses, except one rule that seeds almost nothing.</p>
-    <p class="strength">One model; 33 sessions of 16 users; the session set depends on cost caps; the role memory looks ahead in time.</p></div>
+    <p class="strength">One model; 33 sessions of 16 users; the session set depends on cost caps; the role memory counts sessions later in task-id order; most sessions are in task-id order, not date order.</p></div>
   <div class="card"><span class="tag">P4</span><h3>Does clearing old tool results lower the bill?</h3>
-    <p>On short tasks, the vendor's documented setting roughly doubled the bill (×2.06; ×2.66 where clearing fired) and raised calls (×1.37). Accuracy difference not detected.</p>
+    <p>On short tasks, the vendor's documented setting raised the bill ×2.06 on total spend (×2.12 mean of per-task ratios, ×1.5 median, ×1.39 without the five largest tasks, which carry 73% of the excess; ×2.66 where clearing fired) and raised calls (×1.37). Accuracy difference not detected.</p>
     <p>The hypothesis is about long runs, which were not tested, so it is neither confirmed nor refuted.</p>
     <p class="strength">One model; 20 tasks in 7 scenarios; I ran it although its precondition was not met.</p></div>
 </div>
@@ -124,7 +125,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <h3>The overall picture</h3>
   <ul>
     <li>What the tests support is at the level of mechanism: the cache survives enforced offering, and models search without instruction.</li>
-    <li>None of the four demonstrates a bill saving from a V5 add-on against run-to-run variation. Some point estimates are lower (removing unoffered definitions ×0.80 and ×0.90; one instruction result ×0.87 against ×1.37 on another model; P2b's instruction ×0.80), but they are single results and several are smaller than the gap between two identical runs. Enforced offering (×1.02, ×1.15) and clearing (×2.06) point up. P1's sign is unresolved. Role memory saves searches.</li>
+    <li>No experiment shows an established bill saving from a V5 stage: cost ratios carry no interval, and the lowest ones come from the contrast arm <code>drop</code> or from an instruction that names the oracle subset, with 2 repeats and one model each. Some point estimates are lower (removing unoffered definitions ×0.80 and ×0.90; one instruction result ×0.87 against ×1.37 on another model; P2b's instruction ×0.80), but they are single results and several are smaller than the gap between two identical runs. Enforced offering (×1.02, ×1.15) and clearing (×2.06) point up. P1's sign is unresolved. Role memory saves searches.</li>
     <li>The large saving in these data is another one: deferral against showing everything (P3 run 1 side observation: ×4.6 to ×30 per session; P5: deferral costs about 14 to 15% of showing everything at 100 tools).</li>
     <li>Every test is one benchmark (AppWorld), mostly short tasks, and one to three models. P3, P1 and P4 ran only on OpenRouter, not on the university API.</li>
   </ul>
@@ -142,10 +143,10 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <div><b>Backstop</b>A request cap per session, only a safety net in P3 (6 in run 1, 12 later).</div>
   <div><b>×0.80 and similar</b>A ratio against the reference arm: ×0.80 is 20% cheaper, ×2.06 is more than double.</div>
 </div>
-<p><b>The bill</b> is the cost computed from the provider's usage records and a price table (billing equation DPR-0006). The goal is to minimise it on average over turns and sessions with accuracy nearly the same (<code>ops/STATE.md</code> B; <code>requirements/REGISTER.md</code> H). There is no margin or threshold. Reporting is estimation only: paired differences with intervals, no pass or fail.</p>
+<p><b>The bill</b> is the cost computed from the provider's usage records and a price table (billing equation DPR-0006). The goal is to minimise it on average over turns and sessions with accuracy nearly the same (<code>ops/STATE.md</code> B; <code>requirements/REGISTER.md</code> H). There is no margin or threshold. Reporting is estimation only: paired differences with intervals, no pass or fail. P2 costs (OpenAI) are computed from usage and no file records a check against an invoice; for the 13 OpenRouter runs, computed and billed cost differ by at most 1.3%.</p>
 <div class="table-wrap"><table>
   <tr><th>Test</th><th>Models</th><th>Route and settings</th><th>Data</th></tr>
-  <tr><td>P3</td><td>MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3</td><td>OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell</td><td>20 tasks written by the lead over 463 AppWorld tool definitions; tool results are stubs ("Done")</td></tr>
+  <tr><td>P3</td><td>MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3</td><td>OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell</td><td>20 tasks written by the lead over 463 searchable AppWorld tool definitions plus 5 core tools (468 in the expose-all cell); tool results are stubs ("Done")</td></tr>
   <tr><td>P2</td><td>gpt-5-mini, gpt-5.4-mini</td><td>OpenAI Responses API, effort low, temperature 1.0</td><td>30 AppWorld dev tasks (10 scenarios, Spotify), 128 tools declared, 2 repeats</td></tr>
   <tr><td>P2b</td><td>GLM-5.3</td><td>OpenRouter, GMICloud fp8, temperature 0, effort as served</td><td>Same tasks, 2 repeats</td></tr>
   <tr><td>P1</td><td>GLM-5.3</td><td>Same route as P2b</td><td>33 sessions of 16 users, 2 repeats</td></tr>
@@ -158,7 +159,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 
 <h2 id="p3">P3: search for a hidden tool, and the stop for a missing one</h2>
 <p><b>Idea.</b> If most tools are deferred, the model must decide to search for the one it needs, without being told to. You added a second question (INT-T-031): when the tool does not exist, what makes the model stop? The stop had to be deterministic, not a count of turns. (HYP-0019, V5-R17.)</p>
-<p><b>Setup</b> <span class="t o">O</span>. Four situations: all 468 tools shown (E); the target deferred (D); the target absent (A); a similar wrong tool visible (W). Runs 1 to 3 used single-need tasks. Runs 4 to 6 used 20 two-need tasks: both tools present (P), or one missing and named first (AF) or second (AS). A "substitute" is a state-changing call of another tool in the missing tool's app; a "false claim" is saying the missing action was done. Total spend $9.953 <span class="t">D</span> (the run 1 and run 4 figures include their smoke tests).</p>
+<p><b>Setup</b> <span class="t o">O</span>. Four situations: all 468 tools shown (E; 463 searchable definitions plus 5 core tools); the target deferred (D); the target absent (A); a similar wrong tool visible (W). Runs 1 to 3 used single-need tasks. Runs 4 to 6 used 20 two-need tasks: both tools present (P), or one missing and named first (AF) or second (AS). A "substitute" is a state-changing call of another tool in the missing tool's app; a "false claim" is saying the missing action was done. Total spend $9.953 <span class="t">D</span> (the run 1 and run 4 figures include their smoke tests).</p>
 <h3>Result 1: models search without being told</h3>
 <p class="note">Sessions out of 20, MiniMax / DeepSeek / GLM, plain prompt variant (an index variant made no difference that 20 tasks can show).</p>
 <div class="table-wrap"><table>
@@ -179,7 +180,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <ul>
   <li><span class="t o">O</span> Run 2's rule listed the matched app's tools once. Substitutes doubled or tripled (MiniMax 5 to 10).</li>
   <li><span class="t o">O</span> Run 3's note-only rule did little: the note reached 50 of 60 sessions and only 10 then ended; requests fell 8 to 12%.</li>
-  <li><span class="t o">O</span> Run 4 (300 sessions per model over 5 variants; the missing-tool cells have 40 sessions per variant): a forced reply lost the doable task. It was done in 14 / 19 / 9 of 40, against 37 to 40 / 36 to 40 / 30 to 33 in the three no-rule copies of runs 4 and 5. Withdrawing only the search tool kept the doable task within the run-to-run spread (MiniMax 32 against 37 to 40) but made guessed-name calls rise.</li>
+  <li><span class="t o">O</span> Run 4 (300 sessions per model over 5 variants; the missing-tool cells have 40 sessions per variant): a forced reply lost the doable task. It was done in 14 / 19 / 9 of 40, against 37 to 40 / 36 to 40 / 30 to 33 in the three no-rule copies of runs 4 and 5. Withdrawing only the search tool kept the doable task within the run-to-run spread (MiniMax 32 against 37 to 40); guessed-name calls rose for MiniMax (3-4 to 12) and slightly for GLM (10-13 to 15), and DeepSeek stayed within its no-rule range (10-19).</li>
   <li><span class="t o">O</span> A replay of the logs, with no model call: at the first "no match", the doable tool had already been shown but not yet called in 51, 51 and 67 of 80 sessions. <span class="t i">I</span> The replay file reads this as models searching for both needs before acting, which is why any stop that ends the session at that point loses the doable task.</li>
 </ul>
 <h3>Result 3: the stop rule, with and without the sentence</h3>
@@ -197,12 +198,13 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <ul>
   <li><span class="t">D</span> Requests under DRY plus the sentence against the no-rule range: MiniMax −32 to −37%, DeepSeek −42 to −48%, GLM −43 to −44%.</li>
   <li><span class="t o">O</span> With both tools present, DeepSeek's 17 and GLM's 19 are one session below the no-rule range. "No harm" is not shown.</li>
+  <li><span class="t">D</span> Sessions at the 12-request backstop are at most 39-48% (MiniMax), 7-30% (DeepSeek) and 46-54% (GLM) of the no-rule requests (backstop sessions times 12, over total requests), against 3, 0 and 1 sessions with the rule and sentence. So the fall in requests is partly, not wholly, their removal.</li>
   <li><span class="t o">O</span> The sentence, exactly: "If a tool search reports that the catalogue has no tool for a need, do not try other tools for that need: tell the user that this part cannot be done, and carry out the rest of the request."</li>
   <li><span class="t o">O</span> The stop fired less with the sentence (24 / 21 / 15 sessions against 33 / 36 / 34). The run file reads this as most of the gain over DRY seeming to come from the sentence, and says the run cannot separate the two parts.</li>
 </ul>
 <h3>How strong is this?</h3>
 <ul>
-  <li>Samples are small (20 tasks per cell, 40 sessions per two-need cell); only large effects show. Two identical no-rule runs disagree on up to 5 of 20 tasks. <span class="t o">O</span></li>
+  <li>Samples are small (20 tasks per cell, 40 sessions per two-need cell); only large effects show. Two identical no-rule runs disagree on up to 5 of 20 tasks. <span class="t o">O</span> The two orders of the missing-tool cells are the same 20 tasks, so the 40 sessions per model are at most 20 independent tasks.</li>
   <li><span class="t o">O</span> Only the forced reply in run 4 reached significance (p at most 0.016). No cell of DRY did. The run file calls both DRY effects "very probably real" (fewer substitutes, a gain; fewer doable tasks done, a cost) because DRY lies below the whole no-rule range on both.</li>
   <li><span class="t i">I</span> The comparison is across runs, with no-rule runs made earlier the same day. DRY was designed from run 4's logs on the same 20 tasks that runs 5 and 6 then used, and the sentence was added after seeing run 5's failure. So these results are in-sample.</li>
   <li><span class="t i">I</span> "At or above the no-rule range" holds for MiniMax (40 equals the top of 37 to 40) and GLM (37, above 30 to 33). DeepSeek's 39 lies inside 36 to 40.</li>
@@ -236,15 +238,18 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 </table></div>
 <ul>
   <li><span class="t">D</span> <b>The cache</b>: <code>enf</code> cached share 0.929 / 0.934 against <code>all</code> 0.913 / 0.915 (gpt-5-mini), and 0.891 / 0.904 against 0.858 / 0.897 (gpt-5.4-mini). The cache was not broken.</li>
-  <li><b>Cost of <code>drop</code>:</b> the prefix was about 8,000 to 12,000 tokens against about 19,500. Cost was 20% lower (gpt-5-mini) and 10% lower (gpt-5.4-mini; smaller than the 21% gap between that model's two single <code>all</code> runs). The prefix then differs per task and per user, so sharing across users (V5-R06) is lost; which form is cheaper over many users depends on request rate and is not priced.</li>
+  <li><b>Cost of <code>drop</code>:</b> the mean prompt per call was about 8,500 to 11,100 tokens against about 19,500 (first-call prompt about 3,400 to 4,300 against about 14,700 to 14,800). Cost was 20% lower (gpt-5-mini) and 10% lower (gpt-5.4-mini; smaller than the 21% gap between that model's two single <code>all</code> runs). The prefix then differs per task and per user, so sharing across users (V5-R06) is lost; which form is cheaper over many users depends on request rate and is not priced.</li>
+  <li><span class="t">D</span> <b>Cold starts:</b> in <code>all</code>, <code>enf</code> and <code>instr</code> the first request of a task was mostly served from the previous task's cache (cached share 0.74 to 0.99), while <code>drop</code>'s was not (0.0 in 3 of 4 runs), because its prefix changes per task. If every task's first request were priced uncached, <code>drop</code> would be ×0.68 and ×0.75 against <code>all</code> (not ×0.80 and ×0.90), and the <code>all</code> bill would rise 18% and 24%. Whether sessions start warm depends on the gap between them.</li>
   <li><b>Cost of <code>enf</code>:</b> no saving (×1.02 and ×1.15). <span class="t">D</span> Two identical <code>all</code> runs of gpt-5.4-mini differ in cost by 21% ($1.172 against $0.967), so ×1.15 is within that single-run gap.</li>
+  <li><span class="t">D</span> <b>The instruction arm:</b> it kept all three models inside the named subset. Tool calls outside it: gpt-5-mini 19 of 1,507 (29 of 1,936 outside the oracle list in <code>all</code>), gpt-5.4-mini 0 of 1,782 (44 of 1,655), GLM 0 of 2,602 (156 of 2,133). It changed gpt-5-mini's batching, 1.06 tool calls per request against 2.78, so its requests doubled (697 to 1,417) while its tool calls fell. The cost effect is model-dependent (requests ×2.03, ×0.98, ×0.93). The first P2 write-up said gpt-5-mini "broke" the subset; the logs do not show that.</li>
+  <li><span class="t">D</span> <b>Step cap:</b> gpt-5-mini ran 1 to 7 tasks per run to or near the 50-step cap (<code>all</code> 2, <code>enf</code> 1 to 2, <code>instr</code> 6 to 7, <code>drop</code> 1 to 3), which are 22-24%, 12-18%, 41-46% and 15-38% of the arm's cost; its cost ratios largely reflect these tasks. gpt-5.4-mini had none.</li>
   <li><b>Noise:</b> two identical <code>all</code> runs disagree on 6 and 8 of 30 tasks (temperature 1.0, OpenAI models) and on 1 of 30 in P2b (temperature 0). No per-repeat McNemar test is below 0.05; the smallest p is 0.062.</li>
 </ul>
 <h3>How strong is this?</h3>
 <ul>
   <li><span class="t o">O</span> The files' own corrections say the supported wording is "no detectable difference, small effects not excluded". The intervals allow losses of up to 17 points (gpt-5.4-mini <code>enf</code>) and 28 points (gpt-5-mini <code>instr</code>). Six contrasts were made without correction, and the bootstrap has only 10 clusters.</li>
   <li><span class="t o">O</span> The +11.7 points for gpt-5-mini has the opposite sign to gpt-5.4-mini's −5.0. I would read this as model-dependent or noise, not as a general gain. <code>drop</code> was −3.3 and +8.3 with both intervals including zero.</li>
-  <li><span class="t i">I</span> The oracle subset contains exactly the tools the task needs, and in <code>instr</code> the sentence names them, which is a hint as much as a restriction. In <code>all</code>, GLM made 22% and 47% of its calls outside the oracle list and still succeeded 55 times in 60, so the oracle list is not the only working path. <span class="t u">U</span> Why the share jumped from 22% to 47% at temperature 0 is not explained.</li>
+  <li><span class="t i">I</span> The oracle subset contains exactly the tools the task needs, and in <code>instr</code> the sentence names them, which is a hint as much as a restriction. In <code>all</code>, GLM made 4.7% and 9.6% of its tool calls outside the oracle list (48 of 1,011 and 108 of 1,122; an earlier version divided by requests and gave 22% and 47%) and still succeeded 55 times in 60, so the oracle list is not the only working path. <span class="t u">U</span> Why the share doubled from 4.7% to 9.6% at temperature 0 is not explained.</li>
   <li><span class="t i">I</span> The vendor text implies the unoffered definitions stay visible under <code>allowed_tools</code>; no P2 arm checks it.</li>
   <li><span class="t o">O</span> P2b's "effort as served" differs from P2's effort low. On this provider "as served" behaves like effort high; the university's default is maximum.</li>
 </ul>
@@ -257,7 +262,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 
 <h2 id="p1">P1: seeding tools from memory for returning users</h2>
 <p><b>Idea.</b> For a returning user, offer at session start the tools that memory says were needed before. If enough seeded tools are used, they replace searches and save money; if too few, they only add tokens to carry. <code>calc/memory_seed.py</code> gives the break-even share h* of seeds that must be used. (HYP-0017.)</p>
-<p><b>Desk check first</b> <span class="t o">O</span> (no model run; reproduced by the analyser and by a verifier). AppWorld has 34 users with tasks in 2 to 5 scenarios; ordered by date that gives 64 "returning sessions" (an ordering I constructed, not a recorded history).</p>
+<p><b>Desk check first</b> <span class="t o">O</span> (no model run; reproduced by the analyser and by a verifier). AppWorld has 34 users with tasks in 2 to 5 scenarios. Ordered by the task timestamp with ties broken by task id, that gives 64 "returning sessions". <b>132 of AppWorld's 147 train and dev tasks carry the same timestamp</b> (14 distinct values), and of the 33 sessions analysed only 8 are strictly later than the same user's previous one; for the other 25 the order is task-id order. So this is an ordering I constructed, not a recorded history, and "later" below means later in that order.</p>
 <ul>
   <li>Seeding "everything used before": mean precision 0.14, zero in 36 of 64 sessions.</li>
   <li>All per-user rules lose on the bill, except "used in 2 or more earlier sessions", which seeds only 0.3 tools on average (net +88 at 8 requests).</li>
@@ -281,6 +286,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <tr><td>Calls</td><td>−1.35 (−3.23, −0.09)</td><td>−0.84 (counts the cut session as zero)</td></tr>
 </table></div>
 <ul>
+  <li><span class="t">D</span> The aggregate matters: the −16% is the ratio of total spend (0.84); the mean of the 33 per-session ratios pop6/none is +8% (1.08) and the median 0.97. The table's main column is a paired mean of per-session differences (repeats averaged) against the no-memory mean per session ($0.0708). The session being run when a cap hit is left out of it and counted as a failure with its spend so far in the sensitivity column.</li>
   <li><span class="t">D</span> The −16% rests on one session of the no-memory arm that ran away in one repeat only (49 calls, $0.584, in none r1; 8 calls and $0.025 in the other three runs). Without it the difference is −$0.003 per session, <b>−4.6%</b> (32 sessions).</li>
   <li><span class="t o">O</span> The +16% comes from adding session <code>7d7fbf6_1</code>: with pop6 it took 49 calls ($0.618) and then 22 calls ($0.923, cut by the cap); without memory 10 and 7 calls ($0.027, $0.019). It was expensive with pop6 in both repeats, so a seed effect is suggested by this session, not shown.</li>
   <li><span class="t">D</span> Mean prompt per call is higher for pop6 only when sessions cut by caps and runaways are counted (whole-run means: +12% and +30%). On the 33 sessions completed in all four runs it was 12,985 and 14,305 for pop6 against 15,430 and 14,164 for none (−16% and +1%), so <b>larger requests are not shown</b>. An earlier results file said otherwise; it was wrong and is corrected.</li>
@@ -288,11 +294,11 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 </ul>
 <h3>How strong is this?</h3>
 <ul>
-  <li><span class="t o">O</span> One model and provider; 33 sessions (half the planned 64); the user-level interval is rough.</li>
+  <li><span class="t o">O</span> One model and provider; 33 sessions (half the planned 64); the user-level interval is rough. <span class="t">D</span> The 33 sessions fall in 26 distinct scenarios, so they are less independent than 33 suggests.</li>
   <li><span class="t i">I</span> Sessions averaged about 11 to 12 requests. At that length, with 3 matches per search, h* is 0.19 to 0.21 at the project's cache ratios (0.22 at GLM-5.3's list ratio). The measured 0.27 counts seeds called, 7 per run of them not needed; called and needed is 0.23 to 0.24. Both are above h* but only 0.01 to 0.02 above the 0.22 case, so by the arithmetic role memory should pay a little (about +580 to +670 token-equivalents, about 1% of a session). At 30 requests h* is 0.30 at the base ratio, above the measured 0.27, so the sign depends on session length.</li>
-  <li><span class="t i">I</span> An expected saving of about 1% is far smaller than the interval (about ±34% of a mean of $0.071 per session). P1 could not have detected a 2% effect either way.</li>
+  <li><span class="t i">I</span> An expected saving of about 1% is far smaller than the interval (−$0.039 to +$0.008 on a mean of $0.071 per session, that is −55% to +12% of the no-memory mean). P1 could not have detected a 2% effect either way.</li>
   <li><span class="t o">O</span> <b>Selection effects.</b> The session set depends on pop6's own spending: it shrank from 44 to 35 to 33 sessions when pop6's runs reached their caps (my rule, applied after pop6 r1's cost was seen), and sessions that cost pop6 more were cut. <span class="t i">I</span> That may bias the main set in pop6's favour; the sensitivity column is the attempt to show the other side.</li>
-  <li><span class="t o">O</span> <b>pop6 looks ahead.</b> It counts other users' later-dated sessions, which a deployed system would not have. <span class="t i">I</span> It also does not depend on the user, so it is closer to a larger core chosen by usage (S1) than to personal memory. The memory is built from the correct answers, not from what the model did earlier.</li>
+  <li><span class="t o">O</span> <b>pop6 looks ahead.</b> It counts other users' sessions that come later in that order (task-id order for most), which a deployed system would not have. <span class="t i">I</span> It also does not depend on the user, so it is closer to a larger core chosen by usage (S1) than to personal memory. The memory is built from the correct answers, not from what the model did earlier.</li>
   <li><span class="t o">O</span> <b>Route.</b> Discovered tools were appended to the tools array, which V5-R02 allows. Cached share was 0.63 to 0.74 (0.64 to 0.69 without memory), against about 0.9 in P2 and 0.82 to 0.94 for the same model without discoveries. The prefix size also differs. <span class="t i">I</span> Appended discoveries ended the cached prefix on this route, so V5-R02's "appended discoveries" is not cache-safe here. The effect falls on both arms; its effect on the trade between seeds and searches is unknown.</li>
   <li><span class="t o">O</span> No stop rule was used in P1; the harness assumes every task is doable.</li>
 </ul>
@@ -318,6 +324,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <ul>
   <li><b>Paired, mask minus keep, per task</b> (95% bootstrap over 7 scenarios): success −0.025 (−0.175, +0.125); billed +$0.064 (+$0.024, +$0.107), <b>×2.06</b>; calls +2.8 (+0.7, +5.2), ×1.37.</li>
   <li><span class="t">D</span> Where clearing fired in either repeat (11 tasks): billed <b>×2.66</b>, calls ×1.72. Where it never fired (9 tasks): billed ×1.00, calls ×0.95.</li>
+  <li><span class="t">D</span> The estimator matters: ratio of total spend ×2.06; mean of the per-task ratios ×2.12; median ×1.52; without the five tasks with the largest excess, which carry 73% of it, ×1.39.</li>
   <li><span class="t">D</span> Mean prompt per call was larger in the mask arm (33.5k and 32.0k against 26.7k and 28.2k tokens), but the sessions were also longer, so this is not a clean comparison.</li>
 </ul>
 <h3>How strong is this?</h3>
@@ -340,7 +347,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 </ul>
 <h3>What conflicts or depends on the model</h3>
 <ul>
-  <li>P2: the instruction form was followed by two models and broken by one. <code>enf</code> was +11.7 points (interval excludes 0) on one OpenAI model and −5.0 (includes 0) on the other.</li>
+  <li>P2: the instruction kept all three models inside the subset, but it doubled gpt-5-mini's requests through batching and not the others'. <code>enf</code> was +11.7 points (interval excludes 0) on one OpenAI model and −5.0 (includes 0) on the other.</li>
   <li>P3: MiniMax made far more false claims than DeepSeek and GLM (5 to 8 against 0 and 0 to 1 with no rule; 3 against 0 and 0 with the rule and sentence) and more substitutes.</li>
   <li>P1 and P2b: P2b succeeded 55 of 60; P1's no-memory runs succeeded 39 of 44 and 34 of 35 on mostly other tasks. P1 sessions are longer (median 11 calls against 7). The success rates are similar, so no contradiction is shown.</li>
   <li>P4 step A against step B differ by an order of magnitude, and the two measurements differ in tasks and day.</li>
@@ -350,11 +357,11 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <div class="table-wrap"><table>
   <tr><th>V5 stage</th><th>Verdict</th><th>Basis</th></tr>
   <tr><td>Offering at a fixed prefix, enforced (OpenAI)</td><td><span class="chip ok">falsifier not met</span> HYP-0018 stays proposed. Mechanism observed (cache kept, 0 of 120 calls outside). Accuracy: no detectable difference, small effects not excluded. Oracle subsets, 128 tools, 2 OpenAI models.</td><td>P2</td></tr>
-  <tr><td>Offering by instruction, no enforcement</td><td><span class="chip sug">suggested</span> for two of three models. <span class="chip no">not shown</span> for the university route.</td><td>P2, P2b</td></tr>
+  <tr><td>Offering by instruction, no enforcement</td><td><span class="chip ok">observed</span> that all three models stayed inside the named subset (GLM on the OpenRouter route); the cost effect is model-dependent (requests ×2.03, ×0.98, ×0.93). <span class="chip no">not shown</span> for the university route.</td><td>P2, P2b</td></tr>
   <tr><td>Memory seeding</td><td><span class="chip ok">observed</span> for the role memory on one model that it saves searches (interval excludes 0). <span class="chip no">not shown</span> on the bill. Per-user memory live: <span class="chip no">not shown</span>. The rule tested was pop6, not per-user memory.</td><td>P1</td></tr>
   <tr><td>Search and deferral without instruction</td><td><span class="chip ok">falsifier not met</span> on 3 models with easy stub tasks (HYP-0019 stays open). Ranker quality <span class="chip no">not shown</span>.</td><td>P3</td></tr>
   <tr><td>Stop rule V5-R17</td><td><span class="chip sug">suggested</span> (provisional). Sentence-alone effect and real-task effect <span class="chip no">not shown</span>. Withdrawing search has a cache cost on a plain-prefix route.</td><td>P3, P1, P0</td></tr>
-  <tr><td>Masking old tool results</td><td><span class="chip bad">not supported on short tasks</span> (bill ×2.06, one model). The hypothesis's domain, long runs, was not tested; falsifier neither met nor refuted.</td><td>P4</td></tr>
+  <tr><td>Masking old tool results</td><td><span class="chip bad">not supported on short tasks</span> (bill ×2.06 on total spend, ×1.39 without the five largest tasks; one model). The hypothesis's domain, long runs, was not tested; falsifier neither met nor refuted.</td><td>P4</td></tr>
 </table></div>
 <h3>Weaknesses common to all four</h3>
 <ul>
@@ -362,6 +369,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <li>One to three models per test, on routes unlike the university API: GMICloud fp8 (8-bit weights) for P3, P2b, P1, P4; OpenAI for P2; the university runs 4-bit weights.</li>
   <li>Selection by cost caps: P1's 33 sessions depend on pop6's spending; P4's number of tasks was set by the mask arm's cap. Both rules were set by me, not by you. The $12 and $8 limits, the dropped oracle arm and the decision to run P4 are mine as well.</li>
   <li>In-sample development in P3, and a single reader of the final replies. Wide intervals (7 to 16 clusters). Multiple contrasts without correction.</li>
+  <li>Warm starts in P2: the fixed-prefix arms start each task from the previous task's cache and <code>drop</code> does not, so the arms are not priced alike at session start. Units of independence: P1's 33 sessions fall in 26 scenarios; P3's 40 sessions per model are 20 tasks in two orders.</li>
 </ul>
 
 <h2 id="doubts">Doubts, inconsistencies and corrections</h2>
@@ -371,12 +379,14 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <li><b>RESULTS-P3-RUN3.md said the cache "stays clean" after a tools-array change on GLM-5.3.</b> The P0 probe and P1's traces show the opposite. <span class="chip ok">corrected</span> (dated note appended).</li>
   <li><b>RESULTS-P1.md claimed larger requests with seeds</b> ("+16% on matched sets"). Not a matched comparison. <span class="chip ok">corrected</span> (WD-086 addendum 2).</li>
   <li><b>P4-REPLAY-A.md stated "the model calls tools again" as observed.</b> It is suggested. <span class="chip ok">corrected</span> (commit 8e1d99e).</li>
-  <li>My first P1 and P4 notes (WD-086) said "falsifier met", "accuracy unchanged" and "rules fixed before any arm comparison". An addendum supersedes them; the original lines and one commit subject remain, because history is not rewritten.</li>
+  <li>My first P1 and P4 notes (WD-086) said "falsifier met", "accuracy unchanged" and "rules fixed before any arm comparison". An addendum supersedes them, and the lines are now corrected in place with the original wording kept in brackets; one commit subject remains, because history is not rewritten. <code>RESULTS-P4.md</code> already said "neither met nor refuted".</li>
   <li>P1-PREP.md section 2's "all APIs" column does not reproduce (recall 0.55 and precision 0.44 against 0.49 and 0.38). The column that matters for memory seeding, non-core APIs, reproduces exactly.</li>
   <li>P2b cost: the analysis JSON sums to $5.797, the stated total is $5.781 (a $0.016 difference in one run). The ratio ×0.80 is unaffected. The JSON's <code>reasoning_effort: low</code> is a harness default; no reasoning parameter was sent.</li>
   <li>P3 run 6's "paired against plain" fields are all zero because run 6 has no plain cell; the comparison is by range only. Run 5's count of sessions without the doable task is 25, not 24, and run 1's MiniMax searched in 19 of 20 wrong-tool sessions; both are corrected in the run files.</li>
-  <li>Unexplained: why P2b's <code>all</code> arm made 22% and then 47% of its calls outside the oracle subset at temperature 0.</li>
+  <li>Unexplained: why P2b's <code>all</code> arm made 4.7% and then 9.6% of its tool calls outside the oracle subset at temperature 0.</li>
   <li>P5 and P0 are used as context and were not recomputed. The h* and pop6 net figures were recomputed independently by me and by a verifier.</li>
+  <li><b>Added after the second audit, each checked against the data:</b> P1's "date order" is task-id order for most sessions; gpt-5-mini did not break the instruction's subset (batching doubled its requests); GLM's out-of-subset share is 4.7% and 9.6% of tool calls, not 22% and 47%; P4's estimators range from ×1.39 to ×2.12; P2's fixed-prefix arms start warm and <code>drop</code> does not. <span class="chip ok">corrected</span> in the analysis, the results files (dated notes) and HYP-0017, 0018 and 0021.</li>
+  <li>"468 tools" and "463 definitions" are 463 searchable definitions plus 5 core tools. <code>ops/STATE.md</code> lacked AUTH-034 in its list; <span class="chip ok">added</span>.</li>
 </ol>
 
 <h2 id="claims">Claims table</h2>
@@ -394,14 +404,14 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
     <tr><td class="n">8</td><td>Enforced offering kept the cache and was enforced</td><td>O</td><td><code>main-analysis.json</code></td></tr>
     <tr><td class="n">9</td><td>Enforced accuracy +0.117 and −0.050; the second interval includes zero</td><td>O</td><td><code>main-paired-summary.json</code></td></tr>
     <tr><td class="n">10</td><td>No per-repeat McNemar test below 0.05</td><td>D</td><td><code>main-analysis.json</code></td></tr>
-    <tr><td class="n">11</td><td>The instruction form is model-dependent</td><td>I (the file's reading)</td><td><code>RESULTS-P2-MAIN.md</code> section 3.3</td></tr>
+    <tr><td class="n">11</td><td>The instruction's cost effect is model-dependent (it changed gpt-5-mini's batching and doubled its requests); the named subset was respected by all three</td><td>O/D</td><td>C2; recomputed from the traces on 2026-11-10</td></tr>
     <tr><td class="n">12</td><td>Declaring only the subset costs 20% and 10% less, on a single stream</td><td>O/D</td><td>cost ratios 0.80, 0.90</td></tr>
     <tr><td class="n">13</td><td>P2b: 0 of 412 calls outside; calls ×0.93, cost ×0.80 (×0.85 on repeat 2)</td><td>O</td><td><code>p2b-or-paired-summary.json</code></td></tr>
     <tr><td class="n">14</td><td>The oracle sentence is also a hint</td><td>I</td><td>analyser's reading, not in the files</td></tr>
     <tr><td class="n">15</td><td>pop6 measured h 0.27 against h* 0.19 to 0.21 (0.22 at r = 0.186)</td><td>D/I</td><td><code>p1-analysis.json</code>, <code>memory_seed.py</code></td></tr>
     <tr><td class="n">16</td><td>Searches −1.14 per session (−1.72, −0.63)</td><td>O</td><td><code>p1-analysis.json</code></td></tr>
     <tr><td class="n">17</td><td>Bill −16% / −4.6% / +16%, all uncertain</td><td>O/D</td><td><code>p1-analysis.json</code></td></tr>
-    <tr><td class="n">18</td><td>P1 could not detect a 2% effect</td><td>I</td><td>interval about ±34%</td></tr>
+    <tr><td class="n">18</td><td>P1 could not detect a 2% effect</td><td>I</td><td>interval −55% to +12% of the no-memory mean</td></tr>
     <tr><td class="n">19</td><td>P1's session set depends on pop6's spending</td><td>O</td><td><code>P1-PREP.md</code> section 9</td></tr>
     <tr><td class="n">20</td><td>P1 appended discoveries (allowed by V5-R02); cached share lower than same-model runs without discoveries</td><td>O</td><td><code>p1_memory.py</code>, <code>04</code> line 87</td></tr>
     <tr><td class="n">21</td><td>Per-user rules lose on the data, except the 2+ sessions rule</td><td>O</td><td><code>p1_seed_rules.py</code></td></tr>
@@ -428,7 +438,8 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 
   <div class="q"><h4>2. Do you accept my P1 choices, or should per-user memory run live and synthetic users be added?</h4>
     <p>My choices: pop6 as the tested rule, the oracle arm dropped, a 33-session set, and step C skipped on my own judgement. The result also depends on what you mean by memory: role memory (a core chosen from usage, close to S1) or per-user memory (which the desk check says loses).</p>
-    <ul><li>Accept as is.</li><li>Run per-user memory live.</li><li>Add synthetic users at controlled recurrence.</li></ul></div>
+    <ul><li>Accept as is.</li><li>Run per-user memory live.</li><li>Add synthetic users at controlled recurrence.</li></ul>
+    <p>One more point: the "returning" order is task-id order for most sessions (see P1). If order and gaps matter, the next test needs declared dates and gaps.</p></div>
 
   <div class="q"><h4>3. Which discovery form should the end-to-end study use?</h4>
     <p>Appending discovered tools to the tools array, or placing them in the message history. P1 appended, and its cached share was 0.63 to 0.74 (about 0.9 in P2; 0.82 to 0.94 in P2b with the same model and route but no discoveries). V5-R02 allows appended discoveries but forbids other changes to the array. V5-R17's search withdrawal needs no array change on routes with an offering mechanism and does on routes without one; the P0 probe shows a real cache cost on the university route. The files say the end-to-end study decides (V5-R17 open item b).</p></div>
@@ -439,7 +450,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
     <li>If an OpenRouter route is acceptable, the differences (8-bit against 4-bit weights, effort as served) must be stated as limits.</li></ul></div>
 
   <div class="q"><h4>5. Which models for the end-to-end study?</h4>
-    <p>P2 shows the instruction form is model-dependent, and P3 shows MiniMax-M3 making more false claims. Section 3 of the plan (<code>05</code>) intends at least two models, citing REQ-U21-08, which itself only says that models and providers are chosen when implementing. The files record MiniMax's behaviour as "an input to model choice".</p></div>
+    <p>P2 shows the instruction's cost effect is model-dependent, and P3 shows MiniMax-M3 making more false claims. Section 3 of the plan (<code>05</code>) intends at least two models, citing REQ-U21-08, which itself only says that models and providers are chosen when implementing. The files record MiniMax's behaviour as "an input to model choice".</p></div>
 
   <div class="q"><h4>6. Do you want HYP-0019 closed?</h4>
     <p>P3's falsifier was not met. You kept HYP-0018 open on your instruction (INT-T-044); HYP-0019's file says "closing it is the human's decision".</p></div>

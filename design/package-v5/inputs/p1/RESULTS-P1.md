@@ -85,3 +85,7 @@ sessions only. Mean prompt and cached share are not in `p1-analysis.json`.
 - Discovery appends to the tools array, which ends the cached prefix there (cached share 0.63 to 0.74 against about 0.9 in P2):
   the bill of discovery itself is high on this route, which affects both arms (V5-R02).
 - The users are a construction: AppWorld's tasks ordered by date (`P1-PREP.md` section 4).
+
+## Correction of 2026-11-10 (lead, AUTH-034, from an independent audit; checked by the lead)
+- "AppWorld's tasks ordered by date" and "later-dated" (Limits) overstate the dating: 132 of 147 tasks share one timestamp, and of the 33 sessions analysed only 8 are strictly later than the same user's previous one; the order is task-id order for the other 25 (`P1-PREP.md` section 10). pop6 "looks ahead" in that sense.
+- Aggregates: the −16% is the ratio of total spend (0.84); the mean of the 33 per-session ratios pop6/none is +8% (1.08) and the median 0.97. The 33 sessions fall in 26 scenarios.
