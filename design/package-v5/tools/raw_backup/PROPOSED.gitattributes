@@ -1,0 +1,6 @@
+# text files normalised nowhere: bytes in this repository are exactly what is hashed
+* -text
+# AUTH-035 (proposal): encrypted archives of the raw experimental records are stored with Git LFS (git keeps a small pointer,
+# the content lives in LFS). They are gpg-encrypted (AppWorld's data licence requires encrypted redistribution of derivatives).
+raw-records-encrypted/*.gpg filter=lfs diff=lfs merge=lfs -text
+raw-records-encrypted/*.gpg.part* filter=lfs diff=lfs merge=lfs -text

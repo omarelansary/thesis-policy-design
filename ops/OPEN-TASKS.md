@@ -13,6 +13,9 @@ Windows/Linux switch). `ops/STATE.md` section A points here.
       run without "The task is doable" on the unchanged tasks. Waits for the end-to-end authorization.
 
 ## 2. Waiting on the human (or Windows)
+- [ ] **Raw records backup (AUTH-035, WD-089):** archives and key are ready (`~/r3-work/raw-records-backup/`, `~/r3-work/raw-records-backup.KEY`). Your steps are in
+      `design/package-v5/tools/raw_backup/README.md`: copy the key to a safe place; install git-lfs; review `PROPOSED.gitattributes` and re-pin; add the
+      archives; push `v5-raw-records-backup`; fresh-clone test; Drive upload (not the key); tell the lead the results.
 - [ ] **Answer the analysis questions** (AUTH-034; artifact https://claude.ai/artifact/DmcYSDBuCxEgyq52wBkjDR, section "Questions for you"):
       P4 on long tasks or parked; P1 choices (per-user memory live, synthetic users); discovery form for the end-to-end study;
       university API or OpenRouter; models; HYP-0019; review of the lead's AUTH-033 limits.
