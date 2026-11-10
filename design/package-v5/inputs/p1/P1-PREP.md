@@ -156,3 +156,7 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
   other three runs (pop6 r1, none r2, pop6 r2) use exactly the sessions the first run completed, so all arms and repeats share
   one session set and no repeat is cut. The sessions are AppWorld's returning sessions in their fixed order, so the set is a
   prefix of that order, not a choice by outcome.
+- **Applied (03:20 UTC):** none r1 completed 44 sessions ($3.002), pop6 r1 completed the first 35 of them ($3.008; one session ran
+  to the step cap). The repeat-2 runs use exactly those 35 sessions, the set every run can share, with $2.93 each (P1 total:
+  smoke $0.110 + $3.002 + $3.008 + $0.021, an aborted start of none r2 on 44 sessions stopped by the lead after 6 calls, kept as
+  `p1-aborted-none-r2-44ids`, + 2 x $2.93 <= $12). On these 35 sessions repeat 1 cost $2.457 (none) and $2.549 (pop6).
