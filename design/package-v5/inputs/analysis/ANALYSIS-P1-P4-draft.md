@@ -65,11 +65,11 @@ Labels:
 
 | Test | Models | Route and settings | Data |
 |---|---|---|---|
-| P3 | MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3 | OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell | 20 lead-written tasks over 463 searchable AppWorld tool definitions plus 5 core tools (468 in the expose-all cell); tool results are stubs ("Done") (`p3/README.md`) |
-| P2 | gpt-5-mini, gpt-5.4-mini | OpenAI Responses API, effort low, temperature 1.0 | 30 AppWorld dev tasks (10 scenarios, Spotify), 128 tools declared, 2 repeats |
-| P2b | GLM-5.3 | OpenRouter, GMICloud fp8, Chat Completions, temperature 0, "effort as served" | Same tasks, 2 repeats |
-| P1 | GLM-5.3 | Same route as P2b | 33 sessions of 16 users, 2 repeats |
-| P4 | GLM-5.3 | Same route as P2b | 20 tasks in 7 scenarios, 2 repeats |
+| P3 | MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3 | OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell; no effort setting sent, so each provider's default; reasoning tokens served per request, mean (median): MiniMax-M3 0 (0), DeepSeek 124 (55), GLM-5.3 100 (47) | 20 lead-written tasks over 463 searchable AppWorld tool definitions plus 5 core tools (468 in the expose-all cell); tool results are stubs ("Done") (`p3/README.md`) |
+| P2 | gpt-5-mini, gpt-5.4-mini | OpenAI Responses API, effort low, set explicitly (reasoning tokens served per request, mean (median): gpt-5-mini 52 (0), gpt-5.4-mini 75 (25)), temperature 1.0 | 30 AppWorld dev tasks (10 scenarios, Spotify), 128 tools declared, 2 repeats |
+| P2b | GLM-5.3 | OpenRouter, GMICloud fp8, Chat Completions, temperature 0, no effort setting sent, so GMICloud's default (reasoning tokens served per request in P2b: mean 481, median 38) | Same tasks, 2 repeats |
+| P1 | GLM-5.3 | Same route as P2b (no effort setting sent, so GMICloud's default; mean 450, median 63 reasoning tokens per request) | 33 sessions of 16 users, 2 repeats |
+| P4 | GLM-5.3 | Same route as P2b (no effort setting sent, so GMICloud's default; mean 1,369, median 120 reasoning tokens per request in the masking runs) | 20 tasks in 7 scenarios, 2 repeats |
 
 - [O] None of P1 to P4 produced a scored result on the university API (ScaDS). P2b's three ScaDS attempts timed out or returned HTTP 408 and were not scored (`p2/RESULTS-P2B.md`). The university route appears here only as context (P5 part A, P0).
 - [O] Who decided what: the lead proposed the P3 models and the human confirmed them (INT-T-030), authorized each run and closed P3 (INT-T-039), and kept HYP-0018 open (INT-T-044). The lead wrote the tasks, harnesses and the classification of replies (one reader). The human set the $10 stop for P3 (INT-T-029) and accepted exceeding it for run 6 (INT-T-038; the $10.60 ceiling was the lead's). The lead set the $12 (P1) and $8 (P4) limits: during P1 and P4 the human was away and "stated none" (AUTH-033, `ops/AUTHORIZATIONS.md`).
@@ -148,7 +148,7 @@ Labels:
 - [U] The effect of the sentence alone. There is no instruction-only arm (moved to the end-to-end study).
 - [U] The effect on real AppWorld tasks with real results.
 - [U] Whether DRY plus the sentence works if `search_tools` stays and answers `no_match` instead of being withdrawn (`04` V5-R17 open item b). A note alone (search left in place) was weak in run 3 (the note reached 50 of 60 sessions and 10 of those then ended; requests fell 8 to 12%) and showed no measurable effect in run 4.
-- [U] Other models. MiniMax kept 7 substitutes and 3 false claims of 40 even with the rule, so this is model-dependent.
+- [U] Other models. MiniMax kept 7 substitutes and 3 false claims of 40 even with the rule, so this is model-dependent. [O] MiniMax-M3 served no reasoning tokens at all in P3 (0 in 5,259 requests), while DeepSeek and GLM averaged 124 and 100 per request; whether that explains its behaviour was not tested.
 - [I] V5-R17 withdraws `search_tools`. V5-R02 forbids changing the tools array within a session; `04` V5-R17 item (b) says that on routes with an offering mechanism (Anthropic tool removal, OpenAI `allowed_tools`) the withdrawal needs no array change, and on routes without one it does. This is open item (b). The P0 second probe on the university API (`10-p0-university-api-reading.md` section 7, not run 3) found that on GLM-5.3 one tool added at the end of the list left 1,728 of 5,116 tokens cached (65% rewritten), which `10` says supports V5-R02; gpt-oss-120b and MiniMax-M3 stayed 95 to 100% cached, and the third probe attributes MiniMax's to earlier priming (`10` section 9). `p3/RESULTS-P3-RUN3.md` section 4 worded this as "stays clean on GLM-5.3", which contradicts `10`; the lead corrected that file. P1's own traces agree: calls right after the tools array changed had a cached share of 0.17 to 0.20, against 0.77 to 0.86 otherwise. So withdrawing search mid-session has a cache cost on a plain-prefix-cache route.
 
 ---
@@ -200,13 +200,13 @@ Labels:
 - The instruction kept all three models inside the named subset (tool calls outside: gpt-5-mini 19 of 1,507 against 29 of 1,936 outside the oracle list in `all`; gpt-5.4-mini 0 of 1,782 against 44 of 1,655; GLM 0 of 2,602 against 156 of 2,133), but it changed gpt-5-mini's batching: 1.06 tool calls per request against 2.78 in `all`, so requests doubled (697 to 1,417) while tool calls fell (1,936 to 1,507). Its cost effect is model-dependent: requests x2.03 for gpt-5-mini, x0.98 for gpt-5.4-mini, x0.93 for GLM. The P2 files had said gpt-5-mini "broke" the subset; the logs do not show that (lead's recomputation, 2026-11-10).
 - `enf` was +11.7 points (interval excludes 0) on gpt-5-mini and -5.0 (interval includes 0) on gpt-5.4-mini.
 - `drop` was -3.3 on gpt-5-mini and +8.3 on gpt-5.4-mini; both intervals include 0, and the Corrections warn that none of the six contrasts supports an effect.
-- P2b's "effort as served" differs from main P2's effort low. `p2b-or-analysis.json` records `reasoning_effort: low`, but the local stats show `no_reasoning_param: true`. [I] The JSON field is probably the harness default (the run's `stats.json` also records `reasoning_effort: low` beside `no_reasoning_param: true`). The files say GMICloud "as served" behaves like effort high (`p2/RESULTS-P2B.md`).
+- P2b sent no effort setting, so GMICloud used its own default, while main P2 set effort low explicitly. What was served: across P2b's 855 requests GMICloud used a mean of 481 reasoning tokens (median 38); main P2 at effort low used a mean of 52 (gpt-5-mini) and 75 (gpt-5.4-mini). `p2b-or-analysis.json` records `reasoning_effort: low`, but the local stats show `no_reasoning_param: true`. [I] The JSON field is probably the harness default (the run's `stats.json` also records `reasoning_effort: low` beside `no_reasoning_param: true`). In a 6-request probe on one short question, GMICloud's default used as many reasoning tokens as effort high (236 and 421 with nothing sent, 224 and 172 at high, 50 and 73 at low; `p2/RESULTS-P2B.md`).
 
 **What P2 and P2b do not show.**
 - Realistic subsets that miss a needed tool.
 - Offering that changes within a session (the M2 case, where the problem would show).
 - Catalogue sizes other than 128, other benchmarks, and Anthropic's mechanism.
-- The university route, which has 4-bit weights, maximum effort and no `allowed_tools` (the proxy refuses it).
+- The university route, which has 4-bit weights, maximum effort (its documented default for GLM-5.3: thinking on at the highest level, "max") and no `allowed_tools` (the proxy refuses it).
 - Accuracy differences of a few points.
 
 ---
@@ -453,7 +453,7 @@ Paired, pop6 minus none, per session, 33 sessions of 16 users (95% bootstrap ove
    - V5-R17's search withdrawal needs no array change on routes with an offering mechanism and does on routes without one; the files say the end-to-end study decides (`04` V5-R17 open item b).
 4. **Do thesis claims need to hold on the university API?** Only the human knows the thesis constraint.
    - If yes, P2b's failure on ScaDS (timeouts, HTTP 408) means a new route test.
-   - If an OpenRouter route is acceptable, the model-and-route differences (8-bit against 4-bit, effort) need to be stated as limits.
+   - If an OpenRouter route is acceptable, the model-and-route differences need to be stated as limits: 8-bit against 4-bit weights, and effort (GMICloud's default, which used about as many reasoning tokens as "high" in the probe, against the university's documented "max").
 5. **Which models for the end-to-end study?** P2 shows the instruction's cost effect is model-dependent, and P3 shows MiniMax-M3 with more false claims. `05` section 3 plans at least two models (citing REQ-U21-08, which itself only says that models and providers are chosen when implementing). The files record MiniMax's behaviour as "an input to model choice".
 6. **Do you want HYP-0019 closed?** P3's falsifier was not met. HYP-0018 was kept open on your instruction (INT-T-044); HYP-0019's file says "closing it is the human's decision".
 7. **Do you accept the lead's cost limits and selection rules as they were, or should P1 and P4 be re-run under limits you set?** The $12, $8 and per-run caps shaped which sessions and tasks were measured, and you stated none.

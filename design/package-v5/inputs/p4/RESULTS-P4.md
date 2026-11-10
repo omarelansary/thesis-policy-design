@@ -14,7 +14,7 @@
   tokens, keep the last 3 tool results, clear only if at least 5,000 tokens go; stored source
   `v5-anthropic-context-editing-20261022.md` lines 38-40, 395-410, 1724-1732). Cleared results stay cleared. `p2_offering.py
   --mask 30000,3,5000` (commits 759de31 and its predecessor).
-- **Setting:** GLM-5.3 on OpenRouter pinned to GMICloud fp8, effort as served, temperature 0, seed 100; AppWorld dev, 128 tools
+- **Setting:** GLM-5.3 on OpenRouter pinned to GMICloud fp8, no effort setting sent (GMICloud's default; mean 1,369 reasoning tokens per request, median 120, in the masking runs), temperature 0, seed 100; AppWorld dev, 128 tools
   declared; the keep-everything arm is P2b's two `all` runs (same model, provider and settings, 2026-11-09).
 - **Tasks:** mask repeat 1 stopped at its $2.50 cap after 20 of P2b's 30 tasks; repeat 2 ran exactly those 20 (rule fixed in
   `P4-REPLAY-A.md` after the first 7 tasks' costs were seen, before any accuracy). The keep arm is read on the same 20. These are

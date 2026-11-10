@@ -146,11 +146,11 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <p><b>The bill</b> is the cost computed from the provider's usage records and a price table (billing equation DPR-0006). The goal is to minimise it on average over turns and sessions with accuracy nearly the same (<code>ops/STATE.md</code> B; <code>requirements/REGISTER.md</code> H). There is no margin or threshold. Reporting is estimation only: paired differences with intervals, no pass or fail. P2 costs (OpenAI) are computed from usage and no file records a check against an invoice; for the 13 OpenRouter runs, computed and billed cost differ by at most 1.3%.</p>
 <div class="table-wrap"><table>
   <tr><th>Test</th><th>Models</th><th>Route and settings</th><th>Data</th></tr>
-  <tr><td>P3</td><td>MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3</td><td>OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell</td><td>20 tasks written by the lead over 463 searchable AppWorld tool definitions plus 5 core tools (468 in the expose-all cell); tool results are stubs ("Done")</td></tr>
-  <tr><td>P2</td><td>gpt-5-mini, gpt-5.4-mini</td><td>OpenAI Responses API, effort low, temperature 1.0</td><td>30 AppWorld dev tasks (10 scenarios, Spotify), 128 tools declared, 2 repeats</td></tr>
-  <tr><td>P2b</td><td>GLM-5.3</td><td>OpenRouter, GMICloud fp8, temperature 0, effort as served</td><td>Same tasks, 2 repeats</td></tr>
-  <tr><td>P1</td><td>GLM-5.3</td><td>Same route as P2b</td><td>33 sessions of 16 users, 2 repeats</td></tr>
-  <tr><td>P4</td><td>GLM-5.3</td><td>Same route as P2b</td><td>20 tasks in 7 scenarios, 2 repeats</td></tr>
+  <tr><td>P3</td><td>MiniMax-M3, DeepSeek-V4.1-Flash, GLM-5.3</td><td>OpenRouter, GMICloud fp8 pinned, temperature 0, seed 7, one run per cell; no effort setting sent, so each provider's default; reasoning tokens served per request, mean (median): MiniMax-M3 0 (0), DeepSeek 124 (55), GLM-5.3 100 (47)</td><td>20 tasks written by the lead over 463 searchable AppWorld tool definitions plus 5 core tools (468 in the expose-all cell); tool results are stubs ("Done")</td></tr>
+  <tr><td>P2</td><td>gpt-5-mini, gpt-5.4-mini</td><td>OpenAI Responses API, effort low, set explicitly (reasoning tokens served per request, mean (median): gpt-5-mini 52 (0), gpt-5.4-mini 75 (25)), temperature 1.0</td><td>30 AppWorld dev tasks (10 scenarios, Spotify), 128 tools declared, 2 repeats</td></tr>
+  <tr><td>P2b</td><td>GLM-5.3</td><td>OpenRouter, GMICloud fp8, temperature 0, no effort setting sent, so GMICloud's default (reasoning tokens served per request in P2b: mean 481, median 38)</td><td>Same tasks, 2 repeats</td></tr>
+  <tr><td>P1</td><td>GLM-5.3</td><td>Same route as P2b (no effort setting sent, so GMICloud's default; mean 450, median 63 reasoning tokens per request)</td><td>33 sessions of 16 users, 2 repeats</td></tr>
+  <tr><td>P4</td><td>GLM-5.3</td><td>Same route as P2b (no effort setting sent, so GMICloud's default; mean 1,369, median 120 reasoning tokens per request in the masking runs)</td><td>20 tasks in 7 scenarios, 2 repeats</td></tr>
 </table></div>
 <ul>
   <li><span class="t o">O</span> None of P1 to P4 produced a scored result on the university API (ScaDS). P2b's three ScaDS attempts timed out or returned HTTP 408 and were not scored. The university route appears only as context (P5 part A, P0).</li>
@@ -214,7 +214,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
 <h3>What P3 does not show</h3>
 <ul>
   <li><span class="t u">U</span> The effect of the sentence alone: there is no instruction-only arm (moved to the end-to-end study).</li>
-  <li><span class="t u">U</span> Behaviour on real AppWorld tasks with real tool results; other models (MiniMax kept 7 substitutes and 3 false claims of 40 even with the rule).</li>
+  <li><span class="t u">U</span> Behaviour on real AppWorld tasks with real tool results; other models (MiniMax kept 7 substitutes and 3 false claims of 40 even with the rule; it served no reasoning tokens at all in P3, 0 in 5,259 requests, while DeepSeek and GLM averaged 124 and 100 per request, and whether that explains its behaviour was not tested).</li>
   <li><span class="t u">U</span> Whether DRY plus the sentence works if the search tool stays and answers "no match" instead of being withdrawn (V5-R17 open item b). A note alone was weak in run 3 and showed no measurable effect in run 4.</li>
   <li><span class="t i">I</span> Withdrawing the search tool changes the tools array. V5-R02 forbids changing it within a session; V5-R17 item (b) says that routes with an offering mechanism (Anthropic tool removal, OpenAI <code>allowed_tools</code>) need no array change, and routes without one do. <b>The cache cost of that change is real on the university route:</b> the P0 probe (<code>10-p0-university-api-reading.md</code> section 7) found that on GLM-5.3 one tool added at the end of the list left 1,728 of 5,116 tokens cached, so 65% was rewritten. P1's own traces agree: calls right after the array changed had a cached share of 0.17 to 0.20, against 0.77 to 0.86 otherwise. The run 3 file had said the cache "stays clean"; that was wrong and is corrected.</li>
 </ul>
@@ -251,13 +251,13 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <li><span class="t o">O</span> The +11.7 points for gpt-5-mini has the opposite sign to gpt-5.4-mini's −5.0. I would read this as model-dependent or noise, not as a general gain. <code>drop</code> was −3.3 and +8.3 with both intervals including zero.</li>
   <li><span class="t i">I</span> The oracle subset contains exactly the tools the task needs, and in <code>instr</code> the sentence names them, which is a hint as much as a restriction. In <code>all</code>, GLM made 4.7% and 9.6% of its tool calls outside the oracle list (48 of 1,011 and 108 of 1,122; an earlier version divided by requests and gave 22% and 47%) and still succeeded 55 times in 60, so the oracle list is not the only working path. <span class="t u">U</span> Why the share doubled from 4.7% to 9.6% at temperature 0 is not explained.</li>
   <li><span class="t i">I</span> The vendor text implies the unoffered definitions stay visible under <code>allowed_tools</code>; no P2 arm checks it.</li>
-  <li><span class="t o">O</span> P2b's "effort as served" differs from P2's effort low. On this provider "as served" behaves like effort high; the university's default is maximum.</li>
+  <li><span class="t o">O</span> P2b sent no effort setting, so GMICloud used its own default, while P2 set effort low explicitly. What was served: P2b averaged 481 reasoning tokens per request (median 38); P2 at effort low averaged 52 (gpt-5-mini) and 75 (gpt-5.4-mini). In a 6-request probe on one short question GMICloud's default used as many reasoning tokens as effort high (236 and 421 with nothing sent, 224 and 172 at high, 50 and 73 at low). The university's documented default for GLM-5.3 is the highest level, "max".</li>
 </ul>
 <h3>What P2 and P2b do not show</h3>
 <ul>
   <li>Realistic subsets that miss a needed tool; offering that changes within a session (the memory case, where the problem would appear).</li>
   <li>Catalogue sizes other than 128, other benchmarks, Anthropic's mechanism, accuracy differences of a few points.</li>
-  <li>The university route itself: 4-bit weights, maximum effort, and no <code>allowed_tools</code> (its proxy refuses it).</li>
+  <li>The university route itself: 4-bit weights, maximum effort (its documented default for GLM-5.3: thinking on at the highest level, "max"), and no <code>allowed_tools</code> (its proxy refuses it).</li>
 </ul>
 
 <h2 id="p1">P1: seeding tools from memory for returning users</h2>
@@ -447,7 +447,7 @@ summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outli
   <div class="q"><h4>4. Must the thesis claims hold on the university API?</h4>
     <p>Only you know the thesis constraint.</p>
     <ul><li>If yes, P2b's failure on the university API (timeouts, HTTP 408) means a new route test.</li>
-    <li>If an OpenRouter route is acceptable, the differences (8-bit against 4-bit weights, effort as served) must be stated as limits.</li></ul></div>
+    <li>If an OpenRouter route is acceptable, the differences must be stated as limits: 8-bit against 4-bit weights, and effort (GMICloud's default, which used about as many reasoning tokens as "high" in the probe, against the university's documented "max").</li></ul></div>
 
   <div class="q"><h4>5. Which models for the end-to-end study?</h4>
     <p>P2 shows the instruction's cost effect is model-dependent, and P3 shows MiniMax-M3 making more false claims. Section 3 of the plan (<code>05</code>) intends at least two models, citing REQ-U21-08, which itself only says that models and providers are chosen when implementing. The files record MiniMax's behaviour as "an input to model choice".</p></div>

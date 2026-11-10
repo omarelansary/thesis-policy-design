@@ -13,7 +13,7 @@
 ## Run [O]
 - **Harness** `tools/p1_memory.py`: AppWorld's own function-calling agent and prompts; declared at start the core (15: every
   supervisor API and every login) + `tools__search` (BM25, top 3 over the 458 other APIs; matches appended to the declared tools)
-  + the arm's seeds. No stop rule. GLM-5.3 on OpenRouter pinned to GMICloud fp8, effort as served, temperature 0, seed 100.
+  + the arm's seeds. No stop rule. GLM-5.3 on OpenRouter pinned to GMICloud fp8, no effort setting sent (GMICloud's default; mean 450 reasoning tokens per request, median 63), temperature 0, seed 100.
 - **Arms:** none (no seeds) and pop6 (role memory). The oracle arm was dropped before any run because the projection exceeded
   the lead's P1 limit of $12 (AUTH-033's limits are the lead's; `P1-PREP.md` section 8).
 - **Sessions:** AppWorld's 64 returning sessions in fixed order. `P1-PREP.md` section 9 fixed, after the first run, a common set
