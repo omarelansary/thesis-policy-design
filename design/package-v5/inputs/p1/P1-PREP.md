@@ -146,3 +146,13 @@ Every AppWorld task names its user (the supervisor) and a date (`specs.json`). O
   falsifier) is dropped before any repeat is cut (INT-T-048).
 - **Measures:** success, billed cost and DPR-0006 components, calls, searches, seeds called (measured h) and seeds called but not
   needed (over-calling).
+
+## 9. Rule fixed during step B, before any arm comparison (2026-11-10 00:55 UTC)
+- **Observed in the first run (none, repeat 1), 16 sessions:** mean $0.078 per session, twice the smoke's $0.037, because one
+  session ran to AppWorld's 50-step cap (49 calls, $0.58); the others average about $0.044. Cached share 0.68 (P2: about 0.9):
+  each discovery appends to the tools array, which the chat template places before the messages, so the cached prefix ends there
+  (V5-R02's question; [O] here, the mechanism [I]).
+- **Rule (the lead; AUTH-033's $12 for P1 and $3 per run are kept, not raised):** if the first run stops at its $3 cap, the
+  other three runs (pop6 r1, none r2, pop6 r2) use exactly the sessions the first run completed, so all arms and repeats share
+  one session set and no repeat is cut. The sessions are AppWorld's returning sessions in their fixed order, so the set is a
+  prefix of that order, not a choice by outcome.
